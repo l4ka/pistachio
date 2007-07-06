@@ -49,7 +49,7 @@ endef
 
 # rebuild include/tcb_layout.h if needed
 tcb_layout.h:	$(BUILDDIR)/include/tcb_layout.h
-$(BUILDDIR)/include/tcb_layout.h:	$(SRCDIR)/include/api/$(API)/tcb.h $(SRCDIR)/include/glue/$(API)-$(ARCH)/ktcb.h $(SRCDIR)/include/glue/$(API)-$(ARCH)/utcb.h $(SRCDIR)/Mk/Makefile.voodoo $(BUILDDIR)/config/config.h
+$(BUILDDIR)/include/tcb_layout.h:	$(SRCDIR)/src/api/$(API)/tcb.h $(SRCDIR)/src/glue/$(API)-$(ARCH)/ktcb.h $(SRCDIR)/src/glue/$(API)-$(ARCH)/utcb.h $(SRCDIR)/Mk/Makefile.voodoo $(BUILDDIR)/config/config.h
 	@${ECHO_MSG} Generating $(subst $(BUILDDIR)/,,$@)
 	@#
 	@# create dummy tcb_layout.h
@@ -69,11 +69,11 @@ utcb_t utcb;							\n\
 void make_offsets()						\n\
 {								\n' \
 	> $(TCBLAYOUTTMP).c
-	@$(call extract_members,$(SRCDIR)/include/api/$(API)/tcb.h) | \
+	@$(call extract_members,$(SRCDIR)/src/api/$(API)/tcb.h) | \
 	   $(AWK) '{ print "   O(OFS_TCB_"toupper($$1)",offsetof(tcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
-	@$(call extract_members,$(SRCDIR)/include/glue/$(API)-$(ARCH)/ktcb.h) | \
+	@$(call extract_members,$(SRCDIR)/src/glue/$(API)-$(ARCH)/ktcb.h) | \
 	   $(AWK) '{ print "   O(OFS_TCB_ARCH_"toupper($$1)",offsetof(tcb_t,arch."$$1"));" } ' >> $(TCBLAYOUTTMP).c
-	@$(call extract_members,$(SRCDIR)/include/glue/$(API)-$(ARCH)/utcb.h) | \
+	@$(call extract_members,$(SRCDIR)/src/glue/$(API)-$(ARCH)/utcb.h) | \
 	   $(AWK) '{ print "   O(OFS_UTCB_"toupper($$1)",offsetof(utcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
 	@$(PRINTF)   '\n};\n' \
 	>> $(TCBLAYOUTTMP).c

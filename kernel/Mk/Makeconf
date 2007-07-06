@@ -1,7 +1,7 @@
 ## -*- mode: Makefile; -*-
 ######################################################################
 ##                
-## Copyright (C) 2001-2006,  Karlsruhe University
+## Copyright (C) 2001-2007,  Karlsruhe University
 ##                
 ## File path:     Mk/Makeconf
 ## Description:   Make settings for pistachio
@@ -108,7 +108,7 @@ API?=	v4
 UNDEFS	 += $(ARCH) $(CPU) $(PLATFORM) $(API)
 DEFINES	 += __ARCH__=$(ARCH) __CPU__=$(CPU) __PLATFORM__=$(PLATFORM) __API__=$(API) $(DEFINES_$(ARCH))
 
-INCLUDES += $(BUILDDIR)/include $(SRCDIR)/include $(LIBGCCINC)
+INCLUDES += $(BUILDDIR)/include $(SRCDIR)/src $(SRCDIR)/src/generic $(LIBGCCINC)
 
 
 ######################################################################
@@ -122,11 +122,11 @@ PPFLAGS += -nostdinc \
 	   $(addprefix -U, $(UNDEFS)) \
 	   $(addprefix -D, $(DEFINES)) \
 	   -imacros $(BUILDDIR)/config/config.h \
-	   -imacros $(SRCDIR)/include/macros.h \
-	   -include $(SRCDIR)/include/config.h
+	   -imacros $(SRCDIR)/src/generic/macros.h \
+	   -include $(SRCDIR)/src/generic/config.h
 
 # C/C++ preprocessor flags
-CPPFLAGS += $(PPFLAGS) $(CPPFLAGS_$*) -include $(SRCDIR)/include/types.h
+CPPFLAGS += $(PPFLAGS) $(CPPFLAGS_$*) -include $(SRCDIR)/src/generic/types.h
 # Asm preprocessor flags
 APPFLAGS += -DASSEMBLY $(PPFLAGS)
 
@@ -221,7 +221,7 @@ OBJS	=$(patsubst %.cc, %.o, \
 	    $(patsubst $(SRCDIR)%, $(BUILDDIR)%, $(SOURCES)))))
 
 .INTERMEDIATE: lds.tmp
-lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/include/macros.h $(BUILDDIR)/config/config.h
+lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/src/generic/macros.h $(BUILDDIR)/config/config.h
 	@$(CPP) -DASSEMBLY $(PPFLAGS) -P -C $< -o $@
 
 # link the final binary

@@ -4,4 +4,5 @@ config.h.in
 configure
 *.pyc
 .depend
+*~
 
