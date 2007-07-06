@@ -1,1 +1,0 @@
-SOURCES+=	src/arch/ia64/itanium/startup.S

@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003,  Karlsruhe University
+## Copyright (C) 2003, 2007,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ##                
@@ -37,17 +37,9 @@ include $(top_srcdir)/Mk/l4.base.mk
 
 
 ia32_SRCS=	ia32-getc.cc ia32-putc.cc
-ia64_SRCS=	ia64-getc.cc ia64-putc.cc
 powerpc_SRCS=	powerpc-ofppc-io.cc 1275tree.cc
 powerpc64_SRCS=	powerpc64-getc.cc powerpc64-putc.cc
 amd64_SRCS=	amd64-getc.cc amd64-putc.cc
-mips64_SRCS=	mips64-getc.cc mips64-putc.cc
-mips32_SRCS=	mips32-getc.cc mips32-putc.cc
-alpha_SRCS=	alpha-getc.cc alpha-putc.cc alpha-divrem.S
-arm_SRCS=       arm-getc.cc arm-putc.cc
-sparc64_SRCS=   sparc64-getc.cc sparc64-putc.cc
-
-CFLAGS_alpha = -O2 -mno-fp-regs -freg-struct-return -mcpu=ev4
 
 LIBRARY=	io
 SRCS=		get_hex.cc print.cc $($(ARCH)_SRCS)

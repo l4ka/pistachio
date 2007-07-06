@@ -1,1 +1,0 @@
-SOURCES += kdb/platform/vr41xx/serial.cc

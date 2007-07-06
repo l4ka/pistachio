@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007,  Karlsruhe University
  *                
  * File path:     l4/types.h
  * Description:   Commonly used L4 types
@@ -45,10 +45,6 @@
 # if defined(__i386__)
 #  define L4_ARCH_IA32
 #  define __L4_ARCH__ ia32
-# elif defined(__ia64__)
-#  undef ia64
-#  define L4_ARCH_IA64
-#  define __L4_ARCH__ ia64
 # elif defined(__PPC64__)
 #  define L4_ARCH_POWERPC64
 #  define __L4_ARCH__ powerpc64
@@ -56,26 +52,9 @@
 #  undef powerpc
 #  define L4_ARCH_POWERPC
 #  define __L4_ARCH__ powerpc
-# elif defined(__arm__)
-#  define L4_ARCH_ARM
-#  define __L4_ARCH__ arm
 # elif defined(__x86_64__)
 #  define L4_ARCH_AMD64
 #  define __L4_ARCH__ amd64
-# elif defined(__alpha__)
-#  define L4_ARCH_ALPHA
-#  define __L4_ARCH__ alpha
-# elif defined(__mips__)
-#  if defined (_MIPS_ARCH_MIPS32)
-#   define L4_ARCH_MIPS32
-#   define __L4_ARCH__ mips32
-#  else
-#   define L4_ARCH_MIPS64
-#   define __L4_ARCH__ mips64
-#  endif
-# elif defined(__sparc__)
-#  define L4_ARCH_SPARC64
-#  define __L4_ARCH__ sparc64
 # else
 #  error Unknown hardware architecture.
 # endif

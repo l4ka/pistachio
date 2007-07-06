@@ -1,2 +1,0 @@
-SOURCES += $(addprefix kdb/platform/$(PLATFORM)/, console.cc reboot.cc )
-

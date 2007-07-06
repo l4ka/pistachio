@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2006,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2007,  Karlsruhe University
  *                
  * File path:     bench/pingpong/pingpong.cc
  * Description:   Pingpong test application
@@ -92,20 +92,12 @@ void pong_thread (void);
 
 #if defined(L4_ARCH_IA32)
 #include "ia32.h"
-#elif defined(L4_ARCH_IA64)
-#include "ia64.h"
 #elif defined(L4_ARCH_POWERPC)
 #include "powerpc.h"
-#elif defined(L4_ARCH_ALPHA)
-#include "alpha.h"
-#elif defined(L4_ARCH_MIPS64)
-#include "mips64.h"
 #elif defined(L4_ARCH_POWERPC64)
 #include "powerpc64.h"
 #elif defined(L4_ARCH_AMD64)
 #include "amd64.h"
-#elif defined(L4_ARCH_SPARC64)
-#include "sparc64.h"
 #endif
 
 

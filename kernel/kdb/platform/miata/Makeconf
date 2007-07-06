@@ -1,2 +1,0 @@
-
-SOURCES += ${addprefix kdb/platform/miata/,miata.cc}

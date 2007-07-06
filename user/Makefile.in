@@ -1,8 +1,8 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2004, 2006,  Karlsruhe University
+## Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
 ##                
-## File path:     pistachio/user/Makefile.in
+## File path:     Makefile.in
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -35,8 +35,7 @@ top_builddir=	@builddir@
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-HEADER_DIRS=	l4 l4/alpha l4/amd64 l4/arm l4/ia32 l4/ia64 \
-		l4/mips64 l4/powerpc l4/powerpc64 l4/sparc64
+HEADER_DIRS=	l4 l4/amd64 l4/ia32 l4/powerpc l4/powerpc64
 
 HEADER_FILES=	l4io.h \
 		l4/arch.h \
@@ -53,6 +52,11 @@ HEADER_FILES=	l4io.h \
 		l4/space.h \
 		l4/thread.h \
 		l4/types.h \
+		l4/amd64/kdebug.h \
+		l4/amd64/specials.h \
+		l4/amd64/syscalls.h \
+		l4/amd64/types.h \
+		l4/amd64/vregs.h \
 		l4/ia32/arch.h \
 		l4/ia32/kdebug.h \
 		l4/ia32/specials.h \
@@ -60,13 +64,6 @@ HEADER_FILES=	l4io.h \
 		l4/ia32/tracebuffer.h \
 		l4/ia32/types.h \
 		l4/ia32/vregs.h \
-		l4/ia64/arch.h \
-		l4/ia64/kdebug.h \
-		l4/ia64/runconv.h \
-		l4/ia64/specials.h \
-		l4/ia64/syscalls.h \
-		l4/ia64/types.h \
-		l4/ia64/vregs.h \
 		l4/powerpc/kdebug.h \
 		l4/powerpc/specials.h \
 		l4/powerpc/syscalls.h \
@@ -77,29 +74,6 @@ HEADER_FILES=	l4io.h \
 		l4/powerpc64/syscalls.h \
 		l4/powerpc64/types.h \
 		l4/powerpc64/vregs.h \
-		l4/mips64/kdebug.h \
-		l4/mips64/specials.h \
-		l4/mips64/syscalls.h \
-		l4/mips64/types.h \
-		l4/mips64/vregs.h \
-		l4/arm/kdebug.h \
-		l4/arm/specials.h \
-		l4/arm/syscalls.h \
-		l4/arm/types.h \
-		l4/arm/vregs.h \
-	 	l4/alpha/kdebug.h \
-	 	l4/alpha/pal.h \
-		l4/alpha/specials.h \
-		l4/alpha/syscalls.h \
-		l4/alpha/types.h \
-		l4/alpha/vregs.h \
-		l4/alpha/asm.h \
-		l4/alpha/runconv.h \
-		l4/amd64/kdebug.h \
-		l4/amd64/specials.h \
-		l4/amd64/syscalls.h \
-		l4/amd64/types.h \
-		l4/amd64/vregs.h \
 		l4/sparc64/kdebug.h \
 		l4/sparc64/specials.h \
 		l4/sparc64/syscalls.h \

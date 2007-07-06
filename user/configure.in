@@ -61,33 +61,15 @@ case $HOST in
   ia32|x86|i386*|i486*|i586*|i686*)
 	ARCH=ia32
 	;;
-  ia64*)
-	ARCH=ia64
-	;;
   powerpc64*|ppc64*)
 	ARCH=powerpc64
 	;;
   powerpc*)
 	ARCH=powerpc
 	;;
-  arm*)
-	ARCH=arm
-	;;
   amd64*)
 	ARCH=amd64
 	LIBGCCFLAGS=-m64
-	;;
-  mips64*)
-	ARCH=mips64
-	;;
-  mips32*)
-	ARCH=mips32
-	;;
-  alpha*)
-	ARCH=alpha
-	;;
-  sparc64*)
-	ARCH=sparc64
 	;;
   *)
 	AC_MSG_ERROR([Unknown hardware architecture: $HOST.
@@ -108,9 +90,6 @@ if test "x$CC" = x -a "x$host_alias" != x; then
       amd64)
 	  gcc_prefix=x86_64
 	  host_alias=amd64
-	  ;;
-      mips32)
-	  gcc_prefix=mipsel
 	  ;;
       *)
 	  gcc_prefix=$ARCH
@@ -281,10 +260,6 @@ case $ARCH in
 	default_sigma0_linkbase=00020000
 	default_roottask_linkbase=00300000
 	;;
-  ia64)
-	default_sigma0_linkbase=01000000
-	default_roottask_linkbase=02000000
-	;;
   powerpc)
 	default_kickstart_linkbase=00400000
 	default_sigma0_linkbase=00200000
@@ -294,104 +269,15 @@ case $ARCH in
 	default_sigma0_linkbase=00100000
 	default_roottask_linkbase=00300000
 	;;
-  arm)
-	default_sigma0_linkbase=C0A00000
-	default_roottask_linkbase=C0B00000
-	;;
   amd64)
   	default_kickstart_linkbase=00180000
 	default_sigma0_linkbase=00e00000
 	default_roottask_linkbase=01000000
 	;;
-  alpha)                          
-	default_sigma0_linkbase=d00000
-	default_roottask_linkbase=e00000
-	;;
-  mips64)
-	default_sigma0_linkbase=00100000
-	default_roottask_linkbase=00180000
-	;;
-  mips32)
-	default_sigma0_linkbase=02000000
-	default_roottask_linkbase=02200000
-	;;
-  sparc64)
-	default_sigma0_linkbase=00400000
-	default_roottask_linkbase=00480000
-	;;
 esac
 
 dnl Platform dependent settings.
 case $HOST in
-  arm-pleb)
-        PLAT=pleb
-        CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=strongarm1100 -DARM_LITTLE_ENDIAN"
-	AC_SUBST([PLAT])
-        ;;
-  arm-pleb2)
-        PLAT=pleb2
-        CFLAGS="$CFLAGS -O2 -march=armv5 -mtune=xscale -DARM_LITTLE_ENDIAN"
-	AC_SUBST([PLAT])
-	default_sigma0_linkbase=A00A0000
-	default_roottask_linkbase=A00B0000
-        ;;
-  arm-ixdp425)
-        PLAT=ixdp425
-        CFLAGS="$CFLAGS -O2 -march=armv5 -mbig-endian -DARM_BIG_ENDIAN"
-	LDFLAGS="$LDFLAGS -EB"
-	AC_SUBST([PLAT])
-	default_sigma0_linkbase=00A00000
-	default_roottask_linkbase=00B00000
-        ;;
-  arm-innovator)
-	PLAT=innovator
-	CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=arm9tdmi -mshort-load-bytes -DARM_LITTLE_ENDIAN"
-	default_sigma0_linkbase=10200000
-	default_roottask_linkbase=10300000
-	AC_SUBST([PLAT])
-	;; 
-  arm-csb337)
-	PLAT=csb337
-	CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=arm9tdmi -mshort-load-bytes -DARM_LITTLE_ENDIAN"
-	default_sigma0_linkbase=20500000
-	default_roottask_linkbase=20550000
-	AC_SUBST([PLAT])
-	;; 
-  mips64-erpcn01)
-	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EL -march=r5000 -mips4 -mabi=64 -Wa,-mabi=o64 -DMIPS64_LITTLE_ENDIAN"
-	LDFLAGS="$LDFLAGS -EL"
-	PLAT=erpcn01
-	AC_SUBST([PLAT])
-	;;
-  mips64-sb1)
-	CFLAGS="$CFLAGS -O3 -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EB -march=sb1 -mabi=64 -Wa,-mabi=o64 -DMIPS64_BIG_ENDIAN"
-	LDFLAGS="$LDFLAGS -EB"
-	PLAT=sb1
-	AC_SUBST([PLAT])
-	;;
-  mips64-vr41xx)
-	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EL -march=r4000 -mips3 -mabi=64 -Wa,-mabi=o64 -DMIPS64_LITTLE_ENDIAN"
-	LDFLAGS="$LDFLAGS -EL"
-	PLAT=vr41xx
-	AC_SUBST([PLAT])
-	;;
-  mips64-u4600|mips64*)
-	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EB -march=r4000 -mips3 -mabi=64 -Wa,-mabi=o64 -DMIPS64_BIG_ENDIAN"
-	LDFLAGS="$LDFLAGS -EB"
-	PLAT=u4600
-	AC_SUBST([PLAT])
-	;;
-  mips32*)
-	CFLAGS="$CFLAGS -mips32 -fno-builtin -fno-pic -mno-abicalls"
-	LDFLAGS="$LDFLAGS -mips32 -EL"
-	PLAT=malta
-	AC_SUBST([PLAT])
-	;;
-  alpha*)
-	CFLAGS="$CFLAGS -freg-struct-return"
-	PLAT=srm
-	AC_SUBST([PLAT])
-	;;
   amd64*)
 	PLAT=amd64-pc99
 	CFLAGS="$CFLAGS -m64 -mno-red-zone"
@@ -400,12 +286,6 @@ case $HOST in
 	;;
   powerpc64*)
 	CFLAGS="$CFLAGS -msoft-float -mminimal-toc"
-	;;
-  sparc64-sun|sparc64*)
-	PLAT=ofsparc64
-	CFLAGS="$CFLAGS -mcmodel=medany"
-	AC_SUBST([ENDIAN])
-	AC_SUBST([PLAT])
 	;;
 esac
 

@@ -36,12 +36,8 @@ CMLCONFIG=	$(CMLPATH)/cmlconfigure.py
 CMLCONFIGTRANS=	$(CMLPATH)/configtrans.py
 
 CML_INPUT=	$(addprefix $(SRCDIR)/config/, rules.cml \
-		  alpha.cml	\
 		  amd64.cml	\
-		  arm.cml	\
 		  ia32.cml	\
-		  ia64.cml	\
-		  mips64.cml	\
 		  powerpc.cml	\
 		  powerpc64.cml	\
 		 )

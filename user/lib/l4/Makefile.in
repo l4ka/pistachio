@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003,  Karlsruhe University
+## Copyright (C) 2003, 2007,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ##                
@@ -37,18 +37,9 @@ include $(top_srcdir)/Mk/l4.base.mk
 
 
 ia32_OBJS=	ia32-syscall-init.cc ia32-syscall-stubs.S
-ia64_OBJS=	ia64-syscall-stubs.S
 powerpc_OBJS=	powerpc-syscalls.c
 powerpc64_OBJS=	powerpc64-syscalls.c
-mips64_OBJS=	mips64-syscalls.c
-mips32_OBJS=	mips32-syscalls.c
-alpha_OBJS=	alpha-syscalls.c alpha-syscall-stubs.S
 amd64_OBJS=	amd64-syscalls.c
-arm_OBJS=       arm-syscalls.c
-sparc64_OBJS=   sparc64-syscalls.c
-
-CFLAGS_alpha=	-mno-fp-regs -O2 -freg-struct-return
-CFLAGS_ia64=	-fPIC
 
 LIBRARY=	l4
 SRCS=		$($(ARCH)_OBJS)
