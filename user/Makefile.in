@@ -73,12 +73,7 @@ HEADER_FILES=	l4io.h \
 		l4/powerpc64/specials.h \
 		l4/powerpc64/syscalls.h \
 		l4/powerpc64/types.h \
-		l4/powerpc64/vregs.h \
-		l4/sparc64/kdebug.h \
-		l4/sparc64/specials.h \
-		l4/sparc64/syscalls.h \
-		l4/sparc64/types.h \
-		l4/sparc64/vregs.h
+		l4/powerpc64/vregs.h
 
 SUBDIRS=	lib serv apps util contrib
 
