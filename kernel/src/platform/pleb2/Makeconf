@@ -1,0 +1,1 @@
+SOURCES += $(addprefix src/platform/pleb2/, plat.cc timer.cc irq.cc )

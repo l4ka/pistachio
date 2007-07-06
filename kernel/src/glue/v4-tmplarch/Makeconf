@@ -1,0 +1,11 @@
+$(warning Check paths!)
+
+SOURCES+=$(addprefix src/glue/v4-tmplarch/, \
+	space.cc thread.cc init.cc )
+
+# use linear_ptab_walker if need be
+ifeq (1,0)
+SOURCES+=src/generic/linear_ptab_walker.cc
+else
+SOURCES+=src/glue/v4-tmplarch/space-stub.cc
+endif

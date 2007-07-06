@@ -1,0 +1,61 @@
+/****************************************************************************
+ *                
+ * Copyright (C) 2003,  National ICT Australia (NICTA)
+ *                
+ * File path:	arch/powerpc64/vectors.h
+ * Description:	PowerPC64 exception vector offsets.
+ *                
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *                
+ * $Id: vectors.h,v 1.3 2004/06/04 02:14:26 cvansch Exp $
+ *
+ ***************************************************************************/
+
+#ifndef __ARCH__POWERPC64__VECTORS_H__
+#define __ARCH__POWERPC64__VECTORS_H__
+
+
+#define EXCEPT_OFFSET_BASE		0x0000
+#define EXCEPT_OFFSET_SYSTEM_RESET	(EXCEPT_OFFSET_BASE + 0x0100)
+#define EXCEPT_OFFSET_MACHINE_CHECK	(EXCEPT_OFFSET_BASE + 0x0200)
+#define EXCEPT_OFFSET_DATA_ACCESS	(EXCEPT_OFFSET_BASE + 0x0300)
+#define EXCEPT_OFFSET_DATA_ACCESS_SLB	(EXCEPT_OFFSET_BASE + 0x0380)
+#define EXCEPT_OFFSET_INST_ACCESS	(EXCEPT_OFFSET_BASE + 0x0400)
+#define EXCEPT_OFFSET_INST_ACCESS_SLB	(EXCEPT_OFFSET_BASE + 0x0480)
+#define EXCEPT_OFFSET_HARDWARE_INT	(EXCEPT_OFFSET_BASE + 0x0500)
+#define EXCEPT_OFFSET_ALIGNMENT		(EXCEPT_OFFSET_BASE + 0x0600)
+#define EXCEPT_OFFSET_PROGRAM_CHECK	(EXCEPT_OFFSET_BASE + 0x0700)
+#define EXCEPT_OFFSET_FPU_UNAVAILABLE	(EXCEPT_OFFSET_BASE + 0x0800)
+#define EXCEPT_OFFSET_DECREMENTER	(EXCEPT_OFFSET_BASE + 0x0900)
+#define EXCEPT_OFFSET_TRAP_0A		(EXCEPT_OFFSET_BASE + 0x0A00)
+#define EXCEPT_OFFSET_TRAP_0B		(EXCEPT_OFFSET_BASE + 0x0B00)
+#define EXCEPT_OFFSET_SYSTEM_CALL	(EXCEPT_OFFSET_BASE + 0x0C00)
+#define EXCEPT_OFFSET_TRACE		(EXCEPT_OFFSET_BASE + 0x0D00)
+#define EXCEPT_OFFSET_TRAP_OE		(EXCEPT_OFFSET_BASE + 0x0E00)	/* FPU Assist */
+#define EXCEPT_OFFSET_PERFORMANCE	(EXCEPT_OFFSET_BASE + 0x0F00)
+#define EXCEPT_OFFSET_INSTRUCTION_BREAK	(EXCEPT_OFFSET_BASE + 0x1300)
+#define EXCEPT_OFFSET_SOFT_PATCH	(EXCEPT_OFFSET_BASE + 0x1500)
+#define EXCEPT_OFFSET_MAINTENANCE	(EXCEPT_OFFSET_BASE + 0x1600)
+#define EXCEPT_OFFSET_INSTRUMENTATION	(EXCEPT_OFFSET_BASE + 0x2000)
+
+
+#endif /* __ARCH__POWERPC64__VECTORS_H__ */

@@ -1,0 +1,20 @@
+#if !defined(KIP_SECTION)
+#define KIP_SECTION kip
+#endif
+
+		*(.data.KIP_SECTION)
+		*(.data.KIP_SECTION.pdesc)
+		*(.data.KIP_SECTION.kdesc)
+		*(.data.KIP_SECTION.versionparts)
+		*(.data.KIP_SECTION.features)
+		*(.data.KIP_SECTION.features.end)
+		. = ALIGN(16);
+		*(.data.KIP_SECTION.mdesc)
+
+#if defined(CONFIG_IS_32BIT)
+	_memory_descriptors_raw = (_memory_descriptors_offset << 16)
+		+ _memory_descriptors_size;
+#elif defined(CONFIG_IS_64BIT)
+	_memory_descriptors_raw = (_memory_descriptors_offset << 32)
+		+ _memory_descriptors_size;
+#endif

@@ -1,0 +1,111 @@
+Basic Installation
+==================
+
+The `configure' shell script is used to configure the build
+environment before compilation.  It will create the various Makefiles,
+the `config.h' file and the `config.mk' file.  The `config.h' file is
+included by the C preprocessor and contains compile time definitions.
+The `config.mk' file contains various compiler and linker settings
+used when invoking the compiler itself.
+
+The build process itself can both be performed in-place (i.e., within
+the source tree) or within a separate build tree.  Using a separate
+build tree is encouraged since it enables the concurrent development
+on two different configurations (e.g., hardware architectures) without
+having the build process in one configuration interfere with the build
+process in another configuration.
+
+The simplest way to compile Pistachio using separate build directories
+is:
+
+   1. Create a directory BUILDDIR to host the build tree.
+
+   2. `cd' to the newly created BUILDDIR directory and run the
+      `configure' script located in the main source directory.  For
+      example, if you create a directory `SRCDIR/build' and `cd' to
+      this directory, you can run `../configure' to invoke the
+      configure script.
+
+      By default the `configure' script will generate a build
+      environment corresponding to the hardware architecture on which
+      `configure' is invoked.  You can change this behaviour by giving
+      an argument `--host=ARCH', where ARCH designates the
+      architecture you want to build for (e.g., ia64 or alpha).
+
+   3. Type `make' to compile the Pistachio user-level libraries and
+      servers/applications.
+
+   4. Type `make install' to install the Pistachio binaries and header
+      files in their proper locations.
+
+   5. You can remove the Pistachio binaries and object files from the
+      build directory by typing `make clean'.
+
+
+Configure and Build Options
+===========================
+
+`configure' recognizes a wide number of optional arguments to tweak
+the build process.  The `--host=ARCH' option has already been
+mentioned.  It selects the hardware architecture to use during the
+build process.  This includes the compiler toolchain to use, and
+certain configuration options needed to build the libraries and
+programs correctly.  Some hardware architectures also support an extra
+platform suffix to the host argument (i.e., `--host=ARCH-PLATFORM)
+where PLATFORM designates the platform to build for.  For example, the
+`arm' architecture supports `brutus', `dnard', `ipaq' and other
+platforms.
+
+There are also a number of configure options for selecting
+architecture dependent and independent build options.  These are in
+general selected using `--with-OPTION=ARG'.  Use the `--help' option
+to print a list of all the `configure' options.
+
+In addition to specifying `configure' parameters, you can set certain
+build time variables by specifying them on the `configure' command
+line like this:
+
+    ./configure --host=ia32 CC=my-gcc CFLAGS=-O9
+
+
+Installation Directories
+========================
+
+Header files, libraries and binaries are installed under default
+locations which may be changed by the following `configure'
+parameters:
+
+   Header files      --includedir=DIR    Default PREFIX/include
+   Libraries         --libdir=DIR        Default EPREFIX/lib/l4
+   Binaries/servers  --libexecdir=DIR    Default EPREFIX/libexec/l4
+
+Where PREFIX defaults to `/usr/local' and can be set by `--prefix'.
+EPREFIX defaults to PREFIX and can be set by `--exec-prefix'.  The
+following example configures a build for ia64, specifies that header
+files and libraries should be installed under `/usr/local/ia64/...'
+and binaries (e.g., sigma0) under the `/tftpboot/ia64' directory.
+
+    ./configure --host=ia64 --prefix=/usr/local/ia64 \
+                --libexecdir=/tftpboot/ia64
+
+
+Short Summary of Configure Options
+==================================
+
+`--help'
+     Print a summary of the options to `configure', and exit.
+
+`--host=ARCH[-PLATFORM]'
+     Specify the hardware architecture (and optionally platform) to
+     build for.
+
+`--with-sigma0-linkbase=LINKBASE'
+     Specify the memory location where to link the sigma0 server
+     binary.  The default linkbase for sigm0 is architecture/platform
+     dependent.
+
+`--with-roottask-linkbase=LINKBASE'
+     Specify the memory location where to link the root server binary.
+     The default linkbase for the root server is architecture/platform
+     dependent.
+

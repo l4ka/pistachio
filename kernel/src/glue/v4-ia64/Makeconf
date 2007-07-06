@@ -1,0 +1,17 @@
+SOURCES+=	src/glue/v4-ia64/context.S \
+		src/glue/v4-ia64/exception.cc \
+		src/glue/v4-ia64/init.cc \
+		src/glue/v4-ia64/intctrl.cc \
+		src/glue/v4-ia64/ivt.S \
+		src/glue/v4-ia64/resources.cc \
+		src/glue/v4-ia64/memcontrol.cc \
+		src/glue/v4-ia64/sal.cc \
+		src/glue/v4-ia64/smp.cc \
+		src/glue/v4-ia64/space.cc \
+		src/glue/v4-ia64/thread.cc \
+		src/glue/v4-ia64/timer.cc \
+		src/glue/v4-ia64/user.S
+
+SOURCES+=	src/generic/linear_ptab_walker.cc \
+		src/generic/mapping_alloc.cc \
+		src/generic/mapping.cc

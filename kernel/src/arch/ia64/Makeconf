@@ -1,0 +1,8 @@
+SOURCES+=	src/arch/ia64/efi.cc \
+		src/arch/ia64/itc_timer.cc \
+		src/arch/ia64/memory.cc \
+		src/arch/ia64/pal.cc \
+		src/arch/ia64/sal.cc \
+		src/arch/ia64/subr_asm.S \
+		src/arch/ia64/subr_init.cc
+

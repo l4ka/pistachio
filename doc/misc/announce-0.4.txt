@@ -1,0 +1,160 @@
+Subject: ANNOUNCE: L4Ka::Pistachio version 0.4
+
+The L4Ka team is happy to announce the release of L4Ka::Pistachio
+version 0.4.  With L4Ka::Pistachio the L4Ka team aims at providing a
+robust, portable, high performance implementation of the L4 Version 4
+API.
+
+It has been a long time since our last release, but we hope that all
+the new functionality and bug fixes were worth the wait.  Among other
+things, the version 0.4 release adds support for 3 new hardware
+architectures.  All in all the L4Ka::Pistachio kernel now runs on the
+following architectures:
+
+   o Intel IA32 (Pentium and higher)
+   o Intel IA64 (Itanium1, Itanium2, Ski)
+   o AMD64 [NEW]
+   o PowerPC 32bit (IBM 750)
+   o PowerPC 64bit (Power3, Power4) [NEW]
+   o Alpha (21164)
+   o MIPS 64bit (R4000, VR41xx, R5000)
+   o ARM (SA1100, XScale, ARM925T) [NEW]
+
+L4Ka::Pistachio version 0.4 incorporates a number of enhancements,
+modifications, and bug fixes.  The following is a list of the major
+architecture independent changes since the last release:
+
+   o Most system calls have been extended to report error codes upon
+     failure.  This substantially improves the ease of application
+     development.
+
+   o The kernel now implements "over-mapping" of flexpages correctly.
+     Over-mapping occurs when a new page frame is mapped into the
+     location of an already existing page frame in the destination
+     address space.
+
+   o Better support for reporting and resetting reference bits.
+
+   o The ExchangeRegisters system call has been modified so that it
+     can no longer activate inactive threads.
+
+   o The L4 Version 4 API now specifies an architecture independent
+     protocol for communicating boot loader specific data to the
+     application programs.  This protocol is supported by several L4
+     bootloaders (including kickstart).
+
+   o Sigma0 now implements setting of memory attributes.
+
+   o A bug (actually several bugs) in sigma0 would in some cases cause
+     sigma0 to refuse to hand out certain memory regions, or cause
+     incorrect memory to be handed out.
+
+   o A new 'grabmem' example application has been added to the
+     distribution.
+
+The following is a list of architecture specific changes and
+additions:
+
+   Alpha:
+      o Added FPU support.
+      o Implemented SystemClock system call.
+
+   AMD64:
+      o This release adds support for the AMD64 architecture to
+        L4Ka::Pistachio.
+      o The AMD64 kernel is almost feature complete.  It only lacks
+        support for I/O flexpages and implementations of the Lipc,
+        ProcessorControl and MemoryControl system calls.  It also does
+        not support SMP yet.
+      o The kernel also features a hand-optimized fast IPC path.
+
+   ARM:
+      o This release adds support for the ARM architecture to
+        L4Ka::Pistachio.
+      o PLEB (Intel StrongARM SA-1100), Intel XScale IXP425 and TI
+        OMAP1510 (ARM925T) platform support is included.
+      o The kernel features fast address-space switching (FASS) [1] as
+        a compile option.
+      o The kernel is currently missing a fast-IPC path. Even without
+        this optimization, context-switching and IPC performance
+        across address spaces, when FASS is used appropriately,
+        improves on any existing ARM implementation of L4 by
+        approximately two orders-of-magnitude.
+      o As with other architectures in L4Ka::Pistachio, currently no
+        LIPC optimization is implemented - the LIPC path is identical
+        to the IPC path.
+
+   IA32:
+      o Added a proper implementation of the SystemClock system call.
+      o The support for small address spaces has been greatly
+        improved.
+      o Fixed a bug in the interrupt handing code that caused edge
+        triggered interrupts to be handled incorrectly.
+      o The kickstart utility now handles a number of command line
+        options (see http://l4ka.org/projects/pistachio/kickstart.php
+        for details).
+
+   IA64:
+      o The kernel now supports lazy handling of the upper 96
+        floating-point registers.
+      o Preliminary support for performance profiling has been added.
+      o Fixed a bug in the fast-IPC path that could cause interrupt
+        handling to crash the kernel.
+      o Low-level performance optimizations.
+      o Fixed SystemClock system call to always report correct times.
+
+   MIPS 64bit:
+      o The kernel has been fixed to compile without debugging.
+      o Added support for NEC VR41XX processors.
+      o Changed the system call encoding.
+      o The fast-IPC path has been fixed.
+      o Reworked the exception handling code.
+      o More accurate timer implementation.
+      o Floating point support.
+      o SMP support.
+
+   PowerPC 32bit:
+      o The kernel can run without debugging and without the debugger.
+      o Proper exception message dispatching, including support for
+        the system call exception.
+      o Added correct implementation of the SystemClock system call.
+      o Can prevent verbose kernel initialization.
+      o Added a user-level I/O driver for the psim COM port, which can
+        be used when the kernel is compiled without debug support.
+      o Code restructuring to (1) minimize code, (2) improve
+        readability, and (3) parameterize more kernel features.
+
+   PowerPC 64bit:
+      o This release adds support for the 64 bit PowerPC architecture
+        to L4Ka::Pistachio.
+      o The kernel supports Power3 and Power4 architectures (no SMP).
+      o Optimized selective SLB replacement context switching on
+        Power4.
+
+For more information on L4Ka::Pistachio and the L4 Version 4 API in
+general, refer to the L4Ka::Pistachio whitepaper:
+
+   http://l4ka.org/projects/pistachio/pistachio-whitepaper.pdf
+
+L4Ka::Pistachio is available under the two-clause BSD license.  Source
+and binary distributions, documentation, and other online resources
+can be found on the L4Ka website:
+
+   http://l4ka.org/
+
+The latest version of L4Ka::Pistachio, including any changes since the
+latest release, is also available through a public read-only CVS
+repository.  See our website for instructions on how to access the
+public CVS.
+
+Happy hacking,
+
+   The L4Ka Development Team
+
+
+
+[1] A. Wiggins, H. Tuch, V. Uhlig, and G. Heiser.  Implementation of
+    Fast Address-Space Switching and TLB Sharing on the StrongARM
+    Processor.  In Eighth Asia-Pacific Computer Systems Architecture
+    Conference (ACSAC'03), Aizu-Wakamatsu City, Japan, September
+    23-26, 2003.

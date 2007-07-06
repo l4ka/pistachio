@@ -1,0 +1,71 @@
+######################################################################
+##                
+## Copyright (C) 2003-2004,  Karlsruhe University
+##                
+## File path:     Makefile.in
+## Description:   
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: Makefile.in,v 1.1 2004/03/01 19:04:32 stoess Exp $
+##                
+######################################################################
+srcdir=         @srcdir@
+top_srcdir=     @top_srcdir@
+top_builddir=   @top_builddir@
+
+include $(top_srcdir)/Mk/l4.base.mk
+
+OBJCOPY=        objcopy
+STRIP=          $(TOOLPREFIX)strip
+
+KERNEL?=        $(kerneldir)/$(ARCH)-kernel
+
+PROGRAM=	amd64-loader
+PROGRAM_DEPS=	@srcdir@/Makefile.in
+
+OBJS+=          kernel.bin
+SRCS=           startup.S bootloader.cc elf.cc mini-print.cc string.cc screen.cc 
+
+CC=		gcc
+LD=		ld
+
+CPPFLAGS=	-I$(top_srcdir)/include
+CFLAGS=		 -nostdinc -g -O2 \
+		-I$(top_srcdir)/contrib/elf-loader/include \
+		-I$(dir $(shell $(CC) -print-libgcc-file-name))include \
+		-DELF_LOADER_32BIT
+CXXFLAGS=       $(CFLAGS) -fno-exceptions
+LDFLAGS=       -N -L@srcdir@ -Tlinker.ld  -L$(dir $(shell $(CC) -print-libgcc-file-name)) \
+		-lgcc 
+
+
+kernel.mod: $(KERNEL)
+	@$(ECHO_MSG) `echo $(srcdir)/$@ | sed s,^$(top_srcdir)/,,`
+	$(STRIP) --strip-all --preserve-dates $? -o $@
+
+kernel.bin: kernel.mod
+	@$(ECHO_MSG) `echo $(srcdir)/$@ | sed s,^$(top_srcdir)/,,`
+	$(OBJCOPY) --input-target=binary --output-target=default \
+	           --binary-architecture=i386 $< $@
+include $(top_srcdir)/Mk/l4.prog.mk
+-include .depend

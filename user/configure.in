@@ -1,0 +1,462 @@
+dnl ###################################################################
+dnl
+dnl Copyright (C) 2006,  Karlsruhe University
+dnl
+dnl File path:     configure.in
+dnl
+dnl Redistribution and use in source and binary forms, with or without
+dnl modification, are permitted provided that the following conditions
+dnl are met:
+dnl 1. Redistributions of source code must retain the above copyright
+dnl    notice, this list of conditions and the following disclaimer.
+dnl 2. Redistributions in binary form must reproduce the above copyright
+dnl    notice, this list of conditions and the following disclaimer in the
+dnl    documentation and/or other materials provided with the distribution.
+dnl 
+dnl THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+dnl ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+dnl IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+dnl ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+dnl FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+dnl DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+dnl OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+dnl HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+dnl SUCH DAMAGE.
+dnl
+dnl $Id: configure.in,v 1.66 2006/11/24 15:47:20 ud3 Exp $
+dnl
+dnl ###################################################################
+
+dnl Process this file with autoconf to produce a configure script.
+
+AC_INIT(Pistachio, [0.4])
+AC_CONFIG_SRCDIR([serv/sigma0/sigma0.cc])
+
+if test "x$host_alias" != x; then
+  # We do not necessarily need crt0 and friends when cross-compiling.
+  LDFLAGS="-nostdlib $LDFLAGS"
+  HOST=$host_alias
+else
+  HOST=`(uname -m) 2>/dev/null || echo unknown`
+fi
+
+# Append /l4 to the libdir default
+case ${libdir} in
+  \${exec_prefix}/lib)
+	libdir='${exec_prefix}/lib/l4'
+	;;
+esac
+
+# Append /l4 to the libexecdir default
+case ${libexecdir} in
+  \${exec_prefix}/libexec)
+	libexecdir='${exec_prefix}/libexec/l4'
+	;;
+esac
+
+# Determine hardware architecture to build for.
+case $HOST in
+  ia32|x86|i386*|i486*|i586*|i686*)
+	ARCH=ia32
+	;;
+  ia64*)
+	ARCH=ia64
+	;;
+  powerpc64*|ppc64*)
+	ARCH=powerpc64
+	;;
+  powerpc*)
+	ARCH=powerpc
+	;;
+  arm*)
+	ARCH=arm
+	;;
+  amd64*)
+	ARCH=amd64
+	LIBGCCFLAGS=-m64
+	;;
+  mips64*)
+	ARCH=mips64
+	;;
+  mips32*)
+	ARCH=mips32
+	;;
+  alpha*)
+	ARCH=alpha
+	;;
+  sparc64*)
+	ARCH=sparc64
+	;;
+  *)
+	AC_MSG_ERROR([Unknown hardware architecture: $HOST.
+	Please specify hardware architecture using --host=ARCH.])
+	;;
+esac
+
+
+# Try guessing the correct name of the C compiler and friends.  If
+# compiling for build machine, let autoconf do the job instead.
+CROSSCC=
+if test "x$CC" = x -a "x$host_alias" != x; then
+  if test "x$gcc_prefix" = x; then
+    case $ARCH in
+      ia32)
+	  gcc_prefix=i386
+	  ;;
+      amd64)
+	  gcc_prefix=x86_64
+	  host_alias=amd64
+	  ;;
+      mips32)
+	  gcc_prefix=mipsel
+	  ;;
+      *)
+	  gcc_prefix=$ARCH
+	  ;;
+    esac
+  fi
+
+  AC_CHECK_PROGS(CROSSCC,
+	[$host_alias-gcc $gcc_prefix-elf-gcc $gcc_prefix-unknown-elf-gcc \
+	$gcc_prefix-linux-gcc $gcc_prefix-unknown-linux-gcc \
+	$gcc_prefix-unknown-linux-gnu-gcc $gcc_prefix-pc-linux-gnu-gcc])
+fi
+
+if test "x$CROSSCC" != x; then
+  CC=$CROSSCC
+fi
+
+dnl Autoheader stuff.
+AC_CONFIG_HEADERS([config.h])
+
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_LN_S
+AC_PROG_AWK
+
+dnl Configure parameters
+AC_ARG_WITH([comport],
+	[AC_HELP_STRING([--with-comport=PORT],
+		[comport to user for serial I/O [[0]]])],
+	[CONFIG_COMPORT=`echo $withval | sed 's/yes/0/'`], [CONFIG_COMPORT=0])
+if test "x$CONFIG_COMPORT" != xno; then
+  AC_DEFINE_UNQUOTED([CONFIG_COMPORT], [$CONFIG_COMPORT],
+	[Define to the appropriate I/O comport (0-3).])
+fi
+
+AC_ARG_WITH([comspeed],
+	[AC_HELP_STRING([--with-comspeed=SPEED],
+		[select speed for comport [[115200]]])],
+	[COMSPEED=$withval], [COMSPEED=115200])
+if test "x$CONFIG_COMPORT" != xno; then
+  AC_DEFINE_UNQUOTED([CONFIG_COMSPEED], [$COMSPEED],
+	[Baud rate for comport (typically 115200, 57600, or 38400).])
+fi
+
+AC_ARG_WITH([kickstart-linkbase],
+	[AC_HELP_STRING([--with-kickstart-linkbase=BASE],
+		[link-base for kickstart [[architecture-dependent]]])],
+	[KICKSTART_LINKBASE=$withval], [KICKSTART_LINKBASE=no])
+
+AC_ARG_WITH([s0-linkbase],
+	[AC_HELP_STRING([--with-s0-linkbase=BASE],
+		[link-base for sigma0 [[architecture-dependent]]])],
+	[SIGMA0_LINKBASE=$withval], [SIGMA0_LINKBASE=no])
+
+AC_ARG_WITH([roottask-linkbase],
+	[AC_HELP_STRING([--with-roottask-linkbase=BASE],
+		[link-base for root task [[architecture-dependent]]])],
+	[ROOTTASK_LINKBASE=$withval], [ROOTTASK_LINKBASE=no])
+
+AC_ARG_WITH([kerneldir],
+	[AC_HELP_STRING([--with-kerneldir=DIR],
+		[build directory of kernel [[guess]]])],
+	[kerneldir=$withval], [kerneldir=no])
+
+dnl Find prefix to use for gcc/binutils programs.
+TOOLPREFIX=`echo $CC | sed 's,gcc[[^/]]*$,,'`
+AC_SUBST([TOOLPREFIX])
+
+
+dnl Find location of libgcc.a
+AC_MSG_CHECKING([location of libgcc.a])
+LIBGCC=`$CC $LIBGCCFLAGS -print-libgcc-file-name`
+LIBGCCDIR=`echo $LIBGCC | sed 's,/[[^/]]*$,,'`
+AC_MSG_RESULT([$LIBGCCDIR])
+
+dnl Find location of stdarg.h include file
+AC_MSG_CHECKING([location of stdarg.h])
+testdir=`echo $LIBGCC | sed 's,/[[^/]]*$,/include,'`
+if test -f "$testdir/stdarg.h"; then
+  STDARGDIR=$testdir
+else
+  testdir=`echo $LIBGCC | sed 's,/lib/[[^/]]*$,/include,'`
+  STDARGDIR="\$(top_builddir)"
+  rm -f "stdarg.h"
+  if test -f "$testdir/stdarg.h"; then
+    # If stdarg.h is self contained, use it.  Copy file to avoid using
+    # standard system include
+    grep -q '#include' "$testdir/stdarg.h" || cp "$testdir/stdarg.h" .
+  fi
+  if test ! -f "stdarg.h"; then
+    STDARGDIR="\$(top_srcdir)/../contrib/include"
+  fi
+fi
+
+if test "x$STDARGDIR" != x; then
+  AC_MSG_RESULT([$STDARGDIR])
+else
+  AC_MSG_ERROR([stdarg.h not found])
+fi
+
+
+dnl Guess build directory of kernel
+AC_MSG_CHECKING([kernel build directory])
+case $kerneldir in
+  yes|no)
+	my_builddir=`pwd`
+	my_srcdir=`(cd $srcdir && pwd)`
+	my_confname=`echo $my_builddir | sed s,.*/,,`
+
+	# Relative to build directory
+	if test -f $my_builddir/../kernel/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../kernel
+	elif test -f $my_builddir/../kernel-$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../kernel-$ARCH
+	elif test -f $my_builddir/../pistachio-kernel/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../pistachio-kernel
+	elif test -f $my_builddir/../pistachio-$ARCH-kernel/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../pistachio-$ARCH-kernel
+	elif test -f $my_builddir/../pistachio-kernel-$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../pistachio-kernel-$ARCH
+	elif test -f $my_builddir/../pistachio-$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../pistachio-$ARCH
+	elif test -f $my_builddir/../build-kernel/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../build-kernel
+	elif test -f $my_builddir/../build-kernel-$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../build-kernel-$ARCH
+	elif test -f $my_builddir/../build-$ARCH-kernel/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../build-$ARCH-kernel
+	elif test -f $my_builddir/../build-$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_builddir)'/../build-$ARCH
+
+	# Relative to source directory
+	elif test -f $my_srcdir/../kernel/$my_confname/$ARCH-kernel; then
+	  kerneldir='$(top_srcdir)'/../kernel/$my_confname
+	elif test -f $my_srcdir/../kernel/$ARCH/$ARCH-kernel; then
+	  kerneldir='$(top_srcdir)'/../kernel/$ARCH
+
+	# Default
+	else
+	  kerneldir='$(top_builddir)'
+	fi
+	;;
+esac
+AC_MSG_RESULT([$kerneldir])
+
+
+dnl Set compiler/linker flags.
+CPPFLAGS="-I\$(top_srcdir)/include -I\$(top_builddir) -I$STDARGDIR $CPPFLAGS"
+case $LDFLAGS in
+  *-nostdlib*)
+	;;
+  *)
+	LDFLAGS="-nostdlib $LDFLAGS"
+	;;
+esac
+LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR $LDFLAGS"
+CFLAGS="-nostdinc $CFLAGS"
+CXXFLAGS="-fno-exceptions $CXXFLAGS"
+
+
+dnl Architecture dependent settings.
+case $ARCH in
+  ia32)
+  	default_kickstart_linkbase=00800000
+	default_sigma0_linkbase=00020000
+	default_roottask_linkbase=00300000
+	;;
+  ia64)
+	default_sigma0_linkbase=01000000
+	default_roottask_linkbase=02000000
+	;;
+  powerpc)
+	default_kickstart_linkbase=00400000
+	default_sigma0_linkbase=00200000
+	default_roottask_linkbase=00300000
+	;;
+  powerpc64)
+	default_sigma0_linkbase=00100000
+	default_roottask_linkbase=00300000
+	;;
+  arm)
+	default_sigma0_linkbase=C0A00000
+	default_roottask_linkbase=C0B00000
+	;;
+  amd64)
+  	default_kickstart_linkbase=00180000
+	default_sigma0_linkbase=00e00000
+	default_roottask_linkbase=01000000
+	;;
+  alpha)                          
+	default_sigma0_linkbase=d00000
+	default_roottask_linkbase=e00000
+	;;
+  mips64)
+	default_sigma0_linkbase=00100000
+	default_roottask_linkbase=00180000
+	;;
+  mips32)
+	default_sigma0_linkbase=02000000
+	default_roottask_linkbase=02200000
+	;;
+  sparc64)
+	default_sigma0_linkbase=00400000
+	default_roottask_linkbase=00480000
+	;;
+esac
+
+dnl Platform dependent settings.
+case $HOST in
+  arm-pleb)
+        PLAT=pleb
+        CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=strongarm1100 -DARM_LITTLE_ENDIAN"
+	AC_SUBST([PLAT])
+        ;;
+  arm-pleb2)
+        PLAT=pleb2
+        CFLAGS="$CFLAGS -O2 -march=armv5 -mtune=xscale -DARM_LITTLE_ENDIAN"
+	AC_SUBST([PLAT])
+	default_sigma0_linkbase=A00A0000
+	default_roottask_linkbase=A00B0000
+        ;;
+  arm-ixdp425)
+        PLAT=ixdp425
+        CFLAGS="$CFLAGS -O2 -march=armv5 -mbig-endian -DARM_BIG_ENDIAN"
+	LDFLAGS="$LDFLAGS -EB"
+	AC_SUBST([PLAT])
+	default_sigma0_linkbase=00A00000
+	default_roottask_linkbase=00B00000
+        ;;
+  arm-innovator)
+	PLAT=innovator
+	CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=arm9tdmi -mshort-load-bytes -DARM_LITTLE_ENDIAN"
+	default_sigma0_linkbase=10200000
+	default_roottask_linkbase=10300000
+	AC_SUBST([PLAT])
+	;; 
+  arm-csb337)
+	PLAT=csb337
+	CFLAGS="$CFLAGS -O2 -march=armv4 -mtune=arm9tdmi -mshort-load-bytes -DARM_LITTLE_ENDIAN"
+	default_sigma0_linkbase=20500000
+	default_roottask_linkbase=20550000
+	AC_SUBST([PLAT])
+	;; 
+  mips64-erpcn01)
+	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EL -march=r5000 -mips4 -mabi=64 -Wa,-mabi=o64 -DMIPS64_LITTLE_ENDIAN"
+	LDFLAGS="$LDFLAGS -EL"
+	PLAT=erpcn01
+	AC_SUBST([PLAT])
+	;;
+  mips64-sb1)
+	CFLAGS="$CFLAGS -O3 -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EB -march=sb1 -mabi=64 -Wa,-mabi=o64 -DMIPS64_BIG_ENDIAN"
+	LDFLAGS="$LDFLAGS -EB"
+	PLAT=sb1
+	AC_SUBST([PLAT])
+	;;
+  mips64-vr41xx)
+	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EL -march=r4000 -mips3 -mabi=64 -Wa,-mabi=o64 -DMIPS64_LITTLE_ENDIAN"
+	LDFLAGS="$LDFLAGS -EL"
+	PLAT=vr41xx
+	AC_SUBST([PLAT])
+	;;
+  mips64-u4600|mips64*)
+	CFLAGS="$CFLAGS -G 0 -mlong64 -mno-abicalls -non_shared -msplit-addresses -EB -march=r4000 -mips3 -mabi=64 -Wa,-mabi=o64 -DMIPS64_BIG_ENDIAN"
+	LDFLAGS="$LDFLAGS -EB"
+	PLAT=u4600
+	AC_SUBST([PLAT])
+	;;
+  mips32*)
+	CFLAGS="$CFLAGS -mips32 -fno-builtin -fno-pic -mno-abicalls"
+	LDFLAGS="$LDFLAGS -mips32 -EL"
+	PLAT=malta
+	AC_SUBST([PLAT])
+	;;
+  alpha*)
+	CFLAGS="$CFLAGS -freg-struct-return"
+	PLAT=srm
+	AC_SUBST([PLAT])
+	;;
+  amd64*)
+	PLAT=amd64-pc99
+	CFLAGS="$CFLAGS -m64 -mno-red-zone"
+	LDFLAGS="$LDFLAGS -melf_x86_64"
+	AC_SUBST([PLAT])
+	;;
+  powerpc64*)
+	CFLAGS="$CFLAGS -msoft-float -mminimal-toc"
+	;;
+  sparc64-sun|sparc64*)
+	PLAT=ofsparc64
+	CFLAGS="$CFLAGS -mcmodel=medany"
+	AC_SUBST([ENDIAN])
+	AC_SUBST([PLAT])
+	;;
+esac
+
+case $KICKSTART_LINKBASE in
+  yes|no)
+	KICKSTART_LINKBASE=$default_kickstart_linkbase
+	;;
+esac
+
+case $SIGMA0_LINKBASE in
+  yes|no)
+	SIGMA0_LINKBASE=$default_sigma0_linkbase
+	;;
+esac
+
+case $ROOTTASK_LINKBASE in
+  yes|no)
+	ROOTTASK_LINKBASE=$default_roottask_linkbase
+	;;
+esac
+
+AC_SUBST([CXXFLAGS])
+AC_SUBST([ARCH])
+AC_SUBST([KICKSTART_LINKBASE])
+AC_SUBST([SIGMA0_LINKBASE])
+AC_SUBST([ROOTTASK_LINKBASE])
+AC_SUBST([kerneldir])
+
+
+dnl Modified files.
+AC_CONFIG_FILES([
+config.mk
+Makefile
+lib/Makefile
+lib/l4/Makefile
+lib/io/Makefile
+serv/Makefile
+serv/sigma0/Makefile
+apps/Makefile
+apps/bench/Makefile
+apps/bench/pingpong/Makefile
+apps/grabmem/Makefile
+apps/l4test/Makefile
+util/Makefile
+util/kickstart/Makefile
+util/grubdisk/Makefile
+util/piggybacker/Makefile
+util/piggybacker/ofppc/Makefile
+util/piggybacker/ofppc64/Makefile
+contrib/Makefile
+contrib/elf-loader/Makefile
+])
+
+AC_OUTPUT

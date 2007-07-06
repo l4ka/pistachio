@@ -1,0 +1,4 @@
+		. = ALIGN(16);
+		_start_mdb_funcs = .;
+		*(SORT(.mdb_funcs*))
+		_end_mdb_funcs = .;

@@ -1,0 +1,111 @@
+######################################################################
+#		 
+# Copyright (C) 1999, 2000, 2001,  Karlsruhe University
+#		 
+# File path:	 config/alpha.cml
+# Description:	 rules for Pistachio's Alpha CML2 configuration system
+#		 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#		 
+# $Id: alpha.cml,v 1.16 2004/08/25 06:52:31 awiggins Exp $
+#		 
+######################################################################
+
+symbols
+
+ARCH_ALPHA	'Alpha'
+alpha_type	'System Type'
+CPU_ALPHA_A21264  '21264'
+# Whate about the different variations (21164A etc.)
+CPU_ALPHA_A21164  '21164'
+CPU_ALPHA_A21164A '21164A'
+CPU_ALPHA_A21064  '21064'
+
+alpha_platform	'Platform'
+PLAT_MULTIA	'Multia'
+PLAT_MIATA	'Miata'
+PLAT_TSUNAMI	'Tsunami'
+# PLAT_SRM        'Generic'
+
+NO_CLOCK_IN_INT 'Ignore timer interrupts that occur in interrupts'
+ALPHA_PAL_IPC_FASTPATH 'Enable PAL mode IPC fastpath' text
+
+This enables an IPC fast which operates purely in PAL mode. To do
+so it needs to copy over memory usually reserved for the SRM console
+software. This has been tested on 21264 however if problems exist
+disable it and report a bug.
+.
+
+ALPHA_ADDRESS_BITS    'Size of the Virtual Address Space'
+ALPHA_CONSOLE_RESERVE 'Address at which to load kernel'
+USER_LOAD_PHYS       'User load address is a physical address'
+
+choices alpha_type
+	CPU_ALPHA_A21064
+	CPU_ALPHA_A21164
+	CPU_ALPHA_A21164A
+	CPU_ALPHA_A21264
+	default CPU_ALPHA_A21164
+
+unless ARCH_ALPHA suppress dependent alpha_type
+choices alpha_platform
+	PLAT_MIATA
+	PLAT_MULTIA
+	PLAT_TSUNAMI
+	default PLAT_MIATA
+
+unless ARCH_ALPHA suppress dependent alpha_platform
+
+unless n suppress PLAT_MULTIA
+#derive CPU_ALPHA_A21264  from PLAT_TSUNAMI
+#derive CPU_ALPHA_A21164  from PLAT_MIATA
+#derive CPU_ALPHA_A21064  from PLAT_MULTIA
+
+derive SWIZZLE_IO_ADDR	 from PLAT_TSUNAMI and ALPHA_ADDRESS_BITS == 43
+
+menu hardware_misc
+	ALPHA_ADDRESS_BITS%
+	ALPHA_CONSOLE_RESERVE@
+	USER_LOAD_PHYS
+
+default ALPHA_ADDRESS_BITS from 43 range 43 48
+default ALPHA_CONSOLE_RESERVE from 0x810000
+default USER_LOAD_PHYS from n
+unless ARCH_ALPHA suppress ALPHA_ADDRESS_BITS ALPHA_CONSOLE_RESERVE USER_LOAD_PHYS
+
+menu kernel
+	NO_CLOCK_IN_INT
+	ALPHA_PAL_IPC_FASTPATH
+
+unless ARCH_ALPHA suppress NO_CLOCK_IN_INT
+# awiggins (2004-07-21) Disabled until it is fixed up and tested again.
+unless n suppress ALPHA_PAL_IPC_FASTPATH
+unless ARCH_ALPHA suppress ALPHA_PAL_IPC_FASTPATH
+unless PLAT_TSUNAMI suppress ALPHA_PAL_IPC_FASTPATH
+
+
+default NO_CLOCK_IN_INT from y
+default ALPHA_PAL_IPC_FASTPATH from n
+
+# HACK
+derive ALPHA_FASTPATH from IPC_FASTPATH
+

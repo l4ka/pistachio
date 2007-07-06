@@ -1,0 +1,19 @@
+
+SOURCES+= src/glue/v4-mips64/space.cc \
+	  src/glue/v4-mips64/thread.cc \
+	  src/glue/v4-mips64/exception.cc \
+	  src/glue/v4-mips64/init.cc \
+	  src/glue/v4-mips64/intctrl.cc \
+	  src/glue/v4-mips64/timer.cc \
+	  src/glue/v4-mips64/tlb.cc \
+	  src/glue/v4-mips64/smp.cc \
+	  src/glue/v4-mips64/resources.cc \
+	  src/glue/v4-mips64/memcontrol.cc \
+	  src/glue/v4-mips64/syscalls.S \
+	  src/glue/v4-mips64/fastpath.S \
+	  src/glue/v4-mips64/traps.S \
+	  src/glue/v4-mips64/user.S
+
+SOURCES+=       src/generic/linear_ptab_walker.cc \
+                src/generic/mapping_alloc.cc \
+                src/generic/mapping.cc

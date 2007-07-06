@@ -1,0 +1,9 @@
+
+SOURCES += ${addprefix kdb/arch/mips64/, prepost.cc tlb.cc cpuid.cc reboot.cc cp0.cc watch.cc frame.cc}
+
+ifeq ("$(CONFIG_KDB_DISAS)","y")
+SOURCES+=	kdb/arch/mips64/disas.cc 
+endif
+
+SOURCES +=	kdb/generic/linear_ptab_dump.cc \
+		kdb/generic/mapping.cc

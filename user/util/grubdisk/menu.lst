@@ -1,0 +1,19 @@
+timeout 0
+
+title = L4Ka::Pistachio pingpong 
+kernel=/kickstart
+module=/kernel
+module=/sigma0
+module=/pingpong
+
+# title = L4Ka::Pistachio/i586 pingpong 
+# kernel=/kickstart
+# module=/i586-kernel
+# module=/sigma0
+# module=/pingpong
+
+# title = L4Ka::Pistachio/i686 pingpong 
+# kernel=/kickstart
+# module=/i686-kernel
+# module=/sigma0
+# module=/pingpong

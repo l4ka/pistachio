@@ -1,0 +1,18 @@
+		. = ALIGN(16);
+
+		/* cpu-local static initializers */
+                __ctors_CPU__ = .;
+                *(SORT(.ctors.3*))
+                QUAD(0)
+
+		/* node-local static initializers */
+                __ctors_NODE__ = .;
+                *(SORT(.ctors.2*))
+                QUAD(0)
+
+		/* global static initializers */
+                __ctors_GLOBAL__ = .;
+		*(SORT(.ctors.1*))
+		*(SORT(.ctors.*))
+                *(.ctors)
+                QUAD(0)

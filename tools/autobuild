@@ -1,0 +1,148 @@
+#!/bin/sh
+
+# Usage: tools/autobuild <configuration>
+# must be run from top level pistachio directory.
+
+TOPDIR=`pwd`
+
+# Compile a specifc configuration
+
+function do_configuration() {
+    CONFIGURATION=$1
+    CONFIGTAR=$TOPDIR/contrib/configs/$CONFIGURATION.kernel.tar
+    BUILDDIR=$TOPDIR/build/$CONFIGURATION
+
+    # Can't find the required configuration, so die.
+    if [ ! -e $CONFIGTAR ]; then
+	echo "There is no configuration for $CONFIGURATION"
+	echo "You will need to compile manually :("
+	return $LINENO
+    fi;
+
+    # Already have this configuration, lets rebuild it.
+    if [ -e $BUILDDIR ]; then
+	echo "$BUILDDIR already exists. Updating it"
+	cd $BUILDDIR/kernel
+        mv config/config.h config/config.h.old
+	if ! make $QUIET batchconfig 2>&1 ; then
+            echo "Kernel reconfig failed"
+            return $LINENO
+        fi
+        cmp -s -i 120 config/config.h.old config/config.h \
+            && mv config/config.h.old config/config.h \
+            || rm config/config.h.old
+	if ! make $QUIET 2>&1 ; then
+            echo "Kernel compile failed"
+            return $LINENO
+        fi
+	# FIMXE: Test output
+	cd $BUILDDIR/user
+	if ! make $QUIET 2>&1 ; then
+            echo "User compile failed"
+            return $LINENO
+        fi
+        return 0
+    fi;
+
+    # Don't have this configured yet, lets go through all
+    # the pain of compiling L4
+
+    # First we see if this is a freshly checked out L4 copy
+    # and prompt the user to create user/configure
+    if [ ! -e $TOPDIR/user/configure ]; then 
+		if [[ -e $AUTOHEADER && -e $AUTOCONF ]]; then
+			# User has specified versions to use; try them.
+			echo Running autoheader and autoconf.
+			cd user
+			$AUTOHEADER
+			$AUTOCONF
+			cd ..
+		else
+			echo "$TOPDIR/user/configure doesn't exist"; echo
+			cat user/README.CVS
+			echo; echo "You have:"; echo
+			autoheader --version | head -1
+			autoconf --version | head -1
+			return $LINENO
+		fi;
+    fi;
+
+    # Compile the kernel
+    mkdir -p $BUILDDIR
+
+    # Setup user and kernel directories
+    cd $TOPDIR/kernel;
+    make $QUIET BUILDDIR=$BUILDDIR/kernel 2>&1
+
+    mkdir $BUILDDIR/user
+
+    # Configure and compile kernel
+    cd $BUILDDIR/kernel
+    tar xf $CONFIGTAR
+
+    make $QUIET batchconfig 2>&1
+
+    if ! make $QUIET 2>&1 ; then
+        echo "Kernel compile failed"
+        return $LINENO
+    fi
+
+    # Configure and compile user land
+    cd $BUILDDIR/user;
+    TARGET_ARCH=`grep "^ARCH" $BUILDDIR/kernel/Makeconf.local | sed "s/^[A-Z]*\=//"`
+    TARGET_PLATFORM=`grep "^PLATFORM" $BUILDDIR/kernel/Makeconf.local | sed "s/^[A-Z]*\=//"`
+    TARGET=$TARGET_ARCH-$TARGET_PLATFORM
+    # This is an evil hack to avoid using a cross-compiler when
+    # building x86 on x86.
+    HOST=`uname -m 2>/dev/null`
+    case $HOST in 
+	ia32|x86|i386*|i486*|i586*|i686*)
+	if [ $TARGET_ARCH == "ia32" ]; then TARGET=""; fi
+	;;
+    esac
+    $TOPDIR/user/configure --with-kerneldir=$BUILDDIR/kernel --host=$TARGET
+    if ! make $QUIET 2>&1 ; then
+        echo "User compile failed"
+        return $LINENO
+    fi
+    return 0
+}
+
+# Perform some checks
+if [ x"$1" == x"-q" ]; then
+    QUIET=-s
+    shift
+fi
+
+if [ -z $1 ]; then
+    echo "You need to specify a configuration:"
+    for x in `ls $TOPDIR/contrib/configs/*.tar`; do 
+	echo '    ' `basename $x .kernel.tar`; 
+    done
+    exit $LINENO
+fi
+
+CONFIGS=$1
+if [ $CONFIGS = all ]; then
+    # We build all available configurations
+    CONFIGS=*
+fi
+
+NCONFIGS=`ls -1 $TOPDIR/contrib/configs/${CONFIGS}.kernel.tar 2>/dev/null | wc -l`
+if [ 0 == $NCONFIGS ]; then
+    echo "No existing config matches $1"
+    exit $LINENO
+fi
+
+# We build all specified configurations
+for i in `(cd $TOPDIR/contrib/configs/; ls ${CONFIGS}.kernel.tar | cut -d. -f1)`; do
+    TMPFILE=/tmp/abd-log.${USER}.${HOSTNAME}.${PPID}.$i
+    if do_configuration $i 2>&1 > $TMPFILE; then
+	rm $TMPFILE
+    else
+        cat $TMPFILE
+        mv $TMPFILE $TOPDIR/build/$i/autobuild-log
+	exit $LINENO
+    fi
+done
+exit 0

@@ -1,0 +1,27 @@
+#<item name="someitem">
+# <description>description</description>
+# <path>local directory</path>
+# <license>license</license>
+# <url>home page</url>
+# <location>(source) download location</location>
+#</item>
+
+<item id="cml2">
+ <description>CML2 Configuration System</description>
+ <path>cml2</path>
+ <license>GPL</license>
+ <url>http://tuxedo.org/~esr/cml2/</url>
+ <location>http://tuxedo.org/~esr/cml2/cml2-2.3.0.tar.gz</location>
+</item>
+
+<item id="disas">
+ <description>Disassemblers from binutils</description>
+ <path>disas</path>
+ <license>GPL</license>
+ <location>tar xjf /usr/src/binutils-2.11.93.0.2/binutils-2.11.93.0.2.tar.bz2 "*/opcodes/i386-dis.c" "*/opcodes/ia64-dis.c" "*/opcodes/sh-dis.c" "*/opcodes/ppc-dis.c"</location>
+</item>
+
+... and there goes the fine XML stuff.
+
+- disas/ia32-dis.c is based on revision 1.50 of opcodes/i386-dis.c from the binutils CVS.
+

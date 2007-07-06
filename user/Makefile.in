@@ -1,0 +1,131 @@
+######################################################################
+##                
+## Copyright (C) 2003-2004, 2006,  Karlsruhe University
+##                
+## File path:     pistachio/user/Makefile.in
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: Makefile.in,v 1.20 2006/10/23 10:09:54 stoess Exp $
+##                
+######################################################################
+
+srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
+top_builddir=	@builddir@
+
+include $(top_srcdir)/Mk/l4.base.mk
+
+HEADER_DIRS=	l4 l4/alpha l4/amd64 l4/arm l4/ia32 l4/ia64 \
+		l4/mips64 l4/powerpc l4/powerpc64 l4/sparc64
+
+HEADER_FILES=	l4io.h \
+		l4/arch.h \
+		l4/bootinfo.h \
+		l4/ipc.h \
+		l4/kcp.h \
+		l4/kdebug.h \
+		l4/kip.h \
+		l4/message.h \
+		l4/misc.h \
+		l4/pagefault.h \
+		l4/schedule.h \
+		l4/sigma0.h \
+		l4/space.h \
+		l4/thread.h \
+		l4/types.h \
+		l4/ia32/arch.h \
+		l4/ia32/kdebug.h \
+		l4/ia32/specials.h \
+		l4/ia32/syscalls.h \
+		l4/ia32/tracebuffer.h \
+		l4/ia32/types.h \
+		l4/ia32/vregs.h \
+		l4/ia64/arch.h \
+		l4/ia64/kdebug.h \
+		l4/ia64/runconv.h \
+		l4/ia64/specials.h \
+		l4/ia64/syscalls.h \
+		l4/ia64/types.h \
+		l4/ia64/vregs.h \
+		l4/powerpc/kdebug.h \
+		l4/powerpc/specials.h \
+		l4/powerpc/syscalls.h \
+		l4/powerpc/types.h \
+		l4/powerpc/vregs.h \
+		l4/powerpc64/kdebug.h \
+		l4/powerpc64/specials.h \
+		l4/powerpc64/syscalls.h \
+		l4/powerpc64/types.h \
+		l4/powerpc64/vregs.h \
+		l4/mips64/kdebug.h \
+		l4/mips64/specials.h \
+		l4/mips64/syscalls.h \
+		l4/mips64/types.h \
+		l4/mips64/vregs.h \
+		l4/arm/kdebug.h \
+		l4/arm/specials.h \
+		l4/arm/syscalls.h \
+		l4/arm/types.h \
+		l4/arm/vregs.h \
+	 	l4/alpha/kdebug.h \
+	 	l4/alpha/pal.h \
+		l4/alpha/specials.h \
+		l4/alpha/syscalls.h \
+		l4/alpha/types.h \
+		l4/alpha/vregs.h \
+		l4/alpha/asm.h \
+		l4/alpha/runconv.h \
+		l4/amd64/kdebug.h \
+		l4/amd64/specials.h \
+		l4/amd64/syscalls.h \
+		l4/amd64/types.h \
+		l4/amd64/vregs.h \
+		l4/sparc64/kdebug.h \
+		l4/sparc64/specials.h \
+		l4/sparc64/syscalls.h \
+		l4/sparc64/types.h \
+		l4/sparc64/vregs.h
+
+SUBDIRS=	lib serv apps util contrib
+
+pre-all:
+	@if test ! -e ./include; then \
+	  $(LN_S) $(top_srcdir)/include ./include; \
+	fi
+
+post-install:
+	@for D in $(HEADER_DIRS); do \
+	  $(MKDIRHIER) $(DESTDIR)$(includedir)/$$D; \
+	done
+	@$(ECHO_MSG) Installing include files
+	@(cd $(top_srcdir)/include && \
+	  for F in $(HEADER_FILES); do \
+	    $(INSTALL_DATA) $$F $(DESTDIR)$(includedir)/$$F; \
+	  done; \
+	)
+
+post-clean:
+	@if test -L ./include; then rm ./include; fi
+
+
+include $(top_srcdir)/Mk/l4.subdir.mk

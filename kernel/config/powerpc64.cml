@@ -1,0 +1,98 @@
+######################################################################
+#		 
+# Copyright (C) 2003  University of New South Wales
+#		 
+# File path:	 config/powerpc64.cml
+# Description:	 rules for Pistachio's powerpc64 CML2 configuration system
+#		 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#		 
+# $Id: powerpc64.cml,v 1.6 2005/01/18 13:19:56 cvansch Exp $
+#		 
+######################################################################
+
+symbols
+
+ARCH_POWERPC64	'PowerPC-64'
+powerpc64_type	'Processor Type'
+
+CPU_POWERPC64_POWER3	'Power3'
+CPU_POWERPC64_POWER3p	'Power3+'
+CPU_POWERPC64_POWER4	'Power4'
+CPU_POWERPC64_POWER4p	'Power4+'
+CPU_POWERPC64_PPC970	'PPC970'
+
+powerpc64_platform	'Platform'
+PLAT_OFPOWER4		'OpenFirmware Power4'
+PLAT_OFPOWER3		'OpenFirmware Power3'
+PLAT_OFG5		'OpenFirmware G5'
+
+KDB_CONS_RTAS "Enable the IBM Run Time Abstraction Service (RTAS) debug console?" text
+The IBM RTAS debug console is great for debugging kernel initialization.
+It is useable without the need to memory map any devices, and thus it can
+be used to debug the kernel's memory initialization.
+
+But it will probably conflict with user level device drivers.  If you intend
+to execute user level device drivers, then enable another debug console
+which will activate later in the kernel boot process.  You can use multiple
+debug consoles: first the Open Firmware console, and then a second console
+which deactivates the Open Firmware console.
+
+If unsure about this option, answer yes.
+.
+
+PPC64_TRASH_OF "Reclaim OpenFirmware memory?" text
+The OpenFirmware environment uses a considerable amount of physical memory.
+We can trash OpenFirmware once the kernel has started. This will mean
+that no OpenFirmware services will be available after boot (Dissasembler etc).
+.
+
+
+ppc64_debug_consoles	"Consoles"
+
+menu ppc64_debug_consoles
+	KDB_CONS_RTAS
+
+choices powerpc64_type
+	CPU_POWERPC64_POWER3
+	CPU_POWERPC64_POWER3p
+	CPU_POWERPC64_POWER4
+	CPU_POWERPC64_POWER4p
+	CPU_POWERPC64_PPC970
+	default CPU_POWERPC64_PPC970
+
+unless ARCH_POWERPC64 suppress dependent powerpc64_type
+
+
+choices powerpc64_platform
+	PLAT_OFG5
+	PLAT_OFPOWER3
+	PLAT_OFPOWER4
+	default PLAT_OFG5
+
+unless ARCH_POWERPC64 suppress dependent powerpc64_platform
+
+unless PLAT_OFPOWER3 suppress CPU_POWERPC64_POWER3 CPU_POWERPC64_POWER3p
+unless PLAT_OFPOWER4 suppress CPU_POWERPC64_POWER4 CPU_POWERPC64_POWER4p
+unless PLAT_OFG5 suppress CPU_POWERPC64_PPC970
+
+#menu hardware_misc

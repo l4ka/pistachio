@@ -1,0 +1,4 @@
+ifeq ("$(CONFIG_PLAT_VR41XX)","y")
+SOURCES += src/platform/vr41xx/plat.cc
+endif
+

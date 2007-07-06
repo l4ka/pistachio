@@ -1,0 +1,2 @@
+SOURCES += $(addprefix src/arch/powerpc64/, string.cc pghash.cc \
+	    except.S switch.S vsid_asid.cc )

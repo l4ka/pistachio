@@ -1,0 +1,6 @@
+ifeq ("$(CONFIG_PERFMON)","y")
+SOURCES+=	kdb/arch/ia64/itanium/perf.cc \
+		kdb/arch/ia64/itanium/perf_branchtrace.cc \
+		kdb/arch/ia64/itanium/perf_events.cc \
+		kdb/arch/ia64/itanium/perf_profile.cc 
+endif

@@ -1,0 +1,2 @@
+SOURCES+=	kdb/platform/efi/memmap.cc \
+		kdb/platform/efi/reset.cc

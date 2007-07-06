@@ -1,0 +1,33 @@
+LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker.lds
+
+SOURCES+=$(addprefix src/glue/v4-amd64/, \
+	space.cc smp.cc thread.cc debug.cc exception.cc init.cc idt.cc resources.cc ctors.cc trampoline.S trap.S user.cc syscalls.cc)
+
+CFLAGS_$(CURDIR)/pagefault = -fomit-frame-pointer
+CFLAGS_$(CURDIR)/exception = -fomit-frame-pointer
+
+ifeq ("$(CONFIG_IOAPIC)","y")
+SOURCES += src/generic/acpi.cc src/glue/v4-amd64/timer-apic.cc
+else
+SOURCES += src/glue/v4-amd64/timer.cc
+endif
+
+# use linear_ptab_walker if need be
+ifeq (1,1)
+SOURCES+=src/generic/linear_ptab_walker.cc \
+	 src/generic/mapping_alloc.cc 
+else
+SOURCES+=src/glue/v4-amd64/space-stub.cc
+endif
+
+ifeq ("$(CONFIG_NEW_MDB)","y")
+SOURCES+=	src/generic/mdb.cc \
+		src/generic/mdb_mem.cc
+else
+SOURCES+=	src/generic/mapping.cc
+endif
+
+
+ifeq ("$(CONFIG_AMD64_COMPATIBILITY_MODE)","y")
+include $(SRCDIR)/src/glue/v4-amd64/ia32/Makeconf
+endif

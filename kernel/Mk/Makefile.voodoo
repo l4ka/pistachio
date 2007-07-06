@@ -1,0 +1,136 @@
+###################### -*- mode: makefile -*- ########################
+##                
+## Copyright (C) 2001-2002,  Karlsruhe University
+##                
+## File path:     Makefile.voodoo
+## Description:   Makefile to hide load of very ugly magic.
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: Makefile.voodoo,v 1.34 2006/09/25 14:01:46 skoglund Exp $
+##                
+######################################################################
+
+
+# create a random filename
+TCBLAYOUTTMP:=$(BUILDDIR)/_$(shell date +%s)_123
+
+# Extract the data members declared between two markers
+# First argument is the file name to go fishing in
+define extract_members
+	$(AWK) 'BEGIN { printme = 0 } \
+	        /TCB_END_MARKER/ { printme = 0 } \
+                printme == 1 { print } \
+	        /TCB_START_MARKER/ { printme = 1 } ' \
+	        $(1) | \
+	$(CPP) -imacros $(BUILDDIR)/config/config.h -P | \
+	$(GREP) ';$$' | \
+	$(PERL) -pe 's/.*\b(\w+)(\[.*\])*;.*/\1/g'
+endef
+
+# rebuild include/tcb_layout.h if needed
+tcb_layout.h:	$(BUILDDIR)/include/tcb_layout.h
+$(BUILDDIR)/include/tcb_layout.h:	$(SRCDIR)/include/api/$(API)/tcb.h $(SRCDIR)/include/glue/$(API)-$(ARCH)/ktcb.h $(SRCDIR)/include/glue/$(API)-$(ARCH)/utcb.h $(SRCDIR)/Mk/Makefile.voodoo $(BUILDDIR)/config/config.h
+	@${ECHO_MSG} Generating $(subst $(BUILDDIR)/,,$@)
+	@#
+	@# create dummy tcb_layout.h
+	@rm -f $@
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	@touch $@
+	@#
+	@# create offsets in C
+	@$(PRINTF)						 '\
+#include INC_API(tcb.h)						\n\
+								\n\
+tcb_t tcb;							\n\
+utcb_t utcb;							\n\
+								\n\
+#define O(sym,value) __asm__ __volatile__ ("\\n#define " MKSTR(sym) " %%0 " : : "i" (value)); \n\
+								\n\
+void make_offsets()						\n\
+{								\n' \
+	> $(TCBLAYOUTTMP).c
+	@$(call extract_members,$(SRCDIR)/include/api/$(API)/tcb.h) | \
+	   $(AWK) '{ print "   O(OFS_TCB_"toupper($$1)",offsetof(tcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
+	@$(call extract_members,$(SRCDIR)/include/glue/$(API)-$(ARCH)/ktcb.h) | \
+	   $(AWK) '{ print "   O(OFS_TCB_ARCH_"toupper($$1)",offsetof(tcb_t,arch."$$1"));" } ' >> $(TCBLAYOUTTMP).c
+	@$(call extract_members,$(SRCDIR)/include/glue/$(API)-$(ARCH)/utcb.h) | \
+	   $(AWK) '{ print "   O(OFS_UTCB_"toupper($$1)",offsetof(utcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
+	@$(PRINTF)   '\n};\n' \
+	>> $(TCBLAYOUTTMP).c
+	@#
+	@# build offsets with cross compiler
+	@$(CC) -x c++ -w $(CPPFLAGS) $(CFLAGS) -DBUILD_TCB_LAYOUT -S -o $(TCBLAYOUTTMP).s $(TCBLAYOUTTMP).c || ( $(RM) $(TCBLAYOUTTMP)* $@ ; exit -1 )
+	@# run dumper
+	@$(PRINTF) '/* machine-generated file - do NOT edit */\n'	>  $@
+	@$(PRINTF) '#ifndef __TCB_LAYOUT__H__\n'			>> $@
+	@$(PRINTF) '#define __TCB_LAYOUT__H__\n\n'			>> $@
+	@# Extract the lines starting with #define and remove unwanted symbols
+	@$(GREP) ^#define $(TCBLAYOUTTMP).s | $(SED) -e 's/ [\$$#]/ /'	>> $@
+	@$(PRINTF) '\n#endif /* __TCB_LAYOUT__H__ */\n'		>> $@
+	@test 1 -lt `$(GREP) -c "^#define " $@` || \
+	   ( $(ECHO_MSG); \
+	     $(ECHO_MSG) "Generating tcb_layout.h FAILED!!!"; \
+	     $(ECHO_MSG); \
+	     $(RM) $(TCBLAYOUTTMP)* $@ ; exit -1 )
+	@$(RM) $(TCBLAYOUTTMP)*
+
+
+# Temporary object file
+ASMSYMS=	$(BUILDDIR)/asmsyms.o
+
+# Find all asmsyms.cc files
+SYMSRCS=	$(subst $(SRCDIR)/,,\
+		  $(wildcard \
+		    $(addprefix $(SRCDIR)/, \
+		      $(addsuffix /asmsyms.cc, $(SRCSRC)))))
+
+SYMOBJS=	$(patsubst %.cc, %.o, \
+		  $(patsubst %.c, %.o, \
+		    $(patsubst %.S, %.o,\
+		      $(patsubst $(SRCDIR)/%,%, $(SYMSRCS)))))
+
+asmsyms.h:	$(BUILDDIR)/include/asmsyms.h
+$(BUILDDIR)/include/asmsyms.h:	$(SYMOBJS) $(SRCDIR)/Mk/Makefile.voodoo
+	@${ECHO_MSG} Generating $(subst $(BUILDDIR)/,,$@)
+	@$(LD) $(VFLAGS) -r $(SYMOBJS) -o $(ASMSYMS)
+	@$(PRINTF) "/* machine-generated file - do NOT edit */\n"	> $@
+	@$(PRINTF) "#ifndef __ASMSYMS_H__\n"				>> $@
+	@$(PRINTF) "#define __ASMSYMS_H__\n\n"				>> $@
+	@$(PRINTF) '($$val, $$name, $$type, $$num) ='			> mkasmsyms.pl
+	@$(PRINTF) '(/^\d+ (\d*) ?. (.*)_(sign|b(\d))$$/);'		>> mkasmsyms.pl
+	@$(PRINTF) '$$val /= 32;'					>> mkasmsyms.pl
+	@$(PRINTF) 'if ($$type eq "sign") {'				>> mkasmsyms.pl
+	@$(PRINTF) '	printf ("#define %%-25s (%%s(0x%%x%%x))\\n",'	>> mkasmsyms.pl
+	@$(PRINTF) '	    $$name, $$val == 2 ? "" : "-",'		>> mkasmsyms.pl
+	@$(PRINTF) '	    $$val_high, $$val_low);'			>> mkasmsyms.pl
+	@$(PRINTF) '	    $$val_low = $$val_high = 0;'		>> mkasmsyms.pl
+	@$(PRINTF) '	} else {'					>> mkasmsyms.pl
+	@$(PRINTF) '	    if ($$num <= 3) {'				>> mkasmsyms.pl
+	@$(PRINTF) '		$$val_low += $$val << ($$num * 8);'	>> mkasmsyms.pl
+	@$(PRINTF) '	    } elsif ($$num <= 7) {'			>> mkasmsyms.pl
+	@$(PRINTF) '		$$val_high += $$val << (($$num-4) * 8);'>> mkasmsyms.pl
+	@$(PRINTF) ' }'							>> mkasmsyms.pl
+	@$(PRINTF) ' }'							>> mkasmsyms.pl
+	@$(NM) --radix=d -S $(ASMSYMS) | $(PERL) -n mkasmsyms.pl	>> $@
+	@$(PRINTF) "\n\n#endif /* __ASMSYMS_H__ */\n"			>> $@
+	@$(RM) $(ASMSYMS) mkasmsyms.pl

@@ -1,0 +1,22 @@
+SOURCES += $(addprefix src/glue/v4-amd64/ia32/, init.cc kernelinterface.cc syscalls.cc user.cc)
+
+ifeq ("$(CONFIG_CPU_AMD64_EM64T)","y")
+SOURCES += $(addprefix src/glue/v4-amd64/ia32/, trap-sysenter.S)
+else
+SOURCES += $(addprefix src/glue/v4-amd64/ia32/, trap-syscall.S)
+endif
+
+src/glue/v4-amd64/ia32/kernelinterface.o: include/version.h
+
+# Copied from src/arch/amd64/Makeconf
+
+CCFLAGS_src/glue/v4-amd64/ia32/user = -DAMD64_32BIT_CODE\
+				      $(subst -m64,-m32,\
+					$(subst -mcmodel=kernel,,\
+					  $(CCFLAGS)))
+
+src/glue/v4-amd64/ia32/user.o: src/glue/v4-amd64/ia32/user.cc
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(CPPFLAGS) $(CCFLAGS_$*) -x c++ -c $< -o $(notdir $@)
+	cd $(dir $@) && $(OBJCOPY) -g -O elf64-x86-64 $(notdir $@) $(notdir $@)

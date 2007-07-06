@@ -1,0 +1,30 @@
+LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker-$(PLATFORM).lds
+
+CURDIR = src/glue/v4-ia32
+SOURCES += $(addprefix $(CURDIR)/, init.cc idt.cc exception.cc \
+	space.cc debug.cc resources.cc thread.cc user.cc trap.S \
+	ctors.cc smp.cc trampoline.S memcontrol.cc)
+
+SOURCES+=	src/generic/linear_ptab_walker.cc \
+		src/generic/mapping_alloc.cc
+ifeq ("$(CONFIG_NEW_MDB)","y")
+SOURCES+=	src/generic/mdb.cc \
+		src/generic/mdb_mem.cc
+else
+SOURCES+=	src/generic/mapping.cc
+endif
+
+CFLAGS_$(CURDIR)/pagefault = -fomit-frame-pointer
+CFLAGS_$(CURDIR)/exception = -fomit-frame-pointer
+
+
+ifeq ("$(CONFIG_IOAPIC)","y")
+SOURCES += src/generic/acpi.cc src/glue/v4-ia32/timer-apic.cc
+else
+SOURCES += src/glue/v4-ia32/timer.cc
+endif
+
+
+ifeq ("$(CONFIG_IA32_SMALL_SPACES)","y")
+SOURCES+=	src/glue/v4-ia32/smallspaces.cc
+endif

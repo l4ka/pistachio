@@ -1,0 +1,5 @@
+SOURCES += $(addprefix src/platform/ofpower3/, head.S call.S prom.cc opic.cc )
+
+SOURCES += $(addprefix src/arch/powerpc64/, 1275tree.cc of1275.cc rtas.cc stab.cc )
+
+SOURCES += $(addprefix src/glue/v4-powerpc64/, rtas.cc )

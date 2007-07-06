@@ -1,0 +1,20 @@
+Build Requirements
+==================
+
+If you obtained this version of Pistachio directly from the Mercurial
+repository, you will need the following tools in order to build the
+Pistachio user-level libraries and applications/servers:
+
+   o autoheader
+   o autoconf
+
+Version 2.53 of the above mentioned tools are known to work, but older
+versions of the tools might also produce correct output.  Once the
+tools have been installed perform the following steps:
+
+   1. Run `autoheader'.  This will create the file "config.h.in".
+
+   2. Run `autoconf'.  This will create the file "configure".
+
+You can now proceed with the remaining installation by following the
+instructions given in the INSTALL file.

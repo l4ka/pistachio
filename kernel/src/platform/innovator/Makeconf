@@ -1,0 +1,1 @@
+SOURCES += $(addprefix src/platform/innovator/, timer.cc irq.cc plat.cc )

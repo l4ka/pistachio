@@ -1,0 +1,20 @@
+SOURCES+=	kdb/generic/bootinfo.cc \
+		kdb/generic/cmd.cc \
+		kdb/generic/console.cc \
+		kdb/generic/entry.cc \
+		kdb/generic/init.cc \
+		kdb/generic/input.cc \
+		kdb/generic/kmemory.cc \
+		kdb/generic/linker_set.cc \
+		kdb/generic/memdump.cc \
+		kdb/generic/print.cc \
+		kdb/generic/tid_format.cc \
+		kdb/generic/tracepoints.cc 
+
+ifeq ("$(CONFIG_IO_FLEXPAGES)","y")
+SOURCES+=	kdb/generic/vrt.cc
+endif
+
+ifeq ("$(CONFIG_ACPI)","y")
+SOURCES+=	kdb/generic/acpi.cc
+endif

@@ -1,0 +1,6 @@
+SOURCES += $(addprefix src/glue/v4-sparc64/, exception.cc init.cc thread.cc \
+	     space.cc syscalls.S trap.S user.S window_trap.S)
+
+SOURCES += src/generic/linear_ptab_walker.cc \
+	   src/generic/mapping.cc \
+	   src/generic/mapping_alloc.cc

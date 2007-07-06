@@ -1,0 +1,1 @@
+SOURCES += $(addprefix src/arch/sparc64/, switch.S )

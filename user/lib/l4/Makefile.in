@@ -1,0 +1,57 @@
+######################################################################
+##                
+## Copyright (C) 2003,  Karlsruhe University
+##                
+## File path:     Makefile.in
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: Makefile.in,v 1.12 2006/02/23 21:07:59 ud3 Exp $
+##                
+######################################################################
+
+srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
+top_builddir=	@top_builddir@
+
+include $(top_srcdir)/Mk/l4.base.mk
+
+
+ia32_OBJS=	ia32-syscall-init.cc ia32-syscall-stubs.S
+ia64_OBJS=	ia64-syscall-stubs.S
+powerpc_OBJS=	powerpc-syscalls.c
+powerpc64_OBJS=	powerpc64-syscalls.c
+mips64_OBJS=	mips64-syscalls.c
+mips32_OBJS=	mips32-syscalls.c
+alpha_OBJS=	alpha-syscalls.c alpha-syscall-stubs.S
+amd64_OBJS=	amd64-syscalls.c
+arm_OBJS=       arm-syscalls.c
+sparc64_OBJS=   sparc64-syscalls.c
+
+CFLAGS_alpha=	-mno-fp-regs -O2 -freg-struct-return
+CFLAGS_ia64=	-fPIC
+
+LIBRARY=	l4
+SRCS=		$($(ARCH)_OBJS)
+
+
+include $(top_srcdir)/Mk/l4.lib.mk

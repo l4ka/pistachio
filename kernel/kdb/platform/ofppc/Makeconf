@@ -1,0 +1,2 @@
+SOURCES += $(addprefix kdb/platform/ofppc/, io.cc ofppc.cc reset.cc \
+	stack.S of1275.cc opic.cc)

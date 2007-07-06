@@ -1,0 +1,1 @@
+SOURCES += $(addprefix kdb/arch/powerpc64/, ofio.cc slb.cc reboot.cc )

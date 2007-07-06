@@ -1,0 +1,12 @@
+CURDIR=src/glue/v4-alpha/
+
+#SOURCES+=$(addprefix ${CURDIR}, sizes.cc init.cc )
+
+SOURCES+= $(addprefix ${CURDIR}, init.cc intctrl.cc thread.cc space.cc traps.S irq.cc timer.cc user.S syscalls.S fastpath.S alpha.cc resources.cc)
+
+# awiggins (2004-07-21) Disabled until it is fixed up and tested again.
+#SOURCES+= $(pal_fastpath.S)
+
+SOURCES+= src/generic/linear_ptab_walker.cc \
+	  src/generic/mapping.cc \
+	  src/generic/mapping_alloc.cc

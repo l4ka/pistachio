@@ -1,0 +1,203 @@
+#!/usr/bin/perl
+######################################################################
+##
+## Copyright (C) 2001,  Karlsruhe University
+##
+## File path:     stripcpp
+## Description:   Utility for stripping out certain cpp defined code.
+##
+## @LICENSE@
+##
+## $Id: stripcpp,v 1.1 2002/08/29 11:13:24 joshua Exp $
+##
+######################################################################
+
+my @files, %defs;
+
+
+## Parse args
+while ($arg = shift) {
+  if ($arg =~ /^-D(\w+)(=(\S+))?/) {
+    $defs{$1} = $3 eq '' ? 1 : $3;
+  } elsif ($arg =~ /^-U(\w+)/) {
+    $undefs{$1} = 1;
+  } elsif ($arg =~ /^--?h(elp)?$/) {
+    USAGE (0);
+  } elsif ($arg =~ /^-/) {
+    USAGE (1);
+  } else {
+    push (@files, $arg);
+  }
+}
+
+USAGE (1) unless @files;
+
+sub USAGE {
+  my $status = shift;
+  $0 =~ s,^(.*/),,;
+  print STDERR "USAGE: $0 [-Uvar...] [-Dvar...] [-Dvar=value..] file...\n\n";
+  exit $status;
+}
+
+## Slurp whole files
+undef $/;
+
+select (STDIN); $| = 1;
+select (STDOUT); $| = 1;
+
+## Modify files.  This is not terribly efficient since we put the whole
+## file into a string and perform a large number of regexp searches and
+## replacements on it.
+foreach $file (@files) {
+  open (F, $file) || die "open ($file): $!\n";
+  my $contents = <F>;
+  close F;
+
+  my $changed = 0;
+  my $num, $cnt = 0;
+
+  ## Markup nested ifdefs
+  while ($contents =~ /^(\#\s*(if|ifn?def|elif|else|endif))/m) {
+    my $sub = "!!!";
+    if ($2 eq 'if' || $2 eq 'ifdef' || $2 eq 'ifndef') {
+      $cnt++;
+      $sub = "!!! beg<$cnt>";
+    } elsif ($2 eq 'elif') {
+      $sub = "!!! elif<$cnt>";
+    } elsif ($2 eq 'else') {
+      $sub = "!!! else<$cnt>";
+    } elsif ($2 eq 'endif') {
+      $sub = "!!! end<$cnt>";
+      $cnt--;
+    }
+    $contents =~ s/^(\#\s*(if|ifn?def|elif|else|endif))/$sub$1/m;
+  }
+
+  ## Start fixing up our modifications and possibly removing blocks.
+  ## Begin with the outhermost nesting.
+  $cnt = 1;
+  do {
+    $num = 0;
+
+    while ($contents =~ /^!!! (\w+)<$cnt>(\#\s*)(\w+)\s*(\W*(\w+).*)/m) {
+      my $cut = 0;
+      my $keep = 0;
+      my $firstblock = 0;
+
+      $firstblock = 1 if $3 eq 'if' || $3 eq 'ifdef' || $3 eq 'ifndef';
+
+      if ($3 eq 'ifdef') {
+	if ($undefs{$5}) { $cut = 1; }
+	elsif ($defs{$5}) { $keep = 1; }
+      }
+      elsif ($3 eq 'ifndef') {
+	if ($undefs{$5}) { $keep = 1; }
+	elsif ($defs{$5}) { $cut = 1; }
+      }
+      elsif ($3 eq 'if' || $3 eq 'elif') {
+	my $expr = $4;
+	my $elif = ($3 eq 'elif');
+	if ($expr =~ m,^[\(\s]*(!)?\s*defined\s*\(\s*(\w+)\s*\)\s*[\)\s]*(\s*/\*.*?\*/)*\s*$,) {
+	  ## Simple ifdef like expression
+	  if ($undefs{$2}) {
+	    if ($1 eq '!') { $keep = 1; }
+	    else { $cut = 1; }
+	  }
+	  elsif ($defs{$2}) {
+	    if ($1 eq '!') { $cut = 1; }
+	    else { $keep = 1; }
+	  }
+	} else {
+	  ## More complex expression
+	  my $expr = $4;
+	  my @words;
+	  while ($expr =~ s/\bdefined\s*\(\s*(\w+)\s*\)//) {
+	    push (@words, $1) if $defs{$1} || $undefs{$1};
+	  }
+	  if (@words) {
+	    ## Complex expression containing some of our defined words
+	    my ($pfx, $line) = ($contents =~ /(.*?\n)!!! \w+<$cnt>(.*?)\n/s);
+	    my $linenum = ($pfx =~ tr/\n/\n/) + 1;
+	    my $fname = $file; $fname =~ s,^\./,,;
+	    my $yesno;
+	    print ("In file \"$fname\", line $linenum, complex expression:\n",
+		   "  $line\n",
+		   "\nRemove block (y/n): ");
+	    $/ = "\n";
+	    do {
+	      chomp ($yesno = <STDIN>);
+	    } while ($yesno !~ /[yYnN]/);
+	    undef $/;
+	    $cut = ($yesno eq 'y' || $yesno eq 'Y') ? 1 : 0;
+	    if (!$cut) {
+	      ## Remove subexpression(s)
+	      foreach $word (@words) {
+		while ($line =~
+		       s/\s*(&&|\|\|)\s*(!\s*)?defined\s*\(\s*$word\s*\)//) {}
+		while ($line =~
+		       s/(!\s*)?defined\s*\(\s*$word\s*\)\s*(&&|\|\|)\s*//) {}
+	      }
+	      print "Writing new expression:\n  $line\n";
+	      $contents =~ s/\n!!! \w+<$cnt>.*?\n/\n$line\n/;
+	      $changed = 1;
+	    }
+	  }
+	}
+      }
+
+      if ($keep) {
+	## Keep the current block
+	if (!$firstblock) {
+	  # Remove beginning of ifdef
+	  $contents =~ s/(^|\n)\#\s*if(?!.*?\n\#\s*if).*?(\n!!! \w+<$cnt>)/\n$1/s;
+	}
+	$contents =~ s/\n!!! \w+<$cnt>.*?\n/\n/s;
+	$contents =~ /^!!! (else|elif|end)<$cnt>/m;
+	if ($1 eq 'end') {
+	  # Just remove endif
+	  $contents =~ s/\n!!! end<$cnt>.*?\n/\n/s;
+	} elsif ($1 eq 'else' || $1 eq 'elif') {
+	  # Remove else or elif part too
+	  $contents =~ s/\n!!! el(se|if)<$cnt>.*?\n!!! end<$cnt>.*?\n/\n/s;
+	}
+	$changed = 1;
+      }
+
+      elsif ($cut) {
+	## Remove current block
+	$contents =~ s/\n!!! \w+<$cnt>.*?(\n!!! \w+<$cnt>)/\n$1/s;
+	if ($firstblock) {
+	  $contents =~ /^!!! (else|elif|end)<$cnt>/m;
+	  if ($1 eq 'end') {
+	    ## Just remove endif
+	    $contents =~ s/\n!!! end<$cnt>.*?\n/\n/s;
+	  } elsif ($1 eq 'elif') {
+	    ## Convert elif into if
+	    $contents =~ s/\n!!! elif<$cnt>(\#\s*)elif/\n$1if/s;
+	  } elsif ($1 eq 'else') {
+	    ## Remove else and endif
+	    $contents =~ s/\n!!! else<$cnt>.*?\n/\n/s;
+	    $contents =~ s/\n!!! end<$cnt>.*?\n/\n/s;
+	  }
+	}
+	$changed = 1;
+      }
+
+      else {
+	## Do not modify current block
+	$contents =~ s/(^|\n)!!! (\w+)<$cnt>/\n/s;
+      }
+      $num++;
+    }
+
+    ## Increase nesting
+    $cnt++;
+  } while ($num > 0);
+
+  if ($changed) {
+    open (NEW, "> $file.new") || die "open (> $file.new): $!\n";
+    print NEW "$contents" || die "write ($file.new): $!\n";
+    close NEW;
+    rename "$file.new", "$file" || die "rename $file.new, $file: $!\n";
+  }
+}

@@ -1,0 +1,54 @@
+/****************************************************************************
+ *
+ * Copyright (C) 2003, University of New South Wales
+ *
+ * File path:	arch/sparc64/ultrasparc/ttable.ldi
+ * Description:	Linker script include file for SPARC v9 Trap Table.
+ *              UltraSPARC CPU implementation dependent traps.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *
+ * $Id: ttable.ldi,v 1.2 2003/09/24 19:04:32 skoglund Exp $
+ *
+ ***************************************************************************/
+
+		/**
+		 *  CPU implementation dependent trap types. (0x060 - 0x07F)
+		 */
+		. = TRAPTYPE2ADDR (0x060, TTABLE_TL);
+
+		*(.ttable.TTABLE_TL.interrupt_vector)
+		. = TRAPTYPE2ADDR (0x061, TTABLE_TL);
+		*(.ttable.TTABLE_TL.PA_watchpoint)
+		. = TRAPTYPE2ADDR (0x062, TTABLE_TL);
+		*(.ttable.TTABLE_TL.VA_watchpoint)
+		. = TRAPTYPE2ADDR (0x063, TTABLE_TL);
+		*(.ttable.TTABLE_TL.corrected_ECC_error)
+		. = TRAPTYPE2ADDR (0x064, TTABLE_TL); /* 4 entries - 0x067 */
+		*(.ttable.TTABLE_TL.fast_instruction_access_MMU_miss)
+		. = TRAPTYPE2ADDR (0x068, TTABLE_TL); /* 4 entries - 0x06B */
+		*(.ttable.TTABLE_TL.fast_data_access_MMU_miss)
+		. = TRAPTYPE2ADDR (0x06C, TTABLE_TL); /* 4 entries - 0x06F */
+		*(.ttable.TTABLE_TL.fast_data_access_protection)
+
+		/* Reserved       (0x070 - 0x07F, TTABLE_TL)               */
+

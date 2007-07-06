@@ -1,0 +1,94 @@
+######################################################################
+#		 
+# Copyright (C) 1999, 2000, 2001,  Karlsruhe University
+#		 
+# File path:	 config/mips64.cml
+# Description:	 rules for Pistachio's mips64 CML2 configuration system
+#		 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#		 
+# $Id: mips64.cml,v 1.12 2003/11/17 05:46:00 cvansch Exp $
+#		 
+######################################################################
+
+symbols
+
+ARCH_MIPS64	'MIPS-64'
+mips64_type	'Processor Type'
+CPU_MIPS64_R4X00	"MIPS-64 R4X00"
+CPU_MIPS64_RC64574	"IDT MIPS-64 R5000 (RC64T574)"
+CPU_MIPS64_SB1		"MIPS-64 Sibyte SB1 core"
+CPU_MIPS64_VR4121	"MIPS-64 NEC vr4121"
+CPU_MIPS64_VR4181	"MIPS-64 NEC vr4181"
+
+CPU_CLOCK_SPEED		"CPU Frequency (kHz)"
+
+mips64_platform	'Platform'
+PLAT_ERPCN01	"OpenFuel ERPCN01"
+PLAT_U4600	"U4600"
+PLAT_SB1	"Sibyte"
+PLAT_VR41XX	"vr41xx"
+
+MIPS64_LITTLE_ENDIAN 'Enable MIPS64 LITTLE ENDIAN mode'
+SB1_PASS1_WORKAROUNDS 'Enable SB1 Sibyte MIPS core pass 1 work arounds?' text
+If you enable this option, you may also need to use a version of binutils/gcc
+that also builds code with the appropriate work arounds.
+
+Answer yes to this option to enable the pass 1 work arounds.
+.
+
+
+choices mips64_type
+	CPU_MIPS64_R4X00
+	CPU_MIPS64_RC64574
+	CPU_MIPS64_SB1
+	CPU_MIPS64_VR4121
+	CPU_MIPS64_VR4181
+	default CPU_MIPS64_R4X00
+
+unless ARCH_MIPS64 suppress dependent mips64_type
+
+
+choices mips64_platform
+	PLAT_ERPCN01
+	PLAT_U4600
+	PLAT_SB1
+	PLAT_VR41XX
+	default PLAT_U4600
+
+unless ARCH_MIPS64 suppress dependent mips64_platform
+
+menu hardware_misc
+	MIPS64_LITTLE_ENDIAN
+	CPU_CLOCK_SPEED%
+	SB1_PASS1_WORKAROUNDS
+
+default MIPS64_LITTLE_ENDIAN from n
+default CPU_CLOCK_SPEED from 100000
+default SB1_PASS1_WORKAROUNDS from n
+
+unless ARCH_MIPS64 suppress MIPS64_LITTLE_ENDIAN
+unless ARCH_MIPS64 suppress CPU_CLOCK_SPEED
+unless CPU_MIPS64_SB1 suppress SB1_PASS1_WORKAROUNDS
+
+require PLAT_ERPCN01 implies MIPS64_LITTLE_ENDIAN==y
+require PLAT_VR41XX implies MIPS64_LITTLE_ENDIAN==y

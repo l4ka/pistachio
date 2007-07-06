@@ -1,0 +1,9 @@
+SOURCES += kdb/platform/ofsparc64/console.cc
+
+ifeq ($(CONFIG_SPARC64_SAB82532),y)
+SOURCES += kdb/platform/ofsparc64/sab82532.cc
+endif
+
+ifeq ($(CONFIG_SPARC64_Z8530),y)
+SOURCES += kdb/platform/ofsparc64/z8530.cc
+endif

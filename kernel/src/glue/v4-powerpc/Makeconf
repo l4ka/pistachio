@@ -1,0 +1,6 @@
+SOURCES += $(addprefix src/glue/v4-powerpc/, thread.cc except_handlers.cc \
+	space.cc init.cc kip_sc.S resources.cc smp.cc pghash.cc except.S)
+
+SOURCES += $(addprefix src/generic/, linear_ptab_walker.cc mapping.cc \
+	mapping_alloc.cc)
+

@@ -1,0 +1,1 @@
+SOURCES += $(addprefix kdb/arch/sparc64/, prepost.cc reboot.cc registers.cc)

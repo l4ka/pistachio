@@ -1,0 +1,2 @@
+
+SOURCES += ${addprefix kdb/arch/alpha/, console.cc dispatch.S prepost.cc alpha.cc user.cc}

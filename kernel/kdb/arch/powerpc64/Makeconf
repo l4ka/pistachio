@@ -1,0 +1,9 @@
+SOURCES += $(addprefix kdb/arch/powerpc64/, prepost.cc frame.cc spr.cc dabr.cc \
+		single_step.cc )
+
+ifeq ("$(CONFIG_KDB_DISAS)","y")
+SOURCES+=	kdb/arch/powerpc64/disas.cc 
+endif
+
+SOURCES +=	kdb/generic/linear_ptab_dump.cc \
+		kdb/generic/mapping.cc

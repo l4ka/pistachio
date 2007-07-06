@@ -1,0 +1,3 @@
+ifeq ("$(CONFIG_PLAT_SB1)","y")
+SOURCES += src/platform/sb1/smp.cc src/platform/sb1/cfe.cc
+endif

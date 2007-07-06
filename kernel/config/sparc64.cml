@@ -1,0 +1,70 @@
+######################################################################
+#		 
+# Copyright (C) 2003,  University of New South Wales
+#		 
+# File path:	 config/sparc64.cml
+# Description:	 Rules for Pistachio's SPARC v9 CML2 configuration system
+#		 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#		 
+# $Id: sparc64.cml,v 1.4 2004/06/28 07:10:42 philipd Exp $
+#		 
+######################################################################
+
+symbols
+
+ARCH_SPARC64		'SPARC v9'
+
+# Platform range
+
+sparc64_platform	'Platform'
+SPARC64_ULTRA1		'Sun Ultra 1 workstation'
+SPARC64_ULTRA10		'Sun Ultra 10 workstation'
+SPARC64_SUNFIRE		'Sun Enterprise 3500-6500 server'
+
+choices sparc64_platform
+	SPARC64_ULTRA1
+	SPARC64_ULTRA10
+	SPARC64_SUNFIRE
+	default SPARC64_ULTRA10
+
+unless ARCH_SPARC64 suppress dependent sparc64_platform
+
+# OpenBoot (Open Firmware std) platforms
+
+derive PLAT_OFSPARC64 from SPARC64_ULTRA1 or SPARC64_ULTRA10 or SPARC64_SUNFIRE
+
+# UltraSPARC CPUs
+
+derive SPARC64_ULTRASPARC2 from SPARC64_ULTRA10 or SPARC64_SUNFIRE
+derive SPARC64_ULTRASPARC1 from SPARC64_ULTRA1
+
+derive SPARC64_ULTRASPARC2I from SPARC64_ULTRA10
+
+# CPU types
+
+derive CPU_SPARC64_ULTRASPARC from SPARC64_ULTRASPARC1 or SPARC64_ULTRASPARC2 # or SPARC64_ULTRASPARC3
+
+# Serial port types
+derive SPARC64_SAB82532 from SPARC64_ULTRA10
+derive SPARC64_Z8530 from SPARC64_SUNFIRE
+

@@ -1,0 +1,264 @@
+## -*- mode: Makefile; -*-
+######################################################################
+##                
+## Copyright (C) 2001-2006,  Karlsruhe University
+##                
+## File path:     Mk/Makeconf
+## Description:   Make settings for pistachio
+##                
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#                
+# $Id: Makeconf,v 1.108 2006/11/30 19:40:43 skoglund Exp $
+#                
+######################################################################
+
+# requires:
+#	find
+#	perl
+
+
+# specify the search path for source files 
+vpath %.cc	$(BUILDDIR):$(SRCDIR)
+vpath %.c	$(BUILDDIR):$(SRCDIR)
+vpath %.S	$(BUILDDIR):$(SRCDIR)
+
+
+# source config tool settings so we know what the target will be
+-include $(BUILDDIR)/config/.config
+
+# Tools
+ECHO=		echo
+ECHO_MSG=	$(ECHO) ===\>
+MKDIRHIER=	$(SRCDIR)/../tools/mkdirhier
+RM_F=		rm -f
+PERL?=		perl
+FIND=		find
+GREP=		grep
+SED=		sed
+AWK=		awk
+CAT=		cat
+TR=		tr
+PRINTF=		printf
+
+# Go fishing for cross development toolchain
+# we take the first one reported by type -p <list>
+TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p $(ARCH)-linux-gcc $(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc)))
+
+# Try to use ccache if installed (and NO_CCACHE is not defined)
+ifndef NO_CCACHE
+CCACHE?=	$(firstword $(shell type -p ccache))
+endif
+
+# If CC was not given by user, default to GCC for target architecture
+ifeq "$(origin CC)" "default"
+CC=		$(CCACHE) $(TOOLPREFIX)gcc
+endif
+CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
+
+
+GCCINSTALLDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
+LIBGCCINC?= $(GCCINSTALLDIR)include
+LIBGCCDIR?= $(GCCINSTALLDIR)
+
+# Some CCs (e.g., the native FreeBSD gcc) do not follow the regular
+# gcc conventions when it comes to the gcc include files.
+__STDARG_H=	$(wildcard $(LIBGCCINC)/stdarg.h)
+ifeq "$(__STDARG_H)" ""
+LIBGCCINC=	/usr/include
+endif
+
+
+ifeq "$(origin LD)" "default"
+LD=		$(TOOLPREFIX)ld
+endif
+ifeq "$(origin AR)" "default"
+AR=		$(TOOLPREFIX)ar
+endif
+OBJCOPY?=	$(TOOLPREFIX)objcopy
+NM?=		$(TOOLPREFIX)nm
+
+
+# the preprocessor
+ifeq "$(origin CPP)" "default"
+CPP=		$(TOOLPREFIX)cpp
+endif
+
+API?=	v4
+
+# these macros will be undefined first - they may have default values
+UNDEFS	 += $(ARCH) $(CPU) $(PLATFORM) $(API)
+DEFINES	 += __ARCH__=$(ARCH) __CPU__=$(CPU) __PLATFORM__=$(PLATFORM) __API__=$(API) $(DEFINES_$(ARCH))
+
+INCLUDES += $(BUILDDIR)/include $(SRCDIR)/include $(LIBGCCINC)
+
+
+######################################################################
+#
+# Preprocessor flags
+#
+
+# preprocessor flags - common to ALL source files
+PPFLAGS += -nostdinc \
+	   $(addprefix -I, $(INCLUDES)) \
+	   $(addprefix -U, $(UNDEFS)) \
+	   $(addprefix -D, $(DEFINES)) \
+	   -imacros $(BUILDDIR)/config/config.h \
+	   -imacros $(SRCDIR)/include/macros.h \
+	   -include $(SRCDIR)/include/config.h
+
+# C/C++ preprocessor flags
+CPPFLAGS += $(PPFLAGS) $(CPPFLAGS_$*) -include $(SRCDIR)/include/types.h
+# Asm preprocessor flags
+APPFLAGS += -DASSEMBLY $(PPFLAGS)
+
+# Flags for Makefile.voodoo LD
+VFLAGS =
+
+
+######################################################################
+#
+# Hardware specific options
+#
+# Known so far: CFLAGS_<arch>, CFLAGS_<cpu>, CFLAGS_<platform>
+#               ASMFLAGS_<arch> ASMFLAGS_<cpu>, ASMFLAGS_<platform>
+#		DEFINES_<arch>
+
+-include $(SRCDIR)/Mk/Makeconf.$(ARCH)
+
+######################################################################
+#
+# Compiler/Assembler/Linker flags
+#
+
+# use optimization level of at least 1 - otherwise inlining will fail
+CCFLAGS += -fno-rtti -fno-builtin  -fomit-frame-pointer -fno-exceptions \
+	  -Wall -Wno-non-virtual-dtor -Wno-format -Wconversion \
+	  $(CFLAGS_$(ARCH)) $(CFLAGS_$(CPU)) $(CFLAGS_$(PLATFORM)) 
+
+ifeq ("$(CONFIG_DEBUG_SYMBOLS)","y")
+CCFLAGS  += -g
+endif
+
+CFLAGS = -ffreestanding $(CCFLAGS)
+
+# these for assembly files only
+ASMFLAGS += $(ASMFLAGS_$(PLATFORM)) $(ASMFLAGS_$(ARCH)) $(ASMFLAGS_$(CPU))
+
+
+LIBDIRS += $(LIBGCCDIR)
+LIBS += $(LIBS_$(ARCH))
+LDFLAGS += -static -O2 $(LDFLAGS_$(ARCH)) $(addprefix -L,$(LIBDIRS))
+LDSCRIPT = $(SRCDIR)/src/platform/$(PLATFORM)/linker.lds
+
+
+
+
+# rules to build object files from source files follow
+# C++ files
+%.o:	%.cc
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(CPPFLAGS) $(CCFLAGS) $(CFLAGS_$*) -c $<
+
+
+# C files
+%.o:	%.c
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$*) -c $<
+
+# assembly files
+%.o:	%.S
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(APPFLAGS) $(ASMFLAGS) $(ASMFLAGS_$*) -c $<
+
+
+
+# where to search for files with lists of files to build (Makeconf)
+SRCSRC = src/generic src/platform/$(PLATFORM) src/api/$(API) \
+	 src/arch/$(ARCH) src/arch/$(ARCH)/$(CPU) \
+	 src/glue/$(API)-$(ARCH) src/glue/$(API)-$(ARCH)/$(CPU) \
+	 src/glue/$(ARCH)-$(PLATFORM) src/glue/$(API)-$(PLATFORM)
+
+ifeq "$(CONFIG_DEBUG)" "y"
+SRCSRC+= kdb/generic kdb/platform/$(PLATFORM) kdb/api/$(API) \
+	 kdb/arch/$(ARCH) kdb/arch/$(ARCH)/$(CPU) \
+	 kdb/glue/$(API)-$(ARCH) kdb/glue/$(API)-$(ARCH)/$(CPU) \
+	 kdb/glue/$(ARCH)-$(PLATFORM) kdb/glue/$(API)-$(PLATFORM) kdb
+endif
+
+# include the files with lists of source files
+# these files should contain lines: SOURCES += ...   NOTE the +!!!
+-include $(addprefix $(SRCDIR)/, $(addsuffix /Makeconf, $(SRCSRC)))
+
+
+# build list of object files from list of source files
+# Source files live under SRCDIR. Object files will go into the
+# respective directories but under BUILDDIR
+OBJS	=$(patsubst %.cc, %.o, \
+	  $(patsubst %.c, %.o, \
+	   $(patsubst %.S, %.o, \
+	    $(patsubst $(SRCDIR)%, $(BUILDDIR)%, $(SOURCES)))))
+
+.INTERMEDIATE: lds.tmp
+lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/include/macros.h $(BUILDDIR)/config/config.h
+	@$(CPP) -DASSEMBLY $(PPFLAGS) -P -C $< -o $@
+
+# link the final binary
+$(ARCH)-kernel:	$(BUILDDIR)/Makeconf.local $(OBJS) lds.tmp
+	@$(ECHO_MSG) Linking $@
+	$(LD) $(LDFLAGS) -Tlds.tmp -o $@ $(OBJS) $(LIBS)
+
+
+# things that must be rebuilt every time should depend on phony
+.PHONY: phony
+
+# configuration - forward target to config/Makefile
+batchconfig ttyconfig xconfig menuconfig:
+	@$(MAKE) -C $(BUILDDIR)/config -f $(SRCDIR)/config/Makefile $@
+
+
+#
+clean::
+	@$(RM) `$(FIND) . -name "*.[oasi]" -o -name "*.ii"`
+	@$(RM) $(ARCH)-kernel .depend
+
+
+.depend:	$(SOURCES) $(SYMSRCS) $(BUILDDIR)/Makeconf.local $(wildcard $(addprefix $(SRCDIR)/, $(addsuffix /Makeconf, $(SRCSRC))))
+	@$(RM_F) $@
+	@if [ ! -d $(BUILDDIR)/include ]; then $(MKDIRHIER) $(BUILDDIR)/include; fi
+	@echo > include/version.h
+#	@$(ECHO_MSG) Building dependencies for $(SOURCES) $(SYMSRCS)
+	@for f in $(SOURCES) $(SYMSRCS); do \
+	  case $$f in *.S) FLAGS="$(APPFLAGS)"; ;; *) FLAGS="$(CPPFLAGS)"; ;; esac ; \
+	  $(CPP) $$FLAGS -w -M -MG $(addprefix $(SRCDIR)/,$$f) | \
+	  $(PERL) -pe 's/^(.*):[ \t]+\\\n/\1:/g' | \
+	  $(PERL) -pe 's/^(.*)\.o:[ \t]+$(subst /,\/,$(subst +,\+,$(SRCDIR)))\/(.*)\/\1(.*)/.depend \2\/\1.o: $(subst /,\/,$(subst +,\+,$(SRCDIR)))\/\2\/\1\3/' >> $@; \
+	done 2>&1 | $(GREP) . && $(RM_F) $@ && exit -1 || exit 0
+
+# Don't include dependencies during cleanup or configure
+ifeq "$(filter clean %config, $(MAKECMDGOALS))" ""
+-include .depend
+endif
+
+include $(SRCDIR)/Mk/Makefile.voodoo

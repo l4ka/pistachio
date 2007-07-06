@@ -1,0 +1,7 @@
+SOURCES += $(addprefix src/platform/simics/, startup32.S)
+
+ifeq ("$(CONFIG_IOAPIC)","y")
+SOURCES += src/platform/generic/intctrl-apic.cc
+else
+SOURCES += src/platform/generic/intctrl-pic.cc
+endif

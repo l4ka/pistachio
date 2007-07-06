@@ -1,0 +1,3 @@
+SOURCES += $(addprefix kdb/arch/powerpc64/, macio.cc slb.cc )
+
+SOURCES += kdb/platform/ofg5/reboot.cc

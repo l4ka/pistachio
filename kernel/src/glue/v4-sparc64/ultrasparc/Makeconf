@@ -1,0 +1,1 @@
+SOURCES +=$(addprefix src/glue/v4-sparc64/ultrasparc/, interrupt.S space.cc timer.cc mmu_trap.S mmu.cc)

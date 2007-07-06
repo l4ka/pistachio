@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# tools/create_autobuild <kerneldir> <name>
+# Creates a configuration called <name> based on the configuration
+# in <kerneldir>
+
+KERNELDIR=$1
+NAME=$2
+TOPDIR=`pwd`
+TARFILE=$TOPDIR/contrib/configs/$NAME.kernel.tar
+
+if [ $# -ne 2 ]; then
+    echo "Usage: tools/create_autobuild <kerneldir> <name>";
+    exit 1;
+fi
+
+# Check user has an actual configuration
+if [ ! -e $KERNELDIR/config/config.out ]; then
+     echo "To create an autobuild template you need to have";
+     echo "already run make menuconfig";
+     exit 1;
+fi
+
+# Don't overwrite an existing one
+if [ -e $TARFILE ]; then
+    echo "You already have a config called $NAME";
+    echo "To create a new one, first remove $TARFILE";
+    exit 1;
+fi
+
+cd $KERNELDIR
+tar cf $TARFILE config/config.out config/.config config/config.h

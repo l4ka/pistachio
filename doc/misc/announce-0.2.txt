@@ -1,0 +1,37 @@
+Subject: ANNOUNCE: L4Ka::Pistachio version 0.2
+
+The L4Ka team is pleased to announce the availability of
+L4Ka::Pistachio version 0.2.  The version 0.2 release is mostly a bug
+fix release to address problems encountered in version 0.1.  Most of
+the corrected bugs were located in the user-level bindings.  Apart
+from fixing some bugs, the 0.2 release also introduces slight API
+changes to the ExchangeRegisters system-call, and adds support for the
+Itanium 2 architecture.
+
+L4Ka::Pistachio implements the L4 Version 4 API and currently supports
+the following hardware architectures:
+
+   o Intel IA32 (Pentium and higher)
+   o Intel IA64 (Itanium1, Itanium2)
+   o PowerPC 32bit (IBM 750)
+   o Alpha (21164)
+   o MIPS 64bit (R4000, R5000)
+
+For more information on L4Ka::Pistachio and the L4 Version 4 API in
+general, refer to the L4Ka::Pistachio whitepaper:
+
+   http://l4ka.org/projects/pistachio/pistachio-whitepaper.pdf
+
+L4Ka::Pistachio is available under the two-clause BSD license.  Source
+and binary distributions, documentation, and other online resources
+can be found on the L4Ka website:
+
+   http://l4ka.org/
+
+Note that the L4Ka::Pistachio public CVS repository is currently under
+re-construction.  The current CVS repository therefore does not yet
+incoporate all the changes of the version 0.2 release.
+
+Happy hacking,
+
+

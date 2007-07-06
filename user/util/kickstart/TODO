@@ -1,0 +1,10 @@
+- When loading a module, kickstart needs to keep the multiboot
+  data to generate the bootinfo structure later on
+  (look for orig_mbi_modules).
+  Instead, it could extract the information during module loading
+  and reuse the original modules as free memory, avoid memory
+  region conflicts.
+
+- Some memory region conflicts are resolvable by moving data to a
+  temporary location. The current version bails out if the kernel
+  must be copied onto itself, for example.

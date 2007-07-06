@@ -1,0 +1,5 @@
+SOURCES+=	src/arch/ia64/ski/startup.S \
+		src/arch/ia64/ski/efi.cc \
+		src/arch/ia64/ski/ski.cc \
+		src/arch/ia64/ski/palemu.S \
+		src/arch/ia64/ski/salemu.cc

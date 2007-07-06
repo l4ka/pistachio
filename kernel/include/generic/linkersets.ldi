@@ -1,0 +1,12 @@
+	.sets . : AT(ADDR(.sets) - KERNEL_OFFSET)
+	{
+		. = ALIGN(16);
+		_start_setlist = .;
+		*(.setlist)
+		_end_setlist = .;
+		. = ALIGN(16);
+		_start_sets = .;
+		*(SORT(set_*))
+		_end_sets = .;
+	}
+

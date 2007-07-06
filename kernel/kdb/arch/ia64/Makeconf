@@ -1,0 +1,25 @@
+SOURCES+=	kdb/arch/ia64/breakpoints.cc \
+		kdb/arch/ia64/cache.cc \
+		kdb/arch/ia64/ctrl.cc \
+		kdb/arch/ia64/cpuid.cc \
+		kdb/arch/ia64/frame.cc \
+		kdb/arch/ia64/interrupts.cc \
+		kdb/arch/ia64/io.cc \
+		kdb/arch/ia64/pkrs.cc \
+		kdb/arch/ia64/prepost.cc \
+		kdb/arch/ia64/rrs.cc \
+		kdb/arch/ia64/tlb.cc \
+		kdb/arch/ia64/singlestep.cc \
+		kdb/arch/ia64/sal.cc
+
+ifeq ("$(CONFIG_PERFMON)","y")
+SOURCES+=	kdb/arch/ia64/perf.cc
+endif
+
+ifeq ("$(CONFIG_KDB_DISAS)","y")
+SOURCES+=	kdb/arch/ia64/disas.cc kdb/arch/ia64/ia64-dis.c	\
+		kdb/generic/sprintf.cc	
+endif
+
+SOURCES+=	kdb/generic/linear_ptab_dump.cc \
+		kdb/generic/mapping.cc

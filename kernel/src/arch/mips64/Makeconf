@@ -1,0 +1,2 @@
+SOURCES+=	src/arch/mips64/head.S src/arch/mips64/switch.S
+

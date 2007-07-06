@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+######################################################################
+##
+## Copyright (C) 1998, Espen Skoglund
+##
+## Filename:      fixupcode.pl
+## Description:   Change all occurences of a variable/type name in all
+##                the files given on command line
+## Status:        Experimental, do not distribute.
+## Author:        Espen Skoglund <espensk@stud.cs.uit.no>
+## Created at:    Fri Aug 28 09:08:38 1998
+##
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+##
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##
+## $Id: renamestuff,v 1.1 2003/11/21 17:50:53 skoglund Exp $
+##
+######################################################################
+
+
+## Parse command line
+while ( $arg = shift ) {
+  if ( !$fromname ) {
+    $fromname = $arg;
+  } elsif ( !$toname ) {
+    $toname = $arg;
+  } else {
+    push( @files, $arg );
+  }
+}
+
+if ( !$fromname || !$toname ) {
+  usage();
+  exit;
+}
+
+## Slurp whole files.
+undef $/;
+
+## Change occurances in all the files.
+foreach $f ( @files ) {
+  ## Read file contents.
+  open( OLDFILE, "$f" ) || die "open($f): $!\n";
+  my $contents = <OLDFILE>;
+  close OLDFILE;
+
+  ## Check for replacements.
+  my $num = ($contents =~ s/\b$fromname\b/$toname/ogs);
+  next unless $num;
+
+  printf( "Replaced %2d occurence%s in $f\n",
+	  $num, $num > 1 ? "s" : " " );
+
+  ## Make backup of file.
+  rename( $f, "$f.bak" ) || die "rename($f, $f.bak): $!\n";
+
+  ## Try to open file for writing.
+  if ( !open( NEWFILE, "> $f" ) ) {
+    rename( "$f.bak", $f );
+    die "open(> $f): $!\n";
+  }
+
+  ## Copy contents into new file.
+  print NEWFILE $contents;
+
+  close NEWFILE;
+  unlink "$f.bak";
+}
+
+
+################################################################
+
+sub usage {
+  $0 =~ s!^.*/([^/]+)$!\1!;
+  print( "USAGE: $0 <from name> <to name> [file ...]\n" );
+}

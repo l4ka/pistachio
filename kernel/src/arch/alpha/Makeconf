@@ -1,0 +1,1 @@
+SOURCES += $(addprefix src/arch/alpha/, switch.S alpha-divrem.S head.S console.cc)

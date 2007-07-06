@@ -1,0 +1,120 @@
+######################################################################
+##                
+## Copyright (C) 2003-2004, 2006,  Karlsruhe University
+##                
+## File path:     Makefile.in
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: Makefile.in,v 1.19 2006/10/22 19:39:27 reichelt Exp $
+##                
+######################################################################
+
+srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
+top_builddir=	@top_builddir@
+
+include $(top_srcdir)/Mk/l4.base.mk
+
+CFLAGS+=	-fno-builtin
+KICKSTART_LINKBASE?=	00800000
+
+PROGRAM=	kickstart
+PROGRAM_DEPS=	$(top_builddir)/lib/io/libio.a $(srcdir)/Makefile.in \
+		$(PROGRAM_DEPS_$(ARCH))
+LIBS+=		$(LIBS_$(ARCH))
+SRCS=		crt0-$(ARCH).S kickstart.cc kipmgr.cc elf.cc lib.cc bootinfo.cc \
+		$(ARCH).cc $(SRCS_$(ARCH))
+OBJS+=		$(OBJS_$(ARCH))
+SRCS_MBI=	mbi.cc mbi-$(ARCH).cc mbi-loader.cc
+IO32FILES=	$(IO32FILES_$(ARCH))
+GENFILES=	$(GENFILES_$(ARCH))
+
+LDFLAGS+=	-Ttext=$(KICKSTART_LINKBASE) \
+		-L$(srcdir) -Tkickstart.ld
+CFLAGS+=	-DREVISION="`cat .revision`"
+LGCC=
+
+
+##
+## IA32 specifics
+##
+SRCS_ia32=		$(SRCS_MBI)
+LIBS_ia32=		-lio
+CFLAGS_kickstart_ia32:= $(CFLAGS) 
+
+##
+## AMD64 specifics
+##
+SRCS_amd64=		$(SRCS_MBI) 
+OBJS_amd64+=		elf64.o bootinfo64.o
+LIBS_amd64=		-lio32
+CFLAGS_kickstart_amd64:=$(patsubst -m64, -m32, $(CFLAGS)) -O2 
+CPPFLAGS_amd64= 	-I$(top_srcdir)/lib/io -I$(srcdir) \
+			-DALSO_ELF64 -DALSO_BOOTINFO64
+LDFLAGS_amd64=		-b elf32-i386 --oformat elf32-i386 \
+			-N -m elf_i386 -L.
+IO32FILES_amd64=	get_hex.cc print.cc $(ARCH)-getc.cc $(ARCH)-putc.cc
+PROGRAM_DEPS_amd64=	$(top_builddir)/util/kickstart/libio32.a
+
+##
+## Override CFLAGS
+##
+CFLAGS=			$(CFLAGS_kickstart_$(ARCH))
+
+
+pre-all:	.revision copy_io32files $(GENFILES)
+post-clean:
+	rm -f .revision $(GENFILES)
+	rm -f $(IO32FILES:.cc=32.o) $(IO32FILES:.cc=32.cc) libio32.a
+
+.revision:	$(SRCS)
+	@$(ECHO_MSG) Making  `echo $(srcdir)/ | sed s,^$(top_srcdir)/*,,`$@
+	@(cd $(srcdir) ; grep "\$$[I][d]:" $(SRCS)) | \
+	  $(AWK) '{sum += $$5} END {print sum}' > $@
+
+copy_io32files:
+	@for F in $(IO32FILES:.cc=); do \
+	  test $${F}32.cc -nt $(top_srcdir)/lib/io/$${F}.cc || \
+	    cp $(top_srcdir)/lib/io/$${F}.cc $${F}32.cc; \
+	done
+
+libio32.a:	$(IO32FILES:.cc=32.o)
+	@$(ECHO_MSG) Linking `echo $(srcdir)/$@ | sed s,^$(top_srcdir)/,,`
+	$(AR) cru $@ $(IO32FILES:.cc=32.o)
+	$(RANLIB) $@
+
+elf32.o: $(srcdir)/elf.cc
+	$(CC) -x c++ $(CPPFLAGS) $(CXXFLAGS) -DELF_32on64 -c $(srcdir)/elf.cc -o $@
+
+elf64.o: $(srcdir)/elf.cc
+	$(CC) -x c++ $(CPPFLAGS) $(CXXFLAGS) -DELF_64on32 -c $(srcdir)/elf.cc -o $@
+
+bootinfo32.o: $(srcdir)/bootinfo.cc
+	$(CC) -x c++ $(CPPFLAGS) $(CXXFLAGS) -DBOOTINFO_32on64 -c $(srcdir)/bootinfo.cc -o $@
+
+bootinfo64.o: $(srcdir)/bootinfo.cc
+	$(CC) -x c++ $(CPPFLAGS) $(CXXFLAGS) -DBOOTINFO_64on32 -c $(srcdir)/bootinfo.cc -o $@
+
+
+include $(top_srcdir)/Mk/l4.prog.mk
+

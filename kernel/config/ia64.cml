@@ -1,0 +1,93 @@
+######################################################################
+##                
+## Copyright (C) 2003,  Karlsruhe University
+##                
+## File path:     config/ia64.cml
+## Description:   Rules for Pistachio's ia64 configuration system
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: ia64.cml,v 1.8 2004/02/24 01:46:46 cvansch Exp $
+##                
+######################################################################
+
+symbols
+
+ARCH_IA64		'IA-64'
+ia64_type		'IA-64 Processor Type'
+CPU_IA64_ITANIUM	'Itanium Processor'
+CPU_IA64_ITANIUM2	'Itanium2 Processor'
+CPU_IA64_SKI		'HP Simulator'
+ia64_platform		'IA-64 Platform'
+PLAT_EFI		'Extensible Firmware Interface (EFI)'
+KDB_CONS_SKI		'SKI (HP IA64 emulator)'
+PROFILE_INTERVAL 	'Number of intructions between samples'
+PROFILE_SIZE		'Number of entries in profile hash-table' text
+The size of the profiling hash-table must be large enough such that there
+is a very low percentage of instructions in both kernel and the user
+application whose virtual address hashes to the same hash bucket.
+.
+
+
+#
+# The IA-64 CPU menu
+#
+
+choices ia64_type
+	CPU_IA64_ITANIUM
+	CPU_IA64_ITANIUM2
+	CPU_IA64_SKI
+	default CPU_IA64_ITANIUM
+
+unless ARCH_IA64 suppress ia64_type
+
+#
+# The IA-64 platform menu
+#
+
+choices ia64_platform
+	PLAT_EFI
+	default PLAT_EFI
+
+unless ARCH_IA64 suppress ia64_platform
+
+
+#
+# Setting for the HP SKI emulator.
+#
+unless CPU_IA64_SKI suppress dependent KDB_CONS_SKI
+when CPU_IA64_SKI suppress KDB_CONS_COM KDB_CONS_KBD
+require CPU_IA64_SKI implies SMP==n and KDB_CONS_SKI==y
+
+
+#
+# IA-64 requires an I/O SAPIC
+#
+require ARCH_IA64 implies IOAPIC==y
+
+#
+# IA-64 profiling
+
+default PROFILE_INTERVAL from 10000
+default PROFILE_SIZE from 393241 
+unless ARCH_IA64 suppress PROFILE_INTERVAL PROFILE_SIZE
+

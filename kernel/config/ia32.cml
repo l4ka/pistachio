@@ -1,0 +1,112 @@
+######################################################################
+##                
+## Copyright (C) 2003-2006,  Karlsruhe University
+##                
+## File path:     config/ia32.cml
+## Description:   IA32 specific rules
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: ia32.cml,v 1.11 2006/11/16 19:51:44 skoglund Exp $
+##                
+######################################################################
+
+symbols
+
+ARCH_IA32	'IA-32'
+
+ia32_type	'Processor Type'
+CPU_IA32_I486	'486'
+CPU_IA32_I586	'Pentium1'
+CPU_IA32_I686	'Pentium2/3'
+CPU_IA32_P4	'Pentium4'
+CPU_IA32_K8	'AMD K8'
+CPU_IA32_C3     'VIA C3'
+
+
+
+#
+# IA-32 specific kernel configurations
+#
+
+IA32_SMALL_SPACES	'Small address spaces' text
+Small address spaces is an optimization that emulates tagged TLBs (and
+tagged virtual caches in general) using the segmentation facility in
+the IA-32 processors.  It can greatly reduce the costs associated with
+address space switching.
+.
+
+
+#
+# IA-32 specific debug configurations
+#
+
+IA32_KEEP_LAST_BRANCHES	'Keep last branch' text
+Keep the state of the last-branch model specific registers upon
+exceptions and enter kdebug instructions.  Useful for seeing where the
+last branch occured in user level (e.g., where a branch to an invalid
+instruction occured).
+
+Enabling this will incur some overhead during exception/interrupt
+handling.
+.
+
+
+default IA32_SMALL_SPACES from n
+unless ARCH_IA32 suppress dependent IA32_SMALL_SPACES
+
+default IA32_KEEP_LAST_BRANCHES from n
+unless ARCH_IA32 suppress dependent IA32_KEEP_LAST_BRANCHES
+when CPU_IA32_I486 or CPU_IA32_C3 suppress TRACEBUFFER
+when CPU_IA32_I486 or CPU_IA32_C3 suppress IOAPIC
+when CPU_IA32_I486 or CPU_IA32_C3 suppress SMP
+
+
+
+#
+# The IA-32 CPU menu
+#
+
+choices ia32_type
+	CPU_IA32_I486
+	CPU_IA32_I586
+	CPU_IA32_I686
+	CPU_IA32_P4
+	CPU_IA32_K8
+	CPU_IA32_C3
+	default CPU_IA32_P4
+
+unless ARCH_IA32 suppress dependent ia32_type
+
+
+
+#
+# IA32 processor feature configuration
+#
+derive IA32_SYSENTER from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8
+derive IA32_FXSR from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8
+derive IA32_PGE from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8 or CPU_IA32_C3
+derive IA32_HTT from CPU_IA32_P4
+derive IA32_SMALL_SPACES_GLOBAL from IA32_SMALL_SPACES and IA32_PGE
+derive IA32_PSE from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_I586 or CPU_IA32_K8
+derive IA32_TSC from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_I586 or CPU_IA32_K8 or CPU_IA32_C3
+derive IA32_PAT from CPU_IA32_I686 or CPU_IA32_P4 or CPU_IA32_K8

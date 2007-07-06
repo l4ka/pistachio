@@ -1,0 +1,3 @@
+SOURCES += $(addprefix kdb/glue/v4-powerpc/, code.cc addr.cc prepost.cc)
+SOURCES += kdb/generic/linear_ptab_dump.cc
+

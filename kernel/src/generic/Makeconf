@@ -1,0 +1,11 @@
+SOURCES+=	src/generic/lib.cc \
+		src/generic/kmemory.cc
+
+ifeq ("$(CONFIG_ACPI)","y")
+SOURCES+=	src/generic/acpi.cc
+endif
+
+ifeq ("$(CONFIG_IO_FLEXPAGES)","y")
+SOURCES+=	src/generic/vrt.cc 
+endif
+

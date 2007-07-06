@@ -1,0 +1,38 @@
+SOURCES += $(addprefix src/api/v4/, exregs.cc ipc.cc ipcx.cc kernelinterface.cc thread.cc schedule.cc space.cc interrupt.cc smp.cc processor.cc)
+
+
+VERSIONFILE=$(BUILDDIR)/.version
+
+$(VERSIONFILE): phony
+	@if [ ! -f $(VERSIONFILE) ]; \
+	then echo 1 > $(VERSIONFILE); \
+	else expr `cat $(VERSIONFILE)` + 1 > $(VERSIONFILE); \
+	fi
+
+src/api/v4/kernelinterface.o: include/version.h
+
+include/version.h: $(VERSIONFILE)
+	@$(ECHO_MSG) $@
+	@$(PRINTF)					'\
+//							\n\
+// Autmatically generated.  Do not edit.		\n\
+//							\n\
+							\n' > $@
+
+	@VERSION=`grep AC_INIT $(SRCDIR)/../user/configure.in | \
+	    sed 's/[^0-9.]*\([0-9.]*\)[^0-9.]*/\1/'` ;\
+	$(PRINTF) '\
+#define KERNEL_VERSION         %d			\n\
+#define KERNEL_SUBVERSION      %d			\n\
+#define KERNEL_SUBSUBVERSION   %d			\n\n' \
+	`echo $$VERSION | cut -d. -f1` \
+	`echo $$VERSION | cut -d. -f2` \
+	`echo $$VERSION | cut -d. -f3` >> $@
+	
+	@$(PRINTF) '\
+#define KERNELGENDATE          SHUFFLE3(%s)			\n\
+#define __USER__               "%s"				\n\
+#define __KERNELBUILDNO__      %d				\n\n' \
+	`date "+day:(1%d-100),month:(1%m-100),year:(%Y-2000)"` \
+	$(USER)@`hostname` \
+	`cat $(VERSIONFILE)` >> $@

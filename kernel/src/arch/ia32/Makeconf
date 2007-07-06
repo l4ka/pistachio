@@ -1,0 +1,1 @@
+#SOURCES += $(addprefix src/arch/ia32/, init.cc)

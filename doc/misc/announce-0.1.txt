@@ -1,0 +1,45 @@
+Subject: ANNOUNCE: L4Ka::Pistachio version 0.1
+
+The L4Ka team is happy to announce the first release of the
+L4Ka::Pistachio microkernel.
+
+L4Ka::Pistachio is the latest L4 microkernel developed by the System
+Architecture Group at the University of Karlsruhe, Germany, in
+collaboration with the DISY group at the University of New South
+Wales, Australia.  It is the first available kernel implementation of
+the L4 Version 4 kernel API (currently code-named Version X.2), which
+is fully 32 and 64 bit clean and provides multiprocessor support.  A
+broad overview of L4Ka::Pistachio and the L4 Version 4 API can be
+found in:
+
+   http://l4ka.org/projects/pistachio/pistachio-whitepaper.pdf
+
+L4Ka::Pistachio is built from ground up incorporating the research
+results of the last seven years of microkernel and multi-server
+research.  The code is written in C++ with a strong focus on
+performance and portability.  The first release includes support for
+many of today's widely used commodity architectures:
+
+   o Intel IA32 (Pentium and higher)
+   o Intel IA64 (Itanium1)
+   o PowerPC 32bit (IBM 750)
+   o Alpha (21164)
+   o MIPS 64bit (R4000, R5000)
+
+The variety of supported architectures makes L4Ka::Pistachio an ideal
+research and development platform for a wide variety of systems.
+Additional architectural support for AMD64, ARM, Power4, and
+UltraSparc is either planned or already in progress.
+
+L4Ka::Pistachio is available under the two-clause BSD license.  Source
+and binary distributions, documentation, and other online resources
+can be found on the L4Ka website:
+
+   http://l4ka.org/
+
+Within the next few weeks we are going to release L4Linux 2.4.20 which
+has support for L4Ka::Pistachio/ia32 (besides the old V2 and X.0
+APIs).
+
+Happy hacking,
+

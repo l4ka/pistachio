@@ -1,0 +1,42 @@
+Subject: ANNOUNCE: L4Ka::Pistachio version 0.3
+
+The L4Ka team is pleased to announce the availability of
+L4Ka::Pistachio version 0.3.  The current release fixes a number of
+bugs from the previous release and makes the following major changes:
+
+   o The IA32 port now supports small address spaces.
+   o The `high' field in memory descriptors now specify the last byte
+     of the memory region (API change).
+   o The way that the IA32 port invokes the system call stubs in the
+     user-level bindings has changed.  The change requires that all
+     applications that are compiled with the new bindings must also
+     be linked with the new libl4 library.
+
+L4Ka::Pistachio implements the L4 Version 4 API and currently supports
+the following hardware architectures:
+
+   o Intel IA32 (Pentium and higher)
+   o Intel IA64 (Itanium1, Itanium2)
+   o PowerPC 32bit (IBM 750)
+   o Alpha (21164)
+   o MIPS 64bit (R4000, R5000)
+
+For more information on L4Ka::Pistachio and the L4 Version 4 API in
+general, refer to the L4Ka::Pistachio whitepaper:
+
+   http://l4ka.org/projects/pistachio/pistachio-whitepaper.pdf
+
+L4Ka::Pistachio is available under the two-clause BSD license.  Source
+and binary distributions, documentation, and other online resources
+can be found on the L4Ka website:
+
+   http://l4ka.org/
+
+The latest version of L4Ka::Pistachio, including any changes since the
+latest release, is also available through a public read-only CVS
+repository.  See our website for instructions on how to access the
+public CVS.
+
+Happy hacking,
+
+   The L4Ka Development Team
