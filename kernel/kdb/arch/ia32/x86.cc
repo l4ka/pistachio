@@ -45,7 +45,7 @@
 #include INC_PLAT(nmi.h)
 #include INC_GLUE(idt.h)
 #if defined(CONFIG_IOAPIC)
-# include INC_ARCH(apic.h)
+# include INC_ARCHX(x86,apic.h)
 #endif
 
 DECLARE_CMD (cmd_reset, root, '6', "reset", "Reset system");

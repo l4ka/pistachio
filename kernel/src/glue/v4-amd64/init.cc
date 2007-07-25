@@ -47,7 +47,7 @@
 #include INC_ARCH(hwcr.h)
 #include INC_ARCH(segdesc.h)
 #include INC_ARCH(tss.h)
-#include INC_ARCH(apic.h)
+#include INC_ARCHX(x86,apic.h)
 #include INC_ARCH(config.h)
 
 #include INC_GLUE(intctrl.h)

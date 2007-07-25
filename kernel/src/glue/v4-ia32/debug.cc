@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/debug.cc
  * Description:   Debugging support
@@ -37,7 +37,7 @@
 
 #include INC_ARCH(traps.h)
 #include INC_ARCH(trapgate.h)
-#include INC_ARCH(apic.h)
+#include INC_ARCHX(x86,apic.h)
 
 #define KDB_STACK_SIZE	KTCB_SIZE
 static char kdb_stack[KDB_STACK_SIZE] UNIT("cpulocal")

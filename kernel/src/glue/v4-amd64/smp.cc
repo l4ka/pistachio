@@ -7,7 +7,7 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(idt.h)
 
-#include INC_ARCH(apic.h)
+#include INC_ARCHX(x86,apic.h)
 #include INC_ARCH(trapgate.h)
 
 #include INC_ARCH(debug.h)

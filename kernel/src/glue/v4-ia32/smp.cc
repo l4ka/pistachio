@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/smp.cc
  * Description:   IA32 MP implementation
@@ -34,7 +34,7 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(idt.h)
 #include INC_API(smp.h)
-#include INC_ARCH(apic.h)
+#include INC_ARCHX(x86,apic.h)
 #include INC_ARCH(trapgate.h)
 
 #ifdef CONFIG_SMP_IDLE_POLL

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     platform/generic/intctrl-apic.h
  * Description:   Driver for APIC+IOAPIC
@@ -37,7 +37,7 @@
 #endif
 
 #include INC_PLAT(82093.h)
-#include INC_ARCH(apic.h)
+#include INC_ARCHX(x86,apic.h)
 #include <sync.h>
 #include <linear_ptab.h>
 

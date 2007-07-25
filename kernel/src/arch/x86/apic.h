@@ -1,10 +1,10 @@
 /*********************************************************************
- *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
- *                
- * File path:     arch/amd64/apic.h
- * Description:   Driver for the Local APIC in AMD64 processors
- *                
+ *
+ * Copyright (C) 2002-2004,  Karlsruhe University
+ *
+ * File path:     arch/x86/apic.h
+ * Description:   Driver for the Local APIC in x86 processors
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -13,7 +13,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -25,18 +25,16 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *                
- * $Id: apic.h,v 1.6 2006/10/19 22:57:34 ud3 Exp $
- *                
+ *
+ * $Id: apic.h,v 1.4.4.4 2006/12/05 15:53:04 skoglund Exp $
+ *
  ********************************************************************/
-#ifndef __ARCH__AMD64__APIC_H__
-#define __ARCH__AMD64__APIC_H__
+#ifndef __ARCH__X86__APIC_H__
+#define __ARCH__X86__APIC_H__
 
-#include <debug.h> 
-#include INC_ARCH(pagebits.h)
-#include INC_GLUE(hwspace.h)
 
-template <u64_t base> class local_apic_t {
+template <word_t base> class local_apic_t
+{
 
 private:
     /* register numbers */
@@ -76,16 +74,17 @@ private:
 	union {
 	    u32_t raw;
 	    struct {
-		BITFIELD8(
+		BITFIELD9(
 		    u32_t,
 		    vector		: 8,
 		    delivery_mode	: 3,
+		    reserved_0          : 1,
 		    delivery_status	: 1,
 		    polarity		: 1,
 		    remote_irr		: 1,
 		    trigger_mode	: 1,
 		    masked		: 1,
-		    reserved		: 16);
+		    reserved_1	: 15);
 	    } x;
 	};
     };
@@ -181,9 +180,9 @@ private:
 	}
 
 public:
-    
+
     u8_t id() { return (read_reg(APIC_ID) >> 24); }
-    void set_id(u8_t id) { 
+    void set_id(u8_t id) {
 	write_reg(APIC_ID, (read_reg(APIC_ID) & 0x00ffffff) | (u32_t)id << 24);
     }
     u8_t version() {
@@ -197,15 +196,15 @@ public:
 
     void set_task_prio(u8_t prio, u8_t subprio = 0)
 	{ set_prio (APIC_TASK_PRIO, prio, subprio); }
-    
+
     /* interrupt vectors */
-    enum lvt_t 
+    enum lvt_t
     {
 	lvt_timer = 0,
 	lvt_thermal_monitor = 1,
 	lvt_perfcount = 2,
 	lvt_lint0 = 3,
-	lvt_lint1 = 4, 
+	lvt_lint1 = 4,
 	lvt_error = 5
     };
 
@@ -230,9 +229,9 @@ public:
 	edge = 0,
 	level = 1
     };
-    
+
     bool set_vector(lvt_t lvt, delivery_mode_t del_mode,
-		    pin_polarity_t polarity, 
+		    pin_polarity_t polarity,
 		    trigger_mode_t trigger_mode);
 
 public:
@@ -263,22 +262,22 @@ public:
 
 public:
     /* IRQ handling */
-    void EOI() 	{ write_reg(APIC_EOI, 0); }
+    void EOI()	{ write_reg(APIC_EOI, 0); }
 
     void mask(lvt_t lvt)
-	{ 
+	{
 	    lint_vector_t vec;
 	    vec.raw = read_reg((regno_t)(APIC_LVT_TIMER + (lvt * 0x10)));
 	    vec.x.masked = 1;
 	    write_reg((regno_t)(APIC_LVT_TIMER + (lvt * 0x10)), vec.raw);
 	}
-	    
+
     void unmask(lvt_t lvt)
 	{
 	    lint_vector_t vec;
-	    vec.raw = read_reg(APIC_LVT_TIMER + (lvt * 0x10));
+	    vec.raw = read_reg((regno_t)(APIC_LVT_TIMER + (lvt * 0x10)));
 	    vec.x.masked = 0;
-	    write_reg(APIC_LVT_TIMER + (lvt * 0x10));
+	    write_reg((regno_t)(APIC_LVT_TIMER + (lvt * 0x10)), vec.raw);
 	}
 
     bool get_trigger_mode(u8_t irq)
@@ -286,26 +285,30 @@ public:
 	    word_t tmr = read_reg((regno_t)(APIC_TMR_BASE + ((irq & ~0x1f) >> 1)));
 	    return tmr & (1 << (irq & 0x1f));
 	}
-	    
+
+    u32_t read_vector(lvt_t lvt)
+	{
+	    return read_reg((regno_t)(APIC_LVT_TIMER + (lvt * 0x10)));
+	}
+
 public:
     /* SMP handling */
-    void send_startup_ipi(u8_t apic_id, void(*startup_func)(void));
+    void send_startup_ipi(u8_t apic_id, void(*startup)(void));
     void send_init_ipi(u8_t apic_id, bool assert);
+    void send_nmi(u8_t apic_id);
     void send_ipi(u8_t apic_id, u8_t vector);
     void broadcast_ipi(u8_t vector, bool self = false);
 };
 
 
-template <u64_t base>
+template <word_t base>
 INLINE bool local_apic_t<base>::enable(u8_t spurious_int_vector)
 {
     /* check that this is really an APIC */
-    if ((version() & 0xf0) != 0x10){
-	printf("version = %x \n", version());
+    if ((version() & 0xf0) != 0x10)
 	return false;
-    }
-    
-    /* Opteron support arbitrary SIV - check! */
+
+    /* only P4, Xeon, and Opteron support arbitrary SIV - check! */
     if ((spurious_int_vector & 0xf) != 0xf)
     {
 	if (version() != 0x14)
@@ -319,7 +322,7 @@ INLINE bool local_apic_t<base>::enable(u8_t spurious_int_vector)
     svr.x.focus_processor = 0;
     svr.x.vector = spurious_int_vector;
     write_reg(APIC_SVR, svr.raw);
-    
+
     /* set to flat model -- other models dropped with P4 anyway */
     dest_format_reg_t dest;
     dest.raw = read_reg(APIC_DEST_FORMAT);
@@ -329,17 +332,18 @@ INLINE bool local_apic_t<base>::enable(u8_t spurious_int_vector)
     return true;
 }
 
-template <u64_t base>
+template <word_t base>
 INLINE bool local_apic_t<base>::disable()
 {
     spurious_int_vector_reg_t svr;
     svr.raw = read_reg(APIC_SVR);
+    bool enabled = svr.x.enabled;
     svr.x.enabled = 0;
     write_reg(APIC_SVR, svr.raw);
-    return true;
+    return enabled;
 }
 
-template <u64_t base>
+template <word_t base>
 INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_func)(void))
 {
     //ASSERT(((word_t)startup & ~IA32_PAGE_MASK) == 0);
@@ -349,9 +353,9 @@ INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_fun
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-    // the startup-address of the receiving processor is
-    // 0x000VV000, where VV is sent with the SIPI.
-    reg.x.vector = (((u64_t)startup_func) >> 12) & 0xff;
+	// the startup-address of the receiving processor is
+	// 0x000VV000, where VV is sent with the SIPI.
+    reg.x.vector = ((u32_t)startup_func) >> 12 & 0xff;
     reg.x.delivery_mode = startup;
     reg.x.destination_mode = 0;
     reg.x.destination = 0;
@@ -360,7 +364,7 @@ INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_fun
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
 
-template <u64_t base>
+template <word_t base>
 INLINE void local_apic_t<base>::send_init_ipi(u8_t apic_id, bool assert)
 {
     // destination
@@ -376,7 +380,24 @@ INLINE void local_apic_t<base>::send_init_ipi(u8_t apic_id, bool assert)
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
 
-template <u64_t base>
+template <word_t base>
+INLINE void local_apic_t<base>::send_nmi(u8_t apic_id)
+{
+    // destination
+    write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
+    command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    reg.x.vector = 0;
+    reg.x.delivery_mode = nmi;
+    reg.x.destination_mode = 0;
+    reg.x.destination = 0;
+    reg.x.level = 1;
+    reg.x.trigger_mode = 1;
+    write_reg(APIC_INTR_CMD1, reg.raw);
+}
+
+
+template <word_t base>
 INLINE void local_apic_t<base>::send_ipi(u8_t apic_id, u8_t vector)
 {
     // destination
@@ -387,7 +408,7 @@ INLINE void local_apic_t<base>::send_ipi(u8_t apic_id, u8_t vector)
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
 
-template <u64_t base>
+template <word_t base>
 INLINE void local_apic_t<base>::broadcast_ipi(u8_t vector, bool self)
 {
     command_reg_t reg;
@@ -397,5 +418,4 @@ INLINE void local_apic_t<base>::broadcast_ipi(u8_t vector, bool self)
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
 
-
-#endif /* !__ARCH__AMD64__APIC_H__ */
+#endif /* !__ARCH__X86__APIC_H__ */

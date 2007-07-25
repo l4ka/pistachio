@@ -50,6 +50,7 @@
  *    #include INC_CPU(x.h) includes include/arch/ia32/p4/x.h
  *    #include INC_PLAT(x.h) includes include/platform/pc99/x.h
  *    #include INC_GLUE(x.h) includes include/glue/v4-ia32/x.h
+ *    #include INC_ARCHX(x86,x.h) includes include/arch/x86/x.h
  *
  */
 #define INC_ARCH(x)             <arch/__ARCH__/x>
@@ -60,6 +61,9 @@
 #define INC_GLUE_API_ARCH(x)    <glue/__API__-__ARCH__/x>
 #define INC_GLUE_API_CPU(x)     <glue/__API__-__ARCH__/__CPU__/x>
 #define INC_GLUE_API_PLAT(x)    <glue/__API__-__PLATFORM__/x>
+
+#define INC_ARCHX(x,y)		<arch/x/y>
+
 
 /* use this to place code/data in a certain section */
 #define SECTION(x) __attribute__((section(x)))

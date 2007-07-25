@@ -36,7 +36,6 @@
 
 #include INC_PLAT(acpi.h)
 
-#include INC_ARCH(apic.h)
 #include INC_ARCH(ioport.h)
 #include INC_ARCH(trapgate.h)
 #include INC_GLUE(idt.h)
