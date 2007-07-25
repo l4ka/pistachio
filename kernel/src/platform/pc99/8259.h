@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/8259.h
  * Description:   Driver for i8259 Programmable Interrupt Controller
@@ -32,7 +32,7 @@
 #ifndef __PLATFORM__PC99__8259_H__
 #define __PLATFORM__PC99__8259_H__
 
-#include INC_ARCH(ioport.h)		/* for in_u8/out_u8	*/
+#include INC_ARCHX(x86,ioport.h)	/* for in_u8/out_u8	*/
 
 /**
  * Driver for i8259 PIC

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/platform/simics/io.cc
  * Description:   Simics specific I/O functions
@@ -29,7 +29,7 @@
  * $Id: io.cc,v 1.4 2006/10/19 22:57:38 ud3 Exp $
  *                
  ********************************************************************/
-#include INC_ARCH(ioport.h)
+#include INC_ARCHX(x86,ioport.h)
 
 #include <kdb/kdb.h>
 #include <kdb/init.h>

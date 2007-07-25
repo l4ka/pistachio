@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     platform/simics/nmi.h
  * Description:   Driver for NMI masking hardware
@@ -32,7 +32,7 @@
 #ifndef __PLATFORM__SIMICS__NMI_H__
 #define __PLATFORM__SIMICS__NMI_H__
 
-#include INC_ARCH(ioport.h)		/* for in_u8/out_u8	*/
+#include INC_ARCHX(x86,ioport.h)	/* for in_u8/out_u8	*/
 #include INC_PLAT(rtc.h)		/* for rtc_t		*/
 
 class nmi_t {

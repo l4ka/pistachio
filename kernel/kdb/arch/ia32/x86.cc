@@ -35,7 +35,7 @@
 #include <kdb/input.h>
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(trapgate.h)
-#include INC_ARCH(ioport.h)
+#include INC_ARCHX(x86,ioport.h)
 #include INC_ARCH(sysdesc.h)
 #include INC_ARCH(segdesc.h)
 /* K8 flush filter support  */

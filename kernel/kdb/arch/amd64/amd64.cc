@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     kdb/arch/amd64/amd64.cc
  * Description:   
@@ -39,7 +39,7 @@
 #include INC_ARCH(hwcr.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(cpuid.h)
-#include INC_ARCH(ioport.h)
+#include INC_ARCHX(x86,ioport.h)
 #include INC_ARCH(segdesc.h)
 #include INC_PLAT(nmi.h)
 #include INC_GLUE(idt.h)

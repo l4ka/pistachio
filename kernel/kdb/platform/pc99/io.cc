@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001, 2003-2006,  Karlsruhe University
+ * Copyright (C) 2001, 2003-2007,  Karlsruhe University
  *                
  * File path:     kdb/platform/pc99/io.cc
  * Description:   PC99 specific I/O functions
@@ -30,7 +30,7 @@
  *                
  ********************************************************************/
 #include INC_ARCH(cpu.h)
-#include INC_ARCH(ioport.h)
+#include INC_ARCHX(x86,ioport.h)
 #include INC_API(tcb.h)
 #include <kdb/kdb.h>
 #include <kdb/init.h>
