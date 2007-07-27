@@ -220,7 +220,7 @@ OBJS	=$(patsubst %.cc, %.o, \
 	   $(patsubst %.S, %.o, \
 	    $(patsubst $(SRCDIR)%, $(BUILDDIR)%, $(SOURCES)))))
 
-.INTERMEDIATE: lds.tmp
+#.INTERMEDIATE: lds.tmp
 lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/src/generic/macros.h $(BUILDDIR)/config/config.h
 	@$(CPP) -DASSEMBLY $(PPFLAGS) -P -C $< -o $@
 
@@ -228,6 +228,7 @@ lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/src/generic/macros.h $(BUI
 $(ARCH)-kernel:	$(BUILDDIR)/Makeconf.local $(OBJS) lds.tmp
 	@$(ECHO_MSG) Linking $@
 	$(LD) $(LDFLAGS) -Tlds.tmp -o $@ $(OBJS) $(LIBS)
+	$(RM) lds.tmp
 
 
 # things that must be rebuilt every time should depend on phony
