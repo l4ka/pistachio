@@ -355,7 +355,8 @@ INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_fun
     reg.raw = read_reg(APIC_INTR_CMD1);
 	// the startup-address of the receiving processor is
 	// 0x000VV000, where VV is sent with the SIPI.
-    reg.x.vector = ((u32_t)startup_func) >> 12 & 0xff;
+    word_t startup_vector = (word_t) startup_func;
+    reg.x.vector = ((u32_t)startup_vector) >> 12 & 0xff; ;
     reg.x.delivery_mode = startup;
     reg.x.destination_mode = 0;
     reg.x.destination = 0;
