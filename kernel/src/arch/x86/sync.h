@@ -56,35 +56,13 @@ public: // to allow initializers
 #define DEFINE_SPINLOCK(name) spinlock_t name = {_lock: 0}
 
 
-
-#if defined(CONFIG_IS_32BIT)
 INLINE void spinlock_t::lock(void)
 {
     word_t dummy;
     __asm__ __volatile__ (
         "1:                     \n"
         "   xchg    %1, %2      \n"
-        "   orl     $0, %2      \n"
-        "   jnz     2f          \n"
-        ".section .spinlock     \n"
-        "2:                     \n"
-        "   testb   $1, %1      \n"
-        "   jne     2b          \n"
-        "   jmp     1b          \n"
-        ".previous              \n"
-        : "=r"(dummy)
-        : "m"(this->_lock), "0"(1));
-}
-#endif
-
-#if defined(CONFIG_IS_64BIT)
-INLINE void spinlock_t::lock(void)
-{
-    word_t dummy;
-    __asm__ __volatile__ (
-        "1:                     \n"
-        "   xchg    %1, %2      \n"
-        "   orq     $0, %2      \n"
+        "   or     $0, %2      \n"
         "   jnz     2f          \n"
         ".section .spinlock     \n"
         "2:                     \n"
@@ -95,7 +73,6 @@ INLINE void spinlock_t::lock(void)
         : "=r"(dummy)
         : "m"(this->_lock), "0"(1ULL));
 }
-#endif
 
 
 #endif /* !__ARCH__X86__SYNC_H__ */
