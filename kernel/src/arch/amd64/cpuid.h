@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2005,  Karlsruhe University
+ * Copyright (C) 2003, 2005, 2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/cpuid.h
  * Description:   X86-64 CPUID features 
@@ -237,13 +237,13 @@ INLINE bool amd64_cpu_features_t::has_cpuid() {
 	:
 	"=a" (a), "=b" (b), "=c" (c)
 	:
-	"i" (AMD64_RFL_ID)
+	"i" (X86_FLAGS_ID)
 	:
 	);
 
     // Two successful flips of the CPUID flag indicate CPUID support.
-    return (((a & AMD64_RFL_ID) != (b & AMD64_RFL_ID)) &&
-	    ((b & AMD64_RFL_ID) != (c & AMD64_RFL_ID)));
+    return (((a & X86_FLAGS_ID) != (b & X86_FLAGS_ID)) &&
+	    ((b & X86_FLAGS_ID) != (c & X86_FLAGS_ID)));
 
 }
 

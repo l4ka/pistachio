@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/user.cc
  * Description:   
@@ -364,7 +364,7 @@ IA32_EXC_NO_ERRORCODE(exc_user_syscall, 0)
 			       frame->edx, frame->esi,
 			       frame->edi, frame->ebx,
 			       threadid(frame->ebp), 
-			       frame->eflags & IA32_EFL_ZF,
+			       frame->eflags & X86_FLAGS_ZF,
 			       frame);
     } 
 

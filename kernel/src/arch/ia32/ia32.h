@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2006,  Karlsruhe University
+ * Copyright (C) 2003-2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/ia32.h
  * Description:   IA32 specific constants
@@ -33,6 +33,7 @@
 #ifndef __ARCH__IA32__IA32_H__
 #define __ARCH__IA32__IA32_H__
 
+#include INC_ARCHX(x86,x86.h)
 
 /**********************************************************************
  *    MMU
@@ -100,61 +101,6 @@
 
 
 /**********************************************************************
- *    EFLAGS register bits 
- **********************************************************************/
-
-#define IA32_EFL_CF	(1 <<  0)	/* carry flag			*/
-#define IA32_EFL_PF	(1 <<  2)	/* parity flag			*/
-#define IA32_EFL_AF	(1 <<  4)	/* auxiliary carry flag		*/
-#define IA32_EFL_ZF	(1 <<  6)	/* zero flag			*/
-#define IA32_EFL_SF	(1 <<  7)	/* sign flag			*/
-#define IA32_EFL_TF	(1 <<  8)	/* trap flag			*/
-#define IA32_EFL_IF	(1 <<  9)	/* interrupt enable flag	*/
-#define IA32_EFL_DF	(1 << 10)	/* direction flag		*/
-#define IA32_EFL_OF	(1 << 11)	/* overflow flag		*/
-#define IA32_EFL_NT	(1 << 14)	/* nested task flag		*/
-#define IA32_EFL_RF	(1 << 16)	/* resume flag			*/
-#define IA32_EFL_VM	(1 << 17)	/* virtual 8086 mode		*/
-#define IA32_EFL_AC	(1 << 18)	/* alignement check		*/
-#define IA32_EFL_VIF	(1 << 19)	/* virtual interrupt flag	*/
-#define IA32_EFL_VIP	(1 << 20)	/* virtual interrupt pending	*/
-#define IA32_EFL_ID	(1 << 21)	/* ID flag			*/
-#define IA32_EFL_IOPL(x)	((x & 3) << 12)	/* the IO privilege level field	*/
-
-
-
-/**********************************************************************
- *    control register bits (CR0, CR3, CR4)
- **********************************************************************/
-
-#define IA32_CR0_PE	(1 <<  0)	/* enable protected mode	*/
-#define IA32_CR0_EM	(1 <<  2)	/* disable fpu			*/
-#define IA32_CR0_TS	(1 <<  3)	/* task switched		*/
-#define IA32_CR0_WP	(1 << 16)	/* force write protection on user
-					   read only pages for kernel	*/
-#define IA32_CR0_NW	(1 << 29)	/* not write through		*/
-#define IA32_CR0_CD	(1 << 30)	/* cache disabled		*/
-#define IA32_CR0_PG	(1 << 31)	/* enable paging		*/
-
-#define IA32_CR3_PCD	(1 <<  3)	/* page-level cache disable	*/
-#define IA32_CR3_PWT	(1 <<  4)	/* page-level writes transparent*/
-
-#define IA32_CR4_VME	(1 <<  0)	/* virtual 8086 mode extension	*/
-#define IA32_CR4_PVI	(1 <<  1)	/* enable protected mode
-					   virtual interrupts		*/
-#define IA32_CR4_TSD	(1 <<  2)	/* time stamp disable		*/
-#define IA32_CR4_DE	(1 <<  3)	/* debug extensions		*/
-#define IA32_CR4_PSE	(1 <<  4)	/* page size extension (4MB)	*/
-#define IA32_CR4_PAE	(1 <<  5)	/* physical address extension	*/
-#define IA32_CR4_MCE	(1 <<  6)	/* machine check extensions	*/
-#define IA32_CR4_PGE	(1 <<  7)	/* enable global pages		*/
-#define IA32_CR4_PCE	(1 <<  8)	/* allow user to use rdpmc	*/
-#define IA32_CR4_OSFXSR	(1 <<  9)	/* enable fxsave/fxrstor + sse	*/
-#define IA32_CR4_OSXMMEXCPT (1 << 10)	/* support for unmsk. SIMD exc. */
-
-
-
-/**********************************************************************
  * Model specific register locations.
  **********************************************************************/
 
@@ -203,10 +149,6 @@
 # define IA32_PEBS_UOP_TAG		(1 << 24)
 # define IA32_PEBS_ENABLE_PEBS		(1 << 25)
 #endif /* CONFIG_CPU_IA32_P4 */
-
-#if defined(CONFIG_CPU_IA32_K8)
-# define IA32_HWCR_MSR		        0xC0010015      
-#endif
 
 /* Page Attribute Table (PAT) */
 #if defined(CONFIG_IA32_PAT)

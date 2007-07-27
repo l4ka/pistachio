@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/mmu.h
  * Description: Methods for managing the IA-32 MMU
@@ -68,7 +68,7 @@ INLINE void ia32_mmu_t::flush_tlb(bool global)
 			     "orl	%3, %0		\n"
 			     "movl	%0, %%cr4	\n"
 			     : "=r"(dummy), "=r"(dummy2)
-			     : "i" (~IA32_CR4_PGE), "i" (IA32_CR4_PGE));
+			     : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
 }
 
 /**
@@ -89,7 +89,7 @@ INLINE void ia32_mmu_t::flush_tlbent(u32_t addr)
  */
 INLINE void ia32_mmu_t::enable_super_pages()
 {
-    ia32_cr4_set(IA32_CR4_PSE);
+    ia32_cr4_set(X86_CR4_PSE);
 }
 
 /**
@@ -97,7 +97,7 @@ INLINE void ia32_mmu_t::enable_super_pages()
  */
 INLINE void ia32_mmu_t::enable_global_pages()
 {
-    ia32_cr4_set(IA32_CR4_PGE);
+    ia32_cr4_set(X86_CR4_PGE);
 }
 
 /**
@@ -108,7 +108,7 @@ INLINE void ia32_mmu_t::enable_paged_mode()
     asm("mov %0, %%cr0\n"
 	"nop;nop;nop\n"
 	:
-	: "r"(IA32_CR0_PG | IA32_CR0_WP | IA32_CR0_PE)
+	: "r"(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE)
 	);
 }
 

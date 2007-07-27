@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2006,  Karlsruhe University
+ * Copyright (C) 2004-2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/io_space.cc
  * Description:   IO-Fpage implementation for IA-32
@@ -221,7 +221,7 @@ void init_io_space(void)
 #if defined(CONFIG_IA32_PVI)
     /* Enable PVI Bit */
 #warning Setting PVI bit in CR4 will not work with vmware
-    ia32_cr4_set(IA32_CR4_PVI);
+    ia32_cr4_set(X86_CR4_PVI);
 #endif
     
 

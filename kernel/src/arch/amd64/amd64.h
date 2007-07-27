@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/amd64.h
  * Description:   X86-64 CPU Specific constants
@@ -32,57 +32,14 @@
 #ifndef __ARCH__AMD64__AMD64_H__
 #define __ARCH__AMD64__AMD64_H__
 
-/* RFLAGS register bits */
-#define AMD64_RFL_CF    (1 <<  0)       /* carry flag                   */
-#define AMD64_RFL_PF    (1 <<  2)       /* parity flag                  */
-#define AMD64_RFL_AF    (1 <<  4)       /* auxiliary carry flag         */
-#define AMD64_RFL_ZF    (1 <<  6)       /* zero flag                    */
-#define AMD64_RFL_SF    (1 <<  7)       /* sign flag                    */
-#define AMD64_RFL_TF    (1 <<  8)       /* trap flag                    */
-#define AMD64_RFL_IF    (1 <<  9)       /* interrupt enable flag        */
-#define AMD64_RFL_DF    (1 << 10)       /* direction flag               */
-#define AMD64_RFL_OF    (1 << 11)       /* overflow flag                */
-#define AMD64_RFL_NT    (1 << 14)       /* nested task flag             */
-#define AMD64_RFL_RF    (1 << 16)       /* resume flag                  */
-#define AMD64_RFL_VM    (1 << 17)       /* virtual 8086 mode            */
-#define AMD64_RFL_AC    (1 << 18)       /* alignement check             */
-#define AMD64_RFL_VIF   (1 << 19)       /* virtual interrupt flag       */
-#define AMD64_RFL_VIP   (1 << 20)       /* virtual interrupt pending    */
-#define AMD64_RFL_ID    (1 << 21)       /* CPUID flag                   */
-#define AMD64_RFL_IOPL(x)       ((x & 3) << 12) /* the IO privilege level field */
+#include INC_ARCHX(x86,x86.h)
+
 
 /* exception error code bits */
 #define AMD64_PF_RW	(1 << 1)	/* Pagefault on read/write	*/
 #define AMD64_PF_US	(1 << 2)	/* Pagefault in user/kernel	*/
 #define AMD64_PF_ID	(1 << 4)	/* Pagefault on insn./data	*/
 
-/* control register bits */
-#define AMD64_CR0_PE    (1 <<  0)       /* enable protected mode        */
-#define AMD64_CR0_MP    (1 <<  2)       /* disable emulation            */
-#define AMD64_CR0_EM    (1 <<  2)       /* enable emulation (by #UD)    */
-#define AMD64_CR0_TS    (1 <<  3)       /* task switched                */
-#define AMD64_CR0_WP    (1 << 16)       /* force write protection on user
-                                           read only pages for kernel   */
-#define AMD64_CR0_AM    (1 << 18)       /* alignment mask               */
-#define AMD64_CR0_NW    (1 << 29)       /* not write through            */
-#define AMD64_CR0_CD    (1 << 30)       /* cache disabled               */
-#define AMD64_CR0_PG    (1 << 31)       /* enable paging                */
-
-#define AMD64_CR3_PWT   (1 <<  3)       /* page-level writes transparent*/
-#define AMD64_CR3_PCD   (1 <<  4)       /* page-level cache disable     */
-
-#define AMD64_CR4_VME   (1 <<  0)       /* virtual 8086 mode extension  */
-#define AMD64_CR4_PVI   (1 <<  1)       /* enable protected mode
-                                           virtual interrupts           */
-#define AMD64_CR4_TSD   (1 <<  2)       /* time stamp disable           */
-#define AMD64_CR4_DE    (1 <<  3)       /* debug extensions             */
-#define AMD64_CR4_PSE   (1 <<  4)       /* page size extension (4MB)    */
-#define AMD64_CR4_PAE   (1 <<  5)       /* physical address extension   */
-#define AMD64_CR4_MCE   (1 <<  6)       /* machine check extensions     */
-#define AMD64_CR4_PGE   (1 <<  7)       /* enable global pages          */
-#define AMD64_CR4_PCE   (1 <<  8)       /* allow user to use rdpmc      */
-#define AMD64_CR4_OSFXSR (1 <<  9)      /* enable fxsave/fxrstor + sse  */
-#define AMD64_CR4_OSXMMEXCPT (1 << 10)  /* support for unmsk. SIMD exc. */
 
 /* extended feature register (EFER) bits */
 #define AMD64_EFER_SCE  (1 <<  0)       /* system call extensions       */
@@ -122,9 +79,7 @@
 #define AMD64_FS_MSR                    0xC0000100      /* FS Register */
 #define AMD64_GS_MSR                    0xC0000101      /* GS Register */
 #define AMD64_KRNL_GS_MSR               0xC0000102      /* Kernel GS Swap  */
-
-#define AMD64_HWCR_MSR		        0xC0010015      /* HW configuration MSR */
-
+#define AMD64_HWCR_MSR                  0xC0010015      /* HW configuration MSR */
 #define KERNEL_VERSION_VER              KERNEL_VERSION_CPU_AMD64
 
 #define AMD64_PERFCTR0                  0x0c1

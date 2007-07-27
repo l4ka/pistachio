@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2006,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/exception.cc
  * Description:   exception handling
@@ -463,7 +463,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, IA32_EXC_GENERAL_PROTECTION)
 	 * the reenter-trampoline.
 	 */
 	frame->cs = IA32_KCS;
-	frame->eflags &= ~IA32_EFL_IF;
+	frame->eflags &= ~X86_FLAGS_IF;
 	frame->ecx = (word_t) current->get_user_sp ();
 	frame->eip = (word_t) reenter_sysexit;
 	return;

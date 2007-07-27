@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2005,  Karlsruhe University
+ * Copyright (C) 2003-2005, 2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/mmu.h
  * Description:   X86-64 specific MMU Stuff
@@ -73,7 +73,7 @@ INLINE void amd64_mmu_t::flush_tlb(bool global){
 			     "orq       %3, %0          \n"
 			     "movq      %0, %%cr4       \n"
 			     : "=r"(dummy1), "=r"(dummy2)
-			     : "i" (~AMD64_CR4_PGE), "i" (AMD64_CR4_PGE));
+			     : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
 }
 /**
   * Flushes the TLB entry for a linear address
@@ -90,7 +90,7 @@ INLINE void amd64_mmu_t::flush_tlbent(word_t addr){
  * Enables paged mode for X86_64
  */
 INLINE void amd64_mmu_t::enable_paging(){
-    amd64_cr0_set(AMD64_CR0_PG | AMD64_CR0_WP | AMD64_CR0_PE);
+    amd64_cr0_set(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE);
     asm("jmp penabled; penabled:");
 }
 
@@ -98,7 +98,7 @@ INLINE void amd64_mmu_t::enable_paging(){
  * Disable paged mode for X86_64
  */
 INLINE void amd64_mmu_t::disable_paging(){
-    amd64_cr0_mask(AMD64_CR0_PG);
+    amd64_cr0_mask(X86_CR0_PG);
 }
 
 /**
@@ -106,7 +106,7 @@ INLINE void amd64_mmu_t::disable_paging(){
  * Needed for long and compatibility mode 
  */
 INLINE void amd64_mmu_t::enable_pae_mode(){
-    amd64_cr4_set(AMD64_CR4_PAE);
+    amd64_cr4_set(X86_CR4_PAE);
 }    
 
 /**
@@ -163,7 +163,7 @@ INLINE bool amd64_mmu_t::long_mode_active(){
  * Enables global pages
  */
 INLINE void amd64_mmu_t::enable_global_pages(){
-      amd64_cr4_set(AMD64_CR4_PGE);
+      amd64_cr4_set(X86_CR4_PGE);
 }
 
 /**

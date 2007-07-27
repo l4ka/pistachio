@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/fpu.h
  * Description:   contains x86 specific fpu declarations
@@ -38,14 +38,14 @@ class amd64_fpu_t
 {
 public:
     static void enable()
-	{ amd64_cr0_mask(AMD64_CR0_TS); }
+	{ amd64_cr0_mask(X86_CR0_TS); }
     static void disable()
-	{ amd64_cr0_set(AMD64_CR0_TS); }
+	{ amd64_cr0_set(X86_CR0_TS); }
 
     static void enable_osfxsr()
-	{ amd64_cr4_set(AMD64_CR4_OSFXSR); }
+	{ amd64_cr4_set(X86_CR4_OSFXSR); }
     static void disable_osfxsr()
-	{ amd64_cr4_mask(AMD64_CR4_OSFXSR); }
+	{ amd64_cr4_mask(X86_CR4_OSFXSR); }
 
     static void init()
 	{ __asm__ __volatile__ ("finit\n"); }

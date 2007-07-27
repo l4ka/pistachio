@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/fpu.h
  * Description:   contains x86 specific fpu declarations
@@ -38,14 +38,14 @@ class ia32_fpu_t
 {
 public:
     static void enable()
-	{ ia32_cr0_mask(IA32_CR0_TS); }
+	{ ia32_cr0_mask(X86_CR0_TS); }
     static void disable()
-	{ ia32_cr0_set(IA32_CR0_TS); }
+	{ ia32_cr0_set(X86_CR0_TS); }
 
     static void enable_osfxsr()
-	{ ia32_cr4_set(IA32_CR4_OSFXSR); }
+	{ ia32_cr4_set(X86_CR4_OSFXSR); }
     static void disable_osfxsr()
-	{ ia32_cr4_mask(IA32_CR4_OSFXSR); }
+	{ ia32_cr4_mask(X86_CR4_OSFXSR); }
 
     static void init()
 	{ __asm__ __volatile__ ("finit\n"); }

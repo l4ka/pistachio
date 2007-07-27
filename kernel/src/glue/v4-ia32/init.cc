@@ -348,7 +348,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
 #endif
     
     /* Allow performance counters for users */
-    ia32_cr4_set(IA32_CR4_PCE);  
+    ia32_cr4_set(X86_CR4_PCE);  
 #endif /* defined(CONFIG_PERFMON) */
 
     /* initialize the CPU specific mappings */

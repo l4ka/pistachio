@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2006,  Karlsruhe University
+ * Copyright (C) 2003-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/syscalls.cc
  * Description:   syscall dispatcher
@@ -74,7 +74,7 @@ extern "C" amd64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
 	dest.set_raw(arg6);
 	threadid_t pager;
 	pager.set_raw(arg1);
-	sys_exchange_registers(dest, arg2, arg3, arg4, arg5, arg7, pager, ufl & AMD64_RFL_ZF);
+	sys_exchange_registers(dest, arg2, arg3, arg4, arg5, arg7, pager, ufl & X86_FLAGS_ZF);
 
     }
     else if (syscall == user_thread_control)

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/cpu.h
  * Description:   IA32 helper functions to access special registers
@@ -52,9 +52,9 @@ INLINE bool ia32_has_cpuid()
         // Move EFLAGS image to register for inspection
 	"pop     %0             \n"
 	: "=a" (eflags)
-	: "i" (IA32_EFL_ID)
+	: "i" (X86_FLAGS_ID)
 	);
-    return (eflags & IA32_EFL_ID);
+    return (eflags & X86_FLAGS_ID);
 }
 
 INLINE void ia32_cpuid(word_t index,

@@ -440,7 +440,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
     
      /* Allow performance counters for users */
     TRACE_INIT("Enabling performance monitoring at user level (CPU %d)\n", cpuid);
-    amd64_cr4_set(AMD64_CR4_PCE);  
+    amd64_cr4_set(X86_CR4_PCE);  
 #endif /* defined(CONFIG_PERFMON) */
 
     TRACE_INIT("Enabling global pages (CPU %d)\n", cpuid);

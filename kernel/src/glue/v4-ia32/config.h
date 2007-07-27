@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/config.h
  * Description:   configuration of IA32 architecture
@@ -175,14 +175,14 @@
 
 /* user mode e-flags */
 #if defined(CONFIG_IA32_PVI)
-#define IA32_USER_FLAGS		(IA32_EFL_IOPL(0) | IA32_EFL_IF | IA32_EFL_VIF | 2)
-#define IA32_USER_FLAGMASK	(IA32_EFL_CF | IA32_EFL_PF | IA32_EFL_AF | IA32_EFL_ZF | IA32_EFL_SF | IA32_EFL_OF| IA32_EFL_VIF | IA32_EFL_VIP)
+#define IA32_USER_FLAGS		(X86_FLAGS_IOPL(0) | X86_FLAGS_IF | X86_FLAGS_VIF | 2)
+#define IA32_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF| X86_FLAGS_VIF | X86_FLAGS_VIP)
 #elif defined(CONFIG_IO_FLEXPAGES)
-#define IA32_USER_FLAGS		(IA32_EFL_IOPL(0) | IA32_EFL_IF | 2)
-#define IA32_USER_FLAGMASK	(IA32_EFL_CF | IA32_EFL_PF | IA32_EFL_AF | IA32_EFL_ZF | IA32_EFL_SF | IA32_EFL_OF)
+#define IA32_USER_FLAGS		(X86_FLAGS_IOPL(0) | X86_FLAGS_IF | 2)
+#define IA32_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
 #else
-#define IA32_USER_FLAGS		(IA32_EFL_IOPL(3) | IA32_EFL_IF | 2)
-#define IA32_USER_FLAGMASK	(IA32_EFL_CF | IA32_EFL_PF | IA32_EFL_AF | IA32_EFL_ZF | IA32_EFL_SF | IA32_EFL_OF)
+#define IA32_USER_FLAGS		(X86_FLAGS_IOPL(3) | X86_FLAGS_IF | 2)
+#define IA32_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
 #endif
 
 
