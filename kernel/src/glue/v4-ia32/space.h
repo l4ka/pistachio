@@ -442,7 +442,7 @@ INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)
 INLINE void space_t::flush_tlb (space_t * curspace)
 {
     if (this == curspace || IS_SPACE_SMALL (this))
-	ia32_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
+	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
 }
 
 /**
@@ -453,7 +453,7 @@ INLINE void space_t::flush_tlbent (space_t * curspace, addr_t addr,
 				   word_t log2size)
 {
     if (this == curspace || IS_SPACE_SMALL (this))
-	ia32_mmu_t::flush_tlbent ((u32_t) addr);
+	x86_mmu_t::flush_tlbent ((u32_t) addr);
 }
 
 /**

@@ -444,7 +444,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
 #endif /* defined(CONFIG_PERFMON) */
 
     TRACE_INIT("Enabling global pages (CPU %d)\n", cpuid);
-    amd64_mmu_t::enable_global_pages();    
+    x86_mmu_t::enable_global_pages();    
 
 #if defined(CONFIG_FLUSHFILTER)
     TRACE_INIT("Enabling flush filter (CPU %d)\n", cpuid);
@@ -700,7 +700,7 @@ static void smp_bp_commence()
 void startup_processor()
 {
     TRACE_INIT("AP processor is alive\n");    
-    amd64_mmu_t::set_active_pml4((word_t)get_kernel_space()->get_pml4());
+    x86_mmu_t::set_active_pagetable((word_t)get_kernel_space()->get_pml4());
     TRACE_INIT("AP switched to kernel ptab\n");
 
     /* first thing -- check CPU features */

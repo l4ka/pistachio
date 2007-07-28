@@ -38,7 +38,7 @@
 #include INC_API(space.h)
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_GLUE(memory.h)
 
@@ -263,7 +263,7 @@ void space_t::allocate_tcb(addr_t addr)
     addr_t page = kmem.alloc(kmem_tcb, AMD64_4KPAGE_SIZE);
     ASSERT(page);
     
-    amd64_mmu_t::flush_tlbent((word_t) addr);
+    x86_mmu_t::flush_tlbent((word_t) addr);
     kernel_space->add_mapping(addr, virt_to_phys(page), pgent_t::size_4k, true, true, true);
     sync_kernel_space(addr);    
 }
@@ -589,10 +589,10 @@ void space_t::init_cpu_mappings(cpuid_t cpu)
     }
 
     TRACE_INIT("switching to CPU local pagetable %p\n", get_pml4(cpu));
-    amd64_mmu_t::set_active_pml4((word_t)get_pml4(cpu));
-    amd64_mmu_t::flush_tlb(true);
+    x86_mmu_t::set_active_pagetable((word_t)get_pml4(cpu));
+    x86_mmu_t::flush_tlb(true);
     TRACE_INIT("cpu pagetable activated (%x)\n",
-	       amd64_mmu_t::get_active_pml4());
+	       x86_mmu_t::get_active_pagetable());
     
 
 
@@ -614,7 +614,7 @@ void SECTION(".init.memory") init_kernel_space()
     ASSERT(utcb_page);
 
     kernel_space->init_kernel_mappings();
-    amd64_mmu_t::set_active_pml4((u64_t) kernel_space->get_pml4(0));
+    x86_mmu_t::set_active_pagetable((u64_t) kernel_space->get_pml4(0));
     __asm__ __volatile__("addq %0, %%rsp" :: "i" (KERNEL_OFFSET));
 }
 
@@ -722,7 +722,7 @@ void space_t::arch_free (void)
 AMD64_EXC_WITH_ERRORCODE(exc_pagefault, 0)
 {
 
-    u64_t pf = amd64_mmu_t::get_pagefault_address();
+    u64_t pf = x86_mmu_t::get_pagefault_address();
 
     //TRACE("pagefault @ %p, ip=%p, sp=%p, a=%x, k=%s\n",
     // pf, frame->rip, frame->rsp, 
@@ -738,7 +738,7 @@ AMD64_EXC_WITH_ERRORCODE(exc_pagefault, 0)
      */
     if (EXPECT_FALSE(space == NULL))
     {
-        space = pml4_to_space(amd64_mmu_t::get_active_pml4(),
+        space = pml4_to_space(x86_mmu_t::get_active_pagetable(),
                               get_current_cpu());
     }
     
@@ -767,7 +767,7 @@ static word_t cpu_remote_flush_global UNIT("amd64.cpulocal");
 static void do_xcpu_flush_tlb( cpu_mb_entry_t * entry )
 {
     spin(60, get_current_cpu());
-    amd64_mmu_t::flush_tlb(__FLUSH_GLOBAL__);
+    x86_mmu_t::flush_tlb(__FLUSH_GLOBAL__);
 }
 
 INLINE void tag_flush_remote( space_t * curspace )
@@ -784,14 +784,14 @@ INLINE void tag_flush_remote( space_t * curspace )
 void space_t::flush_tlb( space_t * curspace )
 {
     if ( this == curspace )
-	amd64_mmu_t::flush_tlb(__FLUSH_GLOBAL__); // global entries are not flushed
+	x86_mmu_t::flush_tlb(__FLUSH_GLOBAL__); // global entries are not flushed
     tag_flush_remote(this);
 }
 
 void space_t::flush_tlbent( space_t * curspace, addr_t addr, word_t log2size )
 {
     if ( this == curspace )
-	amd64_mmu_t::flush_tlbent((u64_t)addr);
+	x86_mmu_t::flush_tlbent((u64_t)addr);
     tag_flush_remote(this);
 }
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2006,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/space.cc
  * Description:   address space management
@@ -37,7 +37,7 @@
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
 
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 #include <linear_ptab.h>
@@ -154,7 +154,7 @@ word_t space_t::readmem_phys (addr_t paddr)
     int cpu = get_current_cpu();
 
     // get the _real_ space, use CR3 for that
-    space_t * space = ptab_to_space(ia32_mmu_t::get_active_pagetable(), cpu);
+    space_t * space = ptab_to_space(x86_mmu_t::get_active_pagetable(), cpu);
 
 #if defined(CONFIG_IA32_PSE)
     // map physical 4MB page into remap window
@@ -167,7 +167,7 @@ word_t space_t::readmem_phys (addr_t paddr)
 	     ia32_pgent_t::size_4m, 
 	     IA32_PAGE_KERNEL | IA32_PAGE_VALID);
 	// kill potentially stale TLB entry in remap-window
-	ia32_mmu_t::flush_tlbent (MEMREAD_AREA_START);
+	x86_mmu_t::flush_tlbent (MEMREAD_AREA_START);
 #if 0
 	printf("readmem_phys: space=%p, mapped %p @ %p\n", 
 	       space, space->x[cpu].readmem_area.get_raw(), 
@@ -189,7 +189,7 @@ word_t space_t::readmem_phys (addr_t paddr)
     pgent->set_entry(space, pgent_t::size_4k, paddr, true, false, false, true); 
 
     // kill potentially stale TLB entry in remap-window
-    ia32_mmu_t::flush_tlbent(
+    x86_mmu_t::flush_tlbent(
 	(word_t)addr_offset(addr_mask(paddr, page_mask (pgent_t::size_4m)),
 	    MEMREAD_AREA_START));
 
@@ -228,7 +228,7 @@ addr_t acpi_remap(addr_t addr)
 	addr_mask (paddr, ~page_mask (ACPI_PGENTSZ)),
 	ACPI_PGENTSZ, true, true, false);
     
-    ia32_mmu_t::flush_tlb();
+    x86_mmu_t::flush_tlb();
     
         
     return addr_offset(addr_mask(addr, page_mask (ACPI_PGENTSZ)), 
@@ -262,7 +262,7 @@ active_cpu_space_t active_cpu_space;
 static void do_xcpu_flush_tlb(cpu_mb_entry_t * entry)
 {
     spin(60, get_current_cpu());
-    ia32_mmu_t::flush_tlb (__FLUSH_GLOBAL__);
+    x86_mmu_t::flush_tlb (__FLUSH_GLOBAL__);
 }
 
 INLINE void tag_flush_remote (space_t * curspace)
@@ -297,14 +297,14 @@ INLINE void tag_flush_remote (space_t * curspace)
 void space_t::flush_tlb (space_t * curspace)
 {
     if (this == curspace || IS_SPACE_SMALL (this))
-	ia32_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
+	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
     tag_flush_remote (this);
 }
 
 void space_t::flush_tlbent (space_t * curspace, addr_t addr, word_t log2size)
 {
     if (this == curspace || IS_SPACE_SMALL (this))
-	ia32_mmu_t::flush_tlbent ((u32_t) addr);
+	x86_mmu_t::flush_tlbent ((u32_t) addr);
     tag_flush_remote (this);
 }
 
@@ -473,10 +473,10 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
 	size++;
     }
     TRACE_INIT("switching to CPU local pagetable %p\n", get_pdir(cpu));
-    ia32_mmu_t::set_active_pagetable((u32_t)get_pdir(cpu));
-    ia32_mmu_t::flush_tlb(true);
+    x86_mmu_t::set_active_pagetable((u32_t)get_pdir(cpu));
+    x86_mmu_t::flush_tlb(true);
     TRACE_INIT("cpu pagetable activated (%x)\n", 
-	       ia32_mmu_t::get_active_pagetable());
+	       x86_mmu_t::get_active_pagetable());
 #endif
 }
 
@@ -488,7 +488,7 @@ void SECTION(".init.memory") init_kernel_space()
     ASSERT(kernel_space);
 
     kernel_space->init_kernel_mappings();
-    ia32_mmu_t::set_active_pagetable((u32_t)kernel_space->get_pdir(0));
+    x86_mmu_t::set_active_pagetable((u32_t)kernel_space->get_pdir(0));
 }
 
 /**********************************************************************
@@ -753,7 +753,7 @@ void space_t::allocate_tcb(addr_t addr)
     //TRACEF("tcb=%p, page=%p\n", addr, page);
 
     // map tcb kernel-writable, global 
-    ia32_mmu_t::flush_tlbent ((word_t)addr);
+    x86_mmu_t::flush_tlbent ((word_t)addr);
     kernel_space->add_mapping(addr, virt_to_phys(page), PGSIZE_KTCB, 
 			      true, true, true);
     sync_kernel_space(addr);
@@ -829,7 +829,7 @@ void space_t::map_sigma0(addr_t addr)
  */
 IA32_EXC_WITH_ERRORCODE(exc_pagefault, 0)
 {
-    u32_t pf = ia32_mmu_t::get_pagefault_address();
+    u32_t pf = x86_mmu_t::get_pagefault_address();
     //TRACEF("pagefault @ %p, ip=%p, sp=%p\n", pf, frame->eip, frame->esp);
 
     space_t * space = get_current_space();
@@ -865,7 +865,7 @@ IA32_EXC_WITH_ERRORCODE(exc_pagefault, 0)
      * so we use CR3 to figure out the space
      */
     if (EXPECT_FALSE( space == NULL ))
-	space = ptab_to_space(ia32_mmu_t::get_active_pagetable(), 
+	space = ptab_to_space(x86_mmu_t::get_active_pagetable(), 
 			      get_current_cpu());
 
     space->handle_pagefault(

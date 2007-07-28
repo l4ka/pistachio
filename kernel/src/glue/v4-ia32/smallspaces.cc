@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/smallspaces.cc
  * Description:   Handling of small address spaces
@@ -130,7 +130,7 @@ static void modify_global_bits (space_t * space, pgent_t * pg,
 #if defined(CONFIG_SMP)
 static void do_xcpu_flush_tlb (cpu_mb_entry_t * entry)
 {
-    ia32_mmu_t::flush_tlb (FLUSH_GLOBAL);
+    x86_mmu_t::flush_tlb (FLUSH_GLOBAL);
 }
 #endif /* CONFIG_SMP */
 
@@ -304,11 +304,11 @@ void space_t::make_large (void)
 	reload_user_segregs ();
 
 	// Make sure that we run on our own page table.
-	ia32_mmu_t::set_active_pagetable
+	x86_mmu_t::set_active_pagetable
 	    ((u32_t) get_pdir (get_current_tcb ()->get_cpu ()));
 
 	// Make sure that there are no stale TLB entries.
-	ia32_mmu_t::flush_tlb (FLUSH_GLOBAL);
+	x86_mmu_t::flush_tlb (FLUSH_GLOBAL);
 
 	// Inform thread switch code that we run in a large space.
 	__is_small = 0;
@@ -412,7 +412,7 @@ bool space_t::sync_smallspace (addr_t faddr)
 
     // Get space which fault occured in.
     space_t * fspace = (space_t *)
-	phys_to_virt (ia32_mmu_t::get_active_pagetable ());
+	phys_to_virt (x86_mmu_t::get_active_pagetable ());
 
     // Calculate real fault address.
     addr_t addr = addr_offset (faddr, 0 - smallspace_offset ());

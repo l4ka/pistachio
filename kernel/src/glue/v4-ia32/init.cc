@@ -41,7 +41,7 @@
 #include INC_ARCH(cpu.h)
 
 /* pagetable and mmu management */
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 #include INC_ARCH(ptab.h)
 
 /* idt, tss, gdt etc. */
@@ -714,7 +714,7 @@ static void smp_bp_commence()
 extern "C" void SECTION(SEC_INIT) startup_processor()
 {
     TRACE_INIT("AP processor is alive\n");
-    ia32_mmu_t::set_active_pagetable((u32_t)get_kernel_space()->get_pdir());
+    x86_mmu_t::set_active_pagetable((u32_t)get_kernel_space()->get_pdir());
     TRACE_INIT("AP switched to kernel ptab\n");
 
     // first thing -- check CPU features
@@ -772,12 +772,12 @@ extern "C" void SECTION(SEC_INIT) init_paging()
 
     /* now activate the startup pagetable */
 #if defined(CONFIG_IA32_PSE)
-    ia32_mmu_t::enable_super_pages();
+    x86_mmu_t::enable_super_pages();
 #endif
 #ifdef CONFIG_IA32_PGE
-    ia32_mmu_t::enable_global_pages();
+    x86_mmu_t::enable_global_pages();
 #endif
-    ia32_mmu_t::set_active_pagetable((u32_t)init_pdir);
-    ia32_mmu_t::enable_paged_mode();
+    x86_mmu_t::set_active_pagetable((u32_t)init_pdir);
+    x86_mmu_t::enable_paging();
 }
 

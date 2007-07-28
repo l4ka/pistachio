@@ -89,8 +89,8 @@ void thread_resources_t::load(tcb_t * tcb)
 	u32_t new_pdir = (u32_t)
 	    partner->get_space ()->get_pdir (partner->get_cpu ());
 
-	if (ia32_mmu_t::get_active_pagetable () != new_pdir)
-	    ia32_mmu_t::set_active_pagetable (new_pdir);
+	if (x86_mmu_t::get_active_pagetable () != new_pdir)
+	    x86_mmu_t::set_active_pagetable (new_pdir);
     }
 #endif
 

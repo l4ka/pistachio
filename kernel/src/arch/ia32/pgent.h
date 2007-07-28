@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/pgent.h
  * Description:   Generic page table manipluation for IA-32
@@ -37,7 +37,7 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(hwspace.h)
 #include INC_ARCH(ptab.h)
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 
 #define HW_PGSHIFTS		{ 12, 22, 32 }
 #if defined(CONFIG_IA32_PSE)

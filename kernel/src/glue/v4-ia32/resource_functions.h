@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/resource_functions.h
  * Description:   Functions for handling the ia32 specific resources
@@ -94,8 +94,8 @@ INLINE void thread_resources_t::enable_copy_area (tcb_t * tcb,
 
 	u32_t new_pdir = (u32_t)
 	    partner->get_space ()->get_pdir (partner->get_cpu ());
-	if (ia32_mmu_t::get_active_pagetable () != new_pdir)
-	    ia32_mmu_t::set_active_pagetable (new_pdir);
+	if (x86_mmu_t::get_active_pagetable () != new_pdir)
+	    x86_mmu_t::set_active_pagetable (new_pdir);
 	tcb->resource_bits += IPC_PAGE_TABLE;
 	return;
     }
@@ -126,7 +126,7 @@ INLINE void thread_resources_t::enable_copy_area (tcb_t * tcb,
     // If we are overwriting a copy area we need to flush the old TLB
     // entries.
     if (flush)
-	ia32_mmu_t::flush_tlb (IS_SPACE_GLOBAL (partner->get_space ()));
+	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (partner->get_space ()));
     tcb->resource_bits += COPY_AREA;
 
     *daddr = addr_offset (copy_area_address (n),
@@ -159,7 +159,7 @@ INLINE void thread_resources_t::release_copy_area (tcb_t * tcb,
 	// Flush TLB to get rid of copy area TLB entries.  This can be
 	// optimized away if we know that we're going to switch to
 	// another address space (i.e., implicitly flush the TLB).
-	ia32_mmu_t::flush_tlb
+	x86_mmu_t::flush_tlb
 	    (IS_SPACE_GLOBAL (tcb->get_partner_tcb ()->get_space ()));
 
 	if (disable_copyarea)

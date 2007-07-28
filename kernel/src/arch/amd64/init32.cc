@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/init32.cc
  * Description:   Switch to 64bit long mode
@@ -36,7 +36,7 @@
 #include <init.h>
 
 #include INC_ARCH(cpu.h)
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 #include INC_ARCH(pagebits.h)
 #include INC_ARCH(segdesc.h)
 #include INC_ARCH(descreg.h)
@@ -171,7 +171,7 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
      * spin(x) signalizes error at character position x
      */ 
 	
-    if (!amd64_mmu_t::has_long_mode())
+    if (!x86_mmu_t::has_long_mode())
 	init32_spin(1);
 
 
@@ -219,22 +219,22 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
 
 
     /* Disable Paging (Vol. 2, 14.6.1) */
-    amd64_mmu_t::disable_paging();
+    x86_mmu_t::disable_paging();
 	 
     /* Enable PAE mode - required before  long mode */
-    amd64_mmu_t::enable_pae_mode();
+    x86_mmu_t::enable_pae_mode();
      
     /* Enable long mode (not active unless paging is enabled) */
-    amd64_mmu_t::enable_long_mode();
+    x86_mmu_t::enable_long_mode();
 	 
     /* Set pagemap base pointer (CR3) */
-    amd64_mmu_t::set_active_pml4((u64_t) ((u32_t)init_pml4));
+    x86_mmu_t::set_active_pagetable((u64_t) ((u32_t)init_pml4));
 	 
     /* Enable paged mode */
-    amd64_mmu_t::enable_paging();
+    x86_mmu_t::enable_paging();
 	 
     /* Success ?  */
-    if (!(amd64_mmu_t::long_mode_active()))
+    if (!(x86_mmu_t::long_mode_active()))
 	init32_spin(3);
 	 
     /* Set up temporary GDT (true long mode needs 64bit Code Segment) */

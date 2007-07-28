@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/resource_functions.h
  * Description:   Functions for handling the ia32 specific resources
@@ -105,7 +105,7 @@ INLINE void thread_resources_t::enable_copy_area (tcb_t * tcb,
      // If we are overwriting a copy area we need to flush the old TLB 
      // entries. 
      if (flush) 
-	 amd64_mmu_t::flush_tlb (false); 
+	 x86_mmu_t::flush_tlb (false); 
 
      tcb->resource_bits += COPY_AREA;
      
@@ -132,7 +132,7 @@ INLINE void thread_resources_t::release_copy_area (tcb_t * tcb,
 	// Flush TLB to get rid of copy area TLB entries.  This can be
 	// optimized away if we know that we're going to switch to
 	// another address space (i.e., implicitly flush the TLB).
-	amd64_mmu_t::flush_tlb (false);
+	x86_mmu_t::flush_tlb (false);
 
  	if (disable_copyarea) {
 	    tcb->resource_bits -= COPY_AREA;

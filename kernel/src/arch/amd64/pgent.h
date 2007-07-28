@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/pgent.h
  * Description:   Generic page table manipluation for X86-64
@@ -37,7 +37,7 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(hwspace.h)
 #include INC_ARCH(ptab.h)
-#include INC_ARCH(mmu.h)
+#include INC_ARCHX(x86,mmu.h)
 
 #define HW_PGSHIFTS             { 12, 21, 30, 39, 48, 64 }
 #define HW_VALID_PGSIZES        ((1 << 12) | (1 << 21))

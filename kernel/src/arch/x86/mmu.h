@@ -2,8 +2,8 @@
  *                
  * Copyright (C) 2003-2005, 2007,  Karlsruhe University
  *                
- * File path:     arch/amd64/mmu.h
- * Description:   X86-64 specific MMU Stuff
+ * File path:     arch/x86/mmu.h
+ * Description:   X86 specific MMU Stuff
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,28 +26,35 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: mmu.h,v 1.4 2005/04/21 15:57:00 stoess Exp $
+ * $Id$
  *                
  ********************************************************************/
-#ifndef __ARCH__AMD64__MMU_H__
-#define __ARCH__AMD64__MMU_H__
+#ifndef __ARCH__X86__MMU_H__
+#define __ARCH__X86__MMU_H__
 
-#include INC_ARCH(cpu.h)
-#include INC_ARCH(cpuid.h)
+#include INC_ARCHX(x86,cpu.h)
+#if defined(CONFIG_IS_64BIT)
+# include INC_ARCH(cpuid.h)
+#endif
 
-class amd64_mmu_t{
+class x86_mmu_t
+{
 public:
     static void flush_tlb(bool global = false);
     static void flush_tlbent(word_t addr);
     static void enable_paging();
     static void disable_paging();
     static void enable_pae_mode();
+#if defined(CONFIG_IS_64BIT)
     static bool has_long_mode();
     static void enable_long_mode();
     static bool long_mode_active();
+#endif
     static void enable_global_pages();
-    static word_t get_active_pml4(void);
-    static void set_active_pml4(word_t addr);
+    static void enable_super_pages();
+
+    static word_t get_active_pagetable(void);
+    static void set_active_pagetable(word_t addr);
     static word_t get_pagefault_address(void);
 };
 
@@ -56,83 +63,98 @@ public:
  *
  * @param global        specifies whether global TLB entries are also flushed
  */
-INLINE void amd64_mmu_t::flush_tlb(bool global){
-    
+INLINE void x86_mmu_t::flush_tlb(bool global)
+{
     word_t dummy1, dummy2;
-    
+
     if (!global)
-	__asm__ __volatile__("movq %%cr3, %0\n\t"
-			     "movq %0, %%cr3\n\t"
-			     : "=r" (dummy1));
+    {
+        __asm__ __volatile__(
+                "mov    %%cr3, %0   \n\t"
+                "mov    %0, %%cr3   \n\t"
+                : "=r" (dummy1));
+    }
     else
-	__asm__ __volatile__("movq      %%cr4, %0       \n"
-			     "andq      %2, %0          \n"
-			     "movq      %0, %%cr4       \n"
-			     "movq      %%cr3, %1       \n"
-			     "movq      %1, %%cr3       \n"
-			     "orq       %3, %0          \n"
-			     "movq      %0, %%cr4       \n"
-			     : "=r"(dummy1), "=r"(dummy2)
-			     : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
+    {
+        __asm__ __volatile__(
+                "mov    %%cr4, %0       \n"
+                "and    %2, %0          \n"
+                "mov    %0, %%cr4       \n"
+                "mov    %%cr3, %1       \n"
+                "mov    %1, %%cr3       \n"
+                "or     %3, %0          \n"
+                "mov    %0, %%cr4       \n"
+                : "=r"(dummy1), "=r"(dummy2)
+                : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
+    }
 }
+
+
 /**
   * Flushes the TLB entry for a linear address
   *
   * @param addr  linear address
-  */	
-INLINE void amd64_mmu_t::flush_tlbent(word_t addr){
-    __asm__ __volatile__ ("invlpg (%0)  \n"
-			  :
-			  :"r" (addr));
+  */    
+INLINE void x86_mmu_t::flush_tlbent(word_t addr)
+{
+    __asm__ __volatile__ (
+            "invlpg (%0)  \n"
+            :
+            :"r" (addr));
 }
 
+
 /**
- * Enables paged mode for X86_64
+ * Enables paged mode for X86
  */
-INLINE void amd64_mmu_t::enable_paging(){
+INLINE void x86_mmu_t::enable_paging()
+{
     x86_cr0_set(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE);
-    asm("jmp penabled; penabled:");
+    __asm__ __volatile__ ("jmp penabled; penabled:");
 }
 
+
 /**
- * Disable paged mode for X86_64
+ * Disable paged mode for X86
  */
-INLINE void amd64_mmu_t::disable_paging(){
+INLINE void x86_mmu_t::disable_paging()
+{
     x86_cr0_mask(X86_CR0_PG);
 }
+
 
 /**
  * Enables physical address extensions
  * Needed for long and compatibility mode 
  */
-INLINE void amd64_mmu_t::enable_pae_mode(){
+INLINE void x86_mmu_t::enable_pae_mode()
+{
     x86_cr4_set(X86_CR4_PAE);
 }    
 
+
+#if defined(CONFIG_IS_64BIT)
 /**
  * Checks if CPU has long mode
  *       
  */
-
-INLINE bool amd64_mmu_t::has_long_mode(){
-    
+INLINE bool x86_mmu_t::has_long_mode()
+{
     if (!(amd64_cpu_features_t::has_cpuid()))
-	return false;
+        return false;
     
     u32_t features, lfn, dummy;
     
     amd64_cpu_features_t::cpuid(CPUID_MAX_EXT_FN_NR, &lfn, &dummy, &dummy, &dummy);
     
     if (lfn < CPUID_AMD_FEATURES) 
-	return false;
+        return false;
     
     amd64_cpu_features_t::cpuid(CPUID_AMD_FEATURES, &dummy, &dummy, &dummy, &features);
     
     return (features & CPUID_AMD_HAS_LONGMODE);
-    
 }
 
-    
 
 /**
  * Enables long mode
@@ -140,46 +162,58 @@ INLINE bool amd64_mmu_t::has_long_mode(){
  *       'cause physical address extensions have to be enabled, too
  *       
  */
-INLINE void amd64_mmu_t::enable_long_mode(){
-
+INLINE void x86_mmu_t::enable_long_mode()
+{
     word_t efer = x86_rdmsr(AMD64_EFER_MSR);
     efer |= AMD64_EFER_LME;
     x86_wrmsr(AMD64_EFER_MSR, efer);
-    
 }
+
 
 /**
  * Checks if long mode is active
  *       
  */
-INLINE bool amd64_mmu_t::long_mode_active(){
-
+INLINE bool x86_mmu_t::long_mode_active()
+{
     word_t efer = x86_rdmsr(AMD64_EFER_MSR);
     return (efer & AMD64_EFER_LMA);
-    
 }
+#endif /* defined(CONFIG_IS_64BIT) */
+
 
 /**
  * Enables global pages
  */
-INLINE void amd64_mmu_t::enable_global_pages(){
+INLINE void x86_mmu_t::enable_global_pages()
+{
       x86_cr4_set(X86_CR4_PGE);
 }
+
+
+/**
+ * Enable super pages
+ */
+INLINE void x86_mmu_t::enable_super_pages(void)
+{
+    x86_cr4_set(X86_CR4_PSE);
+}
+
 
 /**
  * Get active page map
  * Note: We can safely call this function in 32bit code, as 
  * the instruction are encoded identically   
  */
-INLINE word_t amd64_mmu_t::get_active_pml4(void){
-    
+INLINE word_t x86_mmu_t::get_active_pagetable(void)
+{
     word_t pgm;
     
-    asm volatile ("mov %%cr3, %0\n" :"=a" (pgm));
+    __asm__ __volatile__ ("mov %%cr3, %0\n" :"=a" (pgm));
     
     return pgm;
-    
 }
+
 
 /**
  * Set active page map
@@ -189,23 +223,25 @@ INLINE word_t amd64_mmu_t::get_active_pml4(void){
  * as sizeof(word_t) = 32! 
  * 
  */
-
-INLINE void amd64_mmu_t::set_active_pml4(word_t pml4){
-   asm volatile ("mov %0, %%cr3\n"
-		 :
-		 : "r"(pml4));
+INLINE void x86_mmu_t::set_active_pagetable(word_t root)
+{
+   __asm__ __volatile__ ("mov %0, %%cr3 \n"
+                        :
+                        : "r"(root));
 }  
+
 
 /**
  * Get pagefault address
  */
-
-INLINE word_t amd64_mmu_t::get_pagefault_address(void) {
-
+INLINE word_t x86_mmu_t::get_pagefault_address(void)
+{
     register word_t tmp;
-    asm ("movq  %%cr2, %0\n"
-	 :"=r" (tmp));
+
+    __asm__ ("mov   %%cr2, %0   \n"
+            :"=r" (tmp));
     
     return tmp;
 }
-#endif /* !__ARCH__AMD64__MMU_H__ */
+
+#endif /* !__ARCH__X86__MMU_H__ */
