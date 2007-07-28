@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-amd64/prepost.cc
  * Description:   X86-64 specific handlers for KDB entry and exit
@@ -38,7 +38,7 @@
 #include <linear_ptab.h>
 #include INC_API(tcb.h)
 
-#include INC_ARCH(traps.h)	/* for X86-64 exception numbers	*/
+#include INC_ARCHX(x86,traps.h)	/* for exception numbers	*/
 #include INC_ARCH(trapgate.h)	/* for amd64_exceptionframe_t	*/
 #include INC_PLAT(nmi.h)	/* for nmi_t			*/
 
@@ -56,7 +56,7 @@ bool kdb_t::pre()
 
     switch (f->reason)
     {
-    case AMD64_EXC_DEBUG:	/* single step, hw breakpoints */
+    case X86_EXC_DEBUG:	/* single step, hw breakpoints */
 	printf("--- Breakpoint ---\n");
 	printf("Addr=%16x, Dumping frame:\n", f->rip);
 	printf("\tRAX %16x", f->rax);
@@ -98,11 +98,11 @@ bool kdb_t::pre()
 	break;
 
 
-    case AMD64_EXC_NMI:		/* well, the name says enough	*/
+    case X86_EXC_NMI:		/* well, the name says enough	*/
 	printf("--- NMI ---\n");
 	break;
 	
-    case AMD64_EXC_BREAKPOINT: /* int3 */
+    case X86_EXC_BREAKPOINT: /* int3 */
     {
 	unsigned char c;
 	if (! readmem(space, addr, &c) )
@@ -196,13 +196,13 @@ void kdb_t::post()
     amd64_exceptionframe_t* f = (amd64_exceptionframe_t*) kdb_param;
     switch (f->reason)
     {
-    case AMD64_EXC_DEBUG:
+    case X86_EXC_DEBUG:
 	/* Set RF in RFLAGS. This will disable breakpoints for one
 	   instruction. The processor will reset it afterwards. */
 	f->rflags |= (1 << 16);
 	break;
 
-    case AMD64_EXC_NMI:
+    case X86_EXC_NMI:
 	nmi_t().unmask();
 	break;
 

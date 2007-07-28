@@ -33,7 +33,7 @@
 #include <debug.h>
 #include <kdb/tracepoints.h>
 #include <linear_ptab.h>
-#include INC_ARCH(traps.h)
+#include INC_ARCHX(x86,traps.h)
 #include INC_ARCH(trapgate.h)
 #include INC_API(tcb.h)
 #include INC_API(space.h)
@@ -377,8 +377,8 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
      * Try to promote space to a large one instead of sending
      * exception IPC.
      */
-    if ((frame->reason == IA32_EXC_STACKSEG_FAULT ||
-	 frame->reason == IA32_EXC_GENERAL_PROTECTION) &&
+    if ((frame->reason == X86_EXC_STACKSEG_FAULT ||
+	 frame->reason == X86_EXC_GENERAL_PROTECTION) &&
 	frame->error == 0 && space->is_small ())
     {
 	space->make_large ();
@@ -397,7 +397,7 @@ IA32_EXC_NO_ERRORCODE(exc_catch, -1)
     while(1);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_invalid_opcode, IA32_EXC_INVALIDOPCODE)
+IA32_EXC_NO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 {
     tcb_t * current = get_current_tcb();
     space_t * space = current->get_space();
@@ -428,7 +428,7 @@ IA32_EXC_NO_ERRORCODE(exc_invalid_opcode, IA32_EXC_INVALIDOPCODE)
 	}
     }
 
-    if (send_exception_ipc(frame, IA32_EXC_INVALIDOPCODE))
+    if (send_exception_ipc(frame, X86_EXC_INVALIDOPCODE))
 	return;
     
     get_current_tcb()->set_state(thread_state_t::halted);
@@ -440,7 +440,7 @@ extern "C" void sysexit_tramp (void);
 extern "C" void sysexit_tramp_end (void);
 extern "C" void reenter_sysexit (void);
 
-IA32_EXC_WITH_ERRORCODE(exc_gp, IA32_EXC_GENERAL_PROTECTION)
+IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
     kdebug_check_breakin();
 #if defined(CONFIG_IA32_SMALL_SPACES) && defined(CONFIG_IA32_SYSENTER)
@@ -507,7 +507,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, IA32_EXC_GENERAL_PROTECTION)
 		   printf ("general protection fault @ %p, error: %x\n", 
 			   frame->eip, frame->error));
 
-    if (send_exception_ipc(frame, IA32_EXC_GENERAL_PROTECTION))
+    if (send_exception_ipc(frame, X86_EXC_GENERAL_PROTECTION))
 	return;
 
 #ifdef CONFIG_KDB
@@ -521,7 +521,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, IA32_EXC_GENERAL_PROTECTION)
     get_current_tcb()->switch_to_idle();
 }
 
-IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, IA32_EXC_NOMATH_COPROC)
+IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 {
     tcb_t * current = get_current_tcb();
 
@@ -531,22 +531,22 @@ IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, IA32_EXC_NOMATH_COPROC)
     current->resources.ia32_no_math_exception(current);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_fpu_fault, IA32_EXC_FPU_FAULT)
+IA32_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
 {
     printf("fpu fault exception @ %p", frame->eip);
 
-    if (send_exception_ipc(frame, IA32_EXC_FPU_FAULT))
+    if (send_exception_ipc(frame, X86_EXC_FPU_FAULT))
 	return;
     
     get_current_tcb()->set_state(thread_state_t::halted);
     get_current_tcb()->switch_to_idle();
 }
 
-IA32_EXC_NO_ERRORCODE(exc_simd_fault, IA32_EXC_SIMD_FAULT)
+IA32_EXC_NO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
 {
     printf("simd fault exception @ %p", frame->eip);
 
-    if (send_exception_ipc(frame, IA32_EXC_SIMD_FAULT))
+    if (send_exception_ipc(frame, X86_EXC_SIMD_FAULT))
 	return;
     
     get_current_tcb()->set_state(thread_state_t::halted);

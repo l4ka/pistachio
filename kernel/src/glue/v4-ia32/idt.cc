@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/idt.cc
  * Description:   v4 specific idt implementation
@@ -34,7 +34,7 @@
 #include INC_ARCH(sysdesc.h)
 
 /* trap definition */
-#include INC_ARCH(traps.h)
+#include INC_ARCHX(x86,traps.h)
 
 #include INC_GLUE(traphandler.h)
 #include INC_GLUE(syscalls.h)
@@ -101,26 +101,26 @@ idt_t::idt_t()
     }
     
     /* setup the exception gates */
-    add_int_gate(IA32_EXC_DIVIDE_ERROR, exc_catch);
-    add_int_gate(IA32_EXC_DEBUG, exc_debug);
-    add_int_gate(IA32_EXC_NMI, exc_nmi);
-    add_syscall_gate(IA32_EXC_BREAKPOINT, exc_breakpoint);
-    add_int_gate(IA32_EXC_OVERFLOW, exc_catch);
-    add_int_gate(IA32_EXC_BOUNDRANGE, exc_catch);
-    add_int_gate(IA32_EXC_INVALIDOPCODE, exc_invalid_opcode);
-    add_int_gate(IA32_EXC_NOMATH_COPROC, exc_nomath_coproc);
-    add_int_gate(IA32_EXC_DOUBLEFAULT, exc_catch);
-    add_int_gate(IA32_EXC_COPSEG_OVERRUN, exc_catch);
-    add_int_gate(IA32_EXC_INVALID_TSS, exc_catch);
-    add_int_gate(IA32_EXC_SEGMENT_NOT_PRESENT, exc_catch);
-    add_int_gate(IA32_EXC_STACKSEG_FAULT, exc_catch);
-    add_int_gate(IA32_EXC_GENERAL_PROTECTION, exc_gp);
-    add_int_gate(IA32_EXC_PAGEFAULT, exc_pagefault);
+    add_int_gate(X86_EXC_DIVIDE_ERROR, exc_catch);
+    add_int_gate(X86_EXC_DEBUG, exc_debug);
+    add_int_gate(X86_EXC_NMI, exc_nmi);
+    add_syscall_gate(X86_EXC_BREAKPOINT, exc_breakpoint);
+    add_int_gate(X86_EXC_OVERFLOW, exc_catch);
+    add_int_gate(X86_EXC_BOUNDRANGE, exc_catch);
+    add_int_gate(X86_EXC_INVALIDOPCODE, exc_invalid_opcode);
+    add_int_gate(X86_EXC_NOMATH_COPROC, exc_nomath_coproc);
+    add_int_gate(X86_EXC_DOUBLEFAULT, exc_catch);
+    add_int_gate(X86_EXC_COPSEG_OVERRUN, exc_catch);
+    add_int_gate(X86_EXC_INVALID_TSS, exc_catch);
+    add_int_gate(X86_EXC_SEGMENT_NOT_PRESENT, exc_catch);
+    add_int_gate(X86_EXC_STACKSEG_FAULT, exc_catch);
+    add_int_gate(X86_EXC_GENERAL_PROTECTION, exc_gp);
+    add_int_gate(X86_EXC_PAGEFAULT, exc_pagefault);
     // 15 reserved
-    add_int_gate(IA32_EXC_FPU_FAULT, exc_fpu_fault);
-    add_int_gate(IA32_EXC_ALIGNEMENT_CHECK, exc_catch);
-    add_int_gate(IA32_EXC_MACHINE_CHECK, exc_catch);
-    add_int_gate(IA32_EXC_SIMD_FAULT, exc_simd_fault);
+    add_int_gate(X86_EXC_FPU_FAULT, exc_fpu_fault);
+    add_int_gate(X86_EXC_ALIGNEMENT_CHECK, exc_catch);
+    add_int_gate(X86_EXC_MACHINE_CHECK, exc_catch);
+    add_int_gate(X86_EXC_SIMD_FAULT, exc_simd_fault);
 
     // syscalls
     add_syscall_gate(0x30, exc_user_sysipc);

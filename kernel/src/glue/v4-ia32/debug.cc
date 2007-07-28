@@ -35,7 +35,7 @@
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
 
-#include INC_ARCH(traps.h)
+#include INC_ARCHX(x86,traps.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCHX(x86,apic.h)
 
@@ -60,17 +60,17 @@ asm ("pushl %%ebp	\n"		\
        "r"(get_kip()->kdebug_entry)	\
      : "memory");			
 
-IA32_EXC_NO_ERRORCODE(exc_breakpoint, IA32_EXC_BREAKPOINT)
+IA32_EXC_NO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
     do_enter_kdebug(frame);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_debug, IA32_EXC_DEBUG)
+IA32_EXC_NO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
     do_enter_kdebug(frame);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_nmi, IA32_EXC_NMI)
+IA32_EXC_NO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
 #ifdef CONFIG_DEBUG 
 #if defined CONFIG_SMP

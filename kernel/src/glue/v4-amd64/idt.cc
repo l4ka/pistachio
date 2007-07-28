@@ -1,7 +1,6 @@
-
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/idt.cc
  * Description:   v4 specific idt implementation
@@ -36,7 +35,7 @@
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(descreg.h)
 #include INC_ARCH(segdesc.h)
-#include INC_ARCH(traps.h)
+#include INC_ARCHX(x86,traps.h)
 
 #include INC_GLUE(idt.h)
 #include INC_GLUE(traphandler.h)
@@ -99,26 +98,26 @@ idt_t::idt_t()
     }
 	
     /* setup the exception gates */
-    add_int_gate(AMD64_EXC_DIVIDE_ERROR, exc_catch_diverr);
-    add_int_gate(AMD64_EXC_DEBUG, exc_debug);
-    add_int_gate(AMD64_EXC_NMI, exc_nmi);
-    add_syscall_gate(AMD64_EXC_BREAKPOINT, exc_breakpoint);
-    add_int_gate(AMD64_EXC_OVERFLOW, exc_catch_overflow);
-    add_int_gate(AMD64_EXC_BOUNDRANGE, exc_catch_boundrange);
-    add_int_gate(AMD64_EXC_INVALIDOPCODE, exc_invalid_opcode);
-    add_int_gate(AMD64_EXC_NOMATH_COPROC, exc_nomath_coproc);
-    add_int_gate(AMD64_EXC_DOUBLEFAULT, exc_catch_doublefault);
-    add_int_gate(AMD64_EXC_COPSEG_OVERRUN, exc_catch_overrun);
-    add_int_gate(AMD64_EXC_INVALID_TSS, exc_catch_invtss);
-    add_int_gate(AMD64_EXC_SEGMENT_NOT_PRESENT, exc_catch_segnotpr);
-    add_int_gate(AMD64_EXC_STACKSEG_FAULT, exc_catch_ss_fault);
-    add_int_gate(AMD64_EXC_GENERAL_PROTECTION, exc_gp);
-    add_int_gate(AMD64_EXC_PAGEFAULT, exc_pagefault);
+    add_int_gate(X86_EXC_DIVIDE_ERROR, exc_catch_diverr);
+    add_int_gate(X86_EXC_DEBUG, exc_debug);
+    add_int_gate(X86_EXC_NMI, exc_nmi);
+    add_syscall_gate(X86_EXC_BREAKPOINT, exc_breakpoint);
+    add_int_gate(X86_EXC_OVERFLOW, exc_catch_overflow);
+    add_int_gate(X86_EXC_BOUNDRANGE, exc_catch_boundrange);
+    add_int_gate(X86_EXC_INVALIDOPCODE, exc_invalid_opcode);
+    add_int_gate(X86_EXC_NOMATH_COPROC, exc_nomath_coproc);
+    add_int_gate(X86_EXC_DOUBLEFAULT, exc_catch_doublefault);
+    add_int_gate(X86_EXC_COPSEG_OVERRUN, exc_catch_overrun);
+    add_int_gate(X86_EXC_INVALID_TSS, exc_catch_invtss);
+    add_int_gate(X86_EXC_SEGMENT_NOT_PRESENT, exc_catch_segnotpr);
+    add_int_gate(X86_EXC_STACKSEG_FAULT, exc_catch_ss_fault);
+    add_int_gate(X86_EXC_GENERAL_PROTECTION, exc_gp);
+    add_int_gate(X86_EXC_PAGEFAULT, exc_pagefault);
     /* 15 reserved */
-    add_int_gate(AMD64_EXC_FPU_FAULT, exc_fpu_fault);
-    add_int_gate(AMD64_EXC_ALIGNEMENT_CHECK, exc_catch_ac);
-    add_int_gate(AMD64_EXC_MACHINE_CHECK, exc_catch_mc);
-    add_int_gate(AMD64_EXC_SIMD_FAULT, exc_simd_fault);
+    add_int_gate(X86_EXC_FPU_FAULT, exc_fpu_fault);
+    add_int_gate(X86_EXC_ALIGNEMENT_CHECK, exc_catch_ac);
+    add_int_gate(X86_EXC_MACHINE_CHECK, exc_catch_mc);
+    add_int_gate(X86_EXC_SIMD_FAULT, exc_simd_fault);
     
     /*  no syscalls in IDT (only via syscall/sysret) */
 }

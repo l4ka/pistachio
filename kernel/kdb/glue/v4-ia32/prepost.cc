@@ -38,7 +38,7 @@
 #include <linear_ptab.h>
 #include INC_API(tcb.h)
 
-#include INC_ARCH(traps.h)	/* for IA32 exception numbers	*/
+#include INC_ARCHX(x86,traps.h)	/* for exception numbers	*/
 #include INC_ARCH(trapgate.h)	/* for ia32_exceptionframe_t	*/
 
 #include INC_PLAT(nmi.h)
@@ -70,7 +70,7 @@ bool kdb_t::pre()
 
     switch (f->reason)
     {
-    case IA32_EXC_DEBUG:	/* single step, hw breakpoints */
+    case X86_EXC_DEBUG:	/* single step, hw breakpoints */
     {
 	/* Debug exception */
 	if (f->eflags & (1 << 8))
@@ -107,11 +107,11 @@ bool kdb_t::pre()
 	break;
     }
 
-    case IA32_EXC_NMI:		/* well, the name says enough	*/
+    case X86_EXC_NMI:		/* well, the name says enough	*/
 	printf("--- NMI ---\n");
 	break;
 	
-    case IA32_EXC_BREAKPOINT: /* int3 */
+    case X86_EXC_BREAKPOINT: /* int3 */
     {
 	space_t * space = kdb.kdb_current->get_space();
 	if (!space) space = get_kernel_space();
@@ -254,13 +254,13 @@ void kdb_t::post() {
     
     switch (f->reason)
     {
-    case IA32_EXC_DEBUG:
+    case X86_EXC_DEBUG:
 	/* Set RF in EFLAGS. This will disable breakpoints for one
 	   instruction. The processor will reset it afterwards. */
 	f->eflags |= (1 << 16);
 	break;
 
-    case IA32_EXC_NMI:
+    case X86_EXC_NMI:
 	nmi_t().unmask();
 	break;
 

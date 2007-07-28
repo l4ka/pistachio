@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/debug.cc
  * Description:   Debugging support
@@ -34,7 +34,7 @@
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
 
-#include INC_ARCH(traps.h)
+#include INC_ARCHX(x86,traps.h)
 #include INC_ARCH(trapgate.h)
 
 #define KDB_STACK_SIZE	1024
@@ -57,17 +57,17 @@ static char kdb_stack[KDB_STACK_SIZE]
            "r"(get_kip()->kdebug_entry) \
          : "memory");			
 
-AMD64_EXC_NO_ERRORCODE(exc_breakpoint, AMD64_EXC_BREAKPOINT)
+AMD64_EXC_NO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
     do_enter_kdebug(frame);
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_debug, AMD64_EXC_DEBUG)
+AMD64_EXC_NO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
     do_enter_kdebug(frame);
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_nmi, AMD64_EXC_NMI)
+AMD64_EXC_NO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
     do_enter_kdebug(frame);
 }

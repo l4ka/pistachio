@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002, 2007,  Karlsruhe University
  *                
- * File path:     arch/amd64/traps.h
- * Description:   AMD64 exceptions
+ * File path:     arch/x86/traps.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,45 +26,44 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: traps.h,v 1.3 2006/10/19 22:57:34 ud3 Exp $ 
+ * $Id$
  *                
  ********************************************************************/
-#ifndef __ARCH__AMD64__TRAPS_H__
-#define __ARCH__AMD64__TRAPS_H__
+#ifndef __ARCH__X86__TRAPS_H__
+#define __ARCH__X86__TRAPS_H__
 
-/* 
- * defined AMD64 exceptions
- * for details see: AMD x86-64  Architecture Programmer's 
+/*
+ * for details see: IA-32 Intel Architecture Software Developer's
+ * Manual, Chapter 5, Interrupt and Exception Handling
+ *
+ * for details see: AMD x86-64  Architecture Programmer's
  * Manual, Volume II, Chapter 8, Interrupt and Exception Handling
- * 
  */
 
+#define X86_EXC_DIVIDE_ERROR        0
+#define X86_EXC_DEBUG               1
+#define X86_EXC_NMI                 2
+#define X86_EXC_BREAKPOINT          3
+#define X86_EXC_OVERFLOW            4
+#define X86_EXC_BOUNDRANGE          5
+#define X86_EXC_INVALIDOPCODE       6
+#define X86_EXC_NOMATH_COPROC       7
+#define X86_EXC_DOUBLEFAULT         8
+#define X86_EXC_COPSEG_OVERRUN      9
+#define X86_EXC_INVALID_TSS         10
+#define X86_EXC_SEGMENT_NOT_PRESENT 11
+#define X86_EXC_STACKSEG_FAULT      12
+#define X86_EXC_GENERAL_PROTECTION  13
+#define X86_EXC_PAGEFAULT           14
+#define X86_EXC_RESERVED            15
+#define X86_EXC_FPU_FAULT           16
+#define X86_EXC_ALIGNEMENT_CHECK    17
+#define X86_EXC_MACHINE_CHECK       18
+#define X86_EXC_SIMD_FAULT          19
 
-#define AMD64_EXC_DIVIDE_ERROR		0
-#define AMD64_EXC_DEBUG			1
-#define AMD64_EXC_NMI			2
-#define AMD64_EXC_BREAKPOINT		3
-#define AMD64_EXC_OVERFLOW		4
-#define AMD64_EXC_BOUNDRANGE		5
-#define AMD64_EXC_INVALIDOPCODE		6
-#define AMD64_EXC_NOMATH_COPROC		7
-#define AMD64_EXC_DOUBLEFAULT		8
-#define AMD64_EXC_COPSEG_OVERRUN	9
-#define AMD64_EXC_INVALID_TSS		10
-#define AMD64_EXC_SEGMENT_NOT_PRESENT	11
-#define AMD64_EXC_STACKSEG_FAULT	12
-#define AMD64_EXC_GENERAL_PROTECTION	13
-#define AMD64_EXC_PAGEFAULT		14
-#define AMD64_EXC_RESERVED		15
-#define AMD64_EXC_FPU_FAULT		16
-#define AMD64_EXC_ALIGNEMENT_CHECK	17
-#define AMD64_EXC_MACHINE_CHECK		18
-#define AMD64_EXC_SIMD_FAULT		19
-
-/* Intel reserved exceptions */
-#define AMD64_EXC_RESERVED_FIRST	20
-#define AMD64_EXC_RESERVED_LAST		31
-
+/* Reserved exceptions */
+#define X86_EXC_RESERVED_FIRST      20
+#define X86_EXC_RESERVED_LAST       31
 
 
-#endif /* !__ARCH__AMD64__TRAPS_H__ */
+#endif /* !__ARCH__X86__TRAPS_H__ */
