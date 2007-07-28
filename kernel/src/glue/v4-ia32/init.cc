@@ -50,7 +50,7 @@
 #include INC_ARCH(tss.h)
 
 /* floating point unit */
-#include INC_ARCH(fpu.h)
+#include INC_ARCHX(x86,fpu.h)
 
 /* K8 flush filter support  */
 #if defined(CONFIG_CPU_IA32_K8)
@@ -245,10 +245,10 @@ static void setup_msrs()
 #endif
 #endif
 
-#if defined(CONFIG_IA32_FXSR)
-    ia32_fpu_t::enable_osfxsr();
+#if defined(CONFIG_X86_FXSR)
+    x86_fpu_t::enable_osfxsr();
 #endif
-    ia32_fpu_t::disable();
+    x86_fpu_t::disable();
     
 #if defined(CONFIG_CPU_IA32_K8) 
 #if defined(CONFIG_FLUSHFILTER)
@@ -291,7 +291,7 @@ static void SECTION(".init.cpu") check_cpu_features()
 #ifdef CONFIG_IA32_PGE
     req_features |= IA32_FEAT_PGE;
 #endif
-#ifdef CONFIG_IA32_FXSR
+#ifdef CONFIG_X86_FXSR
     req_features |= IA32_FEAT_FXSR;
 #endif
 #ifdef CONFIG_IA32_SYSENTER

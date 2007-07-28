@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002, 2007,  Karlsruhe University
  *                
- * File path:     arch/ia32/fpu.h
+ * File path:     arch/x86/fpu.h
  * Description:   contains x86 specific fpu declarations
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -26,63 +26,63 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: fpu.h,v 1.4 2003/09/24 19:04:27 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
-#ifndef __ARCH_IA32_FPU_H__
-#define __ARCH_IA32_FPU_H__
+#ifndef __ARCH_X86_FPU_H__
+#define __ARCH_X86_FPU_H__
 
 #include INC_ARCH(cpu.h)
 
-class ia32_fpu_t
+class x86_fpu_t
 {
 public:
     static void enable()
-	{ x86_cr0_mask(X86_CR0_TS); }
+        { x86_cr0_mask(X86_CR0_TS); }
     static void disable()
-	{ x86_cr0_set(X86_CR0_TS); }
+        { x86_cr0_set(X86_CR0_TS); }
 
     static void enable_osfxsr()
-	{ x86_cr4_set(X86_CR4_OSFXSR); }
+        { x86_cr4_set(X86_CR4_OSFXSR); }
     static void disable_osfxsr()
-	{ x86_cr4_mask(X86_CR4_OSFXSR); }
+        { x86_cr4_mask(X86_CR4_OSFXSR); }
 
     static void init()
-	{ __asm__ __volatile__ ("finit\n"); }
+        { __asm__ __volatile__ ("finit\n"); }
 
     static void save_state(addr_t fpu_state)
         {
-	    __asm__ __volatile__ (
-#if !defined(CONFIG_IA32_FXSR)
-		"fnsave %0"
+        __asm__ __volatile__ (
+#if !defined(CONFIG_X86_FXSR)
+        "fnsave %0"
 #else
-		"fxsave %0"
+        "fxsave %0"
 #endif
-		: 
-		: "m" (*(u32_t*)fpu_state));
-	}
+        :
+        : "m" (*(word_t*)fpu_state));
+    }
 
     static void load_state(addr_t fpu_state)
-	{
-	    __asm__ __volatile__ (
-#if !defined(CONFIG_IA32_FXSR)
-		"frstor %0"
+    {
+        __asm__ __volatile__ (
+#if !defined(CONFIG_X86_FXSR)
+        "frstor %0"
 #else
-		"fxrstor %0"
+        "fxrstor %0"
 #endif
-	    : 
-	    : "m" (*(u32_t*)fpu_state));
-	}
+        :
+        : "m" (*(word_t*)fpu_state));
+    }
 
     static const word_t get_state_size()
-	{
-#if !defined (CONFIG_IA32_FXSR)
-	    return 128;
+    {
+#if !defined (CONFIG_X86_FXSR)
+        return 128;
 #else
-	    return 512;
+        return 512;
 #endif
-	}
-    
+    }
+
 };
 
-#endif  /* __ARCH_IA32_FPU_H__ */
+#endif  /* __ARCH_X86_FPU_H__ */

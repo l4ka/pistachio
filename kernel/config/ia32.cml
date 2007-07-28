@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2006,  Karlsruhe University
+## Copyright (C) 2003-2007,  Karlsruhe University
 ##                
 ## File path:     config/ia32.cml
 ## Description:   IA32 specific rules
@@ -103,7 +103,7 @@ unless ARCH_IA32 suppress dependent ia32_type
 # IA32 processor feature configuration
 #
 derive IA32_SYSENTER from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8
-derive IA32_FXSR from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8
+derive X86_FXSR from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8
 derive IA32_PGE from CPU_IA32_P4 or CPU_IA32_I686 or CPU_IA32_K8 or CPU_IA32_C3
 derive IA32_HTT from CPU_IA32_P4
 derive IA32_SMALL_SPACES_GLOBAL from IA32_SMALL_SPACES and IA32_PGE

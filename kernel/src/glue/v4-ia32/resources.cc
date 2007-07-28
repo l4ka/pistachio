@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/resources.cc
  * Description:   thread resource management
@@ -30,7 +30,7 @@
  *                
  ********************************************************************/
 #include INC_API(tcb.h)
-#include INC_ARCH(fpu.h)
+#include INC_ARCHX(x86,fpu.h)
 #include INC_GLUE(resource_functions.h)
 #include <kdb/tracepoints.h>
 
@@ -47,7 +47,7 @@ void thread_resources_t::save(tcb_t * tcb)
 {
     if (tcb->resource_bits.have_resource (FPU))
     {
-	ia32_fpu_t::disable();
+	x86_fpu_t::disable();
 #ifndef FPU_REENABLE
 	tcb->resource_bits -= FPU;
 #endif
@@ -101,7 +101,7 @@ void thread_resources_t::load(tcb_t * tcb)
 	ASSERT (fpu_state != NULL);
 	TRACEPOINT(IA32_FPU_REENABLE, 
 		   printf("strictly reenabling FPU for %t\n", tcb));
-	ia32_fpu_t::enable();
+	x86_fpu_t::enable();
     }
 #endif
 }
@@ -110,10 +110,10 @@ void thread_resources_t::purge(tcb_t * tcb)
 {
     if (fpu_owner == tcb)
     {
-	ia32_fpu_t::enable();
-	ia32_fpu_t::save_state(this->fpu_state);
+	x86_fpu_t::enable();
+	x86_fpu_t::save_state(this->fpu_state);
 	fpu_owner = NULL;
-	ia32_fpu_t::disable();
+	x86_fpu_t::disable();
 #ifdef FPU_REENABLE
 	tcb->resource_bits -= FPU;
 #endif
@@ -140,13 +140,13 @@ void thread_resources_t::free(tcb_t * tcb)
     ASSERT(tcb);
     if (fpu_state)
     {
-	kmem.free(kmem_resources, fpu_state, ia32_fpu_t::get_state_size());
+	kmem.free(kmem_resources, fpu_state, x86_fpu_t::get_state_size());
 	fpu_state = NULL;
 
 	if (fpu_owner == tcb)
 	{
 	    fpu_owner = NULL;
-	    ia32_fpu_t::disable();
+	    x86_fpu_t::disable();
 	}
     }
 
@@ -157,14 +157,14 @@ void thread_resources_t::free(tcb_t * tcb)
 void thread_resources_t::ia32_no_math_exception(tcb_t * tcb)
 {
     ASSERT(&tcb->resources == this);
-    ia32_fpu_t::enable();
+    x86_fpu_t::enable();
 
     // if the current thread owns the fpu already do a quick exit
     if (fpu_owner != tcb)
     {
 	if (fpu_owner != NULL)
 	{
-	    ia32_fpu_t::save_state(fpu_owner->resources.fpu_state);
+	    x86_fpu_t::save_state(fpu_owner->resources.fpu_state);
 #ifdef  FPU_REENABLE
 	    fpu_owner->resource_bits -= FPU;
 #endif
@@ -173,11 +173,11 @@ void thread_resources_t::ia32_no_math_exception(tcb_t * tcb)
 
 	if (fpu_state == NULL)
 	{
-	    fpu_state = kmem.alloc(kmem_resources, ia32_fpu_t::get_state_size());
-	    ia32_fpu_t::init();
+	    fpu_state = kmem.alloc(kmem_resources, x86_fpu_t::get_state_size());
+	    x86_fpu_t::init();
 	}
 	else
-	    ia32_fpu_t::load_state(fpu_state);
+	    x86_fpu_t::load_state(fpu_state);
     }
 
     tcb->resource_bits += FPU;
