@@ -54,7 +54,7 @@
 
 /* K8 flush filter support  */
 #if defined(CONFIG_CPU_IA32_K8)
-#include INC_ARCH(hwcr_k8.h)
+#include INC_ARCHX(x86,amdhwcr.h)
 #endif 
 
 #include INC_GLUE(config.h)
@@ -253,10 +253,10 @@ static void setup_msrs()
 #if defined(CONFIG_CPU_IA32_K8) 
 #if defined(CONFIG_FLUSHFILTER)
     TRACE_INIT("Enabling K8 Flush Filter\n");
-    ia32_hwcr_t::enable_flushfilter();
+    x86_amdhwcr_t::enable_flushfilter();
 #else
     TRACE_INIT("Disabling K8 Flush Filter\n");
-    ia32_hwcr_t::disable_flushfilter();
+    x86_amdhwcr_t::disable_flushfilter();
 #endif
 #endif
 

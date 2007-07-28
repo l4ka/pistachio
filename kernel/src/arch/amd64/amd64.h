@@ -79,7 +79,6 @@
 #define AMD64_FS_MSR                    0xC0000100      /* FS Register */
 #define AMD64_GS_MSR                    0xC0000101      /* GS Register */
 #define AMD64_KRNL_GS_MSR               0xC0000102      /* Kernel GS Swap  */
-#define AMD64_HWCR_MSR                  0xC0010015      /* HW configuration MSR */
 #define KERNEL_VERSION_VER              KERNEL_VERSION_CPU_AMD64
 
 #define AMD64_PERFCTR0                  0x0c1

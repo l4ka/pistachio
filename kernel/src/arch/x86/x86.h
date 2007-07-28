@@ -102,9 +102,6 @@
 #define X86_EFER_NXE  (1 << 11)       /* nx bit enable                */
 #define X86_EFER_SVME (1 << 12)       /* svm extensions               */
 
-
-#define X86_HWCR_MSR                0xC0010015
-
 #define X86_FEATURE_CONTROL_MSR     0x0000003a
 #define X86_FEAT_CTR_LOCK           (1 << 0)
 

@@ -44,7 +44,7 @@
 
 #include INC_ARCH(cpuid.h)
 #include INC_ARCH(descreg.h)
-#include INC_ARCH(hwcr.h)
+#include INC_ARCHX(x86,amdhwcr.h)
 #include INC_ARCH(segdesc.h)
 #include INC_ARCH(tss.h)
 #include INC_ARCHX(x86,apic.h)
@@ -448,7 +448,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
 
 #if defined(CONFIG_FLUSHFILTER)
     TRACE_INIT("Enabling flush filter (CPU %d)\n", cpuid);
-    amd64_hwcr_t::enable_flushfilter();
+    x86_amdhwcr_t::enable_flushfilter();
 #endif
     
     /* activate msrs */

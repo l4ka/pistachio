@@ -40,7 +40,7 @@
 #include INC_ARCH(segdesc.h)
 /* K8 flush filter support  */
 #if defined(CONFIG_CPU_IA32_K8)
-#include INC_ARCH(hwcr_k8.h)
+#include INC_ARCHX(x86,amdhwcr.h)
 #endif 
 #include INC_PLAT(nmi.h)
 #include INC_GLUE(idt.h)
@@ -395,11 +395,11 @@ CMD(cmd_show_lvt, cg)
 /**
  * cmd_hcwr - dump HWCR register contents
  */
-DECLARE_CMD (cmd_hwcr, arch, 'h', "hwcr", "dump HWCR contents");
+DECLARE_CMD (cmd_amdhwcr, arch, 'h', "hwcr", "dump AMD's HWCR contents");
 
-CMD(cmd_hwcr, cg)
+CMD(cmd_amdhwcr, cg)
 {
-    ia32_hwcr_t::dump_hwcr();
+    x86_amdhwcr_t::dump_hwcr();
     return CMD_NOQUIT;
 }
 #endif

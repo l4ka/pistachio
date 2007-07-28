@@ -36,7 +36,7 @@
 #include <linear_ptab.h>
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(pgent.h)
-#include INC_ARCH(hwcr.h)
+#include INC_ARCHX(x86,amdhwcr.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(cpuid.h)
 #include INC_ARCHX(x86,ioport.h)
@@ -282,11 +282,11 @@ CMD(cmd_cpu, cg)
 /**
  * cmd_hcwr - dump HWCR register contents
  */
-DECLARE_CMD (cmd_hwcr, arch, 'h', "hwcr", "dump HWCR contents");
+DECLARE_CMD (cmd_amdhwcr, arch, 'h', "hwcr", "dump AMD's HWCR contents");
 
-CMD(cmd_hwcr, cg)
+CMD(cmd_amdhwcr, cg)
 {
-    amd64_hwcr_t::dump_hwcr();
+    x86_amdhwcr_t::dump_hwcr();
     return CMD_NOQUIT;
 }
 
