@@ -108,8 +108,8 @@ ia32_segdesc_t	smp_boot_gdt[3];
 static void setup_smp_boot_gdt()
 {
 #   define gdt_idx(x) ((x) >> 3)
-    smp_boot_gdt[gdt_idx(IA32_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
-    smp_boot_gdt[gdt_idx(IA32_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
+    smp_boot_gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
+    smp_boot_gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
 #   undef gdt_idx
 }
 
@@ -152,8 +152,8 @@ static void setup_gdt(ia32_tss_t &tss, cpuid_t cpuid)
 {
 #   define gdt_idx(x) ((x) >> 3)
 
-    gdt[gdt_idx(IA32_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
-    gdt[gdt_idx(IA32_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
+    gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
+    gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
     gdt[gdt_idx(IA32_UCS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::code);
     gdt[gdt_idx(IA32_UDS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
 
@@ -202,7 +202,7 @@ static void SECTION(".init.cpu") activate_gdt()
 	"ljmp	%1,$1f		\n"	/* refetch code segment	descr.	*/
 	"1:			\n"	/*   by jumping across segments	*/
 	:
-	: "m"(gdt_desc), "i" (IA32_KCS)
+	: "m"(gdt_desc), "i" (X86_KCS)
 	);
 
     /* set the segment registers from the freshly installed GDT
@@ -221,11 +221,11 @@ static void SECTION(".init.cpu") activate_gdt()
 	:
 	:
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	"r"(IA32_KDS),
+	"r"(X86_KDS),
 #else
 	"r"(IA32_UDS),
 #endif
-	"r"(IA32_KDS), "r"(IA32_UTCB), "r"(IA32_TBS), "r"(IA32_TSS)
+	"r"(X86_KDS), "r"(IA32_UTCB), "r"(IA32_TBS), "r"(IA32_TSS)
 	: "eax");
 }
 
@@ -236,7 +236,7 @@ static void setup_msrs()
 {
 #ifdef CONFIG_IA32_SYSENTER
     /* here we also setup the model specific registers for the syscalls */
-    x86_wrmsr(IA32_SYSENTER_CS_MSR, (u32_t)(IA32_KCS));
+    x86_wrmsr(IA32_SYSENTER_CS_MSR, (u32_t)(X86_KCS));
     x86_wrmsr(IA32_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
 #if defined(CONFIG_IO_FLEXPAGES)
     x86_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
@@ -357,7 +357,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
     // call cpu ctors
     call_cpu_ctors();
 
-    tss.setup(IA32_KDS);
+    tss.setup(X86_KDS);
     setup_gdt(tss, cpuid);
     activate_gdt();
 
@@ -579,7 +579,7 @@ extern "C" void SECTION(SEC_INIT) startup_system()
 	
 	
 	{ /* copied here to catch errors early */
-	    tss.setup(IA32_KDS);
+	    tss.setup(X86_KDS);
 	    setup_gdt(tss, 0);
 	    activate_gdt();
 	    idt.activate();

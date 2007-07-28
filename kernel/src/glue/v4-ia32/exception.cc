@@ -462,7 +462,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 	 * interrupts since we can not be allowed to be preempted in
 	 * the reenter-trampoline.
 	 */
-	frame->cs = IA32_KCS;
+	frame->cs = X86_KCS;
 	frame->eflags &= ~X86_FLAGS_IF;
 	frame->ecx = (word_t) current->get_user_sp ();
 	frame->eip = (word_t) reenter_sysexit;
@@ -489,7 +489,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 	    TRACEPOINT (IA32_SEGRELOAD);
 	    reload_user_segregs ();
 	    frame->ds = frame->es =
-		(frame->cs & 0xffff) == IA32_UCS ? IA32_UDS : IA32_KDS;
+		(frame->cs & 0xffff) == IA32_UCS ? IA32_UDS : X86_KDS;
 	    return;
 	}
     }

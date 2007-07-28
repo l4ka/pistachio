@@ -210,8 +210,8 @@
  * TSS descriptor is 16 bytes long, therefore we place it at the end
  */
 #define AMD64_INVS	         0x0		/* 0		*/
-#define AMD64_KCS                0x8		/* 1, RPL = 0	*/
-#define AMD64_KDS                0x10		/* 2, RPL = 0	*/
+#define X86_KCS                0x8		/* 1, RPL = 0	*/
+#define X86_KDS                0x10		/* 2, RPL = 0	*/
 #define AMD64_UCS32              0x1b		/* 3, RPL = 3	*/
 #define AMD64_UDS	         0x23		/* 4, RPL = 3	*/
 #define AMD64_UCS                0x2b		/* 5, RPL = 3	*/
@@ -251,7 +251,7 @@
  *		SS <- AMD64_SYSRETCS + 8
  */
 
-#define AMD64_SYSCALLCS		((u64_t) AMD64_KCS)
+#define AMD64_SYSCALLCS		((u64_t) X86_KCS)
 #define AMD64_SYSRETCS		((u64_t) AMD64_UCS32)
 
 /* Syscall/Sysret RFLAGS MASK register value */

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/trapgate.h
  * Description:   defines macros for implementation of trap and 
@@ -81,7 +81,7 @@ public:
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
 #define set_kds(reg)						\
-	"mov $" MKSTR(IA32_KDS) ", %%" #reg "	\n"		\
+	"mov $" MKSTR(X86_KDS) ", %%" #reg "	\n"		\
 	"mov %%" #reg ", %%ds	    		\n"
 #else
 #define set_kds(reg)

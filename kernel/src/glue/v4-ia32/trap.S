@@ -76,7 +76,7 @@ BEGIN_PROC(exc_user_sysipc)
 	movl	%ecx, 0(%esp)			// save timeout
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	mov	$IA32_KDS, %ebx
+	mov	$X86_KDS, %ebx
 	mov	%ebx, %ds
 #endif
 	
@@ -423,7 +423,7 @@ fp_load_resources:
 fp_copy_loop:
 	/* copy loop */
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	movl	$IA32_KDS, %ecx
+	movl	$X86_KDS, %ecx
 	mov	%ecx, %es
 #endif
 

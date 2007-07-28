@@ -53,7 +53,7 @@ void SECTION(".init.system")
     idt_t::add_int_gate(word_t index, void (*address)())
 {
     ASSERT(index < IDT_SIZE);
-    descriptors[index].set_handler(AMD64_KCS, address, amd64_idtdesc_t::interrupt, 0);
+    descriptors[index].set_handler(X86_KCS, address, amd64_idtdesc_t::interrupt, 0);
 }
 
 
@@ -61,14 +61,14 @@ void SECTION(".init.system")
     idt_t::add_syscall_gate(word_t index, void (*address)())
 {
     ASSERT(index < IDT_SIZE);
-    descriptors[index].set_handler(AMD64_KCS, address, amd64_idtdesc_t::interrupt, 3);
+    descriptors[index].set_handler(X86_KCS, address, amd64_idtdesc_t::interrupt, 3);
 }
 
 void SECTION(".init.system") 
     idt_t::add_trap_gate(word_t index, void (*address)())
 {
     ASSERT(index < IDT_SIZE);
-    descriptors[index].set_handler(AMD64_KCS, address, amd64_idtdesc_t::trap, 0);
+    descriptors[index].set_handler(X86_KCS, address, amd64_idtdesc_t::trap, 0);
 }
 
 /**

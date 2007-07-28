@@ -101,7 +101,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
     word_t dummy;
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (IA32_KDS));
+    asm volatile ("mov %0, %%es" : : "r" (X86_KDS));
 #endif
 
     /* use optimized IA32 copy loop -- uses complete cacheline
@@ -116,7 +116,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 	"D"(&dest->get_utcb()->mr[start]));
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (IA32_UDS));
+    asm volatile ("mov %0, %%es" : : "r" (X86_UDS));
 #endif
 }
 

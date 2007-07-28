@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  University of Karlsruhe
+ * Copyright (C) 2002-2007,  University of Karlsruhe
  *                
  * File path:     arch/amd64/pagebits.h
  * Description:   Global page size macros 

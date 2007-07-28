@@ -103,8 +103,8 @@ static void setup_smp_boot_gdt()
      *  are used.
      */
 #   define gdt_idx(x) ((x) >> 3)
-  smp_boot_gdt[gdt_idx(AMD64_KCS)].set_seg((u64_t)0, amd64_segdesc_t::code, 0, amd64_segdesc_t::m_comp);
-  smp_boot_gdt[gdt_idx(AMD64_KDS)].set_seg((u64_t)0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_comp);  
+  smp_boot_gdt[gdt_idx(X86_KCS)].set_seg((u64_t)0, amd64_segdesc_t::code, 0, amd64_segdesc_t::m_comp);
+  smp_boot_gdt[gdt_idx(X86_KDS)].set_seg((u64_t)0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_comp);  
 #   undef gdt_idx
 }
 
@@ -288,8 +288,8 @@ static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
 
     /* Initialize GDT */
     gdt.segdsc[GDT_IDX(AMD64_INVS)].set_seg((u64_t) 0, amd64_segdesc_t::inv, 0, amd64_segdesc_t::m_long);
-    gdt.segdsc[GDT_IDX(AMD64_KCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 0, amd64_segdesc_t::m_long);
-    gdt.segdsc[GDT_IDX(AMD64_KDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_long);
+    gdt.segdsc[GDT_IDX(X86_KCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 0, amd64_segdesc_t::m_long);
+    gdt.segdsc[GDT_IDX(X86_KDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(AMD64_UCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 3, amd64_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(AMD64_UDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 3, amd64_segdesc_t::m_long);
     
@@ -350,7 +350,7 @@ static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
  	"pushq $1f		\n\t"		// new IP		
  	"lretq			\n\t"
  	"1:			\n\t"	
-	: /* No Output */ : "r" (0), "r" (AMD64_UTCBS), "r" (AMD64_TBS), "r" ((u64_t) AMD64_KCS)
+	: /* No Output */ : "r" (0), "r" (AMD64_UTCBS), "r" (AMD64_TBS), "r" ((u64_t) X86_KCS)
 	);
     
     

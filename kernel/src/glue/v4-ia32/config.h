@@ -164,8 +164,8 @@
  **********************************************************************/
 
 /* Segment register values */
-#define IA32_KCS		0x08
-#define IA32_KDS		0x10
+#define X86_KCS		0x08
+#define X86_KDS		0x10
 #define IA32_UCS		0x1b
 #define IA32_UDS		0x23
 #define IA32_UTCB		0x2b
