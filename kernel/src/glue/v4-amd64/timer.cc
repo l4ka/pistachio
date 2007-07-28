@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/timer.cc
  * Description:   Implements RTC timer
@@ -89,18 +89,18 @@ void timer_t::init_global()
 
 void timer_t::init_cpu()
 {
-    u64_t cpu_cycles; 
+    u64_t cpu_cycles;
 
 #if !defined(CONFIG_CPU_AMD64_SIMICS)
     TRACE_INIT("Calculating processor speed...\n");
     /* calculate processor speed */
     wait_for_second_tick();
-    
-    cpu_cycles = amd64_rdtsc();
+
+    cpu_cycles = x86_rdtsc();
     wait_for_second_tick();
-    
-    cpu_cycles = amd64_rdtsc() - cpu_cycles;
-	
+
+    cpu_cycles = x86_rdtsc() - cpu_cycles;
+
     proc_freq = cpu_cycles  / 1000;
     bus_freq = 0;
 

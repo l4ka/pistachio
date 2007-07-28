@@ -89,7 +89,7 @@ INLINE void ia32_mmu_t::flush_tlbent(u32_t addr)
  */
 INLINE void ia32_mmu_t::enable_super_pages()
 {
-    ia32_cr4_set(X86_CR4_PSE);
+    x86_cr4_set(X86_CR4_PSE);
 }
 
 /**
@@ -97,7 +97,7 @@ INLINE void ia32_mmu_t::enable_super_pages()
  */
 INLINE void ia32_mmu_t::enable_global_pages()
 {
-    ia32_cr4_set(X86_CR4_PGE);
+    x86_cr4_set(X86_CR4_PGE);
 }
 
 /**

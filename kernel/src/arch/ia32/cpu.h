@@ -33,6 +33,7 @@
 #define __ARCH__IA32__CPU_H__
 
 #include INC_ARCH(ia32.h)
+#include INC_ARCHX(x86,cpu.h)
 
 INLINE bool ia32_has_cpuid()
 {
@@ -81,108 +82,6 @@ INLINE u32_t ia32_get_cpu_features()
          * i486DX+ and therefore assume the FPU to be present */
 	return IA32_FEAT_FPU;
     }
-}
-
-INLINE u64_t ia32_rdpmc(const int ctrsel)
-{
-    u64_t __return;
-    
-    __asm__ __volatile__ (
-	"rdpmc"
-	: "=A"(__return)
-	: "c"(ctrsel));
-    
-    return __return;
-}
-
-INLINE u64_t ia32_rdtsc(void)
-{
-    u64_t __return;
-
-    __asm__ __volatile__ (
-	"rdtsc"
-	: "=A"(__return));
-
-    return __return;
-}
-
-INLINE u64_t ia32_rdmsr(const u32_t reg)
-{
-    u64_t __return;
-
-    __asm__ __volatile__ (
-	"rdmsr"
-	: "=A"(__return)
-	: "c"(reg)
-	);
-
-    return __return;
-}
-
-INLINE void ia32_wrmsr(const u32_t reg, const u64_t val)
-{
-    __asm__ __volatile__ (
-	"wrmsr"
-	:
-	: "A"(val), "c"(reg));
-}
-
-INLINE void ia32_settsc(const u64_t val)
-{
-    ia32_wrmsr(0x10, val);
-}
-
-INLINE void ia32_wbinvd()
-{
-    __asm__ ("wbinvd\n" : : : "memory");
-}
-
-INLINE int ia32_lsb (u32_t w) __attribute__ ((const));
-INLINE int ia32_lsb (u32_t w)
-{
-    int bitnum;
-    __asm__ ("bsf %1, %0" : "=r" (bitnum) : "rm" (w));
-    return bitnum;
-}
-
-INLINE void ia32_cr0_set(const u32_t val)
-{
-    u32_t tmp;
-    __asm__ __volatile__ ("mov	%%cr0, %0	\n"
-			  "orl	%1, %0		\n"
-			  "mov	%0, %%cr0	\n"
-			  : "=r"(tmp)
-			  : "ri"(val));
-}
-
-INLINE void ia32_cr0_mask(const u32_t val)
-{
-    u32_t tmp;
-    __asm__ __volatile__ ("movl	%%cr0, %0	\n"
-			  "andl	%1, %0		\n"
-			  "movl	%0, %%cr0	\n"
-			  : "=r"(tmp)
-			  : "ri"(~val));
-}
-
-INLINE void ia32_cr4_set(const u32_t val)
-{
-    u32_t tmp;
-    __asm__ __volatile__ ("movl	%%cr4, %0	\n"
-			  "orl	%1, %0		\n"
-			  "movl	%0, %%cr4	\n"
-			  : "=r"(tmp)
-			  : "ri"(val));
-}
-
-INLINE void ia32_cr4_mask(const u32_t val)
-{
-    u32_t tmp;
-    __asm__ __volatile__ ("movl	%%cr4, %0	\n"
-			  "andl	%1, %0		\n"
-			  "movl	%0, %%cr4	\n"
-			  : "=r"(tmp)
-			  : "ri"(~val));
 }
 
 #endif /* !__ARCH__IA32__CPU_H__ */

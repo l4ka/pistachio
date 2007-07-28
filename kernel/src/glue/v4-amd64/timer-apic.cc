@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/timer-apic.cc
  * Description:   implementation of apic timer
@@ -78,12 +78,12 @@ void timer_t::init_cpu()
     /* calculate processor speed */
     wait_for_second_tick();
 
-    cpu_cycles = amd64_rdtsc();
+    cpu_cycles = x86_rdtsc();
     bus_cycles = local_apic.timer_get();
 
     wait_for_second_tick();
     
-    cpu_cycles = amd64_rdtsc() - cpu_cycles;
+    cpu_cycles = x86_rdtsc() - cpu_cycles;
     bus_cycles -= local_apic.timer_get();
 
     proc_freq = cpu_cycles / 1000;

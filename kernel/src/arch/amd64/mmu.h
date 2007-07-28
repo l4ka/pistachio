@@ -90,7 +90,7 @@ INLINE void amd64_mmu_t::flush_tlbent(word_t addr){
  * Enables paged mode for X86_64
  */
 INLINE void amd64_mmu_t::enable_paging(){
-    amd64_cr0_set(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE);
+    x86_cr0_set(X86_CR0_PG | X86_CR0_WP | X86_CR0_PE);
     asm("jmp penabled; penabled:");
 }
 
@@ -98,7 +98,7 @@ INLINE void amd64_mmu_t::enable_paging(){
  * Disable paged mode for X86_64
  */
 INLINE void amd64_mmu_t::disable_paging(){
-    amd64_cr0_mask(X86_CR0_PG);
+    x86_cr0_mask(X86_CR0_PG);
 }
 
 /**
@@ -106,7 +106,7 @@ INLINE void amd64_mmu_t::disable_paging(){
  * Needed for long and compatibility mode 
  */
 INLINE void amd64_mmu_t::enable_pae_mode(){
-    amd64_cr4_set(X86_CR4_PAE);
+    x86_cr4_set(X86_CR4_PAE);
 }    
 
 /**
@@ -142,9 +142,9 @@ INLINE bool amd64_mmu_t::has_long_mode(){
  */
 INLINE void amd64_mmu_t::enable_long_mode(){
 
-    word_t efer = amd64_rdmsr(AMD64_EFER_MSR);
+    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
     efer |= AMD64_EFER_LME;
-    amd64_wrmsr(AMD64_EFER_MSR, efer);
+    x86_wrmsr(AMD64_EFER_MSR, efer);
     
 }
 
@@ -154,7 +154,7 @@ INLINE void amd64_mmu_t::enable_long_mode(){
  */
 INLINE bool amd64_mmu_t::long_mode_active(){
 
-    word_t efer = amd64_rdmsr(AMD64_EFER_MSR);
+    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
     return (efer & AMD64_EFER_LMA);
     
 }
@@ -163,7 +163,7 @@ INLINE bool amd64_mmu_t::long_mode_active(){
  * Enables global pages
  */
 INLINE void amd64_mmu_t::enable_global_pages(){
-      amd64_cr4_set(X86_CR4_PGE);
+      x86_cr4_set(X86_CR4_PGE);
 }
 
 /**

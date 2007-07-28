@@ -316,7 +316,7 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 	case 0x30:
     	    /* wrmsr */
 	    if ( is_privileged_space(space) ) {
-		ia32_wrmsr (frame->ecx, ((u64_t)(frame->eax)) | 
+		x86_wrmsr (frame->ecx, ((u64_t)(frame->eax)) | 
 			((u64_t)(frame->edx)) << 32);
 		frame->eip += 2;
 		return true;
@@ -325,7 +325,7 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 	case 0x32:
 	    /* rdmsr */
 	    if ( is_privileged_space(space) ) {
-		u64_t val = ia32_rdmsr (frame->ecx);
+		u64_t val = x86_rdmsr (frame->ecx);
 		frame->eax = (u32_t)val;
 		frame->edx = (u32_t)(val >> 32);
 		frame->eip += 2;

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/exception.cc
  * Description:   exception handling
@@ -456,7 +456,7 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 	case 0x30:
     	    /* wrmsr */
 	    if ( is_privileged_space(space) ) {
-		amd64_wrmsr ((u32_t) frame->rcx, (frame->rdx << 32) |  (frame->rax & 0xffffffff));
+		x86_wrmsr ((u32_t) frame->rcx, (frame->rdx << 32) |  (frame->rax & 0xffffffff));
 		frame->rip += 2;
 		return true;
 	    } break;
@@ -464,7 +464,7 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 	case 0x32:
 	    /* rdmsr */
 	    if ( is_privileged_space(space) ) {
-		u64_t val = amd64_rdmsr ((u32_t) frame->rcx);
+		u64_t val = x86_rdmsr ((u32_t) frame->rcx);
 		frame->rax = val & 0xffffffff;
 		frame->rdx = val >> 32;
 		frame->rip += 2;

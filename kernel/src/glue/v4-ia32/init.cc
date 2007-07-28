@@ -236,12 +236,12 @@ static void setup_msrs()
 {
 #ifdef CONFIG_IA32_SYSENTER
     /* here we also setup the model specific registers for the syscalls */
-    ia32_wrmsr(IA32_SYSENTER_CS_MSR, (u32_t)(IA32_KCS));
-    ia32_wrmsr(IA32_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
+    x86_wrmsr(IA32_SYSENTER_CS_MSR, (u32_t)(IA32_KCS));
+    x86_wrmsr(IA32_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
 #if defined(CONFIG_IO_FLEXPAGES)
-    ia32_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
+    x86_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
 #else
-    ia32_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
+    x86_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
 #endif
 #endif
 
@@ -275,7 +275,7 @@ static void setup_msrs()
 	((u64_t) IA32_PAT_WC << (8*4)) | ((u64_t) IA32_PAT_WT << (8*5)) |
 	((u64_t) IA32_PAT_UM << (8*6)) | ((u64_t) IA32_PAT_WP << (8*7));
 
-    ia32_wrmsr (IA32_CR_PAT_MSR, pats);
+    x86_wrmsr (IA32_CR_PAT_MSR, pats);
 #endif
 }
 
@@ -348,7 +348,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
 #endif
     
     /* Allow performance counters for users */
-    ia32_cr4_set(X86_CR4_PCE);  
+    x86_cr4_set(X86_CR4_PCE);  
 #endif /* defined(CONFIG_PERFMON) */
 
     /* initialize the CPU specific mappings */
@@ -694,7 +694,7 @@ static void smp_ap_commence()
     /* finally we sync the time-stamp counters */
     while( smp_commence_lock.is_locked() );
 
-    ia32_settsc(0);
+    x86_settsc(0);
 }
 
 static void smp_bp_commence()
@@ -704,8 +704,8 @@ static void smp_bp_commence()
 
     // now release all at once
     smp_commence_lock.unlock();
-    
-    ia32_settsc(0);
+
+    x86_settsc(0);
 }
 
 /**

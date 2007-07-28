@@ -135,7 +135,7 @@ extern "C" amd64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
     {
 	procdesc_t * pdesc = get_kip()->processor_info.get_procdesc(0);
 	ASSERT(pdesc);
-	ret.rax = amd64_rdtsc() / (pdesc->internal_freq / 1000);
+	ret.rax = x86_rdtsc() / (pdesc->internal_freq / 1000);
 	ret.rdx = 0;
 	return ret;
     }

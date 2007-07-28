@@ -85,10 +85,10 @@ DECLARE_CMD (cmd_dump_msrs, arch, 'm', "dumpmsrs",
 
 CMD (cmd_dump_msrs, cg)
 {
-	printf("LASTBRANCH_FROM_IP: %x\n", amd64_rdmsr (AMD64_LASTBRANCHFROMIP));
-	printf("LASTBRANCH_TO_IP:   %x\n", amd64_rdmsr (AMD64_LASTBRANCHTOIP));
-	printf("LASTINT_FROM_IP:    %x\n", amd64_rdmsr (AMD64_LASTINTFROMIP));
-	printf("LASTINT_TO_IP:      %x\n", amd64_rdmsr (AMD64_LASTINTTOIP));
+	printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (AMD64_LASTBRANCHFROMIP));
+	printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (AMD64_LASTBRANCHTOIP));
+	printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (AMD64_LASTINTFROMIP));
+	printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (AMD64_LASTINTTOIP));
     return CMD_NOQUIT;
 }
 #endif
@@ -262,7 +262,7 @@ CMD(cmd_gdt, cg)
     printf("dpl=%d 64-bit ", tss->x.d.dpl);
     printf("tss\n");
 
-    printf("FS_MSR = %16x\nGS_MSR = %16x\n", amd64_rdmsr(AMD64_FS_MSR), amd64_rdmsr(AMD64_GS_MSR));
+    printf("FS_MSR = %16x\nGS_MSR = %16x\n", x86_rdmsr(AMD64_FS_MSR), x86_rdmsr(AMD64_GS_MSR));
 
     return CMD_NOQUIT;
 }

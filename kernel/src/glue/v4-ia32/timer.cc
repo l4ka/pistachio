@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/timer.cc
  * Description:   Implements RTC timer
@@ -102,11 +102,11 @@ void SECTION (".init") timer_t::init_cpu()
     /* calculate processor speed */
     wait_for_second_tick();
 
-    u64_t cpu_cycles = ia32_rdtsc();
+    u64_t cpu_cycles = x86_rdtsc();
 
     wait_for_second_tick();
     
-    cpu_cycles = ia32_rdtsc() - cpu_cycles;
+    cpu_cycles = x86_rdtsc() - cpu_cycles;
 
     proc_freq = cpu_cycles / 1000;
     bus_freq = 0;

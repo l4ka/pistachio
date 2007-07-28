@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2005,  Karlsruhe University
+ * Copyright (C) 2004-2005, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/hwcr_k8.h
  * Description:   
@@ -88,218 +88,218 @@ public:
     
     static bool is_smm_locked() 
     { 
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SMMLOCK); 
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SMMLOCK); 
     }
     static void enable_smmlock() 
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SMMLOCK);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SMMLOCK);
     }
     static void disable_smmlock()
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMMLOCK);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMMLOCK);
     }
 
     
     static bool is_slowfence_enabled() 
     { 
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SLOWFENCE); 
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SLOWFENCE); 
     }	
     static void enable_slowfence()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SLOWFENCE);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SLOWFENCE);
     }
 
     static void disable_slowfence()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMMLOCK);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMMLOCK);
     }
 	
     
     static bool is_ptemem_cached() 
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_TLBCACHEDIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_TLBCACHEDIS); 
     }	
     static void enable_ptemem_cached()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_TLBCACHEDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_TLBCACHEDIS);
     }
     static void disable_ptemem_cached()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_TLBCACHEDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_TLBCACHEDIS);
     }
 	
 
     static bool is_invd_wbinvd() { 
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_INVD_WBINVD); 
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_INVD_WBINVD); 
     }	
     static void enable_invd_wbinvd()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_INVD_WBINVD);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_INVD_WBINVD);
     }
     static void disable_invd_wbinvd()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_INVD_WBINVD);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_INVD_WBINVD);
     }
 
 
     static bool is_flushfilter_enabled() 
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_FFDIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_FFDIS); 
     }
 
     static void enable_flushfilter()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_FFDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_FFDIS);
     }
     static void disable_flushfilter()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_FFDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_FFDIS);
     }
 
 
     static bool is_lockprefix_enabled() 
     {
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_DISLOCK); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_DISLOCK); 
     }	
     static void enable_lockprefix()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_DISLOCK);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_DISLOCK);
     }
     static void disable_lockprefix()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_DISLOCK);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_DISLOCK);
     }
 	
 
     static bool is_ignne_emulation_enabled() 
     {
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_IGNNE_EM); 
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_IGNNE_EM); 
     }	
     static void enable_ignne_emulation()
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_IGNNE_EM);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_IGNNE_EM);
     }
     static void disable_ignne_emulation()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_IGNNE_EM);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_IGNNE_EM);
     }
 
     
     static bool is_hltx_spc_enabled() 
     {
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_HLTXSPCYCEN);
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_HLTXSPCYCEN);
     }	
     static void enable_hltx_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_HLTXSPCYCEN);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_HLTXSPCYCEN);
     }
     static void disable_hltx_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_HLTXSPCYCEN);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_HLTXSPCYCEN);
     }
 
 
     static bool is_smi_spc_enabled()
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SMISPCYCDIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SMISPCYCDIS); 
     }	
     static void enable_smi_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMISPCYCDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SMISPCYCDIS);
     }
     static void disable_smi_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SMISPCYCDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SMISPCYCDIS);
     }
 
 
     static bool is_rsm_spc_enabled() 
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_RSMSPCYCDIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_RSMSPCYCDIS); 
     }	
     static void enable_rsm_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_RSMSPCYCDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_RSMSPCYCDIS);
     }
     static void disable_rsm_spc()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_RSMSPCYCDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_RSMSPCYCDIS);
     }
 
 
     static bool is_sse_enabled()
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SSEDIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_SSEDIS); 
     }
     static void enable_sse()   
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SSEDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_SSEDIS);
     }
     static void disable_sse()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SSEDIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_SSEDIS);
     }
 
     
 	
     static bool is_wrap32_enabled() 
     { 
-	return !(ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_WRAP32DIS); 
+	return !(x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_WRAP32DIS); 
     }	
     static void enable_wrap32()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_WRAP32DIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_WRAP32DIS);
     }
 
     static void disable_wrap32()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_WRAP32DIS);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_WRAP32DIS);
     }
 
     
 
     static bool is_mci_status_write_enabled() 
     { 
-	return (ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_MCIS_WREN); 
+	return (x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_MCIS_WREN); 
     }
     static void enable_mci_status_write()   
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_MCIS_WREN);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr | IA32_HWCR_MCIS_WREN);
     }
 	
     static void disable_mci_status_write()    
     {
-	u64_t hwcr = ia32_rdmsr(IA32_HWCR_MSR);
-	ia32_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_MCIS_WREN);
+	u64_t hwcr = x86_rdmsr(IA32_HWCR_MSR);
+	x86_wrmsr(IA32_HWCR_MSR, hwcr & ~IA32_HWCR_MCIS_WREN);
     }
 
     static u8_t get_startup_fid_status()    {
-	return (u8_t) ((ia32_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_START_FID) >> 19);
+	return (u8_t) ((x86_rdmsr(IA32_HWCR_MSR) & IA32_HWCR_START_FID) >> 19);
     }
 	
 };

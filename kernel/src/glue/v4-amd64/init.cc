@@ -377,33 +377,33 @@ static void setup_msrs()
 {
     
     /* sysret (63..48) / syscall (47..32)  CS/SS MSR */
-    amd64_wrmsr(AMD64_STAR_MSR, ((AMD64_SYSRETCS << 48) | (AMD64_SYSCALLCS << 32)));
+    x86_wrmsr(AMD64_STAR_MSR, ((AMD64_SYSRETCS << 48) | (AMD64_SYSCALLCS << 32)));
     
     /* long mode syscalls MSR */
-    amd64_wrmsr(AMD64_LSTAR_MSR, (u64_t)(syscall_entry));
+    x86_wrmsr(AMD64_LSTAR_MSR, (u64_t)(syscall_entry));
 
     /* compatibility mode syscalls MSR */
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
 #if defined(CONFIG_CPU_AMD64_EM64T)
-    amd64_wrmsr(AMD64_SYSENTER_CS_MSR, AMD64_SYSCALLCS);
-    amd64_wrmsr(AMD64_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
+    x86_wrmsr(AMD64_SYSENTER_CS_MSR, AMD64_SYSCALLCS);
+    x86_wrmsr(AMD64_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
 #if defined(CONFIG_IO_FLEXPAGES)
-    amd64_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(TSS_MAPPING) + 4);
+    x86_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(TSS_MAPPING) + 4);
 #else
-    amd64_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
+    x86_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
 #endif
 #else /* !defined(CONFIG_CPU_AMD64_EM64T) */
-    amd64_wrmsr(AMD64_CSTAR_MSR, (u64_t)(syscall_entry_32));
+    x86_wrmsr(AMD64_CSTAR_MSR, (u64_t)(syscall_entry_32));
 #endif /* !defined(CONFIG_CPU_AMD64_EM64T) */
 #endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
 
     /* long mode syscall RFLAGS MASK  */
-    amd64_wrmsr(AMD64_SFMASK_MSR, (u64_t)(AMD64_SYSCALL_FLAGMASK));
+    x86_wrmsr(AMD64_SFMASK_MSR, (u64_t)(AMD64_SYSCALL_FLAGMASK));
 
     /* enable syscall/sysret in EFER */
-    word_t efer = amd64_rdmsr(AMD64_EFER_MSR);
+    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
     efer |= AMD64_EFER_SCE;
-    amd64_wrmsr(AMD64_EFER_MSR, efer);
+    x86_wrmsr(AMD64_EFER_MSR, efer);
     
 }
 
@@ -440,7 +440,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
     
      /* Allow performance counters for users */
     TRACE_INIT("Enabling performance monitoring at user level (CPU %d)\n", cpuid);
-    amd64_cr4_set(X86_CR4_PCE);  
+    x86_cr4_set(X86_CR4_PCE);  
 #endif /* defined(CONFIG_PERFMON) */
 
     TRACE_INIT("Enabling global pages (CPU %d)\n", cpuid);
@@ -679,7 +679,7 @@ static void smp_ap_commence()
     while( smp_commence_lock.is_locked() );
 
     /* TSC should not be written, but we do it anyway ;-) */
-    amd64_settsc(0);
+    x86_settsc(0);
 }
 
 static void smp_bp_commence()
@@ -690,7 +690,7 @@ static void smp_bp_commence()
     // now release all at once
     smp_commence_lock.unlock();    
 
-    amd64_settsc(0);
+    x86_settsc(0);
 }
 
 /**

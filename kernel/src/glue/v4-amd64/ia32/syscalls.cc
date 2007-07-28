@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2006,  Karlsruhe University
+ * Copyright (C) 2003-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/ia32/syscalls.cc
  * Description:   syscall dispatcher for 32-bit programs
@@ -116,7 +116,7 @@ extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
     {
 	procdesc_t * pdesc = get_kip()->processor_info.get_procdesc(0);
 	ASSERT (pdesc);
-	ret.rax = amd64_rdtsc() / (pdesc->internal_freq / 1000);
+	ret.rax = x86_rdtsc() / (pdesc->internal_freq / 1000);
 	ret.rdx = ret.rax >> 32;
 	return ret;
     }

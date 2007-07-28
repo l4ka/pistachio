@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006-2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/perfmon.h
  * Description:   Performance monitoring counter macros for IA32/AMD64 CPUS.
@@ -139,11 +139,7 @@
 
 #endif /* defined(CONFIG_CPU_IA32_I686) */
 
-#if defined(CONFIG_ARCH_IA32)
-#define arch_wrmsr			ia32_wrmsr
-#elif defined(CONFIG_ARCH_AMD64)
-#define arch_wrmsr			amd64_wrmsr
-#endif
+#define arch_wrmsr			x86_wrmsr
 
 INLINE void setup_perfmon_cpu(word_t cpuid)
 {
@@ -162,7 +158,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
      arch_wrmsr(PMC_MSR_EVTSEL0, 0x4100C0);  // ENABLE + USER + INST_RETIRED
      arch_wrmsr(PMC_MSR_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
 
-     //ia32_cr4_set(IA32_CR4_PCE); // allow rdpmc in user mode
+     //x86_cr4_set(IA32_CR4_PCE); // allow rdpmc in user mode
 
 #elif defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_AMD64_P4)
 

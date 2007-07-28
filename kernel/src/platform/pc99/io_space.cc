@@ -221,7 +221,7 @@ void init_io_space(void)
 #if defined(CONFIG_IA32_PVI)
     /* Enable PVI Bit */
 #warning Setting PVI bit in CR4 will not work with vmware
-    ia32_cr4_set(X86_CR4_PVI);
+    x86_cr4_set(X86_CR4_PVI);
 #endif
     
 

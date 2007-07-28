@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
  *                
  * File path:     kdb/arch/ia32/stepping.cc
  * Description:   Single stepping for IA-32
@@ -58,7 +58,7 @@ CMD (cmd_branchstep, cg)
     ia32_exceptionframe_t * f = (ia32_exceptionframe_t *) kdb.kdb_param;
 
     f->eflags |= (1 << 8) + (1 << 16);	/* RF + TF */
-    ia32_wrmsr (IA32_DEBUGCTL, ((1 << 0) + (1 << 1))); /* LBR + BTF */
+    x86_wrmsr (IA32_DEBUGCTL, ((1 << 0) + (1 << 1))); /* LBR + BTF */
     ia32_single_step_on_branches = true;
 
     return CMD_QUIT;

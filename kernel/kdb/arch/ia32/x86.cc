@@ -85,16 +85,16 @@ DECLARE_CMD (cmd_dump_msrs, arch, 'm', "dumpmsrs",
 CMD (cmd_dump_msrs, cg)
 {
 #if defined(CONFIG_CPU_IA32_I686)
-	printf("LASTBRANCH_FROM_IP: %x\n", ia32_rdmsr (IA32_LASTBRANCHFROMIP));
-	printf("LASTBRANCH_TO_IP:   %x\n", ia32_rdmsr (IA32_LASTBRANCHTOIP));
-	printf("LASTINT_FROM_IP:    %x\n", ia32_rdmsr (IA32_LASTINTFROMIP));
-	printf("LASTINT_TO_IP:      %x\n", ia32_rdmsr (IA32_LASTINTTOIP));
+	printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (IA32_LASTBRANCHFROMIP));
+	printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (IA32_LASTBRANCHTOIP));
+	printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (IA32_LASTINTFROMIP));
+	printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (IA32_LASTINTTOIP));
 #endif
 
 #if defined(CONFIG_CPU_IA32_P4)
 	for (int i = 0; i < 18; i++) {
-	    u64_t pmc = ia32_rdmsr (IA32_COUNTER_BASE + i);
-	    u64_t cccr = ia32_rdmsr (IA32_CCCR_BASE + i);
+	    u64_t pmc = x86_rdmsr (IA32_COUNTER_BASE + i);
+	    u64_t cccr = x86_rdmsr (IA32_CCCR_BASE + i);
 	    printf("PMC/CCCR %02u: 0x%08x%08x/0x%08x%08x\n",
 		   i,
 		   (u32_t)(pmc >> 32), (u32_t)pmc,

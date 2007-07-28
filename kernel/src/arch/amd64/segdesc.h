@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2006,  Karlsruhe University
+ * Copyright (C) 2003, 2006-2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/segdesc.h
  * Description:   paste ia32/segdesc.h, s/ia32/amd64
@@ -95,7 +95,7 @@ INLINE void amd64_segdesc_t::set_seg(u64_t base, segtype_e type, int dpl, mode_e
     if (msr != msr_none && (base >> 32))
     {
 	u32_t reg = (msr == msr_fs) ? AMD64_FS_MSR : AMD64_GS_MSR;
-	amd64_wrmsr(reg, base);
+	x86_wrmsr(reg, base);
     }
     
     x.d.base_low   = base & 0xFFFFFF;
