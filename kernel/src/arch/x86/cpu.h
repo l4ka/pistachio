@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2001-2004, 2007,  Karlsruhe University
  *
- * File path:     arch/x86/instr.h
+ * File path:     arch/x86/cpu.h
  * Description:   x86 helper functions to access special instructions
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
  * $Id$
  *
  ********************************************************************/
-#ifndef __ARCH__X86__INSTR_H__
-#define __ARCH__X86__INSTR_H__
+#ifndef __ARCH__X86__CPU_H__
+#define __ARCH__X86__CPU_H__
 
 
 INLINE u64_t x86_rdpmc(const int ctrsel)
@@ -236,4 +236,4 @@ INLINE void x86_invlpg (word_t addr)
             : "r" (addr));
 }
 
-#endif /* !__ARCH__X86__INSTR_H__ */
+#endif /* !__ARCH__X86__CPU_H__ */
