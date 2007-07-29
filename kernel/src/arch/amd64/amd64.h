@@ -50,13 +50,6 @@
 /*
  * Model specific register locations.
  */
- 
-#define AMD64_TSC_MSR                   0x0010  /* Time Stamp Counter */
- 
-#define AMD64_SYSENTER_CS_MSR           0x0174  /* Sysenter Code Segment */
-#define AMD64_SYSENTER_ESP_MSR          0x0175  /* Sysenter Stack Pointer */
-#define AMD64_SYSENTER_EIP_MSR          0x0176  /* Sysenter Instruction Pointer */
- 
 #define AMD64_MCG_CAP_MSR               0x0179  /* Machine Check Global Capabilities */
 #define AMD64_MCG_STATUS_MSR            0x0179  /* Machine Check Global Status  */
 #define AMD64_MCG_CTL_MSR               0x0179  /* Machine Check Global Control  */

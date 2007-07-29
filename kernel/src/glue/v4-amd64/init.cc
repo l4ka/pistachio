@@ -385,12 +385,12 @@ static void setup_msrs()
     /* compatibility mode syscalls MSR */
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
 #if defined(CONFIG_CPU_AMD64_EM64T)
-    x86_wrmsr(AMD64_SYSENTER_CS_MSR, AMD64_SYSCALLCS);
-    x86_wrmsr(AMD64_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
+    x86_wrmsr(X86_SYSENTER_CS_MSR, AMD64_SYSCALLCS);
+    x86_wrmsr(X86_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
 #if defined(CONFIG_IO_FLEXPAGES)
-    x86_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(TSS_MAPPING) + 4);
+    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u64_t)(TSS_MAPPING) + 4);
 #else
-    x86_wrmsr(AMD64_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
+    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
 #endif
 #else /* !defined(CONFIG_CPU_AMD64_EM64T) */
     x86_wrmsr(AMD64_CSTAR_MSR, (u64_t)(syscall_entry_32));

@@ -236,12 +236,12 @@ static void setup_msrs()
 {
 #ifdef CONFIG_IA32_SYSENTER
     /* here we also setup the model specific registers for the syscalls */
-    x86_wrmsr(IA32_SYSENTER_CS_MSR, (u32_t)(X86_KCS));
-    x86_wrmsr(IA32_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
+    x86_wrmsr(X86_SYSENTER_CS_MSR, (u32_t)(X86_KCS));
+    x86_wrmsr(X86_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
 #if defined(CONFIG_IO_FLEXPAGES)
-    x86_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
+    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
 #else
-    x86_wrmsr(IA32_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
+    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
 #endif
 #endif
 
