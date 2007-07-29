@@ -146,16 +146,6 @@
 # define IA32_PEBS_ENABLE_PEBS		(1 << 25)
 #endif /* CONFIG_CPU_IA32_P4 */
 
-/* Page Attribute Table (PAT) */
-#if defined(CONFIG_IA32_PAT)
-# define IA32_CR_PAT_MSR		0x277
-# define IA32_PAT_UC			0x00
-# define IA32_PAT_WC			0x01
-# define IA32_PAT_WT			0x04
-# define IA32_PAT_WP			0x05
-# define IA32_PAT_WB			0x06
-# define IA32_PAT_UM			0x07
-#endif
 
 /**********************************************************************
  *   Cache line configurations

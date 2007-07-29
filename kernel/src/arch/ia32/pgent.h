@@ -199,7 +199,7 @@ public:
 	{
 	    word_t pat = (pgent.pg.write_through ? 1 : 0) |
 		(pgent.pg.cache_disabled ? 2 : 0);
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
 	    if (pgsize == size_4k ? pgent.pg.size : pgent.pg4m.pat)
 		pat |= 4;
 #endif
@@ -262,7 +262,7 @@ public:
 #endif
 			     (attrib & 1 ? IA32_PAGE_WRITE_THROUGH : 0) |
 			     (attrib & 2 ? IA32_PAGE_CACHE_DISABLE : 0) |
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
 			     (attrib & 4 ?
 			      (1UL << (pgsize == size_4k ? 7 : 12)) : 0) |
 #endif
@@ -347,7 +347,7 @@ public:
 	    if (pgent.pg.global)
 		printf ("global ");
 
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
 	    if (pgsize == size_4k ? pgent.pg.size : pgent.pg4m.pat)
 		printf (pgent.pg.cache_disabled ? "WP" :
 			pgent.pg.write_through  ? "WT" : "WC");

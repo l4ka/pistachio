@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/ptab.h
  * Description:   pagetable management
@@ -117,7 +117,7 @@ public:
     void set_cacheability (bool cacheable, pagesize_e size)
 	{
 	    this->pg.cache_disabled = !cacheable;
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
 	    if (size == size_4k) 
 		pg.size = 0;
 	    else
@@ -129,7 +129,7 @@ public:
 	{
 	    pg.write_through  = (pat & 1) ? 1 : 0;
 	    pg.cache_disabled = (pat & 2) ? 1 : 0;
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
 	    if (size == size_4k)
 		pg.size  = (pat & 4) ? 1 : 0;
 	    else

@@ -260,7 +260,7 @@ static void setup_msrs()
 #endif
 #endif
 
-#if defined(CONFIG_IA32_PAT)
+#if defined(CONFIG_X86_PAT)
     // Initialize all PAT values to their default after-reset state,
     // except PAT4 which is set to write-combining (instead of
     // write-back), and PAT7 which is set to write-protected (instead
@@ -270,12 +270,12 @@ static void setup_msrs()
     // for the PCD and PWT bits if the PAT bit is not set.
 
     u64_t pats =
-	((u64_t) IA32_PAT_WB << (8*0)) | ((u64_t) IA32_PAT_WT << (8*1)) |
-	((u64_t) IA32_PAT_UM << (8*2)) | ((u64_t) IA32_PAT_UC << (8*3)) |
-	((u64_t) IA32_PAT_WC << (8*4)) | ((u64_t) IA32_PAT_WT << (8*5)) |
-	((u64_t) IA32_PAT_UM << (8*6)) | ((u64_t) IA32_PAT_WP << (8*7));
+	((u64_t) X86_PAT_WB << (8*0)) | ((u64_t) X86_PAT_WT << (8*1)) |
+	((u64_t) X86_PAT_UM << (8*2)) | ((u64_t) X86_PAT_UC << (8*3)) |
+	((u64_t) X86_PAT_WC << (8*4)) | ((u64_t) X86_PAT_WT << (8*5)) |
+	((u64_t) X86_PAT_UM << (8*6)) | ((u64_t) X86_PAT_WP << (8*7));
 
-    x86_wrmsr (IA32_CR_PAT_MSR, pats);
+    x86_wrmsr (X86_CR_PAT_MSR, pats);
 #endif
 }
 
