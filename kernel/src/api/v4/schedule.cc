@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     api/v4/schedule.cc
  * Description:   Scheduling functions
@@ -681,6 +681,7 @@ void SECTION(".init") scheduler_t::init( bool bootcpu )
 
     get_idle_tcb()->create_kernel_thread(NILTHREAD, &__idle_utcb);
     /* set idle-magic */
+    get_idle_tcb()->set_space(get_kernel_space());
     get_idle_tcb()->myself_global.set_raw((word_t)0x1d1e1d1e1d1e1d1eULL);
     get_idle_tcb()->create_startup_stack(idle_thread);
     if( bootcpu )
