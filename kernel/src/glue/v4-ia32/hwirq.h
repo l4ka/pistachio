@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/hwirq.h
  * Description:   Macros to define interrupt handler stubs for IA32
@@ -49,7 +49,7 @@ extern "C" void hwirq_##num();                                  \
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
 #define __SET_KDS						\
-	"	mov	$" MKSTR(IA32_KDS) ", %eax		\n"\
+	"	mov	$" MKSTR(X86_KDS) ", %eax		\n"\
 	"	mov	%eax, %ds				\n"
 #else
 #define __SET_KDS

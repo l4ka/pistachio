@@ -116,7 +116,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 	"D"(&dest->get_utcb()->mr[start]));
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (X86_UDS));
+    asm volatile ("mov %0, %%es" : : "r" (IA32_UDS));
 #endif
 }
 
@@ -560,7 +560,7 @@ INLINE void ipc_string_copy(void *dst, const void *src, word_t len)
 {
     word_t dummy1, dummy2, dummy3;
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (IA32_KDS));
+    asm volatile ("mov %0, %%es" : : "r" (X86_KDS));
 #endif
     asm volatile (
 	    "jecxz 1f\n"
