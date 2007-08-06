@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-amd64/space.h
  * Description:   AMD64 space_t implementation
@@ -432,7 +432,7 @@ INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)
 INLINE void space_t::flush_tlb (space_t * curspace)
 {
     if (this == curspace)
-	amd64_mmu_t::flush_tlb ();
+	x86_mmu_t::flush_tlb ();
 }
 
 /**
@@ -443,7 +443,7 @@ INLINE void space_t::flush_tlbent (space_t * curspace, addr_t addr,
 				   word_t log2size)
 {
     if (this == curspace)
-	amd64_mmu_t::flush_tlbent ((u64_t) addr);
+	x86_mmu_t::flush_tlbent ((u64_t) addr);
 }
 
 /**
