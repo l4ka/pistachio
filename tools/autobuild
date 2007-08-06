@@ -59,7 +59,7 @@ function do_configuration() {
 			cd ..
 		else
 			echo "$TOPDIR/user/configure doesn't exist"; echo
-			cat user/README.CVS
+			cat user/README.HG
 			echo; echo "You have:"; echo
 			autoheader --version | head -1
 			autoconf --version | head -1
