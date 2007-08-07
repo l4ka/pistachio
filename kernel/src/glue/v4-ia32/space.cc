@@ -278,8 +278,8 @@ INLINE void tag_flush_remote (space_t * curspace)
 	// For small spaces we must also do TLB shootdown if current
 	// space is small, or current active space on remote CPU is a
 	// small space.
-	if ((active_cpu_space[cpu].space &&
-	     active_cpu_space[cpu].space->is_small ()) ||
+	if ((active_cpu_space.get(cpu) &&
+	     active_cpu_space.get(cpu)->is_small ()) ||
 	    curspace->is_small ())
 	{
 	    cpu_remote_flush |= (1 << cpu);
