@@ -36,22 +36,22 @@
 /**********************************************************************
  *    FLAGS register
  **********************************************************************/
-#define X86_FLAGS_CF    (1UL <<  0)       /* carry flag                   */
-#define X86_FLAGS_PF    (1UL <<  2)       /* parity flag                  */
-#define X86_FLAGS_AF    (1UL <<  4)       /* auxiliary carry flag         */
-#define X86_FLAGS_ZF    (1UL <<  6)       /* zero flag                    */
-#define X86_FLAGS_SF    (1UL <<  7)       /* sign flag                    */
-#define X86_FLAGS_TF    (1UL <<  8)       /* trap flag                    */
-#define X86_FLAGS_IF    (1UL <<  9)       /* interrupt enable flag        */
-#define X86_FLAGS_DF    (1UL << 10)       /* direction flag               */
-#define X86_FLAGS_OF    (1UL << 11)       /* overflow flag                */
-#define X86_FLAGS_NT    (1UL << 14)       /* nested task flag             */
-#define X86_FLAGS_RF    (1UL << 16)       /* resume flag                  */
-#define X86_FLAGS_VM    (1UL << 17)       /* virtual 8086 mode            */
-#define X86_FLAGS_AC    (1UL << 18)       /* alignement check             */
-#define X86_FLAGS_VIF   (1UL << 19)       /* virtual interrupt flag       */
-#define X86_FLAGS_VIP   (1UL << 20)       /* virtual interrupt pending    */
-#define X86_FLAGS_ID    (1UL << 21)       /* CPUID flag                   */
+#define X86_FLAGS_CF    (__UL(1) <<  0)       /* carry flag                   */
+#define X86_FLAGS_PF    (__UL(1) <<  2)       /* parity flag                  */
+#define X86_FLAGS_AF    (__UL(1) <<  4)       /* auxiliary carry flag         */
+#define X86_FLAGS_ZF    (__UL(1) <<  6)       /* zero flag                    */
+#define X86_FLAGS_SF    (__UL(1) <<  7)       /* sign flag                    */
+#define X86_FLAGS_TF    (__UL(1) <<  8)       /* trap flag                    */
+#define X86_FLAGS_IF    (__UL(1) <<  9)       /* interrupt enable flag        */
+#define X86_FLAGS_DF    (__UL(1) << 10)       /* direction flag               */
+#define X86_FLAGS_OF    (__UL(1) << 11)       /* overflow flag                */
+#define X86_FLAGS_NT    (__UL(1) << 14)       /* nested task flag             */
+#define X86_FLAGS_RF    (__UL(1) << 16)       /* resume flag                  */
+#define X86_FLAGS_VM    (__UL(1) << 17)       /* virtual 8086 mode            */
+#define X86_FLAGS_AC    (__UL(1) << 18)       /* alignement check             */
+#define X86_FLAGS_VIF   (__UL(1) << 19)       /* virtual interrupt flag       */
+#define X86_FLAGS_VIP   (__UL(1) << 20)       /* virtual interrupt pending    */
+#define X86_FLAGS_ID    (__UL(1) << 21)       /* CPUID flag                   */
 #define X86_FLAGS_IOPL(x)       ((x & 3) << 12) /* the IO privilege level field */
 
 
@@ -60,34 +60,34 @@
  *    control register bits (CR0, CR3, CR4)
  **********************************************************************/
 
-#define X86_CR0_PE (1UL <<  0)   /* enable protected mode            */
-#define X86_CR0_MP (1UL <<  1)   /* monitor coprocessor              */
-#define X86_CR0_EM (1UL <<  2)   /* disable fpu                      */
-#define X86_CR0_TS (1UL <<  3)   /* task switched                    */
-#define X86_CR0_ET (1UL <<  4)   /* extension type (always 1)        */
-#define X86_CR0_NE (1UL <<  5)   /* numeric error reporting mode     */
-#define X86_CR0_WP (1UL << 16)   /* force write protection on user
+#define X86_CR0_PE 	(__UL(1) <<  0)   /* enable protected mode            */
+#define X86_CR0_MP 	(__UL(1) <<  1)   /* monitor coprocessor              */
+#define X86_CR0_EM 	(__UL(1) <<  2)   /* disable fpu                      */
+#define X86_CR0_TS 	(__UL(1) <<  3)   /* task switched                    */
+#define X86_CR0_ET 	(__UL(1) <<  4)   /* extension type (always 1)        */
+#define X86_CR0_NE 	(__UL(1) <<  5)   /* numeric error reporting mode     */
+#define X86_CR0_WP 	(__UL(1) << 16)   /* force write protection on user
                                     read only pages for kernel       */
-#define X86_CR0_NW (1UL << 29)   /* not write through                */
-#define X86_CR0_CD (1UL << 30)   /* cache disabled                   */
-#define X86_CR0_PG (1UL << 31)   /* enable paging                    */
+#define X86_CR0_NW 	(__UL(1) << 29)   /* not write through                */
+#define X86_CR0_CD 	(__UL(1) << 30)   /* cache disabled                   */
+#define X86_CR0_PG 	(__UL(1) << 31)   /* enable paging                    */
 
-#define X86_CR3_PCD    (1UL <<  3)   /* page-level cache disable     */
-#define X86_CR3_PWT    (1UL <<  4)   /* page-level writes transparent*/
+#define X86_CR3_PCD    	(__UL(1) <<  3)   /* page-level cache disable     */
+#define X86_CR3_PWT    	(__UL(1) <<  4)   /* page-level writes transparent*/
 
-#define X86_CR4_VME    (1UL <<  0)   /* virtual 8086 mode extension  */
-#define X86_CR4_PVI    (1UL <<  1)   /* enable protected mode
+#define X86_CR4_VME    	(__UL(1) <<  0)   /* virtual 8086 mode extension  */
+#define X86_CR4_PVI    	(__UL(1) <<  1)   /* enable protected mode
                                         virtual interrupts           */
-#define X86_CR4_TSD    (1UL <<  2)   /* time stamp disable           */
-#define X86_CR4_DE     (1UL <<  3)   /* debug extensions             */
-#define X86_CR4_PSE    (1UL <<  4)   /* page size extension (4MB)    */
-#define X86_CR4_PAE    (1UL <<  5)   /* physical address extension   */
-#define X86_CR4_MCE    (1UL <<  6)   /* machine check extensions     */
-#define X86_CR4_PGE    (1UL <<  7)   /* enable global pages          */
-#define X86_CR4_PCE    (1UL <<  8)   /* allow user to use rdpmc      */
-#define X86_CR4_OSFXSR (1UL <<  9)   /* enable fxsave/fxrstor + sse  */
-#define X86_CR4_OSXMMEXCPT (1UL << 10)   /* support for unmsk. SIMD exc. */
-#define X86_CR4_VMXE   (1UL << 13)  /* vmx extensions                */
+#define X86_CR4_TSD    	(__UL(1) <<  2)   /* time stamp disable           */
+#define X86_CR4_DE     	(__UL(1) <<  3)   /* debug extensions             */
+#define X86_CR4_PSE    	(__UL(1) <<  4)   /* page size extension (4MB)    */
+#define X86_CR4_PAE    	(__UL(1) <<  5)   /* physical address extension   */
+#define X86_CR4_MCE    	(__UL(1) <<  6)   /* machine check extensions     */
+#define X86_CR4_PGE    	(__UL(1) <<  7)   /* enable global pages          */
+#define X86_CR4_PCE    	(__UL(1) <<  8)   /* allow user to use rdpmc      */
+#define X86_CR4_OSFXSR 	(__UL(1) <<  9)   /* enable fxsave/fxrstor + sse  */
+#define X86_CR4_OSXMMEXCPT (__UL(1) << 10)   /* support for unmsk. SIMD exc. */
+#define X86_CR4_VMXE   	(__UL(1) << 13)  /* vmx extensions                */
 
 
 /**********************************************************************
@@ -142,9 +142,9 @@
 # define X86_ENABLE_PEBS                    (1 << 12)
 
 /* Preceise Event-Based Sampling (PEBS) support. */
-# define X86_PEBS_REPLAY_TAG_MASK           ((1UL << 12)-1)
-# define X86_PEBS_UOP_TAG                   (1UL << 24)
-# define X86_PEBS_ENABLE_PEBS               (1UL << 25)
+# define X86_PEBS_REPLAY_TAG_MASK           ((__UL(1) << 12)-1)
+# define X86_PEBS_UOP_TAG                   (__UL(1) << 24)
+# define X86_PEBS_ENABLE_PEBS               (__UL(1) << 25)
 
 /* Page Attribute Table (PAT) */
 # define X86_CR_PAT_MSR             0x00000277
