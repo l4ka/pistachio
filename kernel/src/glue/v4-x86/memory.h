@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002, 2007,  Karlsruhe University
  *                
- * File path:     platform/pc99/memory.h
+ * File path:     glue/v4-x86/memory.h
  * Description:   memory declarations
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -26,39 +26,52 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: memory.h,v 1.1 2004/03/01 16:36:31 stoess Exp $
+ * $Id$
  *                
  ********************************************************************/
-#ifndef __PLATFORM__PC99__MEMORY_H__
-#define __PLATFORM__PC99__MEMORY_H__
+#ifndef __GLUE__V4_X86__MEMORY_H__
+#define __GLUE__V4_X86__MEMORY_H__
 
 /* boot memory */
-extern char _start_bootmem[];
-extern char _end_bootmem[];
-extern char _start_bootmem_phys[];
-extern char _end_bootmem_phys[];
+extern u8_t _start_bootmem[];
+extern u8_t _end_bootmem[];
+extern u8_t _start_syscalls_phys[];
+extern u8_t _end_syscalls_phys[];
+extern u8_t _start_bootmem_phys[];
+extern u8_t _end_bootmem_phys[];
 
 /* kernel code and data */
-extern char _start_text_phys[];
-extern char _end_text_phys[];
-extern char _start_text[];
-extern char _end_text[];
-extern char _start_cpu_local[];
-extern char _end_cpu_local[];
+extern u8_t _start_text_phys[];
+extern u8_t _end_text_phys[];
+extern u8_t _start_text[];
+extern u8_t _end_text[];
+extern u8_t _start_cpu_local[];
+extern u8_t _end_cpu_local[];
 
 /* init section */
-extern char _start_init[];
-extern char _end_init[];
+extern u8_t _start_init[];
+extern u8_t _end_init[];
 
-#define start_text_phys		((addr_t)_start_text_phys)
-#define end_text_phys		((addr_t)_end_text_phys)
-#define start_bootmem_phys	((addr_t)_start_bootmem_phys)
-#define end_bootmem_phys	((addr_t)_end_bootmem_phys)
-#define start_bootmem		((addr_t)_start_bootmem)
-#define end_bootmem		((addr_t)_end_bootmem)
-#define start_init		((addr_t)_start_init)
-#define end_init		((addr_t)_end_init)
-#define start_cpu_local		((addr_t)_start_cpu_local)
-#define end_cpu_local		((addr_t)_end_cpu_local)
+/* syscalls */
+extern u8_t _start_syscalls[];
+extern u8_t _end_syscalls[];
 
-#endif /* !__PLATFORM__PC99__MEMORY_H__ */
+#define start_text_phys     ((addr_t)_start_text_phys)
+#define end_text_phys       ((addr_t)_end_text_phys)
+#define start_syscalls_phys ((addr_t) _start_syscalls_phys)
+#define end_syscalls_phys   ((addr_t) _end_syscalls_phys)
+#define start_bootmem_phys  ((addr_t)_start_bootmem_phys)
+#define end_bootmem_phys    ((addr_t)_end_bootmem_phys)
+
+#define start_bootmem       ((addr_t)_start_bootmem)
+#define end_bootmem         ((addr_t)_end_bootmem)
+#define start_init          ((addr_t)_start_init)
+#define end_init            ((addr_t)_end_init)
+#define start_init          ((addr_t)_start_init)
+#define end_init            ((addr_t)_end_init)
+#define start_cpu_local     ((addr_t)_start_cpu_local)
+#define end_cpu_local       ((addr_t)_end_cpu_local)
+#define start_syscalls      ((addr_t)_start_syscalls)
+#define end_syscalls        ((addr_t)_end_syscalls)
+
+#endif /* !__GLUE__V4_X86__MEMORY_H__ */

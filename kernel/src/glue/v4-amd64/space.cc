@@ -40,7 +40,7 @@
 #include INC_API(kernelinterface.h)
 #include INC_ARCHX(x86,mmu.h)
 #include INC_ARCH(trapgate.h)
-#include INC_GLUE(memory.h)
+#include INC_GLUEX(x86,memory.h)
 
 #include INC_API(smp.h)
 

@@ -42,7 +42,7 @@
 #include INC_ARCH(pgent.h)
 #include <linear_ptab.h>
 
-#include INC_GLUE(memory.h)
+#include INC_GLUEX(x86,memory.h)
 #include INC_GLUE(space.h)
 #include INC_API(kernelinterface.h)
 

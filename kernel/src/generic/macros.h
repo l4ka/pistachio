@@ -51,6 +51,7 @@
  *    #include INC_PLAT(x.h) includes include/platform/pc99/x.h
  *    #include INC_GLUE(x.h) includes include/glue/v4-ia32/x.h
  *    #include INC_ARCHX(x86,x.h) includes include/arch/x86/x.h
+ *    #include INC_GLUEX(x86,x.h) includes include/glue/v4-x86/x.h
  *
  */
 #define INC_ARCH(x)             <arch/__ARCH__/x>
@@ -63,6 +64,7 @@
 #define INC_GLUE_API_PLAT(x)    <glue/__API__-__PLATFORM__/x>
 
 #define INC_ARCHX(x,y)		<arch/x/y>
+#define INC_GLUEX(x,y)          <glue/__API__-x/y>
 
 
 /* use this to place code/data in a certain section */

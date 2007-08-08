@@ -61,7 +61,7 @@
 #include INC_GLUE(idt.h)
 #include INC_GLUE(space.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUE(memory.h)
+#include INC_GLUEX(x86,memory.h)
 #include INC_GLUE(timer.h)
 #include INC_GLUE(syscalls.h)
 
