@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003-2004,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/asmsyms.cc
- * Description:   Various asm definitions for ia32
+ * File path:     glue/v4-x86/asmsyms.cc
+ * Description:   Various asm definitions for x86
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: asmsyms.cc,v 1.4 2003/09/24 19:05:34 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #include <mkasmsym.h>
@@ -34,10 +34,14 @@
 #include INC_API(threadstate.h)
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
+#include INC_API(queuestate.h)
 
 MKASMSYM (TSTATE_POLLING, (word_t) thread_state_t::polling);
 MKASMSYM (TSTATE_WAITING_FOREVER, (word_t) thread_state_t::waiting_forever);
 MKASMSYM (TSTATE_RUNNING, (word_t) thread_state_t::running);
+
+MKASMSYM (QSTATE_WAKEUP, (word_t) queue_state_t::wakeup);
+MKASMSYM (QSTATE_LATE_WAKEUP, (word_t) queue_state_t::late_wakeup);
 
 MKASMSYM (OFS_KIP_PROCDESC, offsetof(kernel_interface_page_t, proc_desc_ptr));
 MKASMSYM (OFS_PROCDESC_INTFREQ, offsetof(procdesc_t, internal_freq));
