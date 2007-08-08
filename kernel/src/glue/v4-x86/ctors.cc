@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/ctors.cc
+ * File path:     glue/v4-x86/ctors.cc
  * Description:   Prioritized constructors support
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: ctors.cc,v 1.3 2003/09/24 19:05:34 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 

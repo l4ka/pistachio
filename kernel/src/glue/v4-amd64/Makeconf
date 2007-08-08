@@ -34,7 +34,9 @@ include $(SRCDIR)/src/glue/v4-x86/Makeconf
 LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker.lds
 
 SOURCES+=$(addprefix src/glue/v4-amd64/, \
-	space.cc smp.cc thread.cc debug.cc exception.cc init.cc idt.cc resources.cc ctors.cc trampoline.S trap.S user.cc syscalls.cc)
+	space.cc smp.cc thread.cc debug.cc \
+	exception.cc init.cc idt.cc resources.cc \
+	trampoline.S trap.S user.cc syscalls.cc)
 
 CFLAGS_$(CURDIR)/pagefault = -fomit-frame-pointer
 CFLAGS_$(CURDIR)/exception = -fomit-frame-pointer

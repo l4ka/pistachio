@@ -29,4 +29,4 @@
 ##                
 ######################################################################
 
-SOURCES+=$(addprefix src/glue/v4-x86/, asmsyms.cc)
+SOURCES+=$(addprefix src/glue/v4-x86/, asmsyms.cc ctors.cc)
