@@ -66,7 +66,7 @@ void timer_t::init_cpu()
     bool pmtimer = intctrl->has_pmtimer();
     
     // avoid competing for the RTC
-    static spinlock_t timer_lock;
+    static DEFINE_SPINLOCK(timer_lock);
 
 #if !defined(CONFIG_CPU_AMD64_SIMICS)
     TRACE_INIT("calculating processor speed...\n");
@@ -81,6 +81,7 @@ void timer_t::init_cpu()
     if (pmtimer)
     {
 	delay = 100;
+	timer_lock.lock();
 	intctrl->pmtimer_wait(delay);	
     }
     else
@@ -93,7 +94,10 @@ void timer_t::init_cpu()
     u32_t bus_cycles = local_apic.timer_get();
     
     if (pmtimer)
+    {
 	intctrl->pmtimer_wait(delay);	
+	timer_lock.unlock();
+    }
     else
     {
 	wait_for_second_tick();
