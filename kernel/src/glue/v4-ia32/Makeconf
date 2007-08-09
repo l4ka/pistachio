@@ -50,7 +50,7 @@ CFLAGS_$(CURDIR)/exception = -fomit-frame-pointer
 
 
 ifeq ("$(CONFIG_IOAPIC)","y")
-SOURCES += src/generic/acpi.cc src/glue/v4-ia32/timer-apic.cc
+SOURCES += src/generic/acpi.cc
 else
 SOURCES += src/glue/v4-ia32/timer.cc
 endif

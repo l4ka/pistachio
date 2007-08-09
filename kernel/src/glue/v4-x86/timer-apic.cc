@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/timer-apic.cc
+ * File path:     glue/v4-x86/timer-apic.cc
  * Description:   implementation of apic timer
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: timer-apic.cc,v 1.5 2003/09/24 19:05:34 skoglund Exp $
- *                
  ********************************************************************/
 #include INC_ARCH(trapgate.h)
 
@@ -45,7 +43,11 @@ timer_t timer UNIT("cpulocal");
 static local_apic_t<APIC_MAPPINGS> local_apic;
 
 extern "C" void timer_interrupt(void);
+#if defined(CONFIG_IS_64BIT)
+AMD64_EXC_NO_ERRORCODE(timer_interrupt, 0)
+#else
 IA32_EXC_NO_ERRORCODE(timer_interrupt, 0)
+#endif
 {
     local_apic.EOI();
 
@@ -56,7 +58,7 @@ IA32_EXC_NO_ERRORCODE(timer_interrupt, 0)
 
 void timer_t::init_global()
 {
-    TRACE_INIT("init_global timer - trap gate %d\n", IDT_LAPIC_TIMER);
+    TRACE_INIT("Init_global timer - trap gate %d\n", IDT_LAPIC_TIMER);
     idt.add_int_gate(IDT_LAPIC_TIMER, timer_interrupt);
 }
 
@@ -68,7 +70,8 @@ void timer_t::init_cpu()
     // avoid competing for the RTC
     static DEFINE_SPINLOCK(timer_lock);
 
-    TRACE_INIT("calculating processor speed...\n");
+#if !defined(CONFIG_CPU_AMD64_SIMICS)
+    TRACE_INIT("Calculating processor speed ...\n");
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
@@ -79,14 +82,14 @@ void timer_t::init_cpu()
     /* calculate processor speed */
     if (pmtimer)
     {
-	delay = 100;
-	timer_lock.lock();
-	intctrl->pmtimer_wait(delay);	
+        delay = 100;
+        timer_lock.lock();
+        intctrl->pmtimer_wait(delay);   
     }
     else
     {
-	timer_lock.lock();
-	wait_for_second_tick();
+        timer_lock.lock();
+        wait_for_second_tick();
     }
 
     u64_t cpu_cycles = x86_rdtsc();
@@ -94,15 +97,14 @@ void timer_t::init_cpu()
     
     if (pmtimer)
     {
-	intctrl->pmtimer_wait(delay);	
-	timer_lock.unlock();
+        timer_lock.unlock();
+        intctrl->pmtimer_wait(delay);   
     }
     else
     {
-	wait_for_second_tick();
-	timer_lock.unlock();
+        wait_for_second_tick();
+        timer_lock.unlock();
     }
-
     
     cpu_cycles = x86_rdtsc() - cpu_cycles;
     bus_cycles -= local_apic.timer_get();
@@ -112,10 +114,23 @@ void timer_t::init_cpu()
 
     proc_freq = cpu_cycles / delay;
     bus_freq = bus_cycles / delay;
+#else 
+    /*
+     * Set frequencies statically on SIMICS, waiting would take ages...
+     */
+
+    cpu_cycles = CONFIG_CPU_AMD64_SIMICS_SPEED * 1000 * 1000;
+    proc_freq = cpu_cycles  / 1000;
+    bus_freq = 0;
+
+#endif 
+
+
     TRACE_INIT("CPU speed: %d MHz, bus speed: %d MHz\n", 
-	       (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz);
+               (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz);
 
     /* now set timer IRQ to periodic timer */
     local_apic.timer_setup(IDT_LAPIC_TIMER, true);
     local_apic.timer_set( bus_cycles / (1000 * delay / TIMER_TICK_LENGTH) );
+
 }
