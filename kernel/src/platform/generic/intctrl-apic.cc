@@ -187,20 +187,36 @@ void SECTION (".init") intctrl_t::init_arch()
     TRACE_INIT("RSDT is at %p\n", rsdt);
     TRACE_INIT("XSDT is at %p\n", xsdt);
 
+    acpi_fadt_t *fadt = NULL, *_fadt;
     acpi_madt_t* madt = NULL, *_madt;
     
     if (xsdt_phys != NULL)
     {
 	xsdt = (acpi_xsdt_t*)acpi_remap(xsdt_phys);
+	fadt = (acpi_fadt_t*) xsdt->find("FACP", (addr_t) xsdt_phys);
 	madt = (acpi_madt_t*) xsdt->find("APIC", (addr_t) xsdt_phys);
     }
     if ((madt == NULL) && (rsdt_phys != NULL))
     {
 	rsdt = (acpi_rsdt_t*)acpi_remap(rsdt_phys);
 	rsdt->list(rsdt_phys);
+	fadt = (acpi_fadt_t*) rsdt->find("FACP", (addr_t) rsdt_phys);
 	madt = (acpi_madt_t*) rsdt->find("APIC", (addr_t) rsdt_phys);
     }
-    
+
+    if (fadt)	
+    {
+	_fadt = (acpi_fadt_t*)acpi_remap(fadt);
+	TRACE_INIT("FADT is at %p (remap %p), pmtimer IO port %x\n",
+		   fadt, _fadt, _fadt->pmtimer_ioport());
+	
+	pmtimer_available = true;
+	pmtimer_ioport = _fadt->pmtimer_ioport();
+    }
+    else 
+	pmtimer_available = false;
+
+
     if (madt == NULL)
 	return;
 
