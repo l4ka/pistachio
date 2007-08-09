@@ -62,34 +62,56 @@ void timer_t::init_global()
 
 void timer_t::init_cpu()
 { 
+    intctrl_t *intctrl = get_interrupt_ctrl();
+    bool pmtimer = intctrl->has_pmtimer();
+    
     // avoid competing for the RTC
     static spinlock_t timer_lock;
-    timer_lock.lock();
 
     TRACE_INIT("calculating processor speed...\n");
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
 
+   
+    word_t delay = 1000;
+    
     /* calculate processor speed */
-    wait_for_second_tick();
+    if (pmtimer)
+    {
+	delay = 100;
+	intctrl->pmtimer_wait(delay);	
+    }
+    else
+    {
+	timer_lock.lock();
+	wait_for_second_tick();
+    }
 
     u64_t cpu_cycles = x86_rdtsc();
     u32_t bus_cycles = local_apic.timer_get();
+    
+    if (pmtimer)
+	intctrl->pmtimer_wait(delay);	
+    else
+    {
+	wait_for_second_tick();
+	timer_lock.unlock();
+    }
 
-    wait_for_second_tick();
     
     cpu_cycles = x86_rdtsc() - cpu_cycles;
     bus_cycles -= local_apic.timer_get();
 
-    proc_freq = cpu_cycles / 1000;
-    bus_freq = bus_cycles / 1000;
+    word_t local_apic_cpu_mhz = cpu_cycles / (delay * 1000);
+    word_t local_apic_bus_mhz = bus_cycles / (delay * 1000);
 
+    proc_freq = cpu_cycles / delay;
+    bus_freq = bus_cycles / delay;
     TRACE_INIT("CPU speed: %d MHz, bus speed: %d MHz\n", 
-	       (word_t)(cpu_cycles / (1000000)), bus_cycles / (1000000));
+	       (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz);
 
     /* now set timer IRQ to periodic timer */
     local_apic.timer_setup(IDT_LAPIC_TIMER, true);
-    local_apic.timer_set( bus_cycles / (1000000 / TIMER_TICK_LENGTH) );
-    timer_lock.unlock();
+    local_apic.timer_set( bus_cycles / (1000 * delay / TIMER_TICK_LENGTH) );
 }
