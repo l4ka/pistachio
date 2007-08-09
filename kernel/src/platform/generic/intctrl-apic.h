@@ -38,6 +38,8 @@
 
 #include INC_PLAT(82093.h)
 #include INC_ARCHX(x86,apic.h)
+#include INC_ARCHX(x86,apic.h)
+#include INC_ARCHX(x86,ioport.h)
 #include <sync.h>
 #include <linear_ptab.h>
 
@@ -143,6 +145,10 @@ private:
 
     void check_ioapic_shared(word_t id);
     
+private: 
+    bool   pmtimer_available;
+    word_t pmtimer_ioport;
+
 public:
     word_t get_lapic_map() { return lapic_map; }
 
@@ -162,6 +168,19 @@ public:
     bool is_enabled(word_t irq);
 
     void set_cpu(word_t irq, word_t cpu);
+
+    static const word_t pmtimer_ticks = 3579545;
+    static const word_t pmtimer_mask = 0xFFFFFF;
+    
+    u32_t pmtimer_read() { return in_u32(pmtimer_ioport) & pmtimer_mask; }
+    bool has_pmtimer() { return pmtimer_available; }
+    void pmtimer_wait(const word_t ms) 
+	{ 
+	    /* Need to wait ms * pmtimer_ticks / 1000; */
+	    const word_t delta = (ms * pmtimer_ticks) / 1000;
+	    word_t start = pmtimer_read();
+	    while (pmtimer_read() < start + delta) ;
+	}
 
     /* handler invoked on interrupt */
     void handle_irq(word_t irq) __asm__("intctrl_t_handle_irq");
