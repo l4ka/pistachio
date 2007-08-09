@@ -503,18 +503,46 @@ static void SECTION(SEC_INIT) add_more_kmem()
             (md->type() == memdesc_t::reserved) &&
             (word_t) md->high() <= KERNEL_AREA_END)
         {
-            // Map region kernel writable 
-            get_kernel_space()->remap_area(
-                phys_to_virt(md->low()), md->low(),
-                (KERNEL_PAGE_SIZE == IA32_SUPERPAGE_SIZE)
-                 ? pgent_t::size_4m
-                 : pgent_t::size_4k,
-                (md->size() + (KERNEL_PAGE_SIZE-1)) & ~(KERNEL_PAGE_SIZE-1),
-                true, true, true);
-            // Add it to allocator
-            kmem.add(phys_to_virt(md->low()),
-                     md->size());
-            // We found at least one usable descriptor
+	    // If KMEM is larger than 32 MB, allocate it chunkwise
+	    addr_t low = md->low();
+	    word_t size = md->size();
+	    const word_t chunksize = 32 * 1024 * 1024;
+	    
+	    while (size) 
+	    {
+		if (size >= chunksize )
+		{
+		    // Map region kernel writable 
+		    get_kernel_space()->remap_area(
+			phys_to_virt(low), low,
+			(KERNEL_PAGE_SIZE == IA32_SUPERPAGE_SIZE)
+			? pgent_t::size_4m
+			: pgent_t::size_4k,
+			chunksize, true, true, true);	    
+		    
+		    // Add it to allocator
+		    kmem.add(phys_to_virt(low), chunksize);
+		    
+		    low = addr_offset(low, chunksize);
+		    size -= chunksize;
+		}
+		else
+		{
+		    size = (size + (KERNEL_PAGE_SIZE-1)) & ~(KERNEL_PAGE_SIZE-1);
+		    
+		    // Map region kernel writable 
+		    get_kernel_space()->remap_area(
+			phys_to_virt(low), low,
+			(KERNEL_PAGE_SIZE == IA32_SUPERPAGE_SIZE)
+			? pgent_t::size_4m
+			: pgent_t::size_4k,
+			size, true, true, true);
+		    
+		    // Add it to allocator
+		    kmem.add(phys_to_virt(low), size);
+		    size = 0;
+		}
+	    }
             found = true;
         }
     }
