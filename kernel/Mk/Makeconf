@@ -195,7 +195,7 @@ LDSCRIPT = $(SRCDIR)/src/platform/$(PLATFORM)/linker.lds
 
 
 # where to search for files with lists of files to build (Makeconf)
-SRCSRC = src/generic src/platform/$(PLATFORM) src/api/$(API) \
+SRCSRC+= src/generic src/platform/$(PLATFORM) src/api/$(API) \
 	 src/arch/$(ARCH) src/arch/$(ARCH)/$(CPU) \
 	 src/glue/$(API)-$(ARCH) src/glue/$(API)-$(ARCH)/$(CPU) \
 	 src/glue/$(ARCH)-$(PLATFORM) src/glue/$(API)-$(PLATFORM)

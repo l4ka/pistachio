@@ -29,7 +29,7 @@
 ##                
 ######################################################################
 
-
+include $(SRCDIR)/Mk/Makeconf.x86
 
 CFLAGS_ia32+=	-O2 -mpreferred-stack-boundary=2
 CFLAGS_i486+=	-march=i486

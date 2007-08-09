@@ -29,8 +29,6 @@
 ##                
 ######################################################################
 
-include $(SRCDIR)/src/glue/v4-x86/Makeconf
-
 LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker.lds
 
 SOURCES+=$(addprefix src/glue/v4-amd64/, \
