@@ -186,7 +186,8 @@ word_t space_t::readmem_phys (addr_t paddr)
     pgent = pgent->subtree(space, pgent_t::size_max)->next(
 	space, pgent_t::size_4k, page_table_index(pgent_t::size_4k, paddr));
 
-    pgent->set_entry(space, pgent_t::size_4k, paddr, true, false, false, true); 
+//    pgent->set_entry(space, pgent_t::size_4k, paddr, true, false, false, true);
+    pgent->set_entry(space, pgent_t::size_4k, paddr, 1, 0, true);
 
     // kill potentially stale TLB entry in remap-window
     x86_mmu_t::flush_tlbent(
