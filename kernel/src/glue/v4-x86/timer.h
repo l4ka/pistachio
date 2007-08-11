@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/timer.h
+ * File path:     glue/v4-x86/timer.h
  * Description:   Simple RTC timer
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: timer.h,v 1.3 2006/10/19 22:57:35 ud3 Exp $
- *                
  ********************************************************************/
-
-
-#ifndef __GLUE__V4_AMD64__TIMER_H__
-#define __GLUE__V4_AMD64__TIMER_H__
+#ifndef __GLUE__V4_X86__TIMER_H__
+#define __GLUE__V4_X86__TIMER_H__
 
 #include <timer.h>
+
+#if !defined(CONFIG_X86_TSC)
+// In absence of a processor cycle counter we count timer ticks
+extern u64_t ticks;
+#endif
 
 class timer_t : public generic_periodic_timer_t {
 public:
@@ -54,5 +55,4 @@ INLINE timer_t * get_timer()
     return &timer;
 }
 
-
-#endif /* !__GLUE__V4_AMD64__TIMER_H__ */
+#endif /* !__GLUE__V4_X86__TIMER_H__ */

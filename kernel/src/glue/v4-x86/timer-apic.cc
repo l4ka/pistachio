@@ -31,7 +31,7 @@
 
 #include INC_GLUE(idt.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUE(timer.h)
+#include INC_GLUEX(x86,timer.h)
 
 #include INC_PLAT(rtc.h)
 

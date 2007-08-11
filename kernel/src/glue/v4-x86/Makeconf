@@ -34,4 +34,6 @@ SOURCES+=$(addprefix src/glue/v4-x86/, ctors.cc)
 
 ifeq ("$(CONFIG_IOAPIC)","y")
 SOURCES += src/glue/v4-x86/timer-apic.cc
+else
+SOURCES += src/glue/v4-x86/timer.cc
 endif

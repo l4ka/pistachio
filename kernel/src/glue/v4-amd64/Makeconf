@@ -41,8 +41,6 @@ CFLAGS_$(CURDIR)/exception = -fomit-frame-pointer
 
 ifeq ("$(CONFIG_IOAPIC)","y")
 SOURCES += src/generic/acpi.cc
-else
-SOURCES += src/glue/v4-amd64/timer.cc
 endif
 
 # use linear_ptab_walker if need be

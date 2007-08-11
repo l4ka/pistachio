@@ -38,7 +38,7 @@
 #include INC_API(ipc.h)
 #include INC_API(syscalls.h)
 
-#include INC_GLUE(timer.h)
+#include INC_GLUEX(x86,timer.h)
 
 #include INC_ARCH(trapgate.h)
 
@@ -165,7 +165,7 @@ SYSCALL_STUB(exchange_registers)
 
 SYSCALL_STUB(system_clock)
 {
-#if defined(CONFIG_IA32_TSC)
+#if defined(CONFIG_X86_TSC)
     __asm__ __volatile__ (
 	"call	9f			\n"
 	"1:				\n"
@@ -229,7 +229,7 @@ SYSCALL_STUB(system_clock)
 	: "i"(OFS_KIP_PROCDESC), "i"(OFS_PROCDESC_INTFREQ), 
 	  "i"(OFS_USER_UTCB_PROC), "i"(KIP_PROC_DESC_LOG2SIZE),
 	  "i"(1000));
-#else /* !CONFIG_IA32_TSC */
+#else /* !CONFIG_X86_TSC */
     __asm__ __volatile__ (
 	"call	9f			\n"
 	"1:				\n"
@@ -251,7 +251,7 @@ SYSCALL_STUB(system_clock)
 	: "r"((word_t)&ticks & ~IA32_PAGE_MASK),
 	  "i"(TIMER_TICK_LENGTH)
 	);
-#endif /* !CONFIG_IA32_TSC */
+#endif /* !CONFIG_X86_TSC */
 }
 
 SYSCALL_STUB(thread_switch)

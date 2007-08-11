@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/timer.cc
+ * File path:     glue/v4-x86/timer.cc
  * Description:   Implements RTC timer
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -25,9 +25,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *                
- * $Id: timer.cc,v 1.10 2006/10/07 16:34:09 ud3 Exp $
- *                
+ *
  ********************************************************************/
 
 #include INC_GLUE(idt.h)
@@ -35,7 +33,7 @@
 
 #include INC_PLAT(rtc.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUE(timer.h)
+#include INC_GLUEX(x86,timer.h)
 
 #include INC_API(schedule.h)
 
@@ -44,13 +42,17 @@
 /* global instance of timer object */
 timer_t timer;
 
-#if !defined(CONFIG_IA32_TSC)
+#if !defined(CONFIG_X86_TSC)
 #warning JD: ticks are not SMP safe
 u64_t ticks SECTION(".user.counter");
 #endif
 
 extern "C" void timer_interrupt(void);
+#if defined(CONFIG_IS_64BIT)
+AMD64_EXC_NO_ERRORCODE(timer_interrupt, IRQLINE)
+#else
 IA32_EXC_NO_ERRORCODE(timer_interrupt, IRQLINE)
+#endif
 {
     /* acknowledge irq on PIC */
     get_interrupt_ctrl()->ack(IRQLINE);
@@ -60,7 +62,7 @@ IA32_EXC_NO_ERRORCODE(timer_interrupt, IRQLINE)
     rtc.read(0x0c);
 
     /* count interrupts */
-#if !defined(CONFIG_IA32_TSC)
+#if !defined(CONFIG_X86_TSC)
     ticks++;
 #endif
 
@@ -73,64 +75,75 @@ void SECTION (".init") timer_t::init_global()
 {
     /* TODO: Should be irq_manager.register(hwirq, 8, &timer_interrupt); */
     idt.add_int_gate(0x20+IRQLINE, timer_interrupt);
-    
-    {
-	rtc_t<0x70> rtc;
-	
-	/* wait for update-in-progress to finish */
-	while(rtc.read(0x0a) & 0x80);
-	
-	/* set rtc to 512, rate = 2Hz*2^(15-(x:3..0))*/
-	rtc.write(0x0A, (rtc.read(0x0a) & 0xf0) | 0x07);
-	/* enable interrupts
-	   Periodic Interrupt Enable = 0x40	*/
-	rtc.write(0x0b, rtc.read(0x0b) | 0x40);
-	
-	/* read(0x0c) clears all interrupts in RTC */
-	rtc.read(0x0c);
-	
-	/* TODO: Should this become irq_manager.unmask(hwirq, 8) ? */
-	get_interrupt_ctrl()->unmask(IRQLINE);
-    }
+
+    rtc_t<0x70> rtc;
+
+    /* wait for update-in-progress to finish */
+    while(rtc.read(0x0a) & 0x80);
+
+    /* set rtc to 512, rate = 2Hz*2^(15-(x:3..0))*/
+    rtc.write(0x0A, (rtc.read(0x0a) & 0xf0) | 0x07);
+
+    /* enable interrupts
+       Periodic Interrupt Enable = 0x40	*/
+    rtc.write(0x0b, rtc.read(0x0b) | 0x40);
+
+    /* read(0x0c) clears all interrupts in RTC */
+    rtc.read(0x0c);
+
+    /* TODO: Should this become irq_manager.unmask(hwirq, 8) ? */
+    get_interrupt_ctrl()->unmask(IRQLINE);
 }
+
 
 void SECTION (".init") timer_t::init_cpu()
 {
-#if defined(CONFIG_IA32_TSC)
-    TRACE_INIT("calculating processor speed...\n");
+#if defined(CONFIG_CPU_AMD64_SIMICS)
+    u64_t cpu_cycles;
 
+    TRACE_INIT("Simics CPU hardcoding processor speed ...\n");
+    /* Set frequencies statically on SIMICS, waiting would take ages... */
+    cpu_cycles = CONFIG_CPU_AMD64_SIMICS_SPEED * 1000 * 1000;
+    proc_freq = cpu_cycles  / 1000;
+    bus_freq = 0;
+
+    TRACE_INIT("CPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
+    return;
+
+#elif defined(CONFIG_X86_TSC)
+    u64_t cpu_cycles;
+
+    TRACE_INIT("Calculating processor speed ...\n");
     /* calculate processor speed */
     wait_for_second_tick();
 
-    u64_t cpu_cycles = x86_rdtsc();
-
+    cpu_cycles = x86_rdtsc();
     wait_for_second_tick();
-    
+
     cpu_cycles = x86_rdtsc() - cpu_cycles;
 
     proc_freq = cpu_cycles / 1000;
     bus_freq = 0;
 
     TRACE_INIT("CPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
-#else /* !CONFIG_IA32_TSC */
+    return;
 
-    ticks = 0;
-
-#if defined(CONFIG_CPU_IA32_I486)
-/* We just estimate the current cpu speed, this is needed in 
- * absence of any TSC.
- * We simply assume that it's really something like an i486
- */ 
-    TRACE_INIT("estimating processor speed...\n");
+#elif defined(CONFIG_CPU_IA32_I486)
+    /* We just estimate the current cpu speed, this is needed in
+     * absence of any TSC.
+     * We simply assume that it's really something like an i486
+     */
+    TRACE_INIT("Estimating processor speed ...\n");
 
     rtc_t<0x70> rtc;
+    u64_t ticks = 0;
     word_t rounds = 0;
-    
+
     wait_for_second_tick ();
 
     // wait that update bit is off
     while (rtc.read(0x0a) & 0x80);
-    
+
     // read second value
     word_t secstart = rtc.read(0);
 
@@ -151,12 +164,14 @@ void SECTION (".init") timer_t::init_cpu()
 
     TRACE_INIT("Rounds: %d CPU speed: %d kHz\n",
                rounds, (word_t)((rounds * 10000) / (99)));
-#else /* !CONFIG_CPU_IA32_I486 */
+    return;
+
+#else /* !defined(CONFIG_CPU_IA32_I486) */
 
     proc_freq = 0;
     bus_freq = 0;
+    return;
 
-#endif /* !CONFIG_CPU_IA32_I486 */
-#endif /* !CONFIG_IA32_TSC */
+#endif /* !defined(CONFIG_CPU_AMD64_SIMICS) */
 }
 
