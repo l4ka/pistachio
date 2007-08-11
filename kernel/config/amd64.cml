@@ -55,5 +55,7 @@ without modification.
 default AMD64_COMPATIBILITY_MODE from n
 unless ARCH_AMD64 suppress dependent AMD64_COMPATIBILITY_MODE
 
-derive X86_FXSR from CPU_AMD64_P4 or CPU_AMD64_K8
+derive AMD64_FXSR from CPU_AMD64_P4 or CPU_AMD64_K8
+derive AMD64_TSC from CPU_AMD64_P4 or CPU_AMD64_K8
+derive AMD64_PAT from CPU_AMD64_P4 or CPU_AMD64_K8
 

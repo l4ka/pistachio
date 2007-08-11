@@ -406,6 +406,9 @@ require IO_FLEXPAGES implies IA32_SMALL_SPACES==n
 require IA32_SMALL_SPACES implies IO_FLEXPAGES==n
 derive FLUSHFILTER from CPU_K8 and K8_FLUSHFILTER
 derive MULTI_ARCHITECTURE from ARCH_AMD64 and AMD64_COMPATIBILITY_MODE
+derive X86_TSC from IA32_TSC or AMD64_TSC
+derive X86_PAT from IA32_PAT or AMD64_PAT
+derive X86_FXSR from IA32_FXSR or AMD64_FXSR
 
 source "powerpc.cml"
 source "powerpc64.cml"
