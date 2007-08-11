@@ -76,36 +76,33 @@ void timer_t::init_cpu()
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
 
-   
+    timer_lock.lock();
+
     word_t delay = 1000;
     
     /* calculate processor speed */
     if (pmtimer)
     {
         delay = 100;
-        timer_lock.lock();
         intctrl->pmtimer_wait(delay);   
     }
     else
-    {
-        timer_lock.lock();
         wait_for_second_tick();
-    }
 
     u64_t cpu_cycles = x86_rdtsc();
     u32_t bus_cycles = local_apic.timer_get();
     
     if (pmtimer)
     {
-        timer_lock.unlock();
         intctrl->pmtimer_wait(delay);   
     }
     else
     {
         wait_for_second_tick();
-        timer_lock.unlock();
     }
-    
+   
+    timer_lock.unlock();
+
     cpu_cycles = x86_rdtsc() - cpu_cycles;
     bus_cycles -= local_apic.timer_get();
 
