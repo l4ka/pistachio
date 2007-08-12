@@ -34,7 +34,7 @@ include $(SRCDIR)/Mk/Makeconf.x86
 TOOLPREFIX=	$(patsubst %gcc,%,$(firstword $(shell type -p x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc amd64-gcc)))
 
 CFLAGS_amd64    += -m64 -mcmodel=kernel -mno-red-zone -O2
-LDFLAGS_amd64	+= -melf_x86_64 -n 
+LDFLAGS_amd64	+= -melf_x86_64 -n -z max-page-size=4096
 ASMFLAGS_amd64  += -m64 
 CFLAGS_k8       += -march=k8
 VFLAGS 		 = -m elf_x86_64
