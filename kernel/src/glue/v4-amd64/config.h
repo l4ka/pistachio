@@ -213,23 +213,23 @@
 #define X86_KCS                0x8		/* 1, RPL = 0	*/
 #define X86_KDS                0x10		/* 2, RPL = 0	*/
 #define AMD64_UCS32              0x1b		/* 3, RPL = 3	*/
-#define AMD64_UDS	         0x23		/* 4, RPL = 3	*/
-#define AMD64_UCS                0x2b		/* 5, RPL = 3	*/
-#define AMD64_UTCBS              0x33		/* 6, RPL = 3	*/
+#define X86_UDS                  0x23		/* 4, RPL = 3	*/
+#define X86_UCS                  0x2b		/* 5, RPL = 3	*/
+#define X86_UTCBS                0x33		/* 6, RPL = 3	*/
 #define AMD64_KDBS               0x38		/* 7, RPL = 0	*/
-#define AMD64_TBS                0x43		/* 8, RPL = 0	*/
+#define X86_TBS                  0x43		/* 8, RPL = 0	*/
 #define AMD64_TSS                0x48		/* 9, RPL = 0	*/
 
 /* user mode e-flags   */
 #if defined(CONFIG_AMD64_PVI)
-#define AMD64_USER_FLAGS	(X86_FLAGS_IOPL(0) | X86_FLAGS_IF | X86_FLAGS_VIF | 2)
-#define AMD64_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF| X86_FLAGS_VIF | X86_FLAGS_VIP)
+#define X86_USER_FLAGS      (X86_FLAGS_IOPL(0) | X86_FLAGS_IF | X86_FLAGS_VIF | 2)
+#define X86_USER_FLAGMASK   (X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF| X86_FLAGS_VIF | X86_FLAGS_VIP)
 #elif defined(CONFIG_IO_FLEXPAGES)
-#define AMD64_USER_FLAGS	(X86_FLAGS_IOPL(0) | X86_FLAGS_IF | 2)
-#define AMD64_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
+#define X86_USER_FLAGS      (X86_FLAGS_IOPL(0) | X86_FLAGS_IF | 2)
+#define X86_USER_FLAGMASK   (X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
 #else
-#define AMD64_USER_FLAGS	(X86_FLAGS_IOPL(3) | X86_FLAGS_IF | 2)
-#define AMD64_USER_FLAGMASK	(X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
+#define X86_USER_FLAGS      (X86_FLAGS_IOPL(3) | X86_FLAGS_IF | 2)
+#define X86_USER_FLAGMASK   (X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
 #endif
 
 /* IDT, GDT, etc. */
@@ -295,7 +295,7 @@
 #define KSTACK_UFLAGS           (-3)
 #define KSTACK_CS               (-4)
 #define KSTACK_UIP              (-5)
-#define KSTACK_RET_IPC          (-8)
+#define KSTACK_RET_IPC          (-7)
 
 #define CACHE_LINE_SIZE		(AMD64_CACHE_LINE_SIZE)
 #define SMP_STARTUP_ADDRESS	(0x4000) 

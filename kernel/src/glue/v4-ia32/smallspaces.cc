@@ -218,10 +218,10 @@ bool space_t::make_small (smallspace_id_t id)
 	// Reset GDT entries to have proper limits.
 	extern ia32_segdesc_t gdt[];
 
-	gdt[IA32_UCS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
-				    3, ia32_segdesc_t::code);
-	gdt[IA32_UDS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
-				    3, ia32_segdesc_t::data);
+	gdt[X86_UCS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
+				   3, ia32_segdesc_t::code);
+	gdt[X86_UDS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
+				   3, ia32_segdesc_t::data);
 
 	reload_user_segregs ();
 
@@ -296,10 +296,10 @@ void space_t::make_large (void)
 	// Reset GDT entries to 3GB limit.
 	extern ia32_segdesc_t gdt[];
 
-	gdt[IA32_UCS >> 3].set_seg (0, USER_AREA_END-1,
-				    3, ia32_segdesc_t::code);
-	gdt[IA32_UDS >> 3].set_seg (0, USER_AREA_END-1,
-				    3, ia32_segdesc_t::data);
+	gdt[X86_UCS >> 3].set_seg (0, USER_AREA_END-1,
+				   3, ia32_segdesc_t::code);
+	gdt[X86_UDS >> 3].set_seg (0, USER_AREA_END-1,
+				   3, ia32_segdesc_t::data);
 
 	reload_user_segregs ();
 

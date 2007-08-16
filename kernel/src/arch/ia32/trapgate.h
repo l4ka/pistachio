@@ -56,6 +56,9 @@ public:
     u32_t ss;
 };
 
+#if defined(CONFIG_IS_32BIT)
+typedef ia32_exceptionframe_t x86_exceptionframe_t;
+#endif
 
 /*
  * If KEEP_LAST_BRANCHES is enabled we should clear the LBR flag prior

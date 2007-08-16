@@ -154,14 +154,14 @@ static void setup_gdt(ia32_tss_t &tss, cpuid_t cpuid)
 
     gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
     gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
-    gdt[gdt_idx(IA32_UCS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::code);
-    gdt[gdt_idx(IA32_UDS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
+    gdt[gdt_idx(X86_UCS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::code);
+    gdt[gdt_idx(X86_UDS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
 
     /* MyUTCB pointer, 
      * we use a separate page for all processors allocated in space_t 
      * and have one UTCB entry per cache line in the SMP case */
     ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < IA32_PAGE_SIZE);
-    gdt[gdt_idx(IA32_UTCB)].set_seg((u32_t)MYUTCB_MAPPING + 
+    gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)MYUTCB_MAPPING + 
 				    (cpuid * CACHE_LINE_SIZE),
 				    sizeof(threadid_t) - 1, 
 				    3, ia32_segdesc_t::data);
@@ -182,9 +182,9 @@ static void setup_gdt(ia32_tss_t &tss, cpuid_t cpuid)
     
 #ifdef CONFIG_TRACEBUFFER
     if (tracebuffer)
-        gdt[gdt_idx(IA32_TBS)].set_seg((u32_t)tracebuffer, MB(4)-1, 3,
+        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)tracebuffer, MB(4)-1, 3,
 				       ia32_segdesc_t::data);
-    else gdt[gdt_idx(IA32_TBS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
+    else gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
 #endif
 }
 
@@ -223,9 +223,9 @@ static void SECTION(".init.cpu") activate_gdt()
 #if defined(CONFIG_IA32_SMALL_SPACES)
 	"r"(X86_KDS),
 #else
-	"r"(IA32_UDS),
+	"r"(X86_UDS),
 #endif
-	"r"(X86_KDS), "r"(IA32_UTCB), "r"(IA32_TBS), "r"(IA32_TSS)
+	"r"(X86_KDS), "r"(X86_UTCBS), "r"(X86_TBS), "r"(IA32_TSS)
 	: "eax");
 }
 

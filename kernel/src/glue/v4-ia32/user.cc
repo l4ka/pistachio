@@ -102,7 +102,7 @@ extern "C" void user_ipc()
 	"i"(SYS_IPC_NUM),
 	"i"(OFS_USER_UTCB_MYGLOBAL), 
 	"i"(1 << L4_LOCAL_ID_ZERO_BITS),
-	"i"(IA32_UCS));
+	"i"(X86_UCS));
 }
 
 extern "C" void user_lipc() 
@@ -147,7 +147,7 @@ extern "C" void user_lipc()
 	"i"(SYS_IPC_NUM),
 	"i"(OFS_USER_UTCB_MYGLOBAL), 
 	"i"(1 << L4_LOCAL_ID_ZERO_BITS),
-	"i"(IA32_UCS));
+	"i"(X86_UCS));
 }
 
 SYSCALL_STUB(exchange_registers)

@@ -232,12 +232,12 @@ fp_save_resources_done:
 	orl	$0x800, %eax
 	movl	%ecx, 24(%ebp)
 	movl	%eax, 28(%ebp)
-	movl	$IA32_UDS, %ecx
+	movl	$X86_UDS, %ecx
 	movl	%ecx, %es
 #if !defined(CONFIG_TRACEBUFFER)
 	movl	%ecx, %fs
 #endif
-	movl	$IA32_UTCB, %ecx
+	movl	$X86_UTCBS, %ecx
 	movl	%ecx, %gs
 	movl	$1, __is_small
 1:	popl	%ecx
@@ -254,12 +254,12 @@ fp_save_resources_done:
 	movl	$0x0000ffff, 32(%eax)
 	movl	$0x00cbf300, 36(%eax)
 
-	movl	$IA32_UDS, %edx
+	movl	$X86_UDS, %edx
 	movl	%edx, %es
 #if !defined(CONFIG_TRACEBUFFER)
 	movl	%edx, %fs
 #endif
-	movl	$IA32_UTCB, %edx
+	movl	$X86_UTCBS, %edx
 	movl	%edx, %gs
 
 3:	movl	OFS_TCB_PDIR_CACHE(%esi), %ecx
@@ -294,7 +294,7 @@ fp_load_resources_done:
 	movl	OFS_TCB_PARTNER(%esi), %eax	// load partner
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	movl	$IA32_UDS, %ecx
+	movl	$X86_UDS, %ecx
 	mov	%ecx, %ds
 #endif
 
@@ -340,7 +340,7 @@ slowpath:
 
 #else /* !CONFIG_IA32_SYSENTER */
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	movl	$IA32_UDS, %ecx
+	movl	$X86_UDS, %ecx
 	mov	%ecx, %ds
 #endif
 	addl	$4, %esp
@@ -357,7 +357,7 @@ slowpath:
 	.globl sysexit_tramp
 	.globl sysexit_tramp_uaccess
 sysexit_tramp:
-	movl	$IA32_UDS, %edx
+	movl	$X86_UDS, %edx
 	mov	%edx, %ds
 	mov	%edx, %ss
 	sti
@@ -379,16 +379,16 @@ sysexit_tramp_end:
 	.globl reenter_sysexit
 	.globl reenter_sysexit_uaccess
 reenter_sysexit:
-	movl	$IA32_UDS, %edx
+	movl	$X86_UDS, %edx
 	mov	%edx, %ds
 reenter_sysexit_uaccess:
 	movl	(%ecx), %edx		/* Get EIP */
 	addl	$8, %ecx		/* Adjust for user ESP */
 
-	pushl	$IA32_UDS		/* User SS */
+	pushl	$X86_UDS		/* User SS */
 	pushl	%ecx			/* User ESP */
-	pushl	$IA32_USER_FLAGS	/* User EFlags */
-	pushl	$IA32_UCS		/* User CS */
+	pushl	$X86_USER_FLAGS		/* User EFlags */
+	pushl	$X86_UCS		/* User CS */
 	pushl	%edx			/* User EIP */
 	iret
 
@@ -435,7 +435,7 @@ fp_copy_loop:
 	rep	movsl	(%esi), (%edi)
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-	movl	$IA32_UDS, %ecx
+	movl	$X86_UDS, %ecx
 	mov	%ecx, %es
 #endif
 	jmp	fp_copy_loop_done

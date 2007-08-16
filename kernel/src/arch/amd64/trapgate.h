@@ -62,6 +62,10 @@ public:
     u64_t ss;
 };
 
+#if defined(CONFIG_IS_64BIT)
+typedef amd64_exceptionframe_t x86_exceptionframe_t;
+#endif
+
 /**
  * AMD64_EXC_WITH_ERRORCODE: allows C implementation of 
  *   exception handlers and trap/interrupt gates with error 

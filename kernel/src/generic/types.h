@@ -126,6 +126,7 @@ INLINE addr_t addr_align_up (addr_t addr, word_t align)
 #endif
 
 #define BITS_WORD	(sizeof(word_t)*8)
+#define BYTES_WORD	(sizeof(word_t))
 
 #endif /* !defined(ASSEMBLY) */
 

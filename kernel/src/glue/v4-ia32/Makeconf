@@ -33,7 +33,7 @@ LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker-$(PLATFORM).lds
 
 CURDIR = src/glue/v4-ia32
 SOURCES += $(addprefix $(CURDIR)/, init.cc idt.cc exception.cc \
-	space.cc debug.cc resources.cc thread.cc user.cc trap.S \
+	space.cc debug.cc resources.cc user.cc trap.S \
 	smp.cc trampoline.S memcontrol.cc)
 
 SOURCES+=	src/generic/linear_ptab_walker.cc \

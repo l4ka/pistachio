@@ -534,7 +534,7 @@ INLINE void reload_user_segregs (void)
 #else
 	"mov  %0, %%fs		\n\t"	        // no tracebuffer
 #endif  
-	: /* No Output */ : "r" (0), "r" (AMD64_UTCBS), "r" (AMD64_TBS)
+	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" (X86_TBS)
 	);
     
 }

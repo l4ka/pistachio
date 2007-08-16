@@ -230,8 +230,7 @@ INLINE void tcb_t::return_from_user_interruption (void)
     asm("movq %0, %%rsp\n"
 	"retq\n"
 	:
-	: "r"(&get_stack_top()[- sizeof(amd64_exceptionframe_t)/8 - 1]));
-    
+	: "r"(&get_stack_top()[- sizeof(amd64_exceptionframe_t)/8 - 2]));    
 }
 
 
@@ -490,7 +489,7 @@ INLINE void tcb_t::set_user_sp(addr_t sp)
  */
 INLINE void tcb_t::set_user_flags (const word_t flags)
 {
-    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~AMD64_USER_FLAGMASK)) | (flags & AMD64_USER_FLAGMASK);
+    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~X86_USER_FLAGMASK)) | (flags & X86_USER_FLAGMASK);
 }
 
 /**********************************************************************

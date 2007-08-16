@@ -116,7 +116,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 	"D"(&dest->get_utcb()->mr[start]));
 
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (IA32_UDS));
+    asm volatile ("mov %0, %%es" : : "r" (X86_UDS));
 #endif
 }
 
@@ -236,12 +236,12 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"	orl	$0x800, %%eax			\n"
 	"	movl	%%ecx, 24(%%ebp)		\n"
 	"	movl	%%eax, 28(%%ebp)		\n"
-	"	movl	$"MKSTR(IA32_UDS)", %%ecx	\n"
+	"	movl	$"MKSTR(X86_UDS)", %%ecx	\n"
 	"	movl	%%ecx, %%es			\n"
 #if !defined(CONFIG_TRACEBUFFER)
 	"	movl	%%ecx, %%fs			\n"
 #endif        
-	"	movl	$"MKSTR(IA32_UTCB)", %%ecx	\n"
+	"	movl	$"MKSTR(X86_UTCBS)", %%ecx	\n"
 	"	movl	%%ecx, %%gs			\n"
 
 	"	testl	%%edx, %%edx			\n"
@@ -261,12 +261,12 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"	movl	$0x0000ffff, 32(%%eax)		\n"
 	"	movl	$0x00cbf300, 36(%%eax)		\n"
 
-	"	movl	$"MKSTR(IA32_UDS)", %%edx	\n"
+	"	movl	$"MKSTR(X86_UDS)", %%edx	\n"
 	"	movl	%%edx, %%es			\n"
 #if !defined(CONFIG_TRACEBUFFER)
 	"	movl	%%edx, %%fs			\n"
 #endif
-	"	movl	$"MKSTR(IA32_UTCB)", %%edx	\n"
+	"	movl	$"MKSTR(X86_UTCBS)", %%edx	\n"
 	"	movl	%%edx, %%gs			\n"
 
 	"3:	movl	%c6(%2), %%ecx			\n"
@@ -456,7 +456,7 @@ INLINE void tcb_t::set_user_sp(addr_t sp)
 
 INLINE void tcb_t::set_user_flags(const word_t flags)
 {
-    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~IA32_USER_FLAGMASK)) | (flags & IA32_USER_FLAGMASK);
+    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~X86_USER_FLAGMASK)) | (flags & X86_USER_FLAGMASK);
 }
 
 INLINE void tcb_t::return_from_ipc (void)
@@ -573,7 +573,7 @@ INLINE void ipc_string_copy(void *dst, const void *src, word_t len)
 	    : "=S"(dummy1), "=D"(dummy2), "=c"(dummy3)
 	    : "S"(src), "D"(dst), "c"(len >> 2), "d"(len & 3));
 #if defined(CONFIG_IA32_SMALL_SPACES)
-    asm volatile ("mov %0, %%es" : : "r" (IA32_UDS));
+    asm volatile ("mov %0, %%es" : : "r" (X86_UDS));
 #endif
 }
 

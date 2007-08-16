@@ -520,7 +520,7 @@ INLINE void reload_user_segregs (void)
 #endif
 	"	movl %1, %%gs	\n"
 	:
-	: "r" (IA32_UDS), "r" (IA32_UTCB));
+	: "r" (X86_UDS), "r" (X86_UTCBS));
 }
 
 void init_kernel_space();

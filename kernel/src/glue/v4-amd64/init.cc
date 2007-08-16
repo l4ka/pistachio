@@ -290,8 +290,8 @@ static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
     gdt.segdsc[GDT_IDX(AMD64_INVS)].set_seg((u64_t) 0, amd64_segdesc_t::inv, 0, amd64_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(X86_KCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 0, amd64_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(X86_KDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_long);
-    gdt.segdsc[GDT_IDX(AMD64_UCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 3, amd64_segdesc_t::m_long);
-    gdt.segdsc[GDT_IDX(AMD64_UDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 3, amd64_segdesc_t::m_long);
+    gdt.segdsc[GDT_IDX(X86_UCS)].set_seg((u64_t) 0, amd64_segdesc_t::code, 3, amd64_segdesc_t::m_long);
+    gdt.segdsc[GDT_IDX(X86_UDS)].set_seg((u64_t) 0, amd64_segdesc_t::data, 3, amd64_segdesc_t::m_long);
     
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
     gdt.segdsc[GDT_IDX(AMD64_UCS32)].set_seg((u64_t) 0, amd64_segdesc_t::code, 3, amd64_segdesc_t::m_comp);
@@ -320,18 +320,18 @@ static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
      * registers 
      */ 
 	
-    gdt.segdsc[GDT_IDX(AMD64_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
-					     amd64_segdesc_t::data,
-					     3, 
-					     amd64_segdesc_t::m_long,
-					     amd64_segdesc_t::msr_gs);
+    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
+				           amd64_segdesc_t::data,
+				           3,
+				           amd64_segdesc_t::m_long,
+				           amd64_segdesc_t::msr_gs);
     
 #if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(AMD64_TBS)].set_seg((u64_t) tracebuffer,
-					    amd64_segdesc_t::data,
-					    3, 
-					    amd64_segdesc_t::m_long,
-					    amd64_segdesc_t::msr_fs);
+    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t) tracebuffer,
+					 amd64_segdesc_t::data,
+					 3,
+					 amd64_segdesc_t::m_long,
+					 amd64_segdesc_t::msr_fs);
 #endif
 
 
@@ -350,22 +350,22 @@ static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
  	"pushq $1f		\n\t"		// new IP		
  	"lretq			\n\t"
  	"1:			\n\t"	
-	: /* No Output */ : "r" (0), "r" (AMD64_UTCBS), "r" (AMD64_TBS), "r" ((u64_t) X86_KCS)
+	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
 	);
     
     
-    gdt.segdsc[GDT_IDX(AMD64_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
-					     amd64_segdesc_t::data,
-					     3, 
-					     amd64_segdesc_t::m_long,
-					     amd64_segdesc_t::msr_gs);
+    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
+					   amd64_segdesc_t::data,
+					   3,
+					   amd64_segdesc_t::m_long,
+				           amd64_segdesc_t::msr_gs);
     
 #if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(AMD64_TBS)].set_seg((u64_t)tracebuffer,
-					    amd64_segdesc_t::data,
-					    3, 
-					    amd64_segdesc_t::m_long,
-					    amd64_segdesc_t::msr_fs);
+    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t)tracebuffer,
+					 amd64_segdesc_t::data,
+					 3,
+					 amd64_segdesc_t::m_long,
+					 amd64_segdesc_t::msr_fs);
 #endif
 
 }

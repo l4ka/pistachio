@@ -363,7 +363,7 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 
 	TRACEPOINT (IA32_SEGRELOAD);
 	reload_user_segregs ();
-	frame->ds = frame->es = IA32_UDS;
+	frame->ds = frame->es = X86_UDS;
 	frame->eip++;
 	if (i[0] == 0x8e || i[0] == 0x0f)
 	    frame->eip++;
@@ -489,7 +489,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 	    TRACEPOINT (IA32_SEGRELOAD);
 	    reload_user_segregs ();
 	    frame->ds = frame->es =
-		(frame->cs & 0xffff) == IA32_UCS ? IA32_UDS : X86_KDS;
+		(frame->cs & 0xffff) == X86_UCS ? X86_UDS : X86_KDS;
 	    return;
 	}
     }
