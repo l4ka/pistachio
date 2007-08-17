@@ -33,9 +33,11 @@
 #include INC_API(tcb.h)
 #include INC_ARCH(tss.h)
 
-
-#define EXC_FRAME_SIZE ((sizeof(x86_exceptionframe_t)/BYTES_WORD) - 4)
-
+#if defined(CONFIG_IS_64BIT)
+# define EXC_FRAME_SIZE ((sizeof(x86_exceptionframe_t)/BYTES_WORD) - 5)
+# else
+# define EXC_FRAME_SIZE ((sizeof(x86_exceptionframe_t)/BYTES_WORD) - 4)
+#endif
 
 /* Have  naked function */
 extern "C" void return_to_user();

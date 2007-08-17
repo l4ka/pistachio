@@ -295,7 +295,7 @@
 #define KSTACK_UFLAGS           (-3)
 #define KSTACK_CS               (-4)
 #define KSTACK_UIP              (-5)
-#define KSTACK_RET_IPC          (-7)
+#define KSTACK_RET_IPC          (-8)
 
 #define CACHE_LINE_SIZE		(AMD64_CACHE_LINE_SIZE)
 #define SMP_STARTUP_ADDRESS	(0x4000) 

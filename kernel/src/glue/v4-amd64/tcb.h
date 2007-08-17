@@ -230,7 +230,7 @@ INLINE void tcb_t::return_from_user_interruption (void)
     asm("movq %0, %%rsp\n"
 	"retq\n"
 	:
-	: "r"(&get_stack_top()[- sizeof(amd64_exceptionframe_t)/8 - 2]));    
+	: "r"(&get_stack_top()[- sizeof(amd64_exceptionframe_t)/8 - 1]));    
 }
 
 
