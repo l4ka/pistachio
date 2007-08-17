@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/ptab.h
  * Description:   X86-64 pagetable management (4KByte long mode)
@@ -225,6 +225,8 @@ private:
 	} pg2m;
 	u64_t raw;
     };
+
+    friend class pgent_t;
 };
 
 #endif /* !ASSEMBLY */

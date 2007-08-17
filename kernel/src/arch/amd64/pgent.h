@@ -379,6 +379,8 @@ public:
 
     void dump_misc (space_t * s, pgsize_e pgsize)
 	{
+	    if (pgent.pg4k.global)
+		printf ("global ");
 	}
 };
 
