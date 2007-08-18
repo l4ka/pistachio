@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
  * File path:     arch/amd64/tss.h
  * Description:   AMD64 Task State Segment
@@ -48,7 +48,7 @@
 class amd64_tss_t 
 {
 public:
-    void init();
+    void setup(u16_t ss0=0);
     void set_rsp0(u64_t rsp0);
     u64_t get_rsp0();
     addr_t get_io_bitmap();
@@ -66,7 +66,7 @@ private:
     u8_t	stopper;
 } __attribute__((packed));
 
-INLINE void amd64_tss_t::init()
+INLINE void amd64_tss_t::setup(u16_t ss0)
 {
     iopbm_offset = (u16_t)((u64_t)io_bitmap - (u64_t)this);
     stopper = 0xff;
@@ -96,5 +96,8 @@ INLINE word_t amd64_tss_t::get_io_bitmap_offset()
 
 extern amd64_tss_t tss;
 
+#if defined(CONFIG_IS_64BIT)
+typedef amd64_tss_t x86_tss_t;
+#endif
 
 #endif /* !__ARCH__AMD64__TSS_H__ */

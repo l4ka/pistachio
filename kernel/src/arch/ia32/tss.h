@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
  *                
  * File path:     arch/ia32/tss.h
  * Description:   IA32 Task State Segment
@@ -100,5 +100,10 @@ INLINE word_t ia32_tss_t::get_io_bitmap_offset()
  
 
 extern ia32_tss_t tss;
+
+
+#if defined(CONFIG_IS_32BIT)
+typedef ia32_tss_t x86_tss_t;
+#endif
 
 #endif /* !__ARCH__IA32__TSS_H__ */

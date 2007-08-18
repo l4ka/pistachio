@@ -65,7 +65,7 @@
 #endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
 
 amd64_cpu_features_t boot_cpu_ft UNIT("amd64.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
-amd64_tss_t tss UNIT("amd64.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
+x86_tss_t tss UNIT("amd64.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
 bool tracebuffer_initialized UNIT("amd64.cpulocal");
 
 
@@ -283,7 +283,7 @@ void SECTION(SEC_INIT) setup_tracebuffer (void)
  * 
  */
 
-static void SECTION(SEC_INIT) init_gdt(amd64_tss_t &tss, cpuid_t cpuid)
+static void SECTION(SEC_INIT) init_gdt(x86_tss_t &tss, cpuid_t cpuid)
 {
 
     /* Initialize GDT */
@@ -416,7 +416,7 @@ static cpuid_t SECTION(".init.cpu") init_cpu()
 #endif
     /* set up task state segment */
     TRACE_INIT("Activating TSS (CPU %d)\n", cpuid);
-    tss.init();
+    tss.setup();
 
     /* set up global descriptor table */
     TRACE_INIT("Initializing GDT (CPU %d)\n", cpuid);
@@ -520,7 +520,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
     {
 	/* copied here to catch errors early */
 	TRACE_INIT("Activating TSS (Preliminary)\n");
-	tss.init();
+	tss.setup();
 	/* set up global descriptor table */
 	TRACE_INIT("Initializing GDT (Preliminary)\n");
 	init_gdt(tss, 0);
