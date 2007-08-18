@@ -142,7 +142,7 @@ public:
     /* ia-32 specific functions */
     void init_kernel_mappings();
     void init_cpu_mappings(cpuid_t cpu);
-    ia32_pgent_t * get_pdir(cpuid_t cpu = 0);
+    ia32_pgent_t * get_pagetable(cpuid_t cpu = 0);
     bool lookup_mapping (addr_t vaddr, pgent_t ** r_pg,
 			 pgent_t::pgsize_e * r_size);
     bool readmem (addr_t vaddr, word_t * contents);
@@ -261,7 +261,7 @@ public:
  *
  **********************************************************************/
 
-INLINE ia32_pgent_t * space_t::get_pdir(cpuid_t cpu)
+INLINE ia32_pgent_t * space_t::get_pagetable(cpuid_t cpu)
 {
 #if !defined(CONFIG_SMP)
     ASSERT(cpu == 0);
@@ -419,7 +419,7 @@ INLINE tcb_t * space_t::get_tcb(void * ptr)
 
 INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)
 {
-    return ((pgent_t *) phys_to_virt (get_pdir (cpu)))->
+    return ((pgent_t *) phys_to_virt (get_pagetable (cpu)))->
 	next (this, pgent_t::size_4m, num);
 }
 

@@ -63,7 +63,7 @@ INLINE void tcb_t::set_cpu(cpuid_t cpu)
 
     // update the pdir cache on migration
     if (space) 
-	this->pdir_cache = (word_t)space->get_pdir(get_cpu());
+	this->pdir_cache = (word_t)space->get_pagetable(get_cpu());
 }
 
 
@@ -156,7 +156,7 @@ INLINE void tcb_t::allocate()
 INLINE void tcb_t::set_space(space_t * space)
 {
     this->space = space;
-    this->pdir_cache = (word_t)space->get_pdir(get_cpu());
+    this->pdir_cache = (word_t)space->get_pagetable(get_cpu());
 }
 
 INLINE word_t * tcb_t::get_stack_top()

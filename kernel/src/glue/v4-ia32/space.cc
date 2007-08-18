@@ -473,8 +473,8 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
 	}
 	size++;
     }
-    TRACE_INIT("switching to CPU local pagetable %p\n", get_pdir(cpu));
-    x86_mmu_t::set_active_pagetable((u32_t)get_pdir(cpu));
+    TRACE_INIT("switching to CPU local pagetable %p\n", get_pagetable(cpu));
+    x86_mmu_t::set_active_pagetable((u32_t)get_pagetable(cpu));
     x86_mmu_t::flush_tlb(true);
     TRACE_INIT("cpu pagetable activated (%x)\n", 
 	       x86_mmu_t::get_active_pagetable());
@@ -489,7 +489,7 @@ void SECTION(".init.memory") init_kernel_space()
     ASSERT(kernel_space);
 
     kernel_space->init_kernel_mappings();
-    x86_mmu_t::set_active_pagetable((u32_t)kernel_space->get_pdir(0));
+    x86_mmu_t::set_active_pagetable((u32_t)kernel_space->get_pagetable(0));
 }
 
 /**********************************************************************

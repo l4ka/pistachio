@@ -61,7 +61,7 @@ INLINE void tcb_t::set_cpu(cpuid_t cpu)
 
     // update the pdir cache on migration
     if (this->space)
-        this->pdir_cache = (word_t)space->get_pml4(get_cpu());
+        this->pdir_cache = (word_t)space->get_pagetable(get_cpu());
 
 }
 
@@ -186,7 +186,7 @@ INLINE void tcb_t::set_space(space_t * space)
 
     if (space)
     {
-	this->pdir_cache = (word_t)space->get_pml4();
+	this->pdir_cache = (word_t)space->get_pagetable();
 
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
 	if (space->is_compatibility_mode())

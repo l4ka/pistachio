@@ -165,7 +165,7 @@ public:
     /* amd64 specific functions */
     void init_kernel_mappings();
     void init_cpu_mappings(cpuid_t cpu);
-    amd64_pgent_t *get_pml4(cpuid_t cpu=0);
+    amd64_pgent_t *get_pagetable(cpuid_t cpu=0);
     word_t get_from_user(addr_t); 
     
     /* generic page table walker */
@@ -215,7 +215,7 @@ INLINE bool space_t::is_compatibility_mode()
 }
 #endif
 
-INLINE amd64_pgent_t * space_t::get_pml4(cpuid_t cpu)
+INLINE amd64_pgent_t * space_t::get_pagetable(cpuid_t cpu)
 {
 #if !defined(CONFIG_SMP)
     ASSERT(cpu == 0);
@@ -421,7 +421,7 @@ INLINE bool space_t::remove_tcb(tcb_t * tcb)
 
 INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)
 {
-    return ((pgent_t *) phys_to_virt (get_pml4(cpu)))->
+    return ((pgent_t *) phys_to_virt (get_pagetable(cpu)))->
 	next (this, pgent_t::size_512g, num);
 }
 

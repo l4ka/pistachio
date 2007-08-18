@@ -588,8 +588,8 @@ void space_t::init_cpu_mappings(cpuid_t cpu)
 	
     }
 
-    TRACE_INIT("switching to CPU local pagetable %p\n", get_pml4(cpu));
-    x86_mmu_t::set_active_pagetable((word_t)get_pml4(cpu));
+    TRACE_INIT("switching to CPU local pagetable %p\n", get_pagetable(cpu));
+    x86_mmu_t::set_active_pagetable((word_t)get_pagetable(cpu));
     x86_mmu_t::flush_tlb(true);
     TRACE_INIT("cpu pagetable activated (%x)\n",
 	       x86_mmu_t::get_active_pagetable());
@@ -614,7 +614,7 @@ void SECTION(".init.memory") init_kernel_space()
     ASSERT(utcb_page);
 
     kernel_space->init_kernel_mappings();
-    x86_mmu_t::set_active_pagetable((u64_t) kernel_space->get_pml4(0));
+    x86_mmu_t::set_active_pagetable((u64_t) kernel_space->get_pagetable(0));
     __asm__ __volatile__("addq %0, %%rsp" :: "i" (KERNEL_OFFSET));
 }
 

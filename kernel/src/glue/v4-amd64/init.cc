@@ -700,7 +700,7 @@ static void smp_bp_commence()
 void startup_processor()
 {
     TRACE_INIT("AP processor is alive\n");    
-    x86_mmu_t::set_active_pagetable((word_t)get_kernel_space()->get_pml4());
+    x86_mmu_t::set_active_pagetable((word_t)get_kernel_space()->get_pagetable());
     TRACE_INIT("AP switched to kernel ptab\n");
 
     /* first thing -- check CPU features */

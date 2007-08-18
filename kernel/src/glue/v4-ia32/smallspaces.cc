@@ -305,7 +305,7 @@ void space_t::make_large (void)
 
 	// Make sure that we run on our own page table.
 	x86_mmu_t::set_active_pagetable
-	    ((u32_t) get_pdir (get_current_tcb ()->get_cpu ()));
+	    ((u32_t) get_pagetable (get_current_tcb ()->get_cpu ()));
 
 	// Make sure that there are no stale TLB entries.
 	x86_mmu_t::flush_tlb (FLUSH_GLOBAL);

@@ -73,7 +73,7 @@ void thread_resources_t::load(tcb_t * tcb)
 	    if (copy_area_pgdir_idx[i] != ~0UL)
 	    {
 		ia32_pgent_t * pgdir = phys_to_virt
-		    (partner->space->get_pdir (0) + copy_area_pgdir_idx[i]);
+		    (partner->space->get_pagetable (0) + copy_area_pgdir_idx[i]);
 		tcb->space->populate_copy_area (i, pgdir, tcb->get_cpu());
 	    }
 	}
@@ -87,7 +87,7 @@ void thread_resources_t::load(tcb_t * tcb)
 	    tcb->get_partner () : tcb->get_saved_partner ();
 	tcb_t * partner = tcb->get_space ()->get_tcb (ptid);
 	u32_t new_pdir = (u32_t)
-	    partner->get_space ()->get_pdir (partner->get_cpu ());
+	    partner->get_space ()->get_pagetable (partner->get_cpu ());
 
 	if (x86_mmu_t::get_active_pagetable () != new_pdir)
 	    x86_mmu_t::set_active_pagetable (new_pdir);
