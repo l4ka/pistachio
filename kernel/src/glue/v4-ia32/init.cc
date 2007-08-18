@@ -562,9 +562,9 @@ static void SECTION(SEC_INIT) add_more_kmem()
 
 static void clear_bss()
 {
-    extern u8_t _bss_start[];
-    extern u8_t _bss_end[];
-    for (u8_t* p = _bss_start; p < _bss_end; p++)
+    extern u8_t _start_bss[];
+    extern u8_t _end_bss[];
+    for (u8_t* p = _start_bss; p < _end_bss; p++)
 	*p = 0;
 }
 

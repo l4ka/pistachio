@@ -89,9 +89,9 @@ SECTIONS
 	        *(.data.ia32.exc_all);
 	        *(.data.ia32.exc_common);
 		*(.data.*)
-		_bss_start = .;
+		_start_bss = .;
 		*(.bss)
-		_bss_end = .;
+		_end_bss = .;
 	}
 
 	. = ALIGN(4K);
