@@ -90,6 +90,11 @@ static word_t init_ptable[MAX_KERNEL_MAPPINGS][1024] __attribute__((aligned(4096
 
 #endif /* !CONFIG_IA32_PSE */
 
+
+// from glue/v4-x86/
+void clear_bss (void);
+
+
 /**********************************************************************
  *
  * SMP specific code and data
@@ -559,14 +564,6 @@ static void SECTION(SEC_INIT) add_more_kmem()
     }
 }
 
-
-static void clear_bss()
-{
-    extern u8_t _start_bss[];
-    extern u8_t _end_bss[];
-    for (u8_t* p = _start_bss; p < _end_bss; p++)
-	*p = 0;
-}
 
 /**
  * startup_system: starts up the system

@@ -77,6 +77,10 @@ struct gdt_struct {
 u8_t amd64_cache_line_size;
 
 
+// from glue/v4-x86/
+void clear_bss (void);
+
+
 /**********************************************************************
  *
  * SMP specific code and data
@@ -116,20 +120,6 @@ INLINE u8_t get_apic_id()
 }
 #endif
 
-/**
- * Clear BSS
- * 
- */
-static void SECTION(SEC_INIT) clear_bss()
-{
-
-    extern u8_t _start_bss[];
-    extern u8_t _end_bss[];
-    
-    for (u8_t *p = _start_bss; p < _end_bss; p++)
-	*p = 0;
-
-}
 
 
 /**
