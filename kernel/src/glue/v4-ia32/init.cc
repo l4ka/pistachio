@@ -118,11 +118,7 @@ static void setup_smp_boot_gdt()
 #   undef gdt_idx
 }
 
-INLINE u8_t get_apic_id()
-{
-    local_apic_t<APIC_MAPPINGS> apic;
-    return apic.id();
-}
+u8_t get_apic_id();
 #endif
 
 
@@ -153,45 +149,7 @@ void SECTION(SEC_INIT) setup_tracebuffer (void)
 }
 #endif /* CONFIG_TRACEBUFFER */
 
-static void setup_gdt(ia32_tss_t &tss, cpuid_t cpuid)
-{
-#   define gdt_idx(x) ((x) >> 3)
 
-    gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
-    gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
-    gdt[gdt_idx(X86_UCS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::code);
-    gdt[gdt_idx(X86_UDS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
-
-    /* MyUTCB pointer, 
-     * we use a separate page for all processors allocated in space_t 
-     * and have one UTCB entry per cache line in the SMP case */
-    ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < IA32_PAGE_SIZE);
-    gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)MYUTCB_MAPPING + 
-				    (cpuid * CACHE_LINE_SIZE),
-				    sizeof(threadid_t) - 1, 
-				    3, ia32_segdesc_t::data);
-
-    /* the TSS
-     * The last byte in ia32_tss_t is a stopper for the IO permission bitmap.
-     * That's why we set the limit in the GDT to one byte less than the actual
-     * size of the structure. (IA32-RefMan, Part 1, Chapter Input/Output) */
-#if defined(CONFIG_IO_FLEXPAGES)
-    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), TSS_MAPPING, sizeof(ia32_tss_t)-1);
-    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) TSS_MAPPING, sizeof(ia32_tss_t)-1, 
-				   0, ia32_segdesc_t::tss);
-#else
-    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), &tss, sizeof(ia32_tss_t)-1);
-    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) &tss, sizeof(ia32_tss_t)-1, 
-				   0, ia32_segdesc_t::tss);
-#endif
-    
-#ifdef CONFIG_TRACEBUFFER
-    if (tracebuffer)
-        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)tracebuffer, MB(4)-1, 3,
-				       ia32_segdesc_t::data);
-    else gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
-#endif
-}
 
 /**
  * activate_gdt: activates the previously set up GDT
@@ -233,6 +191,52 @@ static void SECTION(".init.cpu") activate_gdt()
 	"r"(X86_KDS), "r"(X86_UTCBS), "r"(X86_TBS), "r"(IA32_TSS)
 	: "eax");
 }
+
+
+
+void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
+{
+#   define gdt_idx(x) ((x) >> 3)
+
+    gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
+    gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
+    gdt[gdt_idx(X86_UCS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::code);
+    gdt[gdt_idx(X86_UDS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
+
+    /* MyUTCB pointer, 
+     * we use a separate page for all processors allocated in space_t 
+     * and have one UTCB entry per cache line in the SMP case */
+    ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < IA32_PAGE_SIZE);
+    gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)MYUTCB_MAPPING + 
+				    (cpuid * CACHE_LINE_SIZE),
+				    sizeof(threadid_t) - 1, 
+				    3, ia32_segdesc_t::data);
+
+    /* the TSS
+     * The last byte in ia32_tss_t is a stopper for the IO permission bitmap.
+     * That's why we set the limit in the GDT to one byte less than the actual
+     * size of the structure. (IA32-RefMan, Part 1, Chapter Input/Output) */
+#if defined(CONFIG_IO_FLEXPAGES)
+    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), TSS_MAPPING, sizeof(ia32_tss_t)-1);
+    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) TSS_MAPPING, sizeof(ia32_tss_t)-1, 
+				   0, ia32_segdesc_t::tss);
+#else
+    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), &tss, sizeof(ia32_tss_t)-1);
+    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) &tss, sizeof(ia32_tss_t)-1, 
+				   0, ia32_segdesc_t::tss);
+#endif
+    
+#ifdef CONFIG_TRACEBUFFER
+    if (tracebuffer)
+        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)tracebuffer, MB(4)-1, 3,
+				       ia32_segdesc_t::data);
+    else gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
+#endif
+
+    activate_gdt();
+}
+
+
 
 /**
  * setup_msrs: initializes all model specific registers for CPU
@@ -364,7 +368,6 @@ cpuid_t SECTION(".init.cpu") init_cpu()
 
     tss.setup(X86_KDS);
     setup_gdt(tss, cpuid);
-    activate_gdt();
 
     /* can take exceptions from now on, 
      * idt is initialized via a constructor */
@@ -606,7 +609,6 @@ extern "C" void SECTION(SEC_INIT) startup_system()
 	{ /* copied here to catch errors early */
 	    tss.setup(X86_KDS);
 	    setup_gdt(tss, 0);
-	    activate_gdt();
 	    idt.activate();
 	}
 

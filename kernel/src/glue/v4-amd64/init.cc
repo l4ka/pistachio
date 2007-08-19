@@ -269,7 +269,7 @@ void SECTION(SEC_INIT) setup_tracebuffer (void)
  * 
  */
 
-static void SECTION(SEC_INIT) init_gdt(x86_tss_t &tss, cpuid_t cpuid)
+void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 {
 
     /* Initialize GDT */
@@ -406,7 +406,7 @@ cpuid_t SECTION(".init.cpu") init_cpu()
 
     /* set up global descriptor table */
     TRACE_INIT("Initializing GDT (CPU %d)\n", cpuid);
-    init_gdt(tss, cpuid);
+    setup_gdt(tss, cpuid);
 
     /* activate idt */
     TRACE_INIT("Activating IDT (CPU %d)\n", cpuid);;
@@ -509,7 +509,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 	tss.setup();
 	/* set up global descriptor table */
 	TRACE_INIT("Initializing GDT (Preliminary)\n");
-	init_gdt(tss, 0);
+	setup_gdt(tss, 0);
 	
 	/* activate idt */
 	TRACE_INIT("Activating IDT (Preliminary)\n");
