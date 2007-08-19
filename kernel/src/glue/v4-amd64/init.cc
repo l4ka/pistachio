@@ -91,11 +91,11 @@ void clear_bss (void);
 extern "C" void _start_ap(void);
 extern "C" void init_paging();
 extern "C" void SECTION(SEC_INIT) startup_processor();
-spinlock_t smp_boot_lock;
+extern spinlock_t smp_boot_lock;
 
 /* commence to sync TSC */
-static void smp_bp_commence();
-spinlock_t smp_commence_lock;
+extern void smp_bp_commence();
+extern spinlock_t smp_commence_lock;
 
 
 amd64_segdesc_t	smp_boot_gdt[3];
@@ -113,11 +113,7 @@ static void setup_smp_boot_gdt()
 }
 
 
-INLINE u8_t get_apic_id()
-{
-    local_apic_t<APIC_MAPPINGS> apic;
-    return apic.id();
-}
+u8_t get_apic_id();
 #endif
 
 
@@ -127,7 +123,7 @@ INLINE u8_t get_apic_id()
  * 
  */
 
-static void SECTION(SEC_INIT) check_cpu_features()
+void SECTION(SEC_INIT) check_cpu_features()
 {
 
 #if 0
@@ -397,7 +393,7 @@ static void setup_msrs()
     
 }
 
-static cpuid_t SECTION(".init.cpu") init_cpu()
+cpuid_t SECTION(".init.cpu") init_cpu()
 {
     cpuid_t cpuid = 0;
 
@@ -658,51 +654,3 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
     /* make sure we don't fall off the edge */
     spin_forever(1);
 }
-
-
-#if defined(CONFIG_SMP)
-static void smp_ap_commence()
-{
-    smp_boot_lock.unlock();
-
-    /* finally we sync the time-stamp counters */
-    while( smp_commence_lock.is_locked() );
-
-    /* TSC should not be written, but we do it anyway ;-) */
-    x86_settsc(0);
-}
-
-static void smp_bp_commence()
-{
-    // wait for last processor to call in
-    smp_boot_lock.lock();
-
-    // now release all at once
-    smp_commence_lock.unlock();    
-
-    x86_settsc(0);
-}
-
-/**
- * startup_processor
- */
-
-void startup_processor()
-{
-    TRACE_INIT("AP processor is alive\n");    
-    x86_mmu_t::set_active_pagetable((word_t)get_kernel_space()->get_pagetable());
-    TRACE_INIT("AP switched to kernel ptab\n");
-
-    /* first thing -- check CPU features */
-    check_cpu_features();
-
-    /* perform processor local initialization */
-    cpuid_t cpuid = init_cpu();
-    
-    get_current_scheduler()->init (false);
-    get_idle_tcb()->notify (smp_ap_commence);
-    get_current_scheduler()->start (cpuid);
-
-    spin_forever(cpuid);
-}
-#endif

@@ -102,11 +102,11 @@ void clear_bss (void);
  **********************************************************************/
 #if defined(CONFIG_SMP)
 extern "C" void _start_ap(void);
-spinlock_t smp_boot_lock;
+extern spinlock_t smp_boot_lock;
 
 /* commence to sync TSC */
-static void smp_bp_commence();
-spinlock_t smp_commence_lock;
+extern void smp_bp_commence();
+extern spinlock_t smp_commence_lock;
 
 
 ia32_segdesc_t	smp_boot_gdt[3];
@@ -287,7 +287,7 @@ static void setup_msrs()
 /**
  * checks the IA32 features (CPUID) to make sure the processor
  * has all necessary features */
-static void SECTION(".init.cpu") check_cpu_features()
+void SECTION(".init.cpu") check_cpu_features()
 {
     u32_t req_features = IA32_FEAT_FPU;
 #ifdef CONFIG_IA32_PSE
@@ -331,7 +331,7 @@ static void SECTION(".init.cpu") check_cpu_features()
  * this function is called once for each processor to initialize 
  * the processor specific data and registers
  */
-static cpuid_t SECTION(".init.cpu") init_cpu()
+cpuid_t SECTION(".init.cpu") init_cpu()
 {
     cpuid_t cpuid = 0;
 
@@ -711,50 +711,7 @@ extern "C" void SECTION(SEC_INIT) startup_system()
     spin_forever(cpuid);
 }
 
-#if defined(CONFIG_SMP)
-static void smp_ap_commence()
-{
-    smp_boot_lock.unlock();
 
-    /* finally we sync the time-stamp counters */
-    while( smp_commence_lock.is_locked() );
-
-    x86_settsc(0);
-}
-
-static void smp_bp_commence()
-{
-    // wait for last processor to call in
-    smp_boot_lock.lock();
-
-    // now release all at once
-    smp_commence_lock.unlock();
-
-    x86_settsc(0);
-}
-
-/**
- * startup_processor
- */
-extern "C" void SECTION(SEC_INIT) startup_processor()
-{
-    TRACE_INIT("AP processor is alive\n");
-    x86_mmu_t::set_active_pagetable((u32_t)get_kernel_space()->get_pagetable());
-    TRACE_INIT("AP switched to kernel ptab\n");
-
-    // first thing -- check CPU features
-    check_cpu_features();
-
-    /* perform processor local initialization */
-    cpuid_t cpuid = init_cpu();
-    
-    get_current_scheduler()->init (false);
-    get_idle_tcb()->notify (smp_ap_commence);
-    get_current_scheduler()->start (cpuid);
-
-    spin_forever(cpuid);
-}
-#endif
 /**
  * init_paging:  initializes the startup pagetable
  *               
