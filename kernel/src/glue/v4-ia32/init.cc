@@ -34,8 +34,7 @@
 #include <kmemory.h>
 #include <mapping.h>
 #include <ctors.h>
-
-#define SEC_INIT	".init"
+#include <init.h>
 
 /* cpu specific types */
 #include INC_ARCH(cpu.h)
@@ -91,9 +90,6 @@ static word_t init_ptable[MAX_KERNEL_MAPPINGS][1024] __attribute__((aligned(4096
 #endif /* !CONFIG_IA32_PSE */
 
 
-// from glue/v4-x86/
-void clear_bss (void);
-
 
 /**********************************************************************
  *
@@ -101,24 +97,14 @@ void clear_bss (void);
  *
  **********************************************************************/
 #if defined(CONFIG_SMP)
-extern "C" void _start_ap(void);
-extern spinlock_t smp_boot_lock;
-
-/* commence to sync TSC */
-extern void smp_bp_commence();
-extern spinlock_t smp_commence_lock;
-
-
 ia32_segdesc_t	smp_boot_gdt[3];
-static void setup_smp_boot_gdt()
+void setup_smp_boot_gdt (void)
 {
 #   define gdt_idx(x) ((x) >> 3)
     smp_boot_gdt[gdt_idx(X86_KCS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::code);
     smp_boot_gdt[gdt_idx(X86_KDS)].set_seg(0, ~0UL, 0, ia32_segdesc_t::data);
 #   undef gdt_idx
 }
-
-u8_t get_apic_id();
 #endif
 
 
@@ -241,7 +227,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 /**
  * setup_msrs: initializes all model specific registers for CPU
  */
-static void setup_msrs()
+void setup_msrs (void)
 {
 #ifdef CONFIG_IA32_SYSENTER
     /* here we also setup the model specific registers for the syscalls */
@@ -329,63 +315,6 @@ void SECTION(".init.cpu") check_cpu_features()
     }
 }
 
-/**
- * init_cpu: initializes the processor
- *
- * this function is called once for each processor to initialize 
- * the processor specific data and registers
- */
-cpuid_t SECTION(".init.cpu") init_cpu()
-{
-    cpuid_t cpuid = 0;
-
-    /* configure IRQ hardware - local part
-     * this has to be done before reading the cpuid since it may change
-     * when having one of those broken BIOSes like ServerWorks */
-    get_interrupt_ctrl()->init_cpu();
-
-#if defined(CONFIG_SMP)
-    cpuid = get_apic_id();
-#endif
-
-    /* Allow performance counters for users */
-#if defined(CONFIG_PERFMON)
-
-#if defined(CONFIG_TBUF_PERFMON) 
-    /* initialize tracebuffer */
-    setup_perfmon_cpu(cpuid);
-#endif
-    
-    /* Allow performance counters for users */
-    x86_cr4_set(X86_CR4_PCE);  
-#endif /* defined(CONFIG_PERFMON) */
-
-    /* initialize the CPU specific mappings */
-    get_kernel_space()->init_cpu_mappings(cpuid);
-
-    // call cpu ctors
-    call_cpu_ctors();
-
-    tss.setup(X86_KDS);
-    setup_gdt(tss, cpuid);
-
-    /* can take exceptions from now on, 
-     * idt is initialized via a constructor */
-    idt.activate();
-
-    /* activate msrs */
-    setup_msrs();
-
-    /* initialize timer - local part */
-    get_timer()->init_cpu();
-
-    /* initialize V4 processor info */
-    init_processor (cpuid, get_timer()->get_bus_freq(), 
-		    get_timer()->get_proc_freq());
-    
-    return cpuid;
-}
-
 
 
 /***********************************************************************
@@ -414,7 +343,7 @@ static void __attribute__((unused)) dump_pdir()
  * At system startup, a fixed amount of kernel memory is allocated
  * to allow basic initialization of the system before sigma0 is up.
  */
-static void SECTION(SEC_INIT) init_bootmem()
+void SECTION(SEC_INIT) init_bootmem (void)
 {
     TRACE_INIT("Initializing boot memory (%p - %p)\n", 
 	       start_bootmem, end_bootmem);
@@ -450,7 +379,7 @@ static void SECTION(SEC_INIT) init_bootmem()
 /**
  * init_meminfo: registers memory section with KIP
  */
-static void SECTION(SEC_INIT) init_meminfo()
+void SECTION(SEC_INIT) init_meminfo(void)
 {
     /* register virtual memory */
     get_kip()->memory_info.insert(memdesc_t::conventional, 
@@ -495,7 +424,7 @@ static void SECTION(SEC_INIT) __attribute__((unused)) init_arch()
 {
 }
 
-static void SECTION(SEC_INIT) add_more_kmem()
+void SECTION(SEC_INIT) add_more_kmem (void)
 {
     /* Scan memory descriptors for a block of reserved physical memory
      * that is within the range of (to be) contiguously mapped
@@ -567,151 +496,6 @@ static void SECTION(SEC_INIT) add_more_kmem()
     }
 }
 
-
-/**
- * startup_system: starts up the system
- *
- * precondition: paging is initialized with init_paging
- *
- * The startup happens in two steps
- *   1) all global initializations are performed
- *      this includes initializing necessary devices and
- *      the kernel debugger. The kernel memory allocator
- *      is set up (see init_arch).
- *
- *   2) the boot processor itself is initialized
- */
-extern "C" void SECTION(SEC_INIT) startup_system()
-{
-    clear_bss();
-
-    // allow printing in ctors
-    init_console ();
-
-    call_global_ctors();
-    call_node_ctors();
-
-    /* system initialization - boot CPU's job */
-    {
-	/* mention ourself */
-	init_hello ();
-
-	/* first thing -- check CPU features */
-	check_cpu_features();
-	
-	/* feed the kernel memory allocator */
-	init_bootmem();
-
-	/* initialize the kernel pagetable */
-	init_kernel_space();
-	
-	
-	{ /* copied here to catch errors early */
-	    tss.setup(X86_KDS);
-	    setup_gdt(tss, 0);
-	    idt.activate();
-	}
-
-	/* initialize kernel interface page */
-	get_kip()->init();
-
-        add_more_kmem();
-        
-	init_meminfo ();
-
-	/* configure IRQ hardware - global part */
-	get_interrupt_ctrl()->init_arch();
-	/* initialize timer - global part */
-	get_timer()->init_global();
-
-	/* initialize mapping database */
-	init_mdb ();
-
-#if defined(CONFIG_IO_FLEXPAGES)
-	/* initialize IO address space */
-	TRACE_INIT("Initializing IO space\n");
-	init_io_space();
-#endif
-
-#if defined(CONFIG_TRACEBUFFER)
-	/* allocate tracebuffer */
-	setup_tracebuffer();
-#endif
-
-	/* initialize kernel debugger if any */
-	if (get_kip()->kdebug_init)
-	    get_kip()->kdebug_init();
-    }
-
-#if defined(CONFIG_SMP)
-    /* start APs on an SMP + rendezvous */
-    {
-	TRACE_INIT("Starting application processors (%p->%p)\n", 
-		   _start_ap, SMP_STARTUP_ADDRESS);
-	
-	// aqcuire commence lock before starting any processor
-	smp_commence_lock.init (1);
-
-	// boot gdt
-	setup_smp_boot_gdt();
-
-	// IPI trap gates
-	init_xcpu_handling ();
-
-	// copy startup code to startup page
-	for (word_t i = 0; i < IA32_PAGE_SIZE / sizeof(word_t); i++)
-	    ((word_t*)SMP_STARTUP_ADDRESS)[i] = ((word_t*)_start_ap)[i];
-
-	/* at this stage we still have our 1:1 mapping at 0 */
-	*((volatile unsigned short *) 0x469) = (SMP_STARTUP_ADDRESS >> 4);
-	*((volatile unsigned short *) 0x467) = (SMP_STARTUP_ADDRESS) & 0xf;
-
-	local_apic_t<APIC_MAPPINGS> local_apic;
-
-	// make sure we don't try to kick out more CPUs we can handle
-	int smp_cpus = 1;
-
-	u8_t apic_id = get_apic_id();
-	for (word_t id = 0; id < sizeof(word_t) * 8; id++)
-	{
-	    if (id == apic_id)
-		continue;
-
-	    if ((get_interrupt_ctrl()->get_lapic_map() & (1 << id)) != 0)
-	    {
-		if (++smp_cpus > CONFIG_SMP_MAX_CPUS)
-		{
-		    printf("found more CPUs than Pistachio supports\n");
-		    spin_forever();
-		}
-		smp_boot_lock.lock(); // unlocked by AP
-		TRACE_INIT("Sending startup IPI to APIC %d\n", id);
-		local_apic.send_init_ipi(id, true);
-		for (int i = 0; i < 100000; i++);
-		local_apic.send_init_ipi(id, false);
-		local_apic.send_startup_ipi(id, (void(*)(void))SMP_STARTUP_ADDRESS);
-#warning VU: time out on AP call in
-	    }
-	}
-
-    }
-#endif
-
-    /* local initialization - all are equal */
-    cpuid_t cpuid = init_cpu ();
-
-    TRACE_INIT("%s done\n", __FUNCTION__);
-
-#ifdef CONFIG_SMP
-    smp_bp_commence ();
-#endif
-
-    get_current_scheduler()->init (true);
-    get_current_scheduler()->start (cpuid);
-
-    /* does not return */
-    spin_forever(cpuid);
-}
 
 
 /**

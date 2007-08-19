@@ -88,18 +88,8 @@ void clear_bss (void);
  **********************************************************************/
 
 #if defined(CONFIG_SMP)
-extern "C" void _start_ap(void);
-extern "C" void init_paging();
-extern "C" void SECTION(SEC_INIT) startup_processor();
-extern spinlock_t smp_boot_lock;
-
-/* commence to sync TSC */
-extern void smp_bp_commence();
-extern spinlock_t smp_commence_lock;
-
-
 amd64_segdesc_t	smp_boot_gdt[3];
-static void setup_smp_boot_gdt()
+void setup_smp_boot_gdt (void)
 {
     /* segment descriptors in long mode and legacy mode are almost identical.
      *  However, in long mode, most of the fields are ignored, thus we can set
@@ -111,9 +101,6 @@ static void setup_smp_boot_gdt()
   smp_boot_gdt[gdt_idx(X86_KDS)].set_seg((u64_t)0, amd64_segdesc_t::data, 0, amd64_segdesc_t::m_comp);  
 #   undef gdt_idx
 }
-
-
-u8_t get_apic_id();
 #endif
 
 
@@ -137,7 +124,7 @@ void SECTION(SEC_INIT) check_cpu_features()
  * 
  */
 
-static void SECTION(SEC_INIT) init_bootmem()
+void SECTION(SEC_INIT) init_bootmem (void)
 {
     
     extern u8_t _start_bootmem[];
@@ -151,7 +138,9 @@ static void SECTION(SEC_INIT) init_bootmem()
     kmem.init(start_bootmem, end_bootmem); 
 }
 
-static void add_more_kmem()
+
+
+void add_more_kmem (void)
 {
 
     /* 
@@ -195,7 +184,7 @@ static void add_more_kmem()
 
 }
 
-static void SECTION(SEC_INIT) init_meminfo()
+void SECTION(SEC_INIT) init_meminfo (void)
 {
 
     extern word_t _memory_descriptors_size[];
@@ -359,7 +348,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 /**
  * setup_msrs: initializes all model specific registers for CPU
  */
-static void setup_msrs()
+void setup_msrs (void)
 {
     
     /* sysret (63..48) / syscall (47..32)  CS/SS MSR */
@@ -393,264 +382,3 @@ static void setup_msrs()
     
 }
 
-cpuid_t SECTION(".init.cpu") init_cpu()
-{
-    cpuid_t cpuid = 0;
-
-#if defined(CONFIG_SMP)
-    cpuid = get_apic_id();
-#endif
-    /* set up task state segment */
-    TRACE_INIT("Activating TSS (CPU %d)\n", cpuid);
-    tss.setup();
-
-    /* set up global descriptor table */
-    TRACE_INIT("Initializing GDT (CPU %d)\n", cpuid);
-    setup_gdt(tss, cpuid);
-
-    /* activate idt */
-    TRACE_INIT("Activating IDT (CPU %d)\n", cpuid);;
-    idt.activate();
-
-    /* configure IRQ hardware - local part */    
-    get_interrupt_ctrl()->init_cpu();    
-    
-    
-#if defined(CONFIG_PERFMON)
-    
-#if defined(CONFIG_TBUF_PERFMON) 
-    /* initialize tracebuffer */
-    TRACE_INIT("Initializing Tracebuffer PMCs (CPU %d)\n", cpuid);
-    setup_perfmon_cpu(cpuid);
-#endif
-    
-     /* Allow performance counters for users */
-    TRACE_INIT("Enabling performance monitoring at user level (CPU %d)\n", cpuid);
-    x86_cr4_set(X86_CR4_PCE);  
-#endif /* defined(CONFIG_PERFMON) */
-
-    TRACE_INIT("Enabling global pages (CPU %d)\n", cpuid);
-    x86_mmu_t::enable_global_pages();    
-
-#if defined(CONFIG_FLUSHFILTER)
-    TRACE_INIT("Enabling flush filter (CPU %d)\n", cpuid);
-    x86_amdhwcr_t::enable_flushfilter();
-#endif
-    
-    /* activate msrs */
-    TRACE_INIT("Activating MSRS (CPU %d)\n", cpuid);
-    setup_msrs();
-	
-    /* initialize the kernel's timer source - per CPU part*/
-    TRACE_INIT("Initializing Timer (CPU %d)\n", cpuid);
-    get_timer()->init_cpu();
-
-    /* initialize V4 processor info */
-    TRACE_INIT("Initializing Processor (CPU %d)\n", cpuid);
-    init_processor (cpuid, get_timer()->get_bus_freq(), 
-		    get_timer()->get_proc_freq());
-
-    /* CPU specific mappings */
-    get_kernel_space()->init_cpu_mappings(cpuid);    
-
-    return cpuid;
-}     
-
-/**
- * Entry Point into C Kernel
- * 
- * Precondition: 64bit-mode enabled
- *		 idempotent mapping and mapping at KERNEL_OFFSET
- *   
- */
-
-extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
-{   
-
-#if defined(CONFIG_SMP)
-    /* check if we are running on the BSP or on an AP */
-    if ( is_ap )
-	startup_processor();    
-#endif 
-
-    /* clear bss */
-    clear_bss();
-    
-    /* init console */
-    init_console(); 
-
-    
-    /* call global constructors */
-    call_global_ctors();
-
-    /* call node constructors */
-    call_node_ctors();
-
-    /* say hello ... */ 
-    init_hello();
-   
-    /* Get CPU Features */
-    TRACE_INIT("Checking CPU features\n");
-    check_cpu_features();
-
-    /* feed the kernel memory allocator */
-    TRACE_INIT("Initializing boot memory (%p - %p)\n",
-		start_bootmem, end_bootmem);
-    init_bootmem();
-
-
-    /* initialize kernel space */
-    TRACE_INIT("Initializing kernel space\n");
-    init_kernel_space();
-
-    {
-	/* copied here to catch errors early */
-	TRACE_INIT("Activating TSS (Preliminary)\n");
-	tss.setup();
-	/* set up global descriptor table */
-	TRACE_INIT("Initializing GDT (Preliminary)\n");
-	setup_gdt(tss, 0);
-	
-	/* activate idt */
-	TRACE_INIT("Activating IDT (Preliminary)\n");
-	idt.activate();
-    }
-
-    /* initialize kernel interface page */
-    TRACE_INIT("Initializing kernel interface page (%p)\n",
-           get_kip());
-    get_kip()->init();
-
- 
-    /* add additional kernel memory */
-    TRACE_INIT("Adding more kernel memory\n");
-    add_more_kmem();  
-
-    /* init memory info */
-    TRACE_INIT("Initializing memory info\n");
-    init_meminfo(); 
-
-    
-    /* initialize mapping database */
-    TRACE_INIT("Initializing mapping database\n");
-    init_mdb ();
-
-#if defined(CONFIG_IO_FLEXPAGES)
-    /* configure IRQ hardware - global part */
-    TRACE_INIT("Initializing IO port space\n");
-    init_io_space();
-#endif
-    
-#if defined(CONFIG_TRACEBUFFER)
-    /* allocate and setup tracebuffer */
-    TRACE_INIT("Initializing Tracebuffer\n");
-    setup_tracebuffer();
-#endif
-
-    /* initialize kernel debugger if any */
-    TRACE_INIT("Initializing kernel debugger\n");
-    if (get_kip()->kdebug_init)
-	get_kip()->kdebug_init();
-    
-    /* configure IRQ hardware - global part */
-    TRACE_INIT("Initializing IRQ hardware\n");
-    get_interrupt_ctrl()->init_arch();
-
-    /* initialize the kernel's timer source */
-    TRACE_INIT("Initializing Timer\n");
-    get_timer()->init_global();
-
-#if defined(CONFIG_SMP)
-    /* start APs on an SMP + rendezvous */
-    {
-	TRACE_INIT("Starting application processors (%p->%p)\n", 
-		   _start_ap, SMP_STARTUP_ADDRESS);
-	
-	/* aqcuire commence lock before starting any processor */
-	smp_commence_lock.init (1);
-
-	/* boot gdt */
-	setup_smp_boot_gdt();
-
-	/* IPI trap gates */
-	init_xcpu_handling ();
-
-	// copy startup code to startup page
-	for (word_t i = 0; i < AMD64_4KPAGE_SIZE / sizeof(word_t); i++)
-	    ((word_t*)SMP_STARTUP_ADDRESS)[i] = ((word_t*)_start_ap)[i];
-
-	/* at this stage we still have our 1:1 mapping at 0 */
-
-	/* this is the location of the warm-reset vector	 
-	 * (40:67h in real mode addressing) which points to the
-	 * cpu startup code
-	 */
-	*((volatile unsigned short *) 0x469) = (SMP_STARTUP_ADDRESS >> 4);  // real mode segment selector
-	*((volatile unsigned short *) 0x467) = (SMP_STARTUP_ADDRESS) & 0xf; // offset
-
-	local_apic_t<APIC_MAPPINGS> local_apic;
-
-	// make sure we don't try to kick out more CPUs we can handle
-	int smp_cpus = 1;
-
-	u8_t apic_id = get_apic_id();
-
-	for (word_t id = 0; id < sizeof(word_t) * 8; id++)
-	{
-	    if (id == apic_id)
-		continue;
-
-  	
-	    // note the typecast (word_t)1
-	    // This is important if we want to check for a maximum of
-	    // 64 cpus .If we would'nt cast, (1 << id) would be a 32bit 
-	    // integer and overflow if id == 0x20.
-	    if ((get_interrupt_ctrl()->get_lapic_map() & ((word_t)1 << id)) != 0)
-	    {
-		if (++smp_cpus > CONFIG_SMP_MAX_CPUS)
-		{
-		    printf("found more CPUs than Pistachio supports\n");
-		    spin_forever();
-		}
-		smp_boot_lock.lock(); // unlocked by AP
-		
-		TRACE_INIT("Sending startup IPI to APIC %d\n", id);
-		
-		local_apic.send_init_ipi(id, true);
-		for (int i = 0; i < 100000; i++);
-		local_apic.send_init_ipi(id, false);
-		for (int i = 0; i < 100000; i++);
-		local_apic.send_startup_ipi(id, (void(*)(void))SMP_STARTUP_ADDRESS);
-		
-#warning VU: time out on AP call in
-	    }
-	}
-	
-    }
-
-
-    smp_bp_commence ();
-
-#endif /* CONFIG_SMP */
-
-
-    /* Initialize CPU */
-    TRACE_INIT("Initializing CPU 0\n");
-    cpuid_t cpuid = init_cpu();
-
-#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
-    TRACE_INIT("Initializing 32-bit kernel interface page (%p)\n",
-           ia32::get_kip());
-    ia32::get_kip()->init();
-    init_kip_32();
-#endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
-
-    /* initialize the scheduler */
-    get_current_scheduler()->init(true);
-    /* get the thing going - we should never return */
-    get_current_scheduler()->start(cpuid);
-    
-    
-    /* make sure we don't fall off the edge */
-    spin_forever(1);
-}
