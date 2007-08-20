@@ -176,10 +176,18 @@ public:
     bool has_pmtimer() { return pmtimer_available; }
     void pmtimer_wait(const word_t ms) 
 	{ 
-	    /* Need to wait ms * pmtimer_ticks / 1000; */
-	    const word_t delta = (ms * pmtimer_ticks) / 1000;
-	    word_t start = pmtimer_read();
-	    while (pmtimer_read() < start + delta) ;
+        /* Need to wait ms * pmtimer_ticks / 1000; */
+        const word_t delta = (ms * pmtimer_ticks) / 1000;
+        word_t start = pmtimer_read();
+        
+        if ((start + delta) >=  pmtimer_mask)
+        {
+            while (pmtimer_read() >= start)
+                /* wait until overlap */;
+        }
+        
+        while (pmtimer_read() < ((start + delta) & pmtimer_mask))
+            /* wait */;
 	}
 
     /* handler invoked on interrupt */
