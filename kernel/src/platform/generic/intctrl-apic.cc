@@ -235,7 +235,7 @@ void SECTION (".init") intctrl_t::init_arch()
 	num_cpus = 0;
 	lapic_map = 0;
 	acpi_madt_lapic_t* p;
-	for (word_t i = 0; ((p = madt->lapic(i)) != NULL); i++)
+	for (word_t i = 0; ((p = _madt->lapic(i)) != NULL); i++)
 	{
 	    TRACE_INIT("Found local APIC: apic_id=%d use=%s proc_id=%d\n",
 		       p->id, p->flags.enabled ? "ok" : "disabled",
@@ -256,7 +256,7 @@ void SECTION (".init") intctrl_t::init_arch()
 	acpi_madt_ioapic_t* p;
 	ioapic_map = 0;
 
-	for (word_t i = 0; ((p = madt->ioapic(i)) != NULL); i++)
+	for (word_t i = 0; ((p = _madt->ioapic(i)) != NULL); i++)
 	{
 	    i82093_t* ioapic = get_ioapic(p->id);
 	    TRACE_INIT("Found IOAPIC: id=%d irq_base=%d addr=%p, map address=%p\n",
@@ -283,7 +283,7 @@ void SECTION (".init") intctrl_t::init_arch()
     /* IRQ source overrides */
     {
 	acpi_madt_irq_t* p;
-	for (word_t i = 0; ((p = madt->irq(i)) != NULL); i++)
+	for (word_t i = 0; ((p = _madt->irq(i)) != NULL); i++)
 	{
 	    TRACE_INIT("Found IRQ source override: "
 		       "srcbus=%d, srcirq=%d, dest=%d, "
@@ -317,7 +317,7 @@ void SECTION (".init") intctrl_t::init_arch()
     {
 	acpi_madt_hdr_t* p;
 	for (u8_t t = 3; t <= 8; t++)
-	    for (word_t i = 0; ((p = madt->find(t, i)) != NULL); i++)
+	    for (word_t i = 0; ((p = _madt->find(t, i)) != NULL); i++)
 		TRACE_INIT("MADT: found unknown type=%d, len=%d\n", p->type, p->len);
     }
     
