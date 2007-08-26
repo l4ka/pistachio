@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/resources.h
+ * File path:     glue/v4-x86/resources.h
  * Description:   ia32 specific resources
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,56 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ *                
  ********************************************************************/
+#ifndef __GLUE__V4_X86__RESOURCES_H__
+#define __GLUE__V4_X86__RESOURCES_H__
 
-#include INC_GLUEX(x86,resources.h)
+#include INC_API(resources.h)
+
+#define HAVE_RESOURCE_TYPE_E
+enum resource_type_e {
+    FPU			= 0,
+    COPY_AREA		= 1,
+#if defined(CONFIG_IA32_SMALL_SPACES)
+    IPC_PAGE_TABLE	= 2,
+#endif
+#if defined(CONFIG_IS_64BIT)
+    COMPATIBILITY_MODE	= 4,
+#endif
+};
+
+
+class thread_resources_t : public generic_thread_resources_t
+{
+public:
+    void dump(tcb_t * tcb);
+    void save(tcb_t * tcb) __asm__ ("tcb_resources_save");
+    void load(tcb_t * tcb) __asm__ ("tcb_resources_load");
+    void purge(tcb_t * tcb);
+    void init(tcb_t * tcb);
+    void free(tcb_t * tcb);
+
+public:
+    void x86_no_math_exception(tcb_t * tcb);
+    void enable_copy_area (tcb_t * tcb, addr_t * saddr,
+			   tcb_t * partner, addr_t * daddr);
+    void release_copy_area (tcb_t * tcb, bool disable_copyarea);
+    addr_t copy_area_address (word_t n);
+    addr_t copy_area_real_address (word_t n);
+
+private:
+    addr_t fpu_state;
+    word_t last_copy_area;
+
+#if defined(CONFIG_IS_32BIT)
+    word_t copy_area_pgdir_idx[COPY_AREA_COUNT];
+#else
+    amd64_pgent_t * pdp;
+    word_t copy_area_pml4_idx[COPY_AREA_COUNT];
+    word_t copy_area_pdp_idx[COPY_AREA_COUNT];
+#endif
+};
+
+
+#endif /* !__GLUE__V4_X86__RESOURCES_H__ */

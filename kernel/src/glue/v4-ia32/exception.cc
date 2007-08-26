@@ -528,7 +528,7 @@ IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
     TRACEPOINT(IA32_NOMATH, 
         printf("IA32_NOMATH %t @ %p\n", current, frame->eip));
 
-    current->resources.ia32_no_math_exception(current);
+    current->resources.x86_no_math_exception(current);
 }
 
 IA32_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)

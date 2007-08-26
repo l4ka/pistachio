@@ -154,7 +154,7 @@ void thread_resources_t::free(tcb_t * tcb)
 	release_copy_area (tcb, false);
 }
 
-void thread_resources_t::ia32_no_math_exception(tcb_t * tcb)
+void thread_resources_t::x86_no_math_exception(tcb_t * tcb)
 {
     ASSERT(&tcb->resources == this);
     x86_fpu_t::enable();

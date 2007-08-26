@@ -558,7 +558,7 @@ AMD64_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
     TRACEPOINT(AMD64_NOMATH, 
 	       printf("AMD64_NOMATH %t @ %p\n", current, frame->rip));
 
-    current->resources.amd64_no_math_exception(current);
+    current->resources.x86_no_math_exception(current);
 }
 
 AMD64_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
