@@ -71,7 +71,7 @@ void timer_t::init_cpu()
     static DEFINE_SPINLOCK(timer_lock);
 
 #if !defined(CONFIG_CPU_AMD64_SIMICS)
-    TRACE_INIT("Calculating processor speed ...\n");
+    TRACE_INIT("Calculating processor speed ...");
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
@@ -120,7 +120,7 @@ void timer_t::init_cpu()
 #endif 
 
 
-    TRACE_INIT("CPU speed: %d MHz, bus speed: %d MHz\n", 
+    TRACE_INIT("\nCPU speed: %d MHz, bus speed: %d MHz\n", 
                (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz);
 
     /* now set timer IRQ to periodic timer */

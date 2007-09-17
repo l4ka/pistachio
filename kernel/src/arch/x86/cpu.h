@@ -32,6 +32,12 @@
 #ifndef __ARCH__X86__CPU_H__
 #define __ARCH__X86__CPU_H__
 
+INLINE void x86_pause()
+{
+
+    __asm__ __volatile__ ("pause");
+}
+
 
 INLINE u64_t x86_rdpmc(const int ctrsel)
 {
