@@ -45,6 +45,7 @@
 #include INC_ARCH(cpuid.h)
 #include INC_ARCH(descreg.h)
 #include INC_ARCHX(x86,amdhwcr.h)
+#include INC_ARCHX(x86,fpu.h)
 #include INC_ARCH(segdesc.h)
 #include INC_ARCH(tss.h)
 #include INC_ARCHX(x86,apic.h)
@@ -350,7 +351,10 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
  */
 void setup_msrs (void)
 {
-    
+#if defined(CONFIG_X86_FXSR)
+    x86_fpu_t::enable_osfxsr();
+#endif
+
     /* sysret (63..48) / syscall (47..32)  CS/SS MSR */
     x86_wrmsr(AMD64_STAR_MSR, ((AMD64_SYSRETCS << 48) | (AMD64_SYSCALLCS << 32)));
     
