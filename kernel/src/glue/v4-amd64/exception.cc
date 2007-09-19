@@ -160,7 +160,7 @@ static bool __attribute__((__noinline__)) send_exception_ipc(amd64_exceptionfram
     return !tag.is_error();
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_catch_diverr, -1)
+X86_EXCNO_ERRORCODE(exc_catch_diverr, -1)
 {
     TRACE("Divide by Zero Exception\n");
     
@@ -169,7 +169,7 @@ AMD64_EXC_NO_ERRORCODE(exc_catch_diverr, -1)
     
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_overflow, -1)
+X86_EXCNO_ERRORCODE(exc_catch_overflow, -1)
 {
     TRACE("Overflow Exception\n");
     
@@ -178,7 +178,7 @@ AMD64_EXC_NO_ERRORCODE(exc_catch_overflow, -1)
     
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_boundrange, -1)
+X86_EXCNO_ERRORCODE(exc_catch_boundrange, -1)
 {
     TRACE("Bound Range Exception\n");
     if (send_exception_ipc(frame, X86_EXC_BOUNDRANGE))
@@ -186,7 +186,7 @@ AMD64_EXC_NO_ERRORCODE(exc_catch_boundrange, -1)
 
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_doublefault, -1)
+X86_EXCNO_ERRORCODE(exc_catch_doublefault, -1)
 {
     TRACE("Doublefault Exception\n");
     if (send_exception_ipc(frame, X86_EXC_DOUBLEFAULT))
@@ -194,42 +194,42 @@ AMD64_EXC_NO_ERRORCODE(exc_catch_doublefault, -1)
     
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_overrun, -1)
+X86_EXCNO_ERRORCODE(exc_catch_overrun, -1)
 {
     TRACE("Overrun Exception\n");
     if (send_exception_ipc(frame, X86_EXC_COPSEG_OVERRUN))
 	return;
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_invtss, -1)
+X86_EXCNO_ERRORCODE(exc_catch_invtss, -1)
 {
     TRACE("Invalid TSS Exception\n");
     if (send_exception_ipc(frame, X86_EXC_INVALID_TSS))
 	return;
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_segnotpr, -1)
+X86_EXCNO_ERRORCODE(exc_catch_segnotpr, -1)
 {
     TRACE("Segment not present Exception\n");
     if (send_exception_ipc(frame, X86_EXC_SEGMENT_NOT_PRESENT))
 	return;
     DUMP_FRAME();
 }				  
-AMD64_EXC_WITH_ERRORCODE(exc_catch_ss_fault, -1)
+X86_EXCWITH_ERRORCODE(exc_catch_ss_fault, -1)
 {
     TRACE("Stack Segment fault Exception\n");
     if (send_exception_ipc(frame, X86_EXC_STACKSEG_FAULT))
 	return;
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_ac, -1)
+X86_EXCNO_ERRORCODE(exc_catch_ac, -1)
 {
     TRACE("Alignment Check Exception\n");
     if (send_exception_ipc(frame, X86_EXC_ALIGNEMENT_CHECK))
 	return;
     DUMP_FRAME();
 }				  
-AMD64_EXC_NO_ERRORCODE(exc_catch_mc, -1)
+X86_EXCNO_ERRORCODE(exc_catch_mc, -1)
 {
     TRACE("Machine Check Exception\n");
     if (send_exception_ipc(frame, X86_EXC_MACHINE_CHECK))
@@ -237,7 +237,7 @@ AMD64_EXC_NO_ERRORCODE(exc_catch_mc, -1)
     DUMP_FRAME();
 }				  
 
-AMD64_EXC_NO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
+X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 {
     tcb_t * current = get_current_tcb();
     space_t * space = current->get_space();
@@ -512,7 +512,7 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 }
 
 
-AMD64_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
+X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
     TRACEPOINT_TB (AMD64_GP, ("amd64_gp at %x (error=%d)",
 			      frame->rip, frame->error),
@@ -551,7 +551,7 @@ AMD64_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     enter_kdebug("#GP");
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
+X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 {
     tcb_t * current = get_current_tcb();
 
@@ -561,7 +561,7 @@ AMD64_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
     current->resources.x86_no_math_exception(current);
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
+X86_EXCNO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
 {
     TRACEF("FPU exception\n");
     if (send_exception_ipc(frame, X86_EXC_FPU_FAULT))
@@ -570,7 +570,7 @@ AMD64_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
 
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
+X86_EXCNO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
 {
     TRACEF("SIMD exception\n");
     if (send_exception_ipc(frame, X86_EXC_SIMD_FAULT))
