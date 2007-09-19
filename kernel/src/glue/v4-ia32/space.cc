@@ -828,7 +828,7 @@ void space_t::map_sigma0(addr_t addr)
 /**
  * exc_pagefault: trap gate for ia32 pagefault handler
  */
-IA32_EXC_WITH_ERRORCODE(exc_pagefault, 0)
+X86_EXCWITH_ERRORCODE(exc_pagefault, 0)
 {
     u32_t pf = x86_mmu_t::get_pagefault_address();
     //TRACEF("pagefault @ %p, ip=%p, sp=%p\n", pf, frame->eip, frame->esp);
