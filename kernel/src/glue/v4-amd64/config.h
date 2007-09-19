@@ -112,6 +112,7 @@
 #define UTCB_MAPPING		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(509) << AMD64_PDIR_BITS)
 /*      KERNEL_OFFSET           (AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS) */
 #define VIDEO_MAPPING		(0xB8000)
+#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS + ((x)+1)*AMD64_4KPAGE_SIZE)
 
 #define UTCB_MAPPING_32		((u32_t) UTCB_MAPPING)
 
@@ -233,7 +234,7 @@
 #endif
 
 /* IDT, GDT, etc. */
-#define IDT_SIZE		128		/* 128 Ent.		*/
+#define IDT_SIZE		256		/* 256 Ent.		*/
 #define GDT_SIZE		11		/* 10  Ent. (2 for TSS)	*/
 #define GDT_IDX(x)		((x) >> 3)
 
@@ -260,8 +261,10 @@
 /* global IDT entries */
 #define IDT_LAPIC_TIMER         0x40
 #define IDT_LAPIC_THERMAL       0x41
-#define IDT_LAPIC_IPI           0x42
+#define IDT_LAPIC_XCPU_IPI	0x42
 #define IDT_IOAPIC_BASE         0x44
+#define IDT_IOAPIC_MAX		0xf0
+#define IDT_IOAPIC_SPURIOUS	0xfb
 
 /* Page size for APIC and ACPI mappings */
 #define APIC_PGENTSZ	        pgent_t::size_4k
@@ -272,7 +275,7 @@
 
 
 /* IOAPIC Settngs */
-#define EXC_INTERRUPT(name)	AMD64_EXC_NO_ERRORCODE(name, 0)
+#define EXC_INTERRUPT(name)	X86_EXCNO_ERRORCODE(name, 0)
     
 
 /* 1.953ms per timer tick
