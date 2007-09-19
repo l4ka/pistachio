@@ -42,6 +42,7 @@
 #include INC_GLUE(space.h)
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(hwirq.h)
+#include INC_GLUEX(x86,cpu.h)
 
 intctrl_t intctrl;
 EXC_INTERRUPT(spurious_interrupt)
@@ -49,59 +50,35 @@ EXC_INTERRUPT(spurious_interrupt)
     enter_kdebug("spurious interrupt - what now?");
 }
 
-HW_IRQ( 0);
-HW_IRQ( 1);
-HW_IRQ( 2);
-HW_IRQ( 3);
-HW_IRQ( 4);
-HW_IRQ( 5);
-HW_IRQ( 6);
-HW_IRQ( 7);
-HW_IRQ( 8);
-HW_IRQ( 9);
-HW_IRQ(10);
-HW_IRQ(11);
-HW_IRQ(12);
-HW_IRQ(13);
-HW_IRQ(14);
-HW_IRQ(15);
-HW_IRQ(16);
-HW_IRQ(17);
-HW_IRQ(18);
-HW_IRQ(19);
-HW_IRQ(20);
-HW_IRQ(21);
-HW_IRQ(22);
-HW_IRQ(23);
-HW_IRQ(24);
-HW_IRQ(25);
-HW_IRQ(26);
-HW_IRQ(27);
-HW_IRQ(28);
-HW_IRQ(29);
-HW_IRQ(30);
-HW_IRQ(31);
-HW_IRQ(32);
-HW_IRQ(33);
-HW_IRQ(34);
-HW_IRQ(35);
-HW_IRQ(36);
-HW_IRQ(37);
-HW_IRQ(38);
-HW_IRQ(39);
-HW_IRQ(40);
-HW_IRQ(41);
-HW_IRQ(42);
-HW_IRQ(43);
-HW_IRQ(44);
-HW_IRQ(45);
-HW_IRQ(46);
-HW_IRQ(47);
-HW_IRQ(48);
-HW_IRQ(49);
+HW_IRQ( 0); HW_IRQ( 1); HW_IRQ( 2); HW_IRQ( 3);
+HW_IRQ( 4); HW_IRQ( 5); HW_IRQ( 6); HW_IRQ( 7);
+HW_IRQ( 8); HW_IRQ( 9); HW_IRQ(10); HW_IRQ(11);
+HW_IRQ(12); HW_IRQ(13); HW_IRQ(14); HW_IRQ(15);
+HW_IRQ(16); HW_IRQ(17); HW_IRQ(18); HW_IRQ(19);
+HW_IRQ(20); HW_IRQ(21); HW_IRQ(22); HW_IRQ(23);
+HW_IRQ(24); HW_IRQ(25); HW_IRQ(26); HW_IRQ(27);
+HW_IRQ(28); HW_IRQ(29); HW_IRQ(30); HW_IRQ(31); 
+HW_IRQ(32); HW_IRQ(33); HW_IRQ(34); HW_IRQ(35);
+HW_IRQ(36); HW_IRQ(37); HW_IRQ(38); HW_IRQ(39);
+HW_IRQ(40); HW_IRQ(41); HW_IRQ(42); HW_IRQ(43);
+HW_IRQ(44); HW_IRQ(45); HW_IRQ(46); HW_IRQ(47);
+HW_IRQ(48); HW_IRQ(49); 
 
 /* have this asm _after_ the entry points to get forward jumps */
 HW_IRQ_COMMON();
+
+
+EXC_INTERRUPT(spurious_interrupt_lapic)
+{
+    intctrl_t::local_apic.EOI();
+    printf("LAPIC: spurious interrupt\n");
+}
+
+EXC_INTERRUPT(spurious_interrupt_ioapic)
+{
+    intctrl_t::local_apic.EOI();
+    printf("IO-APIC: spurious interrupt\n");
+}
 
 
 typedef void(*hwirqfunc_t)();
@@ -110,70 +87,85 @@ INLINE hwirqfunc_t get_interrupt_entry(word_t irq)
     return (hwirqfunc_t)((word_t)hwirq_0 + ((word_t)hwirq_1 - (word_t)hwirq_0) * irq);
 }
 
-INLINE word_t intctrl_t::setup_idt_entry(word_t irq, u8_t prio)
+INLINE u8_t intctrl_t::setup_idt_entry(word_t irq, u8_t prio)
 {
-    word_t vector = IDT_IOAPIC_BASE + irq;
-#if 0
-    TRACEF("IRQ %d, vector=%d, prio=%d, entry=%p\n", 
-	   irq, vector, prio, get_interrupt_entry(irq));
-#endif
-    idt.add_int_gate(vector, get_interrupt_entry(irq));
+    idt_lock.lock();
+    u8_t vector = IDT_IOAPIC_BASE + irq;
+    if (vector < IDT_IOAPIC_MAX) {
+	//TRACEF("IRQ %d, vector=%d, prio=%d, entry=%p\n", 
+	//     irq, vector, prio, get_interrupt_entry(irq));
+	idt.add_int_gate(vector, get_interrupt_entry(irq));
+    } else
+    {
+	TRACEF("IRQ %d, vector=%d, prio=%d, entry=%p\n", 
+	       irq, vector, prio, get_interrupt_entry(irq));
+	UNIMPLEMENTED();
+	vector = 0;
+    }
+    idt_lock.unlock();
     return vector;
 }
+
+INLINE void intctrl_t::free_idt_entry(word_t irq, u8_t vector)
+{
+    /* nothing so far--free ITD entry later */
+}
+
+
 
 INLINE void intctrl_t::sync_redir_entry(ioapic_redir_table_t * entry, sync_redir_part_e part)
 {
     ASSERT(entry && entry->is_valid());
-    ioapic_locks[entry->id].lock();
-    i82093_t * ioapic = get_ioapic(entry->id);
-    
+    entry->ioapic->lock.lock();
     if (part == sync_all)
-	ioapic->set_redir_entry(entry->line, entry->entry);
+	entry->ioapic->i82093->set_redir_entry(entry->line, entry->entry);
     else if (part == sync_low)
-	ioapic->set_redir_entry_low(entry->line, entry->entry);
+	entry->ioapic->i82093->set_redir_entry_low(entry->line, entry->entry);
     else {
 	/* part == sync_high */
-	ioapic->set_redir_entry_high(entry->line, entry->entry);
+	entry->ioapic->i82093->set_redir_entry_high(entry->line, entry->entry);
     }
-    ioapic_locks[entry->id].unlock();
+    entry->ioapic->lock.unlock();
 }
 
-void SECTION (".init") intctrl_t::init_arch()
+void intctrl_t::init_arch()
 {
     /* first initialize object */
     for (word_t i = 0; i < NUM_REDIR_ENTRIES; i++)
 	redir[i].init();
-    
-    for (word_t i = 0; i < CONFIG_MAX_IOAPICS; i++)
-	ioapic_locks[i].init();
 
     max_intsource = 0;
     num_intsources = 0;
+    num_ioapics = 0;
 
     /* mask all IRQs on PIC1 and PIC2 */
     out_u8(0x21, 0xff);
     out_u8(0xa1, 0xff);
 
-    /* set APIC to symmetric mode */
-    out_u8(0x22, 0x70);
-    out_u8(0x23, 0x01);
-
     /* setup spurious interrupt vector */
-    idt.add_int_gate(IDT_LAPIC_SPURIOUS_INT, spurious_interrupt);
+    idt.add_int_gate(IDT_LAPIC_SPURIOUS_INT, spurious_interrupt_lapic);
+    idt.add_int_gate(IDT_IOAPIC_SPURIOUS, spurious_interrupt_ioapic);
 
     /* now walk the ACPI structure */
     addr_t addr = acpi_remap((addr_t)ACPI20_PC99_RSDP_START);
     acpi_rsdp_t* rsdp = acpi_rsdp_t::locate(addr);
-
     TRACE_INIT("RSDP is at %p\n", rsdp);
     
     if (rsdp == NULL)
     {
 	TRACE_INIT("Assuming local APIC defaults");
-	get_kernel_space()->add_mapping((addr_t)(APIC_MAPPINGS),
-					(addr_t)(0xFEE00000),
+	get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS),
+					addr_t(0xFEE00000),
 					APIC_PGENTSZ, true, true, true);
 	
+	if (local_apic.version() >= 0x20)
+	    panic("no local APIC found--system unusable");
+
+	// reserve in KIP
+	get_kip()->memory_info.insert(memdesc_t::reserved, 0, false,
+	    addr_t(APIC_MAPPINGS), addr_t(APIC_MAPPINGS + X86_4KPAGE_SIZE));
+	
+	cpu_t::add_cpu(local_apic.id());
 	return;
     }
     
@@ -183,23 +175,22 @@ void SECTION (".init") intctrl_t::init_arch()
     if ((rsdt_phys == NULL) && (xsdt_phys == NULL))
 	return;
 
-    
-    TRACE_INIT("RSDT is at %p\n", rsdt);
-    TRACE_INIT("XSDT is at %p\n", xsdt);
+    TRACE_INIT("RSDT is at %p\n", rsdt_phys);
+    TRACE_INIT("XSDT is at %p\n", xsdt_phys);
 
     acpi_fadt_t *fadt = NULL, *_fadt;
-    acpi_madt_t* madt = NULL, *_madt;
-    
+    acpi_madt_t *madt = NULL, *_madt; 
+   
     if (xsdt_phys != NULL)
     {
-	xsdt = (acpi_xsdt_t*)acpi_remap(xsdt_phys);
+	xsdt = (acpi_xsdt_t*)acpi_remap(xsdt_phys);	
 	fadt = (acpi_fadt_t*) xsdt->find("FACP", (addr_t) xsdt_phys);
 	madt = (acpi_madt_t*) xsdt->find("APIC", (addr_t) xsdt_phys);
     }
     if ((madt == NULL) && (rsdt_phys != NULL))
     {
 	rsdt = (acpi_rsdt_t*)acpi_remap(rsdt_phys);
-	rsdt->list(rsdt_phys);
+	rsdt->list(rsdt_phys);	
 	fadt = (acpi_fadt_t*) rsdt->find("FACP", (addr_t) rsdt_phys);
 	madt = (acpi_madt_t*) rsdt->find("APIC", (addr_t) rsdt_phys);
     }
@@ -216,12 +207,12 @@ void SECTION (".init") intctrl_t::init_arch()
     else 
 	pmtimer_available = false;
 
-
     if (madt == NULL)
 	return;
 
     _madt = (acpi_madt_t*)acpi_remap(madt);
-
+    
+    
     TRACE_INIT("MADT is at %p (remap %p), local APICs @ %p\n",
 	       madt, _madt, _madt->local_apic_addr);
     
@@ -231,52 +222,54 @@ void SECTION (".init") intctrl_t::init_arch()
 				    addr_t(_madt->local_apic_addr),
 				    APIC_PGENTSZ, true, true, true);
 
+    // reserve in KIP
+    get_kip()->memory_info.insert(memdesc_t::reserved, 0, false,
+	addr_t(APIC_MAPPINGS), addr_t(APIC_MAPPINGS + X86_4KPAGE_SIZE));
+
+
+    /* local apic */
     {
-	num_cpus = 0;
-	lapic_map = 0;
+	word_t total_cpus = 0;
 	acpi_madt_lapic_t* p;
 	for (word_t i = 0; ((p = _madt->lapic(i)) != NULL); i++)
 	{
 	    TRACE_INIT("Found local APIC: apic_id=%d use=%s proc_id=%d\n",
 		       p->id, p->flags.enabled ? "ok" : "disabled",
 		       p->apic_processor_id);
-	    if (p->flags.enabled)
-	    {
-		num_cpus++;
-		lapic_map |= (1 << p->id);
+	    if (p->flags.enabled) {
+		cpu_t::add_cpu(p->id);
+		total_cpus++;
 	    }
 	}
 	TRACE_INIT("Found %d active CPUs, boot CPU is %x\n",
-		   num_cpus, local_apic.id());
-		   
+		   total_cpus, local_apic.id());
+
+	if (total_cpus > cpu_t::count)
+	    printf("WARNING: system has %d CPUs, but kernel supports %d\n",
+		   total_cpus, cpu_t::count);
+#ifndef CONFIG_SMP
+	/* make sure the boot CPU is the first */
+	cpu_t::get(0)->apicid = local_apic.id();
+#endif
     }
 
     /* IO APIC */
     {
 	acpi_madt_ioapic_t* p;
-	ioapic_map = 0;
 
 	for (word_t i = 0; ((p = _madt->ioapic(i)) != NULL); i++)
 	{
-	    i82093_t* ioapic = get_ioapic(p->id);
-	    TRACE_INIT("Found IOAPIC: id=%d irq_base=%d addr=%p, map address=%p\n",
-		       p->id, p->irq_base, p->address, ioapic);
+	    TRACE_INIT("Found IOAPIC: id=%d irq_base=%d addr=%p\n",
+		       p->id, p->irq_base, p->address);
 	    if ((p->address & page_mask(APIC_PGENTSZ)) != 0)
 	    {
 		TRACE_INIT("  APIC %d IS MISALIGNED (%p). Ignoring!\n",
 			   i, p->address);
 		continue;
 	    }
-	    get_kernel_space()->add_mapping((addr_t)ioapic,
-					    (addr_t)((word_t)p->address),
-					    APIC_PGENTSZ,
-					    true, // writable
-					    true, // kernel
-					    true, // global
-					    false); // uncacheable
-
-	    init_io_apic(p->id, p->irq_base);
-	    ioapic_map |= 1 << p->id;
+	    if ( init_io_apic(num_ioapics, p->id, p->irq_base, 
+			      addr_offset(0, p->address)) )
+		num_ioapics++;
 	}
     }
 
@@ -306,7 +299,7 @@ void SECTION (".init") intctrl_t::init_arch()
 	     */
 	    ioapic_redir_t * entry = &redir[p->dest].entry;
 	    entry->x.polarity = 
-		(p->get_polarity() == acpi_madt_irq_t::active_low) ? 1 : 0;
+		(p->get_polarity() == acpi_madt_irq_t::active_high) ? 0 : 1;
 	    entry->x.trigger_mode = 
 		(p->get_trigger_mode() == acpi_madt_irq_t::level) ? 1 : 0;
 	}
@@ -326,20 +319,17 @@ void SECTION (".init") intctrl_t::init_arch()
 
     for (word_t i = 0; i <= max_intsource; i++)
     {
-	/// @todo: handle IRQ prios correctly
-	word_t vector = setup_idt_entry(i, 0);
-
 	if (redir[i].is_valid())
 	{
 	    TRACE_INIT(" IRQ %2d: APIC %d, line %2d, %s, %s active\n",
-		       i, redir[i].id, redir[i].line, 
+		       i, redir[i].ioapic->id, redir[i].line, 
 		       redir[i].entry.x.trigger_mode ? "level" : "edge",
 		       redir[i].entry.x.polarity ? "low" : "high");
-	    redir[i].entry.x.vector = vector;
+	    // route all IO-APIC IRQs to a spurious IRQ handler
+	    redir[i].entry.x.vector = IDT_IOAPIC_SPURIOUS;
 	    sync_redir_entry(&redir[i], sync_all);
 	}
     }
-		   
 }
 
 
@@ -350,15 +340,29 @@ void intctrl_t::init_cpu()
 }
 
 
-void intctrl_t::init_io_apic(word_t ioapic_id, word_t irq_base)
+bool intctrl_t::init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t paddr)
 {
-    i82093_t * ioapic = get_ioapic(ioapic_id);
-    word_t numirqs = ioapic->version().ver.max_lvt + 1;
-    TRACE_INIT("              realid=%d maxint=%d, version=%d\n",
-	       ioapic->id(), numirqs, ioapic->version().ver.version);
+    if (idx >= CONFIG_MAX_IOAPICS)
+	return false;
 
-    ioapic_irq_base[ioapic_id] = irq_base;
-    ioapic_num_irqs[ioapic_id] = numirqs;
+    get_kernel_space()->add_mapping(addr_t(IOAPIC_MAPPING(idx)),
+				    paddr,
+				    APIC_PGENTSZ,
+				    true, // writable
+				    true, // kernel
+				    true, // global
+				    false); // uncacheable
+
+    // reserve in KIP
+    get_kip()->memory_info.insert(memdesc_t::reserved, 0, false, 
+	paddr, addr_offset(paddr, X86_4KPAGE_SIZE));
+
+    ioapic_t * ioapic = &ioapics[idx];
+    ioapic->init(id, addr_t(IOAPIC_MAPPING(idx)));
+
+    word_t numirqs = ioapic->i82093->num_irqs();
+    TRACE_INIT("realid=%d maxint=%d, version=%d\n",
+	       ioapic->i82093->id(), numirqs, ioapic->i82093->version().ver.version);
 
     /* VU: we initialize all IO-APIC interrupts. By default all 
      *     IRQs are steered to local apic 0. The kernel re-routes
@@ -366,7 +370,7 @@ void intctrl_t::init_io_apic(word_t ioapic_id, word_t irq_base)
      */
     for (word_t i = 0; i < numirqs; i++)
     {
-	redir[irq_base + i].set(ioapic_id, i);
+	redir[irq_base + i].set(ioapic, i);
 	ioapic_redir_t * entry = &redir[irq_base + i].entry;
 
 	/* ISA IRQs are mapped 1:1 --> 0 to 15 */
@@ -388,8 +392,8 @@ void intctrl_t::init_io_apic(word_t ioapic_id, word_t irq_base)
     num_intsources += numirqs;
     if ((irq_base + numirqs - 1) > max_intsource)
 	max_intsource = irq_base + numirqs - 1;
+    return true;
 }
-
 void intctrl_t::init_local_apic()
 {
     TRACE_INIT("local apic id=%d, version=%d\n",
@@ -398,6 +402,7 @@ void intctrl_t::init_local_apic()
     if (!local_apic.enable(IDT_LAPIC_SPURIOUS_INT))
 	WARNING ("failed initializing local APIC\n");
 
+#if 0
     /* VU: now deal with broken BIOS or crazy ID assignements 
      * for efficiency reasons we try to change local APIC ids to be 
      * contiguous
@@ -421,30 +426,51 @@ void intctrl_t::init_local_apic()
 
 	apicid_init.unlock();
     }
+#endif
 
     local_apic.set_task_prio(0);
-    
+
     /* now disable all interrupts */
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_timer);
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_thermal_monitor);
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_perfcount);
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_lint0);
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_lint1);
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_error);
+
+#if defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_IA32_C2)
+    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_thermal_monitor);
+#endif
+    
+
 }
 
 void intctrl_t::mask(word_t irq)
 {
+    if (irq >= get_number_irqs())
+	return;
     ASSERT(redir[irq].is_valid());
-
+#if defined(DEBUG_INTCTRL_MASKS)
+    TRACEPOINT_TB (INTCTRL_MASK, 
+		   ("INTCTRL %d mask ra %x", 
+		    irq,   __builtin_return_address((0))));
+#endif
     redir[irq].entry.mask_irq();
-    
-    if (!redir[irq].entry.is_edge_triggered())
+
+    if (redir[irq].entry.is_level_triggered())
 	sync_redir_entry(&redir[irq], sync_low);
 }
 
 bool intctrl_t::unmask(word_t irq)
 {
+    if (irq >= get_number_irqs())
+	return false;
+    
+    ASSERT(redir[irq].is_valid());
+#if defined(DEBUG_INTCTRL_MASKS)
+    TRACEPOINT_TB (INTCTRL_UNMASK, 
+		   ("INTCTRL %d unmask ra %x", 
+		    irq,   __builtin_return_address((0))));
+#endif
     ASSERT(redir[irq].is_valid());
 
     if (redir[irq].entry.is_edge_triggered())
@@ -461,16 +487,31 @@ bool intctrl_t::unmask(word_t irq)
 	redir[irq].entry.unmask_irq();
 	sync_redir_entry(&redir[irq], sync_low);
     }
-    return false;
+    return false;    
+    
 }
 
 bool intctrl_t::is_masked(word_t irq)
 {
+    if (irq >= get_number_irqs())
+	return false;
     return redir[irq].entry.is_masked_irq();
 }
 
 void intctrl_t::enable(word_t irq)
 {
+    if (irq >= get_number_irqs())
+	return;
+    /* IRQ is unassigned? */
+    if (redir[irq].entry.x.vector == IDT_IOAPIC_SPURIOUS) {
+	word_t vector = setup_idt_entry(irq, 0);
+	if (!vector) {
+	    printf("IRQ %d: association failed, no free vector\n", irq);
+	    return;
+	}
+	redir[irq].entry.x.vector = vector;
+    }
+	
     redir[irq].pending = false;
     redir[irq].entry.unmask_irq();
     sync_redir_entry(&redir[irq], sync_low);
@@ -478,9 +519,14 @@ void intctrl_t::enable(word_t irq)
 
 void intctrl_t::disable(word_t irq)
 {
+    if (irq >= get_number_irqs())
+	return;
+    word_t vector = redir[irq].entry.x.vector;
+    redir[irq].entry.x.vector = IDT_IOAPIC_SPURIOUS;
     redir[irq].pending = false;
     redir[irq].entry.mask_irq();
     sync_redir_entry(&redir[irq], sync_low);
+    free_idt_entry(irq, vector);
 }
 
 bool intctrl_t::is_enabled(word_t irq)
@@ -488,44 +534,22 @@ bool intctrl_t::is_enabled(word_t irq)
     return !is_masked(irq);
 }
 
-
-void intctrl_t::check_ioapic_shared(word_t id)
-{ 
-    ioapic_locks[id].set_shared(false);
-    
-#if defined(CONFIG_SMP)
-    /* Check upwards */
-    word_t start = ioapic_irq_base[id]; 
-    word_t end = ioapic_irq_base[id] + ioapic_num_irqs[id];
-    for (word_t irq = start; irq < end; irq++)
-    {
-	if (redir[irq].entry.get_phys_dest() != 
-	    redir[start].entry.get_phys_dest())
-	{
-	    ioapic_locks[id].set_shared(true);
-	    return;
-	}
-    }	
-#endif
-
+bool intctrl_t::is_pending(word_t irq)
+{
+    return redir[irq].pending;
 }
 
 void intctrl_t::set_cpu(word_t irq, word_t cpu)
-{
-#if !defined(CONFIG_SMP)
-    /* VU: on SMP systems we may have an APIC id != 0
-     * hence we set the correct routing value here. Since thread migrations
-     * are not possible on a UP this function is not time critical
-     */
-    cpu = local_apic.id();
-#endif
-    if (redir[irq].entry.get_phys_dest() != cpu)
+{ 
+    if (irq >= get_number_irqs())
+	return;
+
+    if (redir[irq].entry.get_phys_dest() != cpu_t::get(cpu)->get_apic_id())
     {
-	redir[irq].entry.set_phys_dest(cpu);
-	check_ioapic_shared(redir[irq].id);
+	redir[irq].entry.set_phys_dest(cpu_t::get(cpu)->get_apic_id());
 	/* JS: for edge triggered IRQs, sw and hw redir entry may
 	 * not be in sync. If we sync here, we may destroy the logic. 
-	 * We therefore only  sync the upper half */
+	 * We therefore only sync the upper half */
 	sync_redir_entry(&redir[irq], sync_high);
     }
 }
@@ -548,6 +572,7 @@ void intctrl_t::handle_irq(word_t irq)
 
     if (deliver)
 	::handle_interrupt(irq);
+
 }
 
 word_t intctrl_t::get_number_irqs()
