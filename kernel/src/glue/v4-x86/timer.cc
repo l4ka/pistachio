@@ -49,9 +49,9 @@ u64_t ticks SECTION(".user.counter");
 
 extern "C" void timer_interrupt(void);
 #if defined(CONFIG_IS_64BIT)
-AMD64_EXC_NO_ERRORCODE(timer_interrupt, IRQLINE)
+X86_EXCNO_ERRORCODE(timer_interrupt, IRQLINE)
 #else
-IA32_EXC_NO_ERRORCODE(timer_interrupt, IRQLINE)
+X86_EXCNO_ERRORCODE(timer_interrupt, IRQLINE)
 #endif
 {
     /* acknowledge irq on PIC */
