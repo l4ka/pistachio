@@ -48,85 +48,60 @@
 class intctrl_t : public generic_intctrl_t 
 {
 private:
+    class ioapic_t {
+    public:
+	void init(word_t id, addr_t paddr)
+	    {
+		this->id = id;
+		i82093 = (i82093_t*)paddr;
+		lock.init();
+	    }
+
+    public:
+	word_t id;
+	i82093_t *i82093;
+	spinlock_t lock;
+    };
+    
     class ioapic_redir_table_t 
     {
     public:
-	void init() { id = 0; } // mark entry invalid
-	void set(word_t id, word_t line) 
+	void init() { ioapic = NULL; } // mark entry invalid
+	void set(ioapic_t * ioapic, word_t line) 
 	    {
-		this->id = id;
+		this->ioapic = ioapic;
 		this->line = line;
 		this->pending = false;
 	    }
-	    
-	bool is_valid() { return id != 0; }
+	bool is_valid() { return this->ioapic != NULL; }
 
     public:
 	ioapic_redir_t entry;
-	word_t id;
+	ioapic_t* ioapic;
 	word_t line;
 	bool pending;
     };
     
-    /* VU: ioapic_lock_t is used to synchronize access to IO-APICs on
-     * multiple CPUs. If an IO-APIC is not shared, all interrupts are
-     * routed to the same processor. Thus, concurrent access cannot occur
-     * and we don't need locking. On IRQ re-routing we modify the shared bit.
-     * Unlocks are always performed, since they don't cost. The advantage is
-     * that we do not have to deal with shared locks and unshared unlocks.
-     * In the UP case the implementation collapses to nothing.
-     */
-    class ioapic_lock_t
-    {
-    public:
-#if defined(CONFIG_SMP)
-	void init()	{ _lock.init(); shared = false; }
-	void lock()	{ if (is_shared()) _lock.lock(); }
-	void unlock ()	{ _lock.unlock(); }
-	bool is_shared(){ return shared; }
-	void set_shared(bool shared) { this->shared = shared; }
-    private:
-	bool shared;
-	spinlock_t _lock;
-#else /* ! CONFIG_SMP */
-	void init()	{ }
-	void lock()	{ }
-	void unlock ()	{ }
-	bool is_shared() { return false; }
-	void set_shared(bool shared) { }
-#endif /* ! CONFIG_SMP */
-    };
-
-    ioapic_lock_t ioapic_locks[CONFIG_MAX_IOAPICS];
+    ioapic_t ioapics[CONFIG_MAX_IOAPICS];
     ioapic_redir_table_t redir[NUM_REDIR_ENTRIES];
-
-    local_apic_t<APIC_MAPPINGS> local_apic;
 
     word_t num_intsources;
     word_t max_intsource;
-    word_t ioapic_irq_base[CONFIG_MAX_IOAPICS];
-    word_t ioapic_num_irqs[CONFIG_MAX_IOAPICS];
 
     /* apic id handling */
-    word_t lapic_map;
-    word_t ioapic_map;
+    word_t num_ioapics;
     word_t num_cpus;
+    spinlock_t idt_lock;
 
 private:
-    i82093_t * get_ioapic(word_t ioapic_id)
-	{
-	    ASSERT(ioapic_id > 0 && (ioapic_id < CONFIG_MAX_IOAPICS));
-	    return (i82093_t*) (APIC_MAPPINGS + (ioapic_id * (page_size(APIC_PGENTSZ))));
-	    
-	}
-
-    void init_io_apic(word_t ioapic_id, word_t irq_base);
+    bool init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t paddr);
     void init_local_apic();
 
     /** 
      * sets up the IDT and returns the IDT vector 
      */
-    word_t setup_idt_entry(word_t irq, u8_t prio);
+    u8_t setup_idt_entry(word_t irq, u8_t prio);
+    void free_idt_entry(word_t irq, u8_t vector);
 
     /**
      * write the cached redir entry into the APIC
@@ -148,20 +123,22 @@ private:
 private: 
     bool   pmtimer_available;
     word_t pmtimer_ioport;
+    
+public:
+    static local_apic_t<APIC_MAPPINGS> local_apic;
 
 public:
-    word_t get_lapic_map() { return lapic_map; }
-
-public:
+ 
     void init_arch();
     void init_cpu();
-
+    
     word_t get_number_irqs();
     bool is_irq_available(word_t irq);
 
     void mask(word_t irq);
     bool unmask(word_t irq);
     bool is_masked(word_t irq);
+    bool is_pending(word_t irq);
     
     void enable(word_t irq);
     void disable(word_t irq);
@@ -172,39 +149,21 @@ public:
     static const word_t pmtimer_ticks = 3579545;
     static const word_t pmtimer_mask = 0xFFFFFF;
     
-    word_t pmtimer_read() { 
-	
-	u32_t first, second;
-	
-	first = second = in_u32(pmtimer_ioport) & pmtimer_mask;
-	
-	while (first == second)
-	{
-	    second = in_u32(pmtimer_ioport) & pmtimer_mask;
-	    x86_pause();
-	}
-	return second; 
-    
-    }
+    word_t pmtimer_read() { return in_u32(pmtimer_ioport) & pmtimer_mask; }
     bool has_pmtimer() { return pmtimer_available; }
     void pmtimer_wait(const word_t ms) 
 	{ 
 	    /* Need to wait ms * pmtimer_ticks / 1000; */
 	    const word_t delta = (ms * pmtimer_ticks) / 1000;
-	    word_t end = (pmtimer_read() + delta) & pmtimer_mask;
-	    word_t counter = 0;
-	    while (pmtimer_read() < end) 
-	    { 
-		if (counter++ % 500000 == 0) 
-		    printf(".");
-		//printf("%d - %d\n", pmtimer_read(), end);
-		
-	    };
+	    word_t start = pmtimer_read();
+	    
+	    word_t dbg = 0;
+	    while (pmtimer_read() < start + delta) { if (dbg++ % 100000 == 0) printf("."); } ;
 	}
     
     /* handler invoked on interrupt */
     void handle_irq(word_t irq) __asm__("intctrl_t_handle_irq");
-
+    
     friend class kdb_t;
 };
 
