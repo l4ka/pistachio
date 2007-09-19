@@ -390,14 +390,14 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 }
 
 
-IA32_EXC_NO_ERRORCODE(exc_catch, -1)
+X86_EXCNO_ERRORCODE(exc_catch, -1)
 {
     printf("exception caught\n");
     enter_kdebug("exception");
     while(1);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
+X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 {
     tcb_t * current = get_current_tcb();
     space_t * space = current->get_space();
@@ -440,7 +440,7 @@ extern "C" void sysexit_tramp (void);
 extern "C" void sysexit_tramp_end (void);
 extern "C" void reenter_sysexit (void);
 
-IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
+X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
     kdebug_check_breakin();
 #if defined(CONFIG_IA32_SMALL_SPACES) && defined(CONFIG_IA32_SYSENTER)
@@ -521,7 +521,7 @@ IA32_EXC_WITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     get_current_tcb()->switch_to_idle();
 }
 
-IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
+X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 {
     tcb_t * current = get_current_tcb();
 
@@ -531,7 +531,7 @@ IA32_EXC_NO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
     current->resources.x86_no_math_exception(current);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
+X86_EXCNO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
 {
     printf("fpu fault exception @ %p", frame->eip);
 
@@ -542,7 +542,7 @@ IA32_EXC_NO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
     get_current_tcb()->switch_to_idle();
 }
 
-IA32_EXC_NO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
+X86_EXCNO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
 {
     printf("simd fault exception @ %p", frame->eip);
 
