@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/processor.h
  * Description:   processor management
@@ -32,6 +32,7 @@
 #ifndef __API__V4__CPU_H__
 #define __API__V4__CPU_H__
 
+typedef u16_t cpuid_t;
 void init_processor(cpuid_t processor, word_t external_freq, word_t internal_freq);
 
 #endif /* !__API__V4__CPU_H__ */
