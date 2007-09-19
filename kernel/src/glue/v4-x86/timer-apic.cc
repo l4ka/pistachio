@@ -58,7 +58,7 @@ X86_EXCNO_ERRORCODE(timer_interrupt, 0)
 
 void timer_t::init_global()
 {
-    TRACE_INIT("Init_global timer - trap gate %d\n", IDT_LAPIC_TIMER);
+    TRACE_INIT("Initializing global timer - trap gate %d\n", IDT_LAPIC_TIMER);
     idt.add_int_gate(IDT_LAPIC_TIMER, timer_interrupt);
 }
 

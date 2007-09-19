@@ -462,7 +462,7 @@ static void SECTION(".init") init_all_threads(void)
  */
 static void idle_thread()
 {
-    TRACE_INIT("idle thread started on CPU %d\n", get_current_cpu());
+    TRACE_INIT("Idle thread started on CPU %d\n", get_current_cpu());
 
     while(1)
     {

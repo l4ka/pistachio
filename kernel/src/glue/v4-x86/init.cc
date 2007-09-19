@@ -321,7 +321,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 #if defined(CONFIG_SMP)
     /* start APs on an SMP + rendezvous */
     {
-	TRACE_INIT("starting %d application processors (%p->%p)\n", 
+	TRACE_INIT("Starting %d application processors (%p->%p)\n",
 		   cpu_t::count, _start_ap, SMP_STARTUP_ADDRESS);
 	
 	// aqcuire commence lock before starting any processor
@@ -353,7 +353,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 		continue;
 
 	    smp_boot_lock.lock(); // unlocked by AP
-	    TRACE_INIT("sending startup IPI to CPU#%d APIC %d\n", 
+	    TRACE_INIT("Sending startup IPI to CPU#%d APIC %d\n", 
 		       cpuid, cpu->get_apic_id());
 	    local_apic.send_init_ipi(cpu->get_apic_id(), true);
 	    for (int i = 0; i < 200000; i++);

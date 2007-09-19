@@ -532,7 +532,7 @@ void space_t::init_cpu_mappings(cpuid_t cpu)
     /* cpu 0 operates on already initialized pagetables */
     if ( cpu == 0 ) return; 
     
-    TRACE_INIT("init cpu mappings for cpu %d\n", cpu);
+    TRACE_INIT("Initializing cpu mappings for cpu %d\n", cpu);
 
     mem_region_t reg = { start_cpu_local, end_cpu_local };
 
@@ -588,10 +588,10 @@ void space_t::init_cpu_mappings(cpuid_t cpu)
 	
     }
 
-    TRACE_INIT("switching to CPU local pagetable %p\n", get_pagetable(cpu));
+    TRACE_INIT("Switching to CPU local pagetable %p\n", get_pagetable(cpu));
     x86_mmu_t::set_active_pagetable((word_t)get_pagetable(cpu));
     x86_mmu_t::flush_tlb(true);
-    TRACE_INIT("cpu pagetable activated (%x)\n",
+    TRACE_INIT("CPU pagetable activated (%x)\n",
 	       x86_mmu_t::get_active_pagetable());
     
 

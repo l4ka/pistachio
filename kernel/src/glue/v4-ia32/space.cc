@@ -425,12 +425,12 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
     /* CPU 0 gets the always initialized page table */
     if (cpu == 0) return;
 
-    TRACE_INIT("init cpu mappings for cpu %d\n", cpu);
+    TRACE_INIT("Initializing CPU mappings for cpu %d\n", cpu);
 
     mem_region_t reg = { start_cpu_local, end_cpu_local };
     align_memregion(reg, IA32_PAGEDIR_SIZE);
 
-    TRACE_INIT("remapping CPU local memory %p - %p (%p - %p)\n", 
+    TRACE_INIT("Remapping CPU local memory %p - %p (%p - %p)\n", 
 	       start_cpu_local, end_cpu_local, reg.low, reg.high);
 
     pgent_t::pgsize_e size = pgent_t::size_max;
@@ -464,7 +464,7 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
 	    else
 	    {
 		addr_t page = kmem.alloc(kmem_pgtab, IA32_PAGE_SIZE);
-		TRACE_INIT("allocated cpu local page %p -> %p\n", pgaddr, page);
+		TRACE_INIT("Allocated cpu local page %p -> %p\n", pgaddr, page);
 		dst_pgent->set_entry(this, size, virt_to_phys(page), 7, 0, true);
 		memcpy(page, pgaddr, IA32_PAGE_SIZE);
 	    }
@@ -473,10 +473,10 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
 	}
 	size++;
     }
-    TRACE_INIT("switching to CPU local pagetable %p\n", get_pagetable(cpu));
+    TRACE_INIT("Switching to CPU local pagetable %p\n", get_pagetable(cpu));
     x86_mmu_t::set_active_pagetable((u32_t)get_pagetable(cpu));
     x86_mmu_t::flush_tlb(true);
-    TRACE_INIT("cpu pagetable activated (%x)\n", 
+    TRACE_INIT("CPU pagetable activated (%x)\n", 
 	       x86_mmu_t::get_active_pagetable());
 #endif
 }

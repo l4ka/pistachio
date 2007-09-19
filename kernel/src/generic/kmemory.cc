@@ -84,7 +84,7 @@ kmem_t kmem;
 SECTION(SEC_INIT) void kmem_t::init(void * start, void * end)
 {
 #define ISIZE ((word_t) end - (word_t) start)
-    TRACE_INIT ("kmem_init (%p, %p) [%d%c]\n", start, end,
+    TRACE_INIT ("Initializing kernel memory (%p-%p) [%d%c]\n", start, end,
 		ISIZE >= GB (1) ? ISIZE >> 30 :
 		ISIZE >= MB (1) ? ISIZE >> 20 : ISIZE >> 10,
 		ISIZE >= GB (1) ? 'G' : ISIZE >= MB (1) ? 'M' : 'K');

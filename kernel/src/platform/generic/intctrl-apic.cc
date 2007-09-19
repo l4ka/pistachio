@@ -361,7 +361,7 @@ bool intctrl_t::init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t padd
     ioapic->init(id, addr_t(IOAPIC_MAPPING(idx)));
 
     word_t numirqs = ioapic->i82093->num_irqs();
-    TRACE_INIT("realid=%d maxint=%d, version=%d\n",
+    TRACE_INIT("Initializing IOAPIC realid=%d maxint=%d, version=%d\n",
 	       ioapic->i82093->id(), numirqs, ioapic->i82093->version().ver.version);
 
     /* VU: we initialize all IO-APIC interrupts. By default all 
@@ -396,7 +396,7 @@ bool intctrl_t::init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t padd
 }
 void intctrl_t::init_local_apic()
 {
-    TRACE_INIT("local apic id=%d, version=%d\n",
+    TRACE_INIT("Local apic id=%d, version=%d\n",
 	       local_apic.id(), local_apic.version());
 
     if (!local_apic.enable(IDT_LAPIC_SPURIOUS_INT))
@@ -417,7 +417,7 @@ void intctrl_t::init_local_apic()
 	    if ((lapic_map & (1 << i)) == 0)
 	    {
 		lapic_map |= (1 << i);
-		TRACE_INIT("changing local APIC id to %d\n", i);
+		TRACE_INIT("Changing local APIC id to %d\n", i);
 		local_apic.set_id(i);
 		if (local_apic.id() != i)
 		    panic("could not change local APIC id\n");

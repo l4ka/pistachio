@@ -368,5 +368,5 @@ void SECTION(".init") init_interrupt_threads()
     /* initialize KIP */
     word_t num_irqs = get_interrupt_ctrl()->get_number_irqs();
     get_kip()->thread_info.set_system_base(num_irqs);
-    TRACE_INIT("system has %d interrupts\n", num_irqs);
+    TRACE_INIT("System has %d interrupts\n", num_irqs);
 }

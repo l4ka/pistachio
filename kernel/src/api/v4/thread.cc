@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     api/v4/thread.cc
  * Description:   thread manipulation
@@ -1381,7 +1381,7 @@ void SECTION(".init") init_root_servers()
     sigma1.set_global_id(ubase+1, ROOT_VERSION);
     root_server.set_global_id(ubase+2, ROOT_VERSION);
     
-    TRACE_INIT ("creating sigma0 (%t)\n", TID(sigma0));
+    TRACE_INIT ("Creating sigma0 (%t)\n", TID(sigma0));
     tcb = create_root_server(
 	sigma0,			// tid and space
 	root_server,		// scheduler
@@ -1397,7 +1397,7 @@ void SECTION(".init") init_root_servers()
     /* start sigma1 */
     if (!get_kip()->sigma1.mem_region.is_empty())
     {
-	TRACE_INIT ("creating sigma1 (%t)\n", TID(sigma1));
+	TRACE_INIT ("Creating sigma1 (%t)\n", TID(sigma1));
 	tcb = create_root_server(
 	    sigma1,		// tid and space
 	    root_server,	// scheduler
@@ -1414,7 +1414,7 @@ void SECTION(".init") init_root_servers()
     /* start root task */
     if (!get_kip()->root_server.mem_region.is_empty())
     {
-	TRACE_INIT ("creating root server (%t)\n", TID(root_server));
+	TRACE_INIT ("Creating root server (%t)\n", TID(root_server));
 	tcb = create_root_server(
 	    root_server,	// tid and space
 	    root_server,	// scheduler
