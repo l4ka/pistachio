@@ -44,9 +44,9 @@ static local_apic_t<APIC_MAPPINGS> local_apic;
 
 extern "C" void timer_interrupt(void);
 #if defined(CONFIG_IS_64BIT)
-AMD64_EXC_NO_ERRORCODE(timer_interrupt, 0)
+X86_EXCNO_ERRORCODE(timer_interrupt, 0)
 #else
-IA32_EXC_NO_ERRORCODE(timer_interrupt, 0)
+X86_EXCNO_ERRORCODE(timer_interrupt, 0)
 #endif
 {
     local_apic.EOI();
@@ -76,7 +76,7 @@ void timer_t::init_cpu()
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
 
-    word_t delay;
+    word_t delay = 0;
     
     /* calculate processor speed */
     if (!pmtimer)
