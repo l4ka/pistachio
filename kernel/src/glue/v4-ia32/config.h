@@ -118,6 +118,7 @@
 
 /* device memory */
 #define APIC_MAPPINGS		(UTRAMP_MAPPING + IA32_PAGE_SIZE)
+#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS + ((x)+1)*IA32_PAGE_SIZE)
 #define APIC_MAPPINGS_END	(APIC_MAPPINGS + (CONFIG_MAX_IOAPICS + 1) * IA32_PAGE_SIZE)
 #define VIDEO_MAPPING		(0xb8000)
 
@@ -187,7 +188,7 @@
 
 
 /* IDT, GDT, etc. */
-#define IDT_SIZE		128
+#define IDT_SIZE		256
 #define GDT_SIZE		16
 
 /* global IDT entries */
@@ -196,13 +197,15 @@
 #define IDT_LAPIC_TIMER		0x40
 #define IDT_LAPIC_THERMAL	0x41
 #define IDT_LAPIC_XCPU_IPI	0x42
-#define IDT_IOAPIC_BASE		0x44
+#define IDT_IOAPIC_SPURIOUS	0xfb
+#define IDT_IOAPIC_BASE		0x40
+#define IDT_IOAPIC_MAX		0xf0
 
 /* Page size for APIC and ACPI mappings */
 #define APIC_PGENTSZ	        pgent_t::size_4k
 #define ACPI_PGENTSZ	        pgent_t::size_4m
 
-#define EXC_INTERRUPT(name)	IA32_EXC_NO_ERRORCODE(name, 0)				
+#define EXC_INTERRUPT(name)	X86_EXCNO_ERRORCODE(name, 0)				
 
 /* timer frequency */
 #ifdef CONFIG_IOAPIC
