@@ -92,13 +92,13 @@ typedef ia32_exceptionframe_t x86_exceptionframe_t;
 
 
 /**
- * IA32_EXC_WITH_ERRORCODE: allows C implementation of 
+ * X86_EXCWITH_ERRORCODE: allows C implementation of 
  *   exception handlers and trap/interrupt gates with error 
  *   code.
  *
- * Usage: IA32_EXC_WITH_ERRORCODE(exc_gp)
+ * Usage: X86_EXCWITH_ERRORCODE(exc_gp)
  */
-#define IA32_EXC_WITH_ERRORCODE(name, reason)			\
+#define X86_EXCWITH_ERRORCODE(name, reason)			\
 extern "C" void name (void);					\
 static void name##handler(ia32_exceptionframe_t * frame);	\
 void name##_wrapper()						\
@@ -131,7 +131,7 @@ static void name##handler(ia32_exceptionframe_t * frame)
 
 
 
-#define IA32_EXC_NO_ERRORCODE(name, reason)			\
+#define X86_EXCNO_ERRORCODE(name, reason)			\
 extern "C" void name (void);					\
 static void name##handler(ia32_exceptionframe_t * frame);	\
 void name##_wrapper()						\
