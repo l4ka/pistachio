@@ -719,7 +719,7 @@ void space_t::arch_free (void)
 /**
  * exc_pagefault: trap gate for x86-64 pagefault handler
  */
-AMD64_EXC_WITH_ERRORCODE(exc_pagefault, 0)
+X86_EXCWITH_ERRORCODE(exc_pagefault, 0)
 {
 
     u64_t pf = x86_mmu_t::get_pagefault_address();
