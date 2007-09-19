@@ -47,6 +47,9 @@
 #if defined(CONFIG_IOAPIC)
 # include INC_ARCHX(x86,apic.h)
 #endif
+#if defined(CONFIG_SMP)
+#include INC_GLUEX(x86,cpu.h)
+#endif
 
 DECLARE_CMD (cmd_reset, root, '6', "reset", "Reset system");
 
@@ -232,12 +235,14 @@ DECLARE_CMD (cmd_send_nmi, arch, 'N', "send_nmi", "send nmi via IPI");
 
 CMD(cmd_send_nmi, cg)
 {
-#if defined(CONFIG_IOAPIC)
-    word_t apic = get_dec("send NMI to APIC id", 0, NULL);
+    word_t cpuid = get_dec("CPU id", 0, NULL);
+    cpu_t* cpu = cpu_t::get(cpuid);
     local_apic_t<APIC_MAPPINGS> local_apic;
-    local_apic.send_nmi(apic);
-#endif
-    return CMD_NOQUIT;
+    // don't nmi ourselfs
+    if (cpu->get_apic_id() == local_apic.id())
+	return CMD_NOQUIT;
+    local_apic.send_nmi(cpu->get_apic_id());
+    return CMD_QUIT;
 }
 #endif
 
