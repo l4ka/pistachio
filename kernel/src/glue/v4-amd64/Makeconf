@@ -32,7 +32,7 @@
 LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/linker.lds
 
 SOURCES+=$(addprefix src/glue/v4-amd64/, \
-	space.cc smp.cc debug.cc \
+	space.cc debug.cc \
 	exception.cc init.cc idt.cc resources.cc \
 	trampoline.S trap.S user.cc syscalls.cc)
 
