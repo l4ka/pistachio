@@ -60,17 +60,17 @@ asm ("pushl %%ebp	\n"		\
        "r"(get_kip()->kdebug_entry)	\
      : "memory");			
 
-IA32_EXC_NO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
+X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
     do_enter_kdebug(frame);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
+X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
     do_enter_kdebug(frame);
 }
 
-IA32_EXC_NO_ERRORCODE(exc_nmi, X86_EXC_NMI)
+X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
 #ifdef CONFIG_DEBUG 
 #if defined CONFIG_SMP
@@ -92,7 +92,7 @@ IA32_EXC_NO_ERRORCODE(exc_nmi, X86_EXC_NMI)
  
 
 #ifdef CONFIG_SMP
-IA32_EXC_NO_ERRORCODE(exc_debug_ipi, 0)
+X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
 {
     
 }
