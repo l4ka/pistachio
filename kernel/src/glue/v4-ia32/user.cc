@@ -349,7 +349,7 @@ SYSCALL_STUB(memory_control)
 
 #define IS_SYSCALL(x) (entry == entry_##x)
 
-IA32_EXC_NO_ERRORCODE(exc_user_syscall, 0)
+X86_EXCNO_ERRORCODE(exc_user_syscall, 0)
 {
     /* eip points to the system call entry in the user's own kip area,
        calculate address in kernel address space */
