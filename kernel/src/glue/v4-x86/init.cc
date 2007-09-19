@@ -39,6 +39,7 @@
 #include INC_GLUE(space.h)
 #include INC_GLUEX(x86,timer.h)
 #include INC_GLUEX(x86,memory.h)
+#include INC_GLUEX(x86,cpu.h)
 
 #include INC_ARCHX(x86,apic.h)
 #include INC_ARCHX(x86,amdhwcr.h)
@@ -158,10 +159,17 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
      * this has to be done before reading the cpuid since it may change
      * when having one of those broken BIOSes like ServerWorks */
     get_interrupt_ctrl()->init_cpu();
-
+    
 #if defined(CONFIG_SMP)
-    cpuid = get_apic_id();
+    word_t apicid = get_apic_id();
+    for (cpuid = 0; cpuid < cpu_t::count; cpuid++)
+	if (cpu_t::get(cpuid)->apicid == apicid)
+	    break;
+    if (cpuid > CONFIG_SMP_MAX_CPUS)
+	panic("unconfigured CPU started (LAPIC id %d)\n", apicid);
 #endif
+
+
 
     call_cpu_ctors();
 
@@ -237,7 +245,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
 #if defined(CONFIG_IS_64BIT)
 extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 #else
-extern "C" void SECTION(SEC_INIT) startup_system (void)
+    extern "C" void SECTION(SEC_INIT) startup_system (void)
 #endif
 {
 #if defined(CONFIG_IS_64BIT) && defined(CONFIG_SMP)
@@ -312,82 +320,65 @@ extern "C" void SECTION(SEC_INIT) startup_system (void)
 
 #if defined(CONFIG_SMP)
     /* start APs on an SMP + rendezvous */
-    TRACE_INIT("Starting application processors (%p->%p)\n",
-	       _start_ap, SMP_STARTUP_ADDRESS);
-
-    /* aqcuire commence lock before starting any processor */
-    smp_commence_lock.init (1);
-
-    /* boot gdt */
-    setup_smp_boot_gdt();
-
-    /* IPI trap gates */
-    init_xcpu_handling ();
-
-    // copy startup code to startup page
-    for (word_t i = 0; i < X86_4KPAGE_SIZE / sizeof(word_t); i++)
-	((word_t*)SMP_STARTUP_ADDRESS)[i] = ((word_t*)_start_ap)[i];
-
-    /* at this stage we still have our 1:1 mapping at 0 */
-
-    /* this is the location of the warm-reset vector
-     * (40:67h in real mode addressing) which points to the
-     * cpu startup code
-     */
-    *((volatile unsigned short *) 0x469) = (SMP_STARTUP_ADDRESS >> 4);  // real mode segment selector
-    *((volatile unsigned short *) 0x467) = (SMP_STARTUP_ADDRESS) & 0xf; // offset
-
-    local_apic_t<APIC_MAPPINGS> local_apic;
-
-    // make sure we don't try to kick out more CPUs we can handle
-    int smp_cpus = 1;
-
-    u8_t apic_id = get_apic_id();
-
-    for (word_t id = 0; id < sizeof(word_t) * 8; id++)
     {
-	if (id == apic_id)
-	    continue;
+	TRACE_INIT("starting %d application processors (%p->%p)\n", 
+		   cpu_t::count, _start_ap, SMP_STARTUP_ADDRESS);
+	
+	// aqcuire commence lock before starting any processor
+	smp_commence_lock.init (1);
 
-	// note the typecast (word_t)1
-	// This is important if we want to check for a maximum of
-	// 64 cpus .If we would'nt cast, (1 << id) would be a 32bit
-	// integer and overflow if id == 0x20.
-	if ((get_interrupt_ctrl()->get_lapic_map() & ((word_t)1 << id)) != 0)
-	{
-	    if (++smp_cpus > CONFIG_SMP_MAX_CPUS)
-	    {
-		printf("found more CPUs than Pistachio supports\n");
-		spin_forever();
-	    }
+	// boot gdt
+	setup_smp_boot_gdt();
+
+	// IPI trap gates
+	init_xcpu_handling ();
+
+	// copy startup code to startup page
+	for (word_t i = 0; i < X86_4KPAGE_SIZE / sizeof(word_t); i++)
+	    ((word_t*)SMP_STARTUP_ADDRESS)[i] = ((word_t*)_start_ap)[i];
+
+	/* at this stage we still have our 1:1 mapping at 0 */
+	*((volatile unsigned short *) 0x469) = (SMP_STARTUP_ADDRESS >> 4);
+	*((volatile unsigned short *) 0x467) = (SMP_STARTUP_ADDRESS) & 0xf;
+
+	local_apic_t<APIC_MAPPINGS> local_apic;
+
+	word_t apic_id = get_apic_id();
+
+	for (cpuid_t cpuid = 0; cpuid < cpu_t::count; cpuid++) {
+	    cpu_t* cpu = cpu_t::get(cpuid);
+
+	    // don't start ourselfs
+	    if (cpu->get_apic_id() == apic_id)
+		continue;
 
 	    smp_boot_lock.lock(); // unlocked by AP
-
-	    TRACE_INIT("Sending startup IPI to APIC %d\n", id);
-
-	    local_apic.send_init_ipi(id, true);
-	    for (int i = 0; i < 100000; i++);
-
-	    local_apic.send_init_ipi(id, false);
-	    for (int i = 0; i < 100000; i++);
-
-	    local_apic.send_startup_ipi(id, (void(*)(void))SMP_STARTUP_ADDRESS);
-
+	    TRACE_INIT("sending startup IPI to CPU#%d APIC %d\n", 
+		       cpuid, cpu->get_apic_id());
+	    local_apic.send_init_ipi(cpu->get_apic_id(), true);
+	    for (int i = 0; i < 200000; i++);
+	    local_apic.send_init_ipi(cpu->get_apic_id(), false);
+	    local_apic.send_startup_ipi(cpu->get_apic_id(), (void(*)(void))SMP_STARTUP_ADDRESS);
 #warning VU: time out on AP call in
 	}
     }
-
-    smp_bp_commence ();
-
+    
 #endif /* CONFIG_SMP */
 
     /* Initialize CPU */
     TRACE_INIT("Initializing CPU 0\n");
     cpuid_t cpuid = init_cpu();
+    
+#ifdef CONFIG_SMP
+    smp_bp_commence ();
+#else
+    cpu_t::add_cpu(0);
+#endif
+
 
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
     TRACE_INIT("Initializing 32-bit kernel interface page (%p)\n",
-           ia32::get_kip());
+	       ia32::get_kip());
     ia32::get_kip()->init();
     init_kip_32();
 #endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
@@ -398,6 +389,6 @@ extern "C" void SECTION(SEC_INIT) startup_system (void)
     get_current_scheduler()->start(cpuid);
 
     /* make sure we don't fall off the edge */
-    spin_forever(1);
+    spin_forever(cpuid);
 }
 
