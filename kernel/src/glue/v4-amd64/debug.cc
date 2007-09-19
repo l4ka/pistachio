@@ -57,17 +57,17 @@ static char kdb_stack[KDB_STACK_SIZE]
            "r"(get_kip()->kdebug_entry) \
          : "memory");			
 
-AMD64_EXC_NO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
+X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
     do_enter_kdebug(frame);
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
+X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
     do_enter_kdebug(frame);
 }
 
-AMD64_EXC_NO_ERRORCODE(exc_nmi, X86_EXC_NMI)
+X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
     do_enter_kdebug(frame);
 }
