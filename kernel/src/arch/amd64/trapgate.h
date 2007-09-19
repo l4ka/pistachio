@@ -67,14 +67,14 @@ typedef amd64_exceptionframe_t x86_exceptionframe_t;
 #endif
 
 /**
- * AMD64_EXC_WITH_ERRORCODE: allows C implementation of 
+ * X86_EXCWITH_ERRORCODE: allows C implementation of 
  *   exception handlers and trap/interrupt gates with error 
  *   code.
  *
- * Usage: AMD64_EXC_WITH_ERRORCODE(exc_gp)
+ * Usage: X86_EXCWITH_ERRORCODE(exc_gp)
  */
 
-#define AMD64_EXC_WITH_ERRORCODE(name, reason)			\
+#define X86_EXCWITH_ERRORCODE(name, reason)			\
 extern "C" void name##handler(amd64_exceptionframe_t *frame);	\
 void name##_wrapper()						\
 {								\
@@ -126,7 +126,7 @@ void name##handler(amd64_exceptionframe_t *frame)
 
 
 /* JS: TODO use RIP relative addressing !!!*/
-#define AMD64_EXC_NO_ERRORCODE(name, reason)		\
+#define X86_EXCNO_ERRORCODE(name, reason)		\
 extern "C" void name (void);					\
 extern "C" void name##handler(amd64_exceptionframe_t *frame);	\
 void name##_wrapper()						\
