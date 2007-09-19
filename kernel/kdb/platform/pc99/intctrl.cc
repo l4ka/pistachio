@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     kdb/platform/pc99/intctrl.cc
  * Description:   IO-APIC analysis
@@ -48,9 +48,9 @@ CMD(cmd_apic, cg)
     {
 	if (!ctrl->redir[idx].is_valid())
 	    continue;
-
+	
 	printf("IRQ %2d: IOAPIC %d, Line %2d: ", idx, 
-	       ctrl->redir[idx].id, ctrl->redir[idx].line);
+	       ctrl->redir[idx].ioapic->id, ctrl->redir[idx].line);
 	
 	printf("vec %d, %s, %s, %s, %s dest %d\n",
 	       ctrl->redir[idx].entry.x.vector,
@@ -63,7 +63,7 @@ CMD(cmd_apic, cg)
 	       ctrl->redir[idx].entry.x.dest.physical.physical_dest	   
 	    );
 
-	ioapic_redir_t redir = ctrl->get_ioapic(ctrl->redir[idx].id)->
+	ioapic_redir_t redir = ctrl->redir[idx].ioapic->i82093->
 		get_redir_entry(ctrl->redir[idx].line);
 	
 	if ( redir.raw[0] != ctrl->redir[idx].entry.raw[0] || 
