@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/82093.h
  * Description:   Driver for IO-APIC 82093
@@ -94,6 +94,7 @@ public:
     void mask_irq()  { this->x.mask = 1; }
     void unmask_irq()	{ this->x.mask = 0; }
     bool is_masked_irq() {return (this->x.mask == 1); }    
+    bool is_level_triggered()  { return (this->x.trigger_mode == 1); }
     bool is_edge_triggered()  { return (this->x.trigger_mode == 0); }
 } __attribute__((packed));
 
@@ -129,9 +130,15 @@ private:
 
 public:
     u8_t id() { return get(IOAPIC_ID) >> 24; };
+    
     ioapic_version_t version() {
 	return (ioapic_version_t) { raw : get(IOAPIC_VER) };
     }
+    
+    word_t num_irqs() { 
+	return version().ver.max_lvt + 1;
+    }
+    
     /* VU: masking an IRQ on the IOAPIC only becomes active after
      * performing a read on the data register.  Therefore, when an IRQ
      * is masked we always perform the read assuming that masking/
@@ -139,7 +146,7 @@ public:
 	
     void set_redir_entry(word_t idx, ioapic_redir_t redir)
 	{
-	    ASSERT(idx < 24);
+	    ASSERT(idx < num_irqs());
 	    set(0x11 + (idx * 2), redir.raw[1]);
 	    set(0x10 + (idx * 2), redir.raw[0]);
 	    if (redir.x.mask) reread();
@@ -147,19 +154,20 @@ public:
 	}
     void set_redir_entry_low(word_t idx, ioapic_redir_t redir)
 	{
-	    ASSERT(idx < 24);
+	    ASSERT(idx < num_irqs());
 	    set(0x10 + (idx * 2), redir.raw[0]);
 	    if (redir.x.mask) reread();
 	}
     
     void set_redir_entry_high(word_t idx, ioapic_redir_t redir)
 	{
+	    ASSERT(idx < num_irqs());
 	    set(0x11 + (idx * 2), redir.raw[1]);
 	}
 
     ioapic_redir_t get_redir_entry(word_t idx)
 	{
-	    ASSERT(idx < 24);
+	    ASSERT(idx < num_irqs());
 	    ioapic_redir_t redir;
 	    redir.raw[1] = get(0x11 + (idx * 2));
 	    redir.raw[0] = get(0x10 + (idx * 2));
