@@ -149,17 +149,34 @@ public:
     static const word_t pmtimer_ticks = 3579545;
     static const word_t pmtimer_mask = 0xFFFFFF;
     
-    word_t pmtimer_read() { return in_u32(pmtimer_ioport) & pmtimer_mask; }
+    word_t pmtimer_read() 
+    {
+	u32_t first, second;
+ 	
+ 	first = second = in_u32(pmtimer_ioport) & pmtimer_mask;
+ 	
+ 	while (first == second)
+ 	{
+ 	    second = in_u32(pmtimer_ioport) & pmtimer_mask;
+ 	    x86_pause();
+ 	}
+ 	return second; 
+    }
+    
     bool has_pmtimer() { return pmtimer_available; }
     void pmtimer_wait(const word_t ms) 
-	{ 
-	    /* Need to wait ms * pmtimer_ticks / 1000; */
-	    const word_t delta = (ms * pmtimer_ticks) / 1000;
-	    word_t start = pmtimer_read();
-	    
-	    word_t dbg = 0;
-	    while (pmtimer_read() < start + delta) { if (dbg++ % 100000 == 0) printf("."); } ;
+    { 
+	/* Need to wait ms * pmtimer_ticks / 1000; */
+	const word_t delta = (ms * pmtimer_ticks) / 1000;
+	word_t end = (pmtimer_read() + delta) & pmtimer_mask;
+	word_t counter = 0;
+	while (pmtimer_read() < end) 
+	{
+	    if (counter++ % 500000 == 0) 
+		printf(".");
+	    //printf("%d - %d\n", pmtimer_read(), end);
 	}
+    }
     
     /* handler invoked on interrupt */
     void handle_irq(word_t irq) __asm__("intctrl_t_handle_irq");
