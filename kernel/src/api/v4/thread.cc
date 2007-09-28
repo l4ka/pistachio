@@ -850,19 +850,22 @@ bool tcb_t::migrate_to_processor(cpuid_t processor)
 	// thread is on local CPU and should be migrated
 	xcpu_release_thread(this);
 
-	// if we migrate ourself we use the idle thread to perform the notification
-	if (get_current_tcb() == this)
+	// if we migrate ourself we use the idle thread to perform the
+	// notification
+	tcb_t *current = get_current_tcb(); 
+	if (current == this)
 	{
 	    get_idle_tcb()->notify(xcpu_put_thread, this, processor);
 	    this->switch_to_idle();
 	}
-	else {
+	else 
+	{
 	    xcpu_put_thread(this, processor);
 
 	    // schedule if we've been running on the thread's timeslice
 	    if (!get_current_scheduler()->get_prio_queue(this)->timeslice_tcb) {
-		get_current_scheduler()->enqueue_ready(this);
-		this->switch_to_idle();
+		get_current_scheduler()->enqueue_ready(current);
+		current->switch_to_idle();
 	    }
 	}
     }
