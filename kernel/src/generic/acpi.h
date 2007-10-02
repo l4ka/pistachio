@@ -265,8 +265,8 @@ public:
 	for (word_t i = 0; i < ((header.len-sizeof(header))/sizeof(ptrs[0])); i++)
 	{
 	    acpi_thead_t* t= (acpi_thead_t*)(acpi_remap((addr_t)ptrs[i]));
-	    printf("%c%c%c%c @ %p\n",
-		   t->sig[0], t->sig[1], t->sig[2], t->sig[3], ptrs[i]);
+	    TRACE_INIT("%c%c%c%c @ %p\n",
+		       t->sig[0], t->sig[1], t->sig[2], t->sig[3], ptrs[i]);
 	    acpi_remap(myself_phys);
 
 	};
