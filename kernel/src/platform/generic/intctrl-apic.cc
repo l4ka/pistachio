@@ -87,7 +87,7 @@ INLINE hwirqfunc_t get_interrupt_entry(word_t irq)
     return (hwirqfunc_t)((word_t)hwirq_0 + ((word_t)hwirq_1 - (word_t)hwirq_0) * irq);
 }
 
-INLINE u8_t intctrl_t::setup_idt_entry(word_t irq, u8_t prio)
+u8_t intctrl_t::setup_idt_entry(word_t irq, u8_t prio)
 {
     idt_lock.lock();
     u8_t vector = IDT_IOAPIC_BASE + irq;
