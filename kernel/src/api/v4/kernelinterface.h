@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     api/v4/kernelinterface.h
  * Description:   Version 4 kernel-interface page
@@ -82,10 +82,12 @@ class memory_info_t
 {
 public:
     union {
-	BITFIELD2(word_t,
-	    n		: BITS_WORD/2,
-	    memdesc_ptr	: BITS_WORD/2
-	    );
+	struct {
+	    BITFIELD2(word_t,
+		      n		: BITS_WORD/2,
+		      memdesc_ptr	: BITS_WORD/2
+		);
+	};
 	word_t raw;
     };
 
