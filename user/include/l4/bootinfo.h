@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  Karlsruhe University
+ * Copyright (C) 2004, 2007,  Karlsruhe University
  *                
  * File path:     l4/bootinfo.h
  * Description:   The L4 common bootinfo interface
@@ -79,7 +79,7 @@ L4_INLINE L4_Word_t L4_BootRec_Type (const L4_BootRec_t * r)
 
 L4_INLINE L4_BootRec_t * L4_BootRec_Next (const L4_BootRec_t * r)
 {
-    return (L4_BootRec_t *) (((L4_Word_t) r) + r->offset_next);
+    return (L4_BootRec_t *) ((L4_Word8_t *) r + r->offset_next);
 }
 
 #if defined(__cplusplus)
@@ -128,7 +128,7 @@ L4_INLINE char * L4_Module_Cmdline (const L4_BootRec_t * ptr)
 {
     L4_Boot_Module_t * m = (L4_Boot_Module_t *) ptr;
     if (m->cmdline_offset)
-	return (char *) ((L4_Word_t) m + m->cmdline_offset);
+	return (char *) m + m->cmdline_offset;
     else
 	return (char *) 0;
 }
@@ -249,7 +249,7 @@ L4_INLINE char * L4_SimpleExec_Cmdline (const L4_BootRec_t * ptr)
 {
     L4_Boot_SimpleExec_t * e = (L4_Boot_SimpleExec_t *) ptr;
     if (e->cmdline_offset)
-	return (char *) ((L4_Word_t) e + e->cmdline_offset);
+	return (char *) ((L4_Word8_t *) e + e->cmdline_offset);
     else
 	return (char *) 0;
 }
@@ -354,7 +354,7 @@ L4_INLINE L4_Word_t L4_BootInfo_Size (const void * ptr)
 L4_INLINE L4_BootRec_t * L4_BootInfo_FirstEntry (const void * ptr)
 {
     L4_BootInfo_t * b = (L4_BootInfo_t *) ptr;
-    return (L4_BootRec_t *) (((L4_Word_t) b) + b->first_entry);
+    return (L4_BootRec_t *) ((L4_Word8_t *) b + b->first_entry);
 }
 
 L4_INLINE L4_Word_t L4_BootInfo_Entries (const void * ptr)
