@@ -40,7 +40,6 @@
 #include INC_API(syscalls.h)		/* for sys_ipc */
 #include INC_ARCH(tss.h)		/* for amd64_tss_t */
 #include INC_GLUE(resource_functions.h)	/* for thread_resources_t */
-#include <kdb/tracebuffer.h>
 #if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
 
 #include INC_GLUE(ia32/tcb.h)
@@ -242,6 +241,8 @@ INLINE void tcb_t::return_from_user_interruption (void)
 
 #ifndef BUILD_TCB_LAYOUT
 #include <tcb_layout.h> 
+#include <kdb/tracebuffer.h>
+
 /**
  * switch to initial thread
  * @param tcb TCB of initial thread
@@ -292,7 +293,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	   dest, dest->stack, dest->pdir_cache, dest->space);
     //enter_kdebug("hmm");
 #endif
-    tbuf_record_event (1, "switch %t => %t", (word_t)this, (word_t)dest);
+    tbuf_record_event (1, 0, "switch %t => %t", (word_t)this, (word_t)dest);
 
 #ifdef CONFIG_SMP
     active_cpu_space.set(get_cpu(), dest->space);
