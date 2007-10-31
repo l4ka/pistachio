@@ -113,12 +113,12 @@ void kmem_t::free(void * address, word_t size)
 
     FREE_TRACE("kmem_free(%p, %x)\n", address, size);
     TRACEPOINT (KMEM_FREE,
-		printf ("kmem_free (%p, %d [%d%c]), ip: %p\n",
-			address, size,
-			size >= GB (1) ? size >> 30 :
-			size >= MB (1) ? size >> 20 : size >> 10,
-			size >= GB (1) ? 'G' : size >= MB (1) ? 'M' : 'K',
-			__builtin_return_address (0)));
+		"kmem_free (%p, %d [%d%c]), ip: %p\n",
+		address, size,
+		size >= GB (1) ? size >> 30 :
+		size >= MB (1) ? size >> 20 : size >> 10,
+		size >= GB (1) ? 'G' : size >= MB (1) ? 'M' : 'K',
+		__builtin_return_address (0));
 
     KMEM_CHECK;
 
@@ -158,13 +158,11 @@ void * kmem_t::alloc(word_t size)
     spinlock.lock();
     
     ALLOC_TRACE("%s(%d) kfl: %p\n", __FUNCTION__, size, kmem_free_list);
-    TRACEPOINT_TB (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x",
-				size, (word_t)__builtin_return_address (0)),
-		   printf ("kmem_alloc (%d [%d%c]), ip: %p\n",
-			   size, size >= GB (1) ? size >> 30 :
-			   size >= MB (1) ? size >> 20 : size >> 10,
-			   size >= GB (1) ? 'G' : size >= MB (1) ? 'M' : 'K',
-			   __builtin_return_address (0)));
+    TRACEPOINT (KMEM_ALLOC, "kmem_alloc (%d [%d%c]), ip: %p\n",
+		size, size >= GB (1) ? size >> 30 :
+		size >= MB (1) ? size >> 20 : size >> 10,
+		size >= GB (1) ? 'G' : size >= MB (1) ? 'M' : 'K',
+		__builtin_return_address (0));
     KMEM_CHECK;
     
     size = max(size, KMEM_CHUNKSIZE);
@@ -213,7 +211,7 @@ void * kmem_t::alloc(word_t size)
 		KMEM_CHECK;
 
 #if 0
-		TRACEPOINT_TB (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x "
+		TRACEPOINT (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x "
 					    "==> %p\n",
 					    size, __builtin_return_address(0),
 					    curr),
@@ -264,10 +262,7 @@ void * kmem_t::alloc_aligned(word_t size, word_t alignment, word_t mask)
     spinlock.lock();
     
     ALLOC_TRACE("%s(%d) kfl: %p\n", __FUNCTION__, size, kmem_free_list);
-    TRACEPOINT_TB (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x\n",
-				size, (word_t)__builtin_return_address (0)),
-		   printf ("kmem_alloc (%d), ip: %p\n",
-			   size, __builtin_return_address (0)));
+    TRACEPOINT (KMEM_ALLOC, "kmem_alloc (%d), ip: %p\n", size, __builtin_return_address (0));
     KMEM_CHECK;
     
     size = max(size, KMEM_CHUNKSIZE);
@@ -316,7 +311,7 @@ void * kmem_t::alloc_aligned(word_t size, word_t alignment, word_t mask)
 		KMEM_CHECK;
 
 #if 0
-		TRACEPOINT_TB (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x "
+		TRACEPOINT (KMEM_ALLOC, ("kmem_alloc (%d bytes), ip=%x "
 					    "==> %p\n",
 					    size, __builtin_return_address(0),
 					    curr));
