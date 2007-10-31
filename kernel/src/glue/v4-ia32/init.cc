@@ -119,21 +119,6 @@ void setup_smp_boot_gdt (void)
 ia32_segdesc_t	gdt[GDT_SIZE] UNIT("ia32.cpulocal");
 ia32_tss_t	tss UNIT("ia32.cpulocal");
 
-#if defined(CONFIG_TRACEBUFFER)
-tracebuffer_t * tracebuffer;
-EXTERN_KMEM_GROUP (kmem_misc);
-
-void SECTION(SEC_INIT) setup_tracebuffer (void)
-{
-    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
-    ASSERT (TRACEBUFFER_SIZE == MB (4));
-    get_kernel_space ()->add_mapping (tracebuffer,
-				     virt_to_phys (tracebuffer),
-				     pgent_t::size_4m,
-				     true, false, true);
-    tracebuffer->initialize ();
-}
-#endif /* CONFIG_TRACEBUFFER */
 
 
 
@@ -213,8 +198,8 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #endif
     
 #ifdef CONFIG_TRACEBUFFER
-    if (tracebuffer)
-        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)tracebuffer, MB(4)-1, 3,
+    if (get_tracebuffer())
+        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)get_tracebuffer(), TRACEBUFFER_SIZE-1, 3,
 				       ia32_segdesc_t::data);
     else gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, ia32_segdesc_t::data);
 #endif
