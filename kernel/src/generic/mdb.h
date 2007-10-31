@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2004-2007,  Karlsruhe University
  *                
- * File path:     mdb.h
+ * File path:     generic/mdb.h
  * Description:   Classes and access methods for the generic mapping
  *		  database.
  *                
@@ -74,6 +74,21 @@ public:
 		ctrl.mapctrl_self = ctrl.unmap = ctrl.deliver_status = true;
 		return ctrl;
 	    }
+	
+	char *string()
+	    {
+		char *s = (char *) "~~~~~~";
+		
+		s[0] = (set_attribute ? 'm' : '~');
+		s[1] = (deliver_status ? 'd' : '~');
+		s[2] = (reset_status ? 'r' : '~');
+		s[3] = (set_rights ? 'p' : '~');
+		s[4] = (unmap ? 'u' : '~');
+		s[5] = (mapctrl_self ? 'c' : '~');
+		
+		return s;
+	    }
+
     };
 
     // Generic class for specifying properly aligned power of 2 sized
