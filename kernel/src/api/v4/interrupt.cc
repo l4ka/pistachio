@@ -134,7 +134,7 @@ static void do_xcpu_interrupt(cpu_mb_entry_t * entry)
  */
 void handle_interrupt(word_t irq)
 {
-    TRACEPOINT (INTERRUPT, printf("IRQ %d\n", irq));
+    TRACEPOINT (INTERRUPT, "IRQ %d\n", irq);
 
     spin(76, get_current_cpu());
 
@@ -265,9 +265,8 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     tcb_t * irq_tcb = get_current_space()->get_tcb(irq_tid);
     word_t irq = irq_tid.get_irqno();
 
-    TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, 
-		printf("SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)\n",
-		       irq, TID(irq_tid), TID(handler_tid)) );
+    TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, "SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)\n",
+		irq, TID(irq_tid), TID(handler_tid));
 
     // check whether this is a valid/available IRQ
     if (!irq_tid.is_interrupt() || !get_interrupt_ctrl()->is_irq_available(irq))
