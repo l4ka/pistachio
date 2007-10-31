@@ -54,30 +54,6 @@ DECLARE_TRACEPOINT (AMD64_UD);
 DECLARE_TRACEPOINT (AMD64_NOMATH);
 DECLARE_TRACEPOINT (AMD64_SEGRELOAD);
 
-#define DUMP_FRAME()				\
-    TRACE("Unresolved exception\n");		\
-    TRACE("\tRAX %16x", frame->rax);		\
-    TRACE("\t R8 %16x\n", frame->r8 );		\
-    TRACE("\tRCX %16x", frame->rcx);		\
-    TRACE("\t R9 %16x\n", frame->r9 );		\
-    TRACE("\tRDX %16x", frame->rdx);		\
-    TRACE("\tR10 %16x\n", frame->r10);		\
-    TRACE("\tRBX %16x", frame->rbx);		\
-    TRACE("\tR11 %16x\n", frame->r11);		\
-    TRACE("\tRSP %16x", frame->rsp);		\
-    TRACE("\tR12 %16x\n", frame->r12);		\
-    TRACE("\tRBP %16x", frame->rbp);		\
-    TRACE("\tR13 %16x\n", frame->r13);		\
-    TRACE("\tRSI %16x", frame->rsi);		\
-    TRACE("\tR14 %16x\n", frame->r14);		\
-    TRACE("\tRDI %16x", frame->rdi);		\
-    TRACE("\tR15 %16x\n", frame->r15);		\
-    TRACE("\tRIP %16x\n", frame->rip);		\
-    TRACE("\tERR %16x", frame->error);		\
-    TRACE("\tRFL %16x\n", frame->rflags);	\
-    TRACE("\t CS %16x", frame->cs);		\
-    TRACE("\t SS %16x\n", frame->ss);		\
-    enter_kdebug("Exception");
 
 static bool __attribute__((__noinline__)) send_exception_ipc(amd64_exceptionframe_t *frame, word_t exception_number )
 {
@@ -167,7 +143,8 @@ X86_EXCNO_ERRORCODE(exc_catch_diverr, -1)
     if (send_exception_ipc(frame, X86_EXC_DIVIDE_ERROR))
 	return;
     
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_overflow, -1)
 {
@@ -176,7 +153,8 @@ X86_EXCNO_ERRORCODE(exc_catch_overflow, -1)
     if (send_exception_ipc(frame, X86_EXC_OVERFLOW))
 	return;
     
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_boundrange, -1)
 {
@@ -184,7 +162,8 @@ X86_EXCNO_ERRORCODE(exc_catch_boundrange, -1)
     if (send_exception_ipc(frame, X86_EXC_BOUNDRANGE))
 	return;
 
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_doublefault, -1)
 {
@@ -192,49 +171,56 @@ X86_EXCNO_ERRORCODE(exc_catch_doublefault, -1)
     if (send_exception_ipc(frame, X86_EXC_DOUBLEFAULT))
 	return;
     
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_overrun, -1)
 {
     TRACE("Overrun Exception\n");
     if (send_exception_ipc(frame, X86_EXC_COPSEG_OVERRUN))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_invtss, -1)
 {
     TRACE("Invalid TSS Exception\n");
     if (send_exception_ipc(frame, X86_EXC_INVALID_TSS))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_segnotpr, -1)
 {
     TRACE("Segment not present Exception\n");
     if (send_exception_ipc(frame, X86_EXC_SEGMENT_NOT_PRESENT))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCWITH_ERRORCODE(exc_catch_ss_fault, -1)
 {
     TRACE("Stack Segment fault Exception\n");
     if (send_exception_ipc(frame, X86_EXC_STACKSEG_FAULT))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_ac, -1)
 {
     TRACE("Alignment Check Exception\n");
     if (send_exception_ipc(frame, X86_EXC_ALIGNEMENT_CHECK))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 X86_EXCNO_ERRORCODE(exc_catch_mc, -1)
 {
     TRACE("Machine Check Exception\n");
     if (send_exception_ipc(frame, X86_EXC_MACHINE_CHECK))
 	return;
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
 }				  
 
 X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
@@ -243,8 +229,7 @@ X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
     space_t * space = current->get_space();
     addr_t addr = (addr_t) frame->rip;
 
-    TRACEPOINT_TB (AMD64_UD, ("amd64_ud at %x (current=%x)", (u64_t)addr, (u64_t)current),
- 		   TRACE ("%t: invalid opcode at IP %p\n", current, addr));
+    TRACEPOINT (AMD64_UD, "amd64_ud at %x (current=%x)", addr, current);
 
     /* instruction emulation */
     switch( (u8_t) space->get_from_user(addr))
@@ -322,15 +307,11 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 
 #if defined(CONFIG_IO_FLEXPAGES)
 
-#define HANDLE_IO_PAGEFAULT(port, size)					\
-	tcb_t *tcb = get_current_tcb();					\
-	TRACEPOINT_TB (AMD64_IO_PAGEFAULT, ("IO-Pagefault @ %x [size %x] (current=%T)",	\
-					    (word_t)port, (word_t) size, \
-					    TID(tcb->get_global_id())),	\
-		       printf("IO-Pagefault at %x [size %x] (current=%T)\n", \
-			      (word_t)port, (word_t) size,		\
-			      TID(tcb->get_global_id())));		\
-	handle_io_pagefault(tcb, port, size, (addr_t)frame->rip);	\
+#define HANDLE_IO_PAGEFAULT(port, size)							\
+	tcb_t *tcb = get_current_tcb();							\
+	TRACEPOINT (AMD64_IO_PAGEFAULT, "IO-Pagefault @ %x [size %x] (current=%T)",	\
+		    (u32_t)port, (u32_t) size, TID(tcb->get_global_id()));		\
+	handle_io_pagefault(tcb, port, size, (addr_t)frame->rip);			\
 	return true;
     
     
@@ -500,7 +481,7 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 	    // Assume that kernel knows what it is doing.
 	    break;
 
-	TRACEPOINT (AMD64_SEGRELOAD);
+	TRACEPOINT (AMD64_SEGRELOAD, "segment register reload");
 	reload_user_segregs ();
 	frame->rip++;
 	if (i[0] == 0x8e || i[0] == 0x0f)
@@ -514,10 +495,7 @@ static bool handle_faulting_instruction (amd64_exceptionframe_t * frame)
 
 X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
-    TRACEPOINT_TB (AMD64_GP, ("amd64_gp at %x (error=%d)",
-			      frame->rip, frame->error),
- 		   printf ("general protection fault @ %p, error: %x\n", 
- 			   frame->rip, frame->error));
+    TRACEPOINT (AMD64_GP, "general protection fault @ %p, error: %x\n", frame->rip, frame->error);
 
     /*
      * In some cases we handle the faulting instruction without
@@ -533,7 +511,8 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 	return;
 
     TRACE("GP exception\n");
-    DUMP_FRAME();
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");
     
     __asm__ (
         "mov %%ds, %0   \n" 
@@ -555,8 +534,7 @@ X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 {
     tcb_t * current = get_current_tcb();
 
-    TRACEPOINT(AMD64_NOMATH, 
-	       printf("AMD64_NOMATH %t @ %p\n", current, frame->rip));
+    TRACEPOINT(AMD64_NOMATH, "AMD64_NOMATH %t @ %p\n", current, frame->rip);
 
     current->resources.x86_no_math_exception(current);
 }
@@ -566,7 +544,8 @@ X86_EXCNO_ERRORCODE(exc_fpu_fault, X86_EXC_FPU_FAULT)
     TRACEF("FPU exception\n");
     if (send_exception_ipc(frame, X86_EXC_FPU_FAULT))
 	return;
-    DUMP_FRAME();    
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");    
 
 }
 
@@ -575,7 +554,8 @@ X86_EXCNO_ERRORCODE(exc_simd_fault, X86_EXC_SIMD_FAULT)
     TRACEF("SIMD exception\n");
     if (send_exception_ipc(frame, X86_EXC_SIMD_FAULT))
 	return;
-    DUMP_FRAME();    
+    x86_dump_frame(frame);
+    enter_kdebug("unhandled exception");    
 
 }
 
