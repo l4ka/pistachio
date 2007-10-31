@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2006,  Karlsruhe University
+ * Copyright (C) 2004-2007,  Karlsruhe University
  *                
  * File path:     bench/pingpong/ia32.h
  * Description:   IA32 specific pingpong functions
@@ -30,6 +30,10 @@
  *                
  ********************************************************************/
 #include <l4/arch.h>
+
+#undef L4_TRACEBUFFER
+#undef L4_PERFMON
+#include <l4/tracebuffer.h>
 
 #define HAVE_HANDLE_ARCH_PAGEFAULT
 #define HAVE_READ_CYCLES
