@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/tracepoints.cc
  * Description:   Tracepoint related commands
@@ -35,11 +35,33 @@
 #include <kdb/input.h>
 #include <kdb/linker_set.h>
 
-#if defined(CONFIG_TRACEPOINTS)
+#if defined(CONFIG_TRACEPOINTS) || defined(CONFIG_TRACEBUFFER)
 
-static void list_tp_choices (void);
+void SECTION(SEC_KDEBUG) list_tp_choices (void)
+{
+    word_t size = tp_list.size ();
 
+    for (word_t i = 0; i <= size / 2; i++)
+    {
+	if (i == 0)
+	    printf ("%3d - %28s", 0, "List choices");
+	else
+	    printf ("%3d - %28s", i, tp_list.get (i - 1)->name);
 
+	if (i + (size / 2) < size)
+	    printf ("%3d - %s\n", i + (size / 2) + 1,
+		    tp_list.get (i + (size / 2))->name);
+    }
+    printf ("\n");
+}
+
+void init_tracepoints()
+{
+    tracepoint_t * tp;
+    word_t id = 1;
+    while ((tp = tp_list.next ()) != NULL)
+	tp->id = id++;
+}
 
 /*
  * Linker set containing all tracepoints.
@@ -47,34 +69,11 @@ static void list_tp_choices (void);
 
 DECLARE_SET (tracepoint_set);
 
-
-
-/*
- * Wrapper class for accessing tracepoint set.
- */
-
-class tracepoint_list_t
-{
-public:
-    linker_set_t	*tp_set;
-
-    inline void reset (void)
-	{ tp_set->reset (); }
-
-    inline tracepoint_t * next (void)
-	{ return (tracepoint_t *) tp_set->next (); }
-
-    inline word_t size (void)
-	{ return tp_set->size (); }
-
-    inline tracepoint_t * get (word_t n)
-	{ return (tracepoint_t *) tp_set->get (n); }
-};
-
 tracepoint_list_t tp_list = { &tracepoint_set };
 
+#endif
 
-
+#if defined(CONFIG_TRACEPOINTS)
 
 /*
  * Command group for tracepoint commands.
@@ -252,27 +251,6 @@ CMD(cmd_tp_reset, cg)
     
     return CMD_NOQUIT;
 }
-
-
-
-static void SECTION(SEC_KDEBUG) list_tp_choices (void)
-{
-    word_t size = tp_list.size ();
-
-    for (word_t i = 0; i <= size / 2; i++)
-    {
-	if (i == 0)
-	    printf ("%3d - %28s", 0, "List choices");
-	else
-	    printf ("%3d - %28s", i, tp_list.get (i - 1)->name);
-
-	if (i + (size / 2) < size)
-	    printf ("%3d - %s\n", i + (size / 2) + 1,
-		    tp_list.get (i + (size / 2))->name);
-    }
-    printf ("\n");
-}
-
 
 #endif /* CONFIG_TRACEPONTS */
 
