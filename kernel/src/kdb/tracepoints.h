@@ -52,45 +52,74 @@
 class tracepoint_t
 {
 public:
-    char	*name;
+    const char	*name;
+    word_t	id;
     word_t	enabled;
     word_t	enter_kdb;
     word_t	counter[CONFIG_SMP_MAX_CPUS];
 
-public:
     void reset_counter ()
 	{ for (int cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; counter[cpu++] = 0); }
+    
 };
 
 #define EXTERN_TRACEPOINT(tp)				\
     extern tracepoint_t __tracepoint_##tp
 
+extern void init_tracepoints();
+
+/*
+ * Wrapper class for accessing tracepoint set.
+ */
+
+class tracepoint_list_t
+{
+public:
+    linker_set_t	*tp_set;
+
+    inline void reset (void)
+	{ tp_set->reset (); }
+
+    inline tracepoint_t * next (void)
+	{ return (tracepoint_t *) tp_set->next (); }
+
+    inline word_t size (void)
+	{ return tp_set->size (); }
+
+    inline tracepoint_t * get (word_t n)
+	{ return (tracepoint_t *) tp_set->get (n); }
+};
+
+extern tracepoint_list_t tp_list;
+
 #if defined(CONFIG_TRACEPOINTS)
 
-#define DECLARE_TRACEPOINT(tp)				\
-    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, { 0, } };\
+#define DECLARE_TRACEPOINT(tp)					\
+    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, 0, { 0, } };	\
     PUT_SET (tracepoint_set, __tracepoint_##tp)
 
-#define TRACEPOINT(tp, code...)					\
+#define TRACEPOINT(tp, str, args...)				\
 do {								\
-    TBUF_REC_TRACEPOINT (#tp);					\
-    __tracepoint_##tp.counter[TP_CPU]++;			\
-    if (__tracepoint_##tp.enabled & (1UL << TP_CPU))		\
+    tracepoint_t *_tp = &__tracepoint_##tp;			\
+    TBUF_REC_TRACEPOINT (_tp->id, str, ##args);			\
+    _tp->counter[TP_CPU]++;					\
+    if (_tp->enabled & (1UL << TP_CPU))				\
     {								\
-	{code;}							\
-	if (__tracepoint_##tp.enter_kdb & (1UL << TP_CPU))	\
+	{printf(str, ##args); printf("\n");}			\
+	if (_tp->enter_kdb & (1UL << TP_CPU))			\
 	    enter_kdebug (#tp);					\
     }								\
 } while (0)
 
-#define TRACEPOINT_TB(tp, tb, code...)				\
+
+#define TRACEPOINT_NOTB(tp, code...)				\
 do {								\
-    TBUF_REC_TRACEPOINT_TB tb;					\
-    __tracepoint_##tp.counter[TP_CPU]++;			\
-    if (__tracepoint_##tp.enabled & (1UL << TP_CPU))		\
+    tracepoint_t *_tp = &__tracepoint_##tp;			\
+    tp->counter[TP_CPU]++;					\
+    if (tp->enabled & (1UL << TP_CPU))				\
     {								\
 	{code;}							\
-	if (__tracepoint_##tp.enter_kdb & (1UL << TP_CPU))	\
+	if (tp->enter_kdb & (1UL << TP_CPU))			\
 	    enter_kdebug (#tp);					\
     }								\
 } while (0)
@@ -108,17 +137,14 @@ do {						\
 #else /* !CONFIG_TRACEPOINTS */
 
 #define DECLARE_TRACEPOINT(tp)		        \
-    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, { 0, } };
+    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, 0, { 0, } };	
 
-#define TRACEPOINT(tp, code...)                 \
-do { 						\
-    TBUF_REC_TRACEPOINT (#tp);			\
+#define TRACEPOINT(tp, str, args...)				\
+    do {							\
+	TBUF_REC_TRACEPOINT (__tracepoint_##tp.id, str, ##args);\
 } while (0)
 
-#define TRACEPOINT_TB(tp, tb, code...)		\
-do {						\
-    TBUF_REC_TRACEPOINT_TB tb;			\
-} while (0)
+#define TRACEPOINT_NOTB(tp, code...)
 
 #define ENABLE_TRACEPOINT(tp, kdb)
 #define TRACEPOINT_ENTERS_KDB(tp) (0)
