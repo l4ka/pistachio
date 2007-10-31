@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/arch/amd64/disas.cc
  * Description:   Disassembler wrapper for IA-32
@@ -41,7 +41,8 @@ DECLARE_CMD(cmd_disas, root, 'U', "disas", "disassemble");
 
 CMD(cmd_disas, cg)
 {
-    amd64_exceptionframe_t* f = (amd64_exceptionframe_t*) kdb.kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t* f = param->frame;
 
     char c;
     u64_t pc;
