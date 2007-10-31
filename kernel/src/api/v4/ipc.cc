@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/ipc.cc
  * Description:   generic IPC path
@@ -66,8 +66,7 @@ INLINE bool transfer_message(tcb_t * src, tcb_t * dst, msg_tag_t tag)
 {
     ASSERT(src);
     ASSERT(dst);
-    TRACEPOINT (IPC_TRANSFER, 
-		printf("IPC transfer message: src=%t, dst=%t\n", src, dst));
+    TRACEPOINT (IPC_TRANSFER, "IPC transfer message: src=%t, dst=%t\n", src, dst);
     
     // clear all flags except propagation
     tag.clear_receive_flags();
@@ -272,19 +271,17 @@ SYS_IPC (threadid_t to_tid, threadid_t from_tid, timeout_t timeout)
     scheduler_t * scheduler = get_current_scheduler();
     msg_tag_t tag = current->get_tag();
 
-    TRACEPOINT_TB (SYSCALL_IPC, ("sys_ipc %t => %t (recvfrom=%t)",
-				 TID(current->get_global_id()),
-				 TID(to_tid), TID(from_tid)),
-		   printf (to_tid.is_nilthread () ?
-			   "SYS_IPC: current: %t, to_tid: %t, "
-			   "from_tid: %t, to: 0x%x\n" :
-			   "SYS_IPC: current: %t, to_tid: %t, "
-			   "from_tid: %t, to: 0x%x, "
-			   "tag: 0x%x (label=0x%x, u=%d, t=%d)\n",
-			   TID(current->get_global_id()), TID(to_tid),
-			   TID(from_tid), timeout.raw,
-			   tag.raw, tag.get_label (), tag.get_untyped (),
-			   tag.get_typed ()));
+    TRACEPOINT (SYSCALL_IPC, 
+		to_tid.is_nilthread () ?
+		"SYS_IPC: current: %t, to_tid: %t, "
+		"from_tid: %t, to: 0x%x\n" :
+		"SYS_IPC: current: %t, to_tid: %t, "
+		"from_tid: %t, to: 0x%x, "
+		"tag: 0x%x (label=0x%x, u=%d, t=%d)\n",
+		TID(current->get_global_id()), TID(to_tid),
+		TID(from_tid), timeout.raw,
+		tag.raw, tag.get_label (), tag.get_untyped (),
+		tag.get_typed ());
 
     /* --- send phase --------------------------------------------------- */
 #if defined(CONFIG_SMP)
@@ -383,10 +380,8 @@ SYS_IPC (threadid_t to_tid, threadid_t from_tid, timeout_t timeout)
 #ifdef CONFIG_SMP
 	else if ( !to_tcb->is_local_cpu() )
 	{
-	    TRACEPOINT(XCPU_IPC_SEND, 
-		       printf("XCPU IPC send %t (%d) -> %t (%d)\n",
-			      current, current->get_cpu(),
-			      to_tcb, to_tcb->get_cpu()));
+	    TRACEPOINT(XCPU_IPC_SEND, "XCPU IPC send %t (%d) -> %t (%d)\n",
+		       current, current->get_cpu(), to_tcb, to_tcb->get_cpu());
 
 	    // receiver seems to be waiting -- try to send
 	    xcpu_request( to_tcb->get_cpu(), do_xcpu_send, 
@@ -444,10 +439,8 @@ SYS_IPC (threadid_t to_tid, threadid_t from_tid, timeout_t timeout)
 	    /* VU: kick receiver and forget about him
 	     * we have to transmit the sender id since it is
 	     * going to change soon!!! */
-	    TRACEPOINT(XCPU_IPC_SEND_DONE, 
-		       printf("XCPU IPC send done %t (%d) -> %t (%d)\n",
-			      current, current->get_cpu(),
-			      to_tcb, to_tcb->get_cpu()));
+	    TRACEPOINT(XCPU_IPC_SEND_DONE, "XCPU IPC send done %t (%d) -> %t (%d)\n",
+		       current, current->get_cpu(), to_tcb, to_tcb->get_cpu());
 
 	    TRACE_XIPC("%t (%x), %t\n", to_tcb, (word_t)to_tcb->get_state(), current);
 	    xcpu_request( to_tcb->get_cpu(), do_xcpu_send_done, 
@@ -680,10 +673,8 @@ SYS_IPC (threadid_t to_tid, threadid_t from_tid, timeout_t timeout)
 	    }
 #ifdef CONFIG_SMP
 	    else {
-		TRACEPOINT(XCPU_IPC_RECEIVE, 
-			   printf("XCPU IPC receive curr=%t (%d) -> from=%t (%d)\n",
-				  current, current->get_cpu(),
-				  from_tcb, from_tcb->get_cpu()));
+		TRACEPOINT(XCPU_IPC_RECEIVE, "XCPU IPC receive curr=%t (%d) -> from=%t (%d)\n",
+			   current, current->get_cpu(), from_tcb, from_tcb->get_cpu());
 
 		TRACE_XIPC("XCPU receive from %t, to_tcb=%t\n", from_tcb, to_tcb);
 		current->set_state(thread_state_t::locked_waiting);
