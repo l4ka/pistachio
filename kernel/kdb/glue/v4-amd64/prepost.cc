@@ -47,14 +47,16 @@ extern "C" int disas(addr_t pc);
 
 bool kdb_t::pre()
 {
-    amd64_exceptionframe_t* f = (amd64_exceptionframe_t*) kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb_param;
+    x86_exceptionframe_t* f = param->frame;
+    kdb_current = param->tcb;
 
     space_t * space = kdb.kdb_current->get_space();
     if (!space) space = get_kernel_space();
 
     addr_t addr = (addr_t) (f->rip);
 
-    switch (f->reason)
+    switch (param->exception)
     {
     case X86_EXC_DEBUG:	/* single step, hw breakpoints */
 	printf("--- Breakpoint ---\n");
@@ -193,8 +195,10 @@ bool kdb_t::pre()
 
 void kdb_t::post()
 {
-    amd64_exceptionframe_t* f = (amd64_exceptionframe_t*) kdb_param;
-    switch (f->reason)
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t* f = param->frame;
+    
+    switch (param->exception)
     {
     case X86_EXC_DEBUG:
 	/* Set RF in RFLAGS. This will disable breakpoints for one
