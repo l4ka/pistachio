@@ -118,9 +118,8 @@ void tunnel_pagefault (word_t addr)
     tcb_t * current = get_current_tcb ();
     tcb_t * partner = current->get_partner_tcb ();
 
-    TRACEPOINT (PAGEFAULT_TUNNEL,
-		printf ("tunnelled page fault @ %p (current=%t, partner=%t)\n",
-			addr, current, partner));
+    TRACEPOINT (PAGEFAULT_TUNNEL, "tunnelled page fault @ %p (current=%t, partner=%t)\n",
+		addr, current, partner);
 
     current->send_pagefault_ipc ((addr_t) addr, (addr_t) ~0UL, space_t::write);
     current->set_state (thread_state_t::locked_waiting);
@@ -192,17 +191,14 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
 
     if (user_area || (!kernel))
     {
-	TRACEPOINT_TB (PAGEFAULT_USER,
-		       ("user page fault at %x (ip=%x, access=%x)",
-			(word_t)addr, (word_t)ip, access),
-		       printf("%t: user %s pagefault at %p, ip=%p\n", 
-			      current,
-			      access == space_t::write     ? "write" :
-			      access == space_t::read	   ? "read"  :
-			      access == space_t::execute   ? "execute" :
-			      access == space_t::readwrite ? "read/write" :
-			      "unknown", 
-			      addr, ip));
+	TRACEPOINT (PAGEFAULT_USER, "%t: user %s pagefault at %p, ip=%p\n", 
+		    current,
+		    access == space_t::write     ? "write" :
+		    access == space_t::read	   ? "read"  :
+		    access == space_t::execute   ? "execute" :
+		    access == space_t::readwrite ? "read/write" :
+		    "unknown", 
+		    addr, ip);
 
 #warning sigma0-check in default pagefault handler. 
 	/* VU: with software loaded tlbs that could be handled elsewhere...*/
@@ -251,13 +247,9 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
     else
     {
 	/* fault in kernel area */
-	TRACEPOINT_TB (PAGEFAULT_KERNEL,
-		       ("kernel page fault at %x "
-			"(ip=%x, space=%p)",
-			(word_t)addr, (word_t)ip, (word_t)this),
-		       printf ("%t: kernel pagefault in space "
-			       "%p @ %p, ip=%p, type=%x\n",
-			       current, this, addr, ip, access));
+	TRACEPOINT (PAGEFAULT_KERNEL,
+		    "%t: kernel pagefault in space %p @ %p, ip=%p, type=%x\n",
+		    current, this, addr, ip, access);
 
 	if (sync_kernel_space(addr))
 	    return;
@@ -325,10 +317,9 @@ SYS_SPACE_CONTROL (threadid_t space_tid, word_t control, fpage_t kip_area,
 		   fpage_t utcb_area, threadid_t redirector_tid)
 {
     TRACEPOINT (SYSCALL_SPACE_CONTROL,
-		printf("SYS_SPACE_CONTROL: space=%t, control=%p, kip_area=%p, "
-		       "utcb_area=%p, redir=%t\n",  TID (space_tid),
-		       control, kip_area.raw, utcb_area.raw,
-		       TID (redirector_tid)));
+		"SYS_SPACE_CONTROL: space=%t, control=%p, kip_area=%p, "
+		"utcb_area=%p, redir=%t\n",  TID (space_tid),
+		control, kip_area.raw, utcb_area.raw, TID (redirector_tid));
 
     // Check privilege
     if (EXPECT_FALSE (! is_privileged_space(get_current_space())))
@@ -394,9 +385,8 @@ SYSCALL_ATTR("unmap") void sys_unmap(word_t control)
     word_t num = control & 0x3f;
     bool flush = control & (1 << 6) ? true : false;
 
-    TRACEPOINT(SYSCALL_UNMAP,
-	printf("SYS_UNMAP: control=0x%x (num=%d, flush=%d)\n", 
-	       control, num, flush));
+    TRACEPOINT(SYSCALL_UNMAP, "SYS_UNMAP: control=0x%x (num=%d, flush=%d)\n", 
+	       control, num, flush);
 
 #warning VU: adapt to new msg_tag scheme
     for (word_t i = 0; i <= num; i++)
