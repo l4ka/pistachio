@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2006,  Karlsruhe University
+ * Copyright (C) 2005-2007,  Karlsruhe University
  *                
  * File path:     generic/vrt.cc
  * Description:   Generic Variable Radix Table for managing mappings
@@ -147,13 +147,11 @@ bool vrt_t::lookup (word_t addr, word_t * value, word_t * objsize)
 void vrt_t::map_fpage (fpage_t f_fp, word_t base, vrt_t * t_space,
 		       fpage_t t_fp, bool grant)
 {
-    TRACEPOINT (VRT_MAP,
-		printf ("%s::%s (fp=%p [%p,%d] base=%p) to "
-			"%s (fp=%p [%p,%d])\n",
+    TRACEPOINT (VRT_MAP, "%s::%s (fp=%p [%p,%d] base=%p) to %s (fp=%p [%p,%d])\n",
 			get_name (), grant ? "grant" : "map",
 			f_fp.raw, f_fp.get_base (), f_fp.get_size_log2 (),
 			base, t_space->get_name (), t_fp.raw,
-			t_fp.get_base (), t_fp.get_size_log2 ()));
+			t_fp.get_base (), t_fp.get_size_log2 ());
 
     // Determine the exact location for where to map from and where to
     // map to.
@@ -289,12 +287,11 @@ void vrt_t::map_fpage (fpage_t f_fp, word_t base, vrt_t * t_space,
 		// We are overmapping a large object with a smaller
 		// one.  We need to unmap the larger object.
 
-		TRACEPOINT (VRT_OVERMAP,
-			    printf ("%s overmap: faddr=%p fsz=%d "
-				    "taddr=%p tsz=%d (single entry)\n",
-				    t_space->get_name (),
-				    f_addr, f_table->get_objsize (),
-				    t_addr, t_table->get_objsize ()));
+		TRACEPOINT (VRT_OVERMAP, "%s overmap: faddr=%p fsz=%d "
+			    "taddr=%p tsz=%d (single entry)\n",
+			    t_space->get_name (),
+			    f_addr, f_table->get_objsize (),
+			    t_addr, t_table->get_objsize ());
 
 		t_space->get_mapdb ()->flush (t_table->get_mapnode (t_addr));
 		ASSERT (! t_node->is_valid ());
@@ -333,14 +330,12 @@ void vrt_t::map_fpage (fpage_t f_fp, word_t base, vrt_t * t_space,
 			// There exists a sub-table that is completely
 			// contained within the new table.  Remove it.
 
-			TRACEPOINT (VRT_OVERMAP,
-				    vrt_table_t * tt = t_node->get_table ();
-				    printf ("%s overmap: faddr=%p fsz=%d "
-					    "taddr=%p (subtable <%p,%p>)\n",
-					    t_space->get_name (),
-					    f_addr, f_table->get_objsize (),
-					    t_addr, tt->get_start_addr (),
-					    tt->get_end_addr ()));
+			TRACEPOINT (VRT_OVERMAP,"%s overmap: faddr=%p fsz=%d "
+				    "taddr=%p (subtable <%p,%p>)\n",
+				    t_space->get_name (),
+				    f_addr, f_table->get_objsize (),
+				    t_addr, t_node->get_table ()->get_start_addr (),
+				    t_node->get_table ()->get_end_addr ());
 
 			word_t num = 1;
 			word_t addr = t_addr;
@@ -484,14 +479,13 @@ void vrt_t::map_fpage (fpage_t f_fp, word_t base, vrt_t * t_space,
 	    // We are ovemapping a node or a whole subtree.  Unmap
 	    // each single entry in the subtree.
 
-	    TRACEPOINT (VRT_OVERMAP,
-			printf ("%s overmap: faddr=%p fsz=%d "
-				"taddr=%p tsz=%d (%s)\n",
-				get_name (),
-				f_addr, f_table->get_objsize (),
-				t_addr, t_table->get_objsize (),
-				t_node->is_table () ?
-				"subtable" : "single entry"));
+	    TRACEPOINT (VRT_OVERMAP, "%s overmap: faddr=%p fsz=%d "
+			"taddr=%p tsz=%d (%s)\n",
+			get_name (),
+			f_addr, f_table->get_objsize (),
+			t_addr, t_table->get_objsize (),
+			t_node->is_table () ?
+			"subtable" : "single entry");
 
 	    word_t num = 1;
 	    word_t addr = t_addr;
@@ -692,18 +686,10 @@ word_t vrt_t::mapctrl (fpage_t fp, mdb_t::ctrl_t ctrl,
 		       word_t rights, word_t attrib)
 {
     TRACEPOINT (VRT_MAPCTRL,
-		printf ("%s::mapctrl (%p [%p,%d], %x [%c%c%c%c%c%c],"
-			" %x, %p)\n",
-			get_name (),
-			fp.raw, fp.get_base (), fp.get_size_log2 (),
-			ctrl.raw,
-			ctrl.set_attribute ? 'm' : '~',
-			ctrl.deliver_status ? 'd' : '~',
-			ctrl.reset_status ? 'r' : '~',
-			ctrl.set_rights ? 'p' : '~',
-			ctrl.unmap ? 'u' : '~',
-			ctrl.mapctrl_self ? 'c' : '~',
-			rights & 0x7, attrib));
+		"%s::mapctrl (%p [%p,%d], %x [%s] %x, %p)\n",
+		get_name (),
+		fp.raw, fp.get_base (), fp.get_size_log2 (),
+		ctrl.raw, ctrl.string(), rights & 0x7, attrib);
 
     // Determine size and number of objects to mapctrl.  Make sure
     // that we stay within the bounds of the space even if user
