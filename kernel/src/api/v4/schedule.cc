@@ -101,8 +101,7 @@ bool time_t::operator< (time_t & r)
  * has expired */
 void scheduler_t::total_quantum_expired(tcb_t * tcb)
 {
-    TRACEPOINT(TOTAL_QUANTUM_EXPIRED, 
-	       printf("total quantum expired for %t\n", tcb));
+    TRACEPOINT(TOTAL_QUANTUM_EXPIRED, "total quantum expired for %t\n", tcb);
 
 #warning VU: total quantum IPC disabled
     /* Total quantum IPC is an open point.  The expiration may happen
@@ -225,8 +224,8 @@ tcb_t * scheduler_t::parse_wakeup_queues(tcb_t * current)
 	    tcb->set_state(thread_state_t::running);
 	    enqueue_ready(tcb);
 
-	    TRACEPOINT(WAKEUP_TIMEOUT, printf("wakeup timeout (curr=%t wu=%p) Current time = %ld\n",
-					      current, tcb ,current_time));
+	    TRACEPOINT(WAKEUP_TIMEOUT, "wakeup timeout (curr=%t wu=%p) Current time = %ld\n",
+		       current, tcb, current_time);
 
 	    /* was preempted -- give him a fresh timeslice */
 	    //tcb->current_timeslice = tcb->timeslice_length;
@@ -347,9 +346,8 @@ void scheduler_t::handle_timer_interrupt()
 	    this->delay_preemption(current, wakeup) )
 	{
 	    // We have a delayed preemption.  Perform accounting, etc.
-	    TRACEPOINT(PREEMPTION_DELAYED, 
-		       printf("delayed preemption thread=%t, time=%dus\n", 
-			      current, current->current_max_delay));
+	    TRACEPOINT(PREEMPTION_DELAYED, "delayed preemption thread=%t, time=%dus\n", 
+		       current, current->current_max_delay);
 
     	    /* VU: should we give max_delay? */
     	    timeslice_tcb->current_timeslice += current->current_max_delay;
@@ -360,25 +358,20 @@ void scheduler_t::handle_timer_interrupt()
 	else
 	{
 	    // We have end-of-timeslice.
-	    TRACEPOINT(TIMESLICE_EXPIRED, 
-		       printf("timeslice expired for %t\n", current));
+	    TRACEPOINT(TIMESLICE_EXPIRED, "timeslice expired for %t\n", current);
 
 	    if( EXPECT_FALSE(current->get_preempt_flags().is_delayed()) )
 	    {
 		if( current->current_max_delay == 0 )
 		{
-		    TRACEPOINT(PREEMPTION_FAULT, 
-		 	    printf("delay preemption fault by %t\n", current));
+		    TRACEPOINT(PREEMPTION_FAULT, "delay preemption fault by %t\n", current);
 		}
 		else
 		{
-		    TRACEPOINT(PREEMPTION_DELAY_OVERRULED,
-			    printf("delayed preemption overruled for %t by %t, "
-				"current prio %08x, sensitive prio %08x, "
-				"target prio %08x\n",
-				current, wakeup, get_priority(current), 
-				get_sensitive_prio(current), 
-				get_priority(wakeup)) );
+		    TRACEPOINT(PREEMPTION_DELAY_OVERRULED, "delayed preemption overruled for %t by %t, "
+			       "current prio %08x, sensitive prio %08x, target prio %08x\n",
+			       current, wakeup, get_priority(current), get_sensitive_prio(current), 
+			       get_priority(wakeup));
 		}
 	    }
 
@@ -482,9 +475,8 @@ SYS_THREAD_SWITCH (threadid_t dest)
     tcb_t * current = get_current_tcb();
     scheduler_t * scheduler = get_current_scheduler();
 
-    TRACEPOINT( SYSCALL_THREAD_SWITCH,
-		printf("SYS_THREAD_SWITCH current=%t, dest=%t\n",
-		       current, TID(dest)) );
+    TRACEPOINT( SYSCALL_THREAD_SWITCH, "SYS_THREAD_SWITCH current=%t, dest=%t\n",
+		current, TID(dest));
 
     /* explicit timeslice donation */
     if (!dest.is_nilthread())
@@ -512,8 +504,7 @@ SYS_THREAD_SWITCH (threadid_t dest)
 	current->set_preempt_flags( current->get_preempt_flags().clear_pending() );
 	/* refresh max delay */
 	current->current_max_delay = current->max_delay;
-	TRACEPOINT(PREEMPTION_DELAY_REFRESH, 
-		   printf("delayed preemption refresh for %t\n", current));
+	TRACEPOINT(PREEMPTION_DELAY_REFRESH, "delayed preemption refresh for %t\n", current);
     }
 
 
@@ -592,10 +583,10 @@ SYS_SCHEDULE (threadid_t dest_tid, word_t time_control,
 {
     
     TRACEPOINT(SYSCALL_SCHEDULE, 
-	printf("SYS_SCHEDULE: curr=%t, dest=%t, time_ctrl=%x, "
+	       "SYS_SCHEDULE: curr=%t, dest=%t, time_ctrl=%x, "
 	       "proc_ctrl=%x, prio=%x, preemption_ctrl=%x\n",
 	       get_current_tcb(), TID(dest_tid), time_control, 
-	       processor_control, prio, preemption_control));
+	       processor_control, prio, preemption_control);
 
     tcb_t * dest_tcb = get_current_space()->get_tcb(dest_tid);
     
