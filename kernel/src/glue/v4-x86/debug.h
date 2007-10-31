@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
- * File path:     arch/x86/debug.h
+ * File path:     glue/v4-x86/debug.h
  * Description:   x86 debugging support
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,13 +29,13 @@
  * $Id: debug.h,v 1.8.4.3 2006/12/05 15:53:45 skoglund Exp $
  *                
  ********************************************************************/
-#ifndef __ARCH__X86__DEBUG_H__
-#define __ARCH__X86__DEBUG_H__
+#ifndef __GLUE__X86__DEBUG_H__
+#define __GLUE__X86__DEBUG_H__
 
+#include INC_ARCH(trapgate.h)
 #include INC_GLUE(config.h)
 
 #define DEBUG_SCREEN (KERNEL_OFFSET + 0xb8000)
-
 
 INLINE void spin_forever(int pos = 0)
 {
@@ -49,6 +49,18 @@ INLINE void spin_forever(int pos = 0)
 #endif /* defined(CONFIG_SPIN_WHEELS) */
 }
 
+class space_t;
+class tcb_t;
+
+class debug_param_t 
+{
+   
+public:
+    word_t exception;
+    space_t * space;
+    tcb_t * tcb;
+    x86_exceptionframe_t * frame;
+};
 
 INLINE void spin(int pos, int cpu = 0)
 {
@@ -71,4 +83,24 @@ INLINE void spin(int pos, int cpu = 0)
             :                                   \
             : "a" (0UL))
 
-#endif /* !__ARCH__X86__DEBUG_H__ */
+extern "C" int printf(const char* format, ...);
+INLINE void dump_flags(const word_t flags)
+{
+    printf("%c%c%c%c%c%c%c%c%c%c%c",
+	   flags & (1 <<  0) ? 'C' : 'c',
+	   flags & (1 <<  2) ? 'P' : 'p',
+	   flags & (1 <<  4) ? 'A' : 'a',
+	   flags & (1 <<  6) ? 'Z' : 'z',
+	   flags & (1 <<  7) ? 'S' : 's',
+	   flags & (1 << 11) ? 'O' : 'o',
+	   flags & (1 << 10) ? 'D' : 'd',
+	   flags & (1 <<  9) ? 'I' : 'i',
+	   flags & (1 <<  8) ? 'T' : 't',
+	   flags & (1 << 16) ? 'R' : 'r',
+	   ((flags >> 12) & 3) + '0'
+	);
+}
+
+
+
+#endif /* !__GLUE__X86__DEBUG_H__ */
