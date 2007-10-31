@@ -66,9 +66,10 @@ bool kdb_t::pre()
 {
     bool enter_kernel_debugger = true;
 
-    ia32_exceptionframe_t* f = (ia32_exceptionframe_t*) kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb_param;
+    x86_exceptionframe_t* f = param->frame;
 
-    switch (f->reason)
+    switch (param->exception)
     {
     case X86_EXC_DEBUG:	/* single step, hw breakpoints */
     {
@@ -250,14 +251,14 @@ bool kdb_t::pre()
 
 void kdb_t::post() {
 
-    ia32_exceptionframe_t* f = (ia32_exceptionframe_t*) kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb_param;
     
-    switch (f->reason)
+    switch (param->exception)
     {
     case X86_EXC_DEBUG:
 	/* Set RF in EFLAGS. This will disable breakpoints for one
 	   instruction. The processor will reset it afterwards. */
-	f->eflags |= (1 << 16);
+	param->frame->eflags |= (1 << 16);
 	break;
 
     case X86_EXC_NMI:
