@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/syscalls.h
  * Description:   declaration of system calls
@@ -159,16 +159,70 @@ SYS_MEMORY_CONTROL (word_t control,
  *                 control register constants
  *********************************************************************/
 
-#define EXREGS_CONTROL_HALT	(1 << 0)
-#define EXREGS_CONTROL_RECV	(1 << 1)
-#define EXREGS_CONTROL_SEND	(1 << 2)
-#define EXREGS_CONTROL_SP	(1 << 3)
-#define EXREGS_CONTROL_IP	(1 << 4)
-#define EXREGS_CONTROL_FLAGS	(1 << 5)
-#define EXREGS_CONTROL_UHANDLE	(1 << 6)
-#define EXREGS_CONTROL_PAGER	(1 << 7)
-#define EXREGS_CONTROL_HALTFLAG	(1 << 8)
 
+class exregs_ctrl_t {
+    
+public:
+    enum flag_e {
+	halt_flag        = 0,
+	recv_flag	 = 1,
+	send_flag	 = 2,
+	sp_flag	         = 3,
+	ip_flag	         = 4,
+	flags_flag	 = 5,
+	uhandle_flag	 = 6,
+	pager_flag	 = 7,
+	haltflag_flag    = 8,
+	exchandler_flag  = 9,
+	scheduler_flag   = 10,
+	ctrlxfer_flag    = 11,
+    };
+    
+    union {
+	struct {
+	    word_t halt		: 1;
+	    word_t recv		: 1;
+	    word_t send		: 1;
+	    word_t sp		: 1;
+	    word_t ip		: 1;
+	    word_t flags	: 1;
+	    word_t uhandle	: 1;
+	    word_t pager	: 1;
+	    word_t haltflag	: 1;
+	    word_t exchandler	: 1;
+	    word_t scheduler	: 1;
+	    word_t ctrlxfer	: 1;
+	    word_t __pad	: 20;
+	};
+	word_t raw;
+    };
+
+    exregs_ctrl_t (void) {}
+    exregs_ctrl_t (word_t r) { raw = r; }
+    
+    bool is_set(flag_e flag) { return raw  & (1UL << flag); } 
+    void set(flag_e flag) { raw  |= (1UL << flag); } 
+
+    char *string()
+	{
+	    static char s[] =  "~~~~~~~~~~~~";
+	    
+	    s[0]  =  halt    	? 'h' : '~';
+	    s[1]  =  recv    	? 'r' : '~';
+	    s[2]  =  send    	? 's' : '~';
+	    s[3]  =  sp      	? 's' : '~';
+	    s[4]  =  ip      	? 'i' : '~';
+	    s[5]  =  flags   	? 'f' : '~';
+	    s[6]  =  uhandle 	? 'u' : '~';
+	    s[7]  =  pager   	? 'p' : '~';
+	    s[8]  =  haltflag	? 'h' : '~';
+	    s[9]  =  exchandler	? 'e' : '~';	
+	    s[10] =  scheduler	? 's' : '~';
+	    s[11] =  ctrlxfer	? 'X' : '~';
+	    
+	    return s;
+	}
+};
 
 /*
  * Error code values
