@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/arch/ia32/ia32-dis.c
  * Description:   Wrapper for IA-32 disassembler
