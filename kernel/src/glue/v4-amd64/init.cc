@@ -238,22 +238,6 @@ void SECTION(SEC_INIT) init_meminfo (void)
  **********************************************************************/
 
 
-#if defined(CONFIG_TRACEBUFFER)
-tracebuffer_t * tracebuffer;
-EXTERN_KMEM_GROUP (kmem_misc);
-
-void SECTION(SEC_INIT) setup_tracebuffer (void)
-{
-    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
-    ASSERT (TRACEBUFFER_SIZE == MB (2));
-    get_kernel_space ()->add_mapping (tracebuffer,
-				     virt_to_phys (tracebuffer),
-				     pgent_t::size_2m,
-				     true, false, true);
-    tracebuffer->initialize ();
-}
-#endif /* defined(CONFIG_TRACEBUFFER) */
-
 /**
  * Setup global descriptor table 
  * 
@@ -303,7 +287,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 				           amd64_segdesc_t::msr_gs);
     
 #if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t) tracebuffer,
+    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t) get_tracebuffer(),
 					 amd64_segdesc_t::data,
 					 3,
 					 amd64_segdesc_t::m_long,
@@ -337,7 +321,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 				           amd64_segdesc_t::msr_gs);
     
 #if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t)tracebuffer,
+    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg( (u64_t) get_tracebuffer(),
 					 amd64_segdesc_t::data,
 					 3,
 					 amd64_segdesc_t::m_long,
