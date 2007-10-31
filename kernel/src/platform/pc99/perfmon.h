@@ -139,7 +139,6 @@
 
 #endif /* defined(CONFIG_CPU_IA32_I686) */
 
-#define arch_wrmsr			x86_wrmsr
 
 INLINE void setup_perfmon_cpu(word_t cpuid)
 {
@@ -147,28 +146,27 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
 #if defined(CONFIG_CPU_IA32_I686) || defined(CONFIG_CPU_AMD64_K8) || defined(CONFIG_CPU_IA32_K8)
     
     /* disable PerfEvents */
-     arch_wrmsr(PMC_MSR_EVTSEL0, 0);
-     arch_wrmsr(PMC_MSR_EVTSEL1, 0);
+     x86_wrmsr(PMC_MSR_EVTSEL0, 0);
+     x86_wrmsr(PMC_MSR_EVTSEL1, 0);
  
      /* clear PMCs */
-     arch_wrmsr(PMC_MSR_CTR0, 0);
-     arch_wrmsr(PMC_MSR_CTR1, 0);
+     x86_wrmsr(PMC_MSR_CTR0, 0);
+     x86_wrmsr(PMC_MSR_CTR1, 0);
  
      /* init PMCs */
-     arch_wrmsr(PMC_MSR_EVTSEL0, 0x4100C0);  // ENABLE + USER + INST_RETIRED
-     arch_wrmsr(PMC_MSR_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
+     x86_wrmsr(PMC_MSR_EVTSEL0, 0x4100C0);  // ENABLE + USER + INST_RETIRED
+     x86_wrmsr(PMC_MSR_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
 
-     //x86_cr4_set(IA32_CR4_PCE); // allow rdpmc in user mode
 
 #elif defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_AMD64_P4)
 
      /* disable PMCs via CCCR*/
-     arch_wrmsr(PMC_MSR_IQ_CCCR(0), 3 << 16);
-     arch_wrmsr(PMC_MSR_IQ_CCCR(2), 3 << 16);
+     x86_wrmsr(PMC_MSR_IQ_CCCR(0), 3 << 16);
+     x86_wrmsr(PMC_MSR_IQ_CCCR(2), 3 << 16);
      
      /* clear PMCs */
-     arch_wrmsr(PMC_MSR_IQ_COUNTER(0), 0);
-     arch_wrmsr(PMC_MSR_IQ_COUNTER(2), 0);
+     x86_wrmsr(PMC_MSR_IQ_COUNTER(0), 0);
+     x86_wrmsr(PMC_MSR_IQ_COUNTER(2), 0);
 
      /* 
       * init ESCR0:
@@ -176,7 +174,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
       * event mask (non-bogus tagged and non-tagged) 
       * event select (inst_retired)
       */
-     arch_wrmsr(PMC_MSR_CRU_ESCR0, (1 << 2) | (3 << 9) | (2 << 25)); 
+     x86_wrmsr(PMC_MSR_CRU_ESCR0, (1 << 2) | (3 << 9) | (2 << 25)); 
      
      /* 
       * init ESCR1:
@@ -184,20 +182,21 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
       * event mask (non-bogus tagged and non-tagged) 
       * event select (inst_retired)
       */
-     arch_wrmsr(PMC_MSR_CRU_ESCR1, (1 << 3) | (3 << 9) | (2 << 25)); 
+     x86_wrmsr(PMC_MSR_CRU_ESCR1, (1 << 3) | (3 << 9) | (2 << 25)); 
 
      /* 
       * enable PMCs via CCCR:
       * enable + escr select + reserved
       */
-     arch_wrmsr(PMC_MSR_IQ_CCCR(0), (1 << 12) | (PMC_MSR_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16)); 
-     arch_wrmsr(PMC_MSR_IQ_CCCR(2), (1 << 12) | (PMC_MSR_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16));
+     x86_wrmsr(PMC_MSR_IQ_CCCR(0), (1 << 12) | (PMC_MSR_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16)); 
+     x86_wrmsr(PMC_MSR_IQ_CCCR(2), (1 << 12) | (PMC_MSR_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16));
+
+     x86_cr4_set(X86_CR4_PCE); // allow rdpmc in user mode
      
 #endif
  
 }
 
-#undef arch_wrmsr
 
 
 #endif /* !__PLATFORM__PC99__PMC_MSR_H__ */
