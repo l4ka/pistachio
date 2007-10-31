@@ -39,16 +39,130 @@
 
 #if defined(CONFIG_TRACEBUFFER)
 
+extern void list_tp_choices (void);
+
 #if defined(CONFIG_TBUF_PERFMON)
 #define IF_PERFMON(a...) a
 #else
 #define IF_PERFMON(a...)
 #endif
 
+static inline int SECTION(SEC_KDEBUG) strlen(const char* p) { int i=0; while (*(p++)) i++; return i; };
+
 
 DECLARE_CMD_GROUP (tracebuf);
 
 word_t tbufcnt = 0;
+
+class tbuf_filter_t
+{
+public:
+    static const word_t max_filters = 4;
+
+private:   
+    word_t tpid[max_filters];
+    tcb_t *tcb[max_filters];
+    word_t cpumask;
+
+    bool cpu_pass(tracerecord_t *t)
+	{
+	    return (cpumask & (1UL<< t->cpu));
+	}
+    
+    
+    bool tpid_pass(tracerecord_t *t)
+	{
+	    if (tpid[0] == NULL || ((word_t) tpid[0] == t->tpid))
+		return true;
+	    
+	    for (word_t i=1; i < max_filters; i++)
+	    {
+		if (tpid[i] == NULL)
+		    return false;
+		if ((word_t) tpid[i] == t->tpid)
+		    return true;
+	    }
+	    
+	    return false;
+	}
+
+
+    bool tcb_pass(tracerecord_t *t)
+	{
+	    if (tcb[0] == NULL || ((word_t) tcb[0] == (t->thread & KTCB_MASK)))
+		return true;
+    
+	    for (word_t i=1; i < max_filters; i++)
+	    {
+		if ((word_t) tcb[i] == (t->thread & KTCB_MASK))
+		    return true;
+		if (tcb[i] == NULL)
+		    return false;
+	    }
+	    return false;
+	}
+
+
+public:
+    
+    tbuf_filter_t()
+	{ invalidate(); 	}
+    
+    void invalidate()
+	{
+	    for (word_t i=0; i < max_filters; i++)
+	    {
+		tpid[i] = NULL;
+		tcb[i] = NULL;
+	    }
+	    cpumask = ~0UL;
+
+	}
+    
+    void dump()
+	{
+	    printf("CPU: [%x]\n", cpumask);
+	    
+	    printf("Tracepoints: \n");
+	    for (word_t i=0; i < max_filters; i++)
+	    {
+		if (tpid[i] == NULL)
+		    break;
+		printf("\t\t%2d: %8d %s\n", i, tpid[i], tp_list.get(tpid[i]-1)->name);
+	    }    
+	    
+	    printf("TCBs: \n");
+	    for (word_t i=0; i < max_filters; i++)
+	    {
+		if (tcb[i] == NULL)
+		    break;
+		printf("\t\t%2d: %8t\n", i, (tcb_t *) tcb[i]);
+	    }    
+    
+
+
+	}
+    
+    void set_cpumask(word_t mask) {  cpumask = mask; }
+    void set_tpid(word_t idx, word_t id)
+	{ 
+	    ASSERT(idx < max_filters);
+	    tpid[idx] = id;
+	}
+    
+    void set_tcb(word_t idx, tcb_t *t)
+	{ 
+	    ASSERT(idx < max_filters);
+	    tcb[idx] = t;
+	}
+    
+    bool pass(tracerecord_t *t)
+	{ return cpu_pass(t) && tpid_pass(t) && tcb_pass(t); }
+	      
+
+};
+    
+tbuf_filter_t tbuf_filter;
 
 
 /*
@@ -117,7 +231,7 @@ CMD (cmd_tb_dump_ctr, cg)
  * Apply filter for tracebuffer events.
  */
 
-DECLARE_CMD (cmd_tb_filter, tracebuf, 'f', "filter", "Filter events");
+DECLARE_CMD (cmd_tb_filter, tracebuf, 'f', "filter", "Record filter");
 
 CMD (cmd_tb_filter, cg)
 {	
@@ -238,9 +352,13 @@ CMD (cmd_tb_dump, cg)
 	break;
     }
 
-    printf ("\nRecord Type   %ws Cyclecount "
+    printf ("\nRecord P  Type   TP  %ws Cyclecount "
 	    IF_PERFMON (" Perfctr0  Perfctr1 ")
 	    " Event\n", "Thread");
+    
+    space_t *kspace = get_kernel_space();
+
+   
     for (num = 0, index = start; count--; index++)
     {
 	if (index >= size) index = 0;
@@ -248,6 +366,11 @@ CMD (cmd_tb_dump, cg)
 
 	if (((rec->utype | (rec->ktype << 16)) & mask) ^ eventsel)
 	    continue;
+	
+	if (rec->is_kernel_event() && !tbuf_filter.pass(rec))
+	    continue;
+
+	
 	num++;
 
         if (! old.tsc)
@@ -259,14 +382,21 @@ CMD (cmd_tb_dump, cg)
 
 	threadid_t tid;
 	if (rec->is_kernel_event ())
-	    tid = addr_to_tcb ((addr_t) rec->thread)->get_global_id ();
+	{
+	    tcb_t *tcb = addr_to_tcb((addr_t) rec->thread);
+	    
+	    if (!kspace->is_tcb_area (tcb) && tcb != get_idle_tcb())
+		tcb = kspace->get_tcb (threadid ((word_t) tcb));
+	    
+	    tid = tcb->get_global_id ();
+	}
+
 	else
 	    tid = threadid (rec->thread);
 
-        printf ( "%6d %04x %c %wt %10d" IF_PERFMON("%10d%10d") "  ",
-		 index, rec->get_type (),
-		 rec->is_kernel_event () ? 'k' : 'u', tid.get_raw (),
-		 rec->tsc - old.tsc
+        printf ( "%6d %02d %04x %c %3d %wt %10u" IF_PERFMON("%10u%10u") "  ",
+		 index, rec->cpu, rec->get_type (), rec->is_kernel_event () ? 'k' : 'u', 
+		 rec->tpid, tid.get_raw (),  rec->tsc - old.tsc
 		 IF_PERFMON (, rec->pmc0-old.pmc0, rec->pmc1-old.pmc1));
 
         sum.tsc  += (rec->tsc - old.tsc);
@@ -280,9 +410,16 @@ CMD (cmd_tb_dump, cg)
 	if (rec->is_kernel_event ())
 	{
 	    // Trust kernel strings to be ok
-
-	    printf ((char *) rec->str, rec->data[0],
-		    rec->data[1], rec->data[2], rec->data[3]);
+	    printf (rec->str, 
+		    rec->arg[0], rec->arg[1], 
+		    rec->arg[2], rec->arg[3],
+		    rec->arg[4], rec->arg[5], 
+		    rec->arg[6], rec->arg[7],
+		    rec->arg[8]);
+	    
+	    word_t len = strlen(rec->str);
+	    if( (len < 1) || rec->str[len-1] != '\n' )
+		printf("\n"); 
 	}
 	else
 	{
@@ -300,12 +437,15 @@ CMD (cmd_tb_dump, cg)
 		! space->is_user_area ((addr_t) rec->str))
 	    {
 		printf ("%p (%p, %p, %p, %p)\n", rec->str,
-			rec->data[0], rec->data[1],
-			rec->data[2], rec->data[3]);
+			rec->arg[0], rec->arg[1],
+			rec->arg[2], rec->arg[3],
+			rec->arg[4], rec->arg[5],
+			rec->arg[6], rec->arg[7],
+			rec->arg[8]);
 		continue;
 	    }
+	    
 	    space = tcb->get_space ();
-
 	    static char user_str[64];
 	    addr_t p = (addr_t) rec->str;
 	    word_t idx = 0;
@@ -319,6 +459,12 @@ CMD (cmd_tb_dump, cg)
 		user_str[idx++] = c;
 		p = addr_offset (p, 1);
 	    }
+	    
+	    // Append a newline and zero if needed and possible
+	
+	    if (user_str[idx-1] != '\n' && idx < sizeof(user_str)-2)
+		user_str[idx++] = '\n';
+	    
 	    user_str[idx] = 0;
 
 	    // Turn '%s' into '%p' (i.e., avoid printing arbitrary
@@ -334,13 +480,16 @@ CMD (cmd_tb_dump, cg)
 			idx++;
 		    if (user_str[idx] == 's')
 			user_str[idx] = 'p';
-		}
-
-	    printf (user_str, rec->data[0], rec->data[1],
-		    rec->data[2], rec->data[3]);
+		}	
+	    
+	    printf (user_str,
+		    rec->arg[0], rec->arg[1],
+		    rec->arg[2], rec->arg[3],
+		    rec->arg[4], rec->arg[5],
+		    rec->arg[6], rec->arg[7],
+		    rec->arg[8]);
+	    
 	}
-
-        printf("\n");  
     }
     
     printf ("---------------------------------"
@@ -354,5 +503,94 @@ CMD (cmd_tb_dump, cg)
     
     return CMD_NOQUIT;
 }
+
+/*
+ * Submenu for tracebuffer display filters.
+ */
+
+DECLARE_CMD_GROUP (tbuf_filter_menu);
+
+DECLARE_CMD (cmd_tbuf_filter, tracebuf, 'i', "display_filter",
+	     "display filters");
+
+CMD (cmd_tbuf_filter, cg)
+{
+    return tbuf_filter_menu.interact (cg, "display filters");
+}
+
+
+DECLARE_CMD (cmd_tb_cpu, tbuf_filter_menu, 'c', "cpufilter", "CPU display filter");
+CMD(cmd_tb_cpu, cg) 
+{
+#if defined(CONFIG_SMP)
+    tbuf_filter.set_cpumask(get_hex("Processor Filter", ~0UL, "all"));
+#endif	    
+    return CMD_NOQUIT;
+}
+
+DECLARE_CMD (cmd_tb_evt, tbuf_filter_menu, 'p', "tpfilter", "TP display filter");
+CMD(cmd_tb_evt, cg) 
+{
+    for (word_t i=0; i < tbuf_filter_t::max_filters; i++)
+	tbuf_filter.set_tpid(i, 0);
+    
+    for (word_t i=0; i < tbuf_filter_t::max_filters; i++)
+    {
+	for (;;)
+	{
+	    tbuf_filter.set_tpid(i, 0);
+	    word_t tpid = get_dec ("Select TP", 0, "list");
+	    if (tpid == 0)
+	    {
+		list_tp_choices ();
+		continue;
+	    }
+	    else if (tpid == ABORT_MAGIC)
+		return CMD_NOQUIT;
+	    else if (tpid <= tp_list.size ())
+		tbuf_filter.set_tpid(i, tpid);
+	    break;
+	}
+	if (get_choice ("More events", "y/n", 'n') == 'n')
+	    break;
+
+    }
+    return CMD_NOQUIT;
+}
+
+
+DECLARE_CMD (cmd_tb_tcb, tbuf_filter_menu, 't', "tcbfilter", "TCB display filter");
+CMD(cmd_tb_tcb, cg) 
+{
+    for (word_t i=0; i < tbuf_filter_t::max_filters; i++)
+	tbuf_filter.set_tcb(i, NULL);
+    
+    for (word_t i=0; i < tbuf_filter_t::max_filters; i++)
+    {
+	tbuf_filter.set_tcb(i, get_thread ("tcb/tid/name"));
+	if (get_choice ("More threads", "y/n", 'n') == 'n')
+	    break;
+
+    }
+    return CMD_NOQUIT;
+	
+}
+
+DECLARE_CMD (cmd_tb_showfilters, tbuf_filter_menu, 's', "showfilters", "Show display filters");
+CMD(cmd_tb_showfilters, cg) 
+{
+    tbuf_filter.dump();
+    return CMD_NOQUIT;
+	
+}
+
+DECLARE_CMD (cmd_tb_zero, tbuf_filter_menu, 'z', "zerofilter", "Invalidate display filters");
+CMD(cmd_tb_zero, cg) 
+{
+    tbuf_filter.invalidate();
+    return CMD_NOQUIT;
+}
+
+
 
 #endif /* CONFIG_TRACEBUFFER */
