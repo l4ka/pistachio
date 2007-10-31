@@ -450,7 +450,7 @@ void intctrl_t::mask(word_t irq)
 	return;
     ASSERT(redir[irq].is_valid());
 #if defined(DEBUG_INTCTRL_MASKS)
-    TRACEPOINT_TB (INTCTRL_MASK, 
+    TRACEPOINT (INTCTRL_MASK, 
 		   ("INTCTRL %d mask ra %x", 
 		    irq,   __builtin_return_address((0))));
 #endif
@@ -467,7 +467,7 @@ bool intctrl_t::unmask(word_t irq)
     
     ASSERT(redir[irq].is_valid());
 #if defined(DEBUG_INTCTRL_MASKS)
-    TRACEPOINT_TB (INTCTRL_UNMASK, 
+    TRACEPOINT (INTCTRL_UNMASK, 
 		   ("INTCTRL %d unmask ra %x", 
 		    irq,   __builtin_return_address((0))));
 #endif
