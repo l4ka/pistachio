@@ -403,9 +403,9 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
     word_t err = entry->param[3];
 
     TRACEPOINT (XCPU_UNWIND,
-		printf ("tcb=%t, partner=%t, state=%s, tag=%p, err=%p\n",
+		"tcb=%t, partner=%t, state=%s, tag=%p, err=%p\n",
 			TID (tcb->get_global_id ()), TID (partner_id),
-			expected_state.string (), tag.raw, err));
+			expected_state.string (), tag.raw, err);
 
     if (EXPECT_FALSE (! tcb->is_local_cpu ()))
     {
@@ -460,10 +460,10 @@ void tcb_t::unwind (unwind_reason_e reason)
     tcb_t * partner;
 
     TRACEPOINT (UNWIND,
-		printf ("Unwind: tcb=%t p=%t s=%s (saved: p=%t s=%s)\n",
+		"Unwind: tcb=%t p=%t s=%s (saved: p=%t s=%s)\n",
 			TID (get_global_id ()), TID (get_partner ()),
 			get_state ().string (),	TID (get_saved_partner ()),
-			get_saved_state ().string ()));
+			get_saved_state ().string ());
     
     thread_state_t orig_cstate UNUSED = get_state ();
     thread_state_t orig_sstate UNUSED = get_saved_state ();
@@ -1084,11 +1084,11 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 		    word_t utcb_location)
 {
     TRACEPOINT (SYSCALL_THREAD_CONTROL, 
-		printf ("SYS_THREAD_CONTROL: dest=%t, space=%t, "
+		"SYS_THREAD_CONTROL: dest=%t, space=%t, "
 			"scheduler=%t, pager=%t, utcb=%x\n", 
 			TID (dest_tid), TID (space_tid), 
 			TID (scheduler_tid), TID (pager_tid), 
-			utcb_location));
+			utcb_location);
     tcb_t * current = get_current_tcb();
     
     // Check privilege
