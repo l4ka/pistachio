@@ -29,6 +29,7 @@
  * $Id: stepping.cc,v 1.5 2003/09/24 19:05:05 skoglund Exp $
  *                
  ********************************************************************/
+#include <debug.h>
 #include <kdb/kdb.h>
 #include INC_ARCH(trapgate.h)	/* for ia32_exceptionframe_t */
 #include INC_ARCH(cpu.h)
@@ -40,7 +41,8 @@ DECLARE_CMD (cmd_singlestep, root, 's', "singlestep", "Single step");
 
 CMD(cmd_singlestep, cg)
 {
-    ia32_exceptionframe_t* f = (ia32_exceptionframe_t*) kdb.kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t* f = param->frame;
 
     ia32_last_eip = f->eip;
     f->eflags |= (1 << 8) + (1 << 16); /* RF + TF */
@@ -55,7 +57,8 @@ DECLARE_CMD (cmd_branchstep, root, 'S', "branchstep",
 
 CMD (cmd_branchstep, cg)
 {
-    ia32_exceptionframe_t * f = (ia32_exceptionframe_t *) kdb.kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t* f = param->frame;
 
     f->eflags |= (1 << 8) + (1 << 16);	/* RF + TF */
     x86_wrmsr (IA32_DEBUGCTL, ((1 << 0) + (1 << 1))); /* LBR + BTF */
