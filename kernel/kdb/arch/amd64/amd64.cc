@@ -115,7 +115,8 @@ static void SECTION(SEC_KDEBUG) dump_rflags(const u64_t rflags)
 
 CMD(cmd_show_frame, cg)
 {
-    amd64_exceptionframe_t * frame = (amd64_exceptionframe_t*)kdb.kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t * frame = param->frame;
     printf("fault addr: %16x\tstack: %16x\terror code: %x frame: %p\n", 
 	   frame->rip, frame->rsp, frame->error, frame);
 
