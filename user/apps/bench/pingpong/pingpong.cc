@@ -45,6 +45,7 @@ extern long _start_pong_thread;
 #define START_ADDR(func)	((L4_Word_t) func)
 #endif
 
+
 #define IPC_ARCH_OPTIMIZATION
 
 //#define PERFMON
@@ -419,6 +420,14 @@ int main (void)
     L4_Start (pager_tid, (L4_Word_t) pager_stack + sizeof(pager_stack) - 32,
 	      START_ADDR (pager));
 
+    
+    
+#if defined(L4_TRACEBUFFER)
+    const char *str = "Pingpong started %x\n";
+    printf(str, L4_Myself());
+    L4_Tbuf_RecordEvent (1, str, L4_Myself().raw);
+#endif
+    
     for (;;)
     {
 	bool printmenu = true;
