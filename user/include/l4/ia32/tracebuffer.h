@@ -30,7 +30,17 @@
 #ifndef __L4__IA32__TRACEBUFFER_H__
 #define __L4__IA32__TRACEBUFFER_H__
 
-#define __L4_TRACEBUFFER_SIZE	(1UL << 22)
+#define __L4_TRACEBUFFER_SIZE	(4 * 1024 * 1024)
+
+/* Turn preprocessor symbol definition into string */
+#define	MKSTR(sym)	MKSTR2(sym)
+#define	MKSTR2(sym)	#sym
+
+#if defined(L4_64BIT)
+# define __PLUS32	+ 32
+#else
+# define __PLUS32
+#endif
 
 
 /*
@@ -42,15 +52,17 @@ typedef struct
 {
     struct {
 	L4_Word_t	utype	: 16;
-	L4_Word_t	__pad	: 16;
+	L4_Word_t	__pad0	: 16 __PLUS32;
+	L4_Word_t	cpu	: 16;
+	L4_Word_t	__pad1	: 16 __PLUS32;
     } X;
+    
     L4_Word_t	tsc;
     L4_Word_t	thread;
-    L4_Word_t	str;
-    L4_Word_t	data[4];
     L4_Word_t	pmc0;
     L4_Word_t	pmc1;
-    L4_Word_t	__pad2[6];
+    L4_Word_t	str;
+    L4_Word_t	data[9];
 } L4_TraceRecord_t;
 
 
@@ -58,23 +70,31 @@ typedef struct
  * Access to performance monitoring counters
  */
 
+/*
+ * Access to stack pointer, timestamp, and performance monitoring counters
+ */
+#define __L4_TBUF_RDTSC  "	rdtsc					\n" \
+			 "	mov	%3, %%fs:2*%c9(%0)		\n"	
+    
+
 #if defined(L4_PERFMON)
-# define __L4_RDPMC_0   "	rdpmc				\n"	\
-			"	movl	%%eax, %%fs:32(%%edi)	\n"
-# define __L4_RDPMC_1   "	rdpmc				\n"	\
-			"	movl	%%eax, %%fs:36(%%edi)	\n"
+# define __L4_TBUF_RDPMC_0   "	rdpmc				\n"	\
+			     "	mov	%3, %%fs:4*%c9(%0)	\n"
+# define __L4_TBUF_RDPMC_1   "	rdpmc				\n"	\
+			"	mov	%3, %%fs:5*%c9(%0)	\n"
+
 # if !defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
-#  define __L4_PMC_SEL_1 "	inc	%%ecx			\n"
+#  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
 # elif defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_PMC_SEL_0 "	movl	$12, %%ecx		\n"
-#  define __L4_PMC_SEL_1 "	add	$2, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_0 "	movl	$12, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	add	$2, %%ecx		\n"
 # endif
 #else
-# define __L4_PMC_SEL_0 "	xorl	%%eax, %%eax		\n"
-# define __L4_PMC_SEL_1
-# define __L4_RDPMC_0   "	movl	%%eax, %%fs:32(%%edi)	\n"
-# define __L4_RDPMC_1   "	movl	%%eax, %%fs:36(%%edi)	\n"
+# define __L4_TBUF_PMC_SEL_0 "	xor	%3, %3			\n"
+# define __L4_TBUF_PMC_SEL_1
+# define __L4_TBUF_RDPMC_0   "	mov	%3, %%fs:4*%c9(%0)	\n"
+# define __L4_TBUF_RDPMC_1   "	mov	%3, %%fs:5*$c9(%9)	\n"
 #endif
 
 
@@ -97,69 +117,102 @@ typedef struct
 do {								\
     asm volatile (						\
 	__L4_TBUF_LOCK						\
-	"	incl	%%fs:32(%0)		\n"		\
+	"	inc	%%fs:8*%c1(%0)		\n"		\
 	:							\
 	:							\
-	"r" ((ctr & 0x7) * 4));					\
+	"r" ((ctr & 0x7) * 4),					\
+	"i" (sizeof(L4_Word_t)));				\
 } while (0)
 
 
-#define __L4_TBUF_GET_NEXT_RECORD(tid, event)			\
-({								\
-    L4_Word_t _addr, _dummy;					\
-    asm volatile (						\
-	/* Check wheter to filter the event */			\
-	"	movl	%%fs:8, %%edx		\n"		\
-	"	andl	%%ecx, %%edx		\n"		\
-	"	xorl	%%fs:12, %%edx		\n"		\
-	"	jnz	2f			\n"		\
-								\
-	/* Get record offset into EDI */			\
-	"1:	movl	%%fs:4, %%eax		\n"		\
-	"	movl	%3, %%edi		\n"		\
-	"	movl	%%edi, %%edx		\n"		\
-	"	addl	%%eax, %%edi		\n"		\
-	"	andl   	%4, %%edi		\n"		\
-	"	cmovzl	%%edx, %%edi		\n"		\
-	__L4_TBUF_LOCK						\
-	"	cmpxchg	%%edi, %%fs:4		\n"		\
-	"	jnz	1b			\n"		\
-								\
-	/* Store type, thread, and counters into record */	\
-	"	rdtsc				\n"		\
-	"	movl	%%ecx, %%fs:0(%%edi)	\n"		\
-	"	movl	%%eax, %%fs:4(%%edi)	\n"		\
-	"	movl	%%esi, %%fs:8(%%edi)	\n"		\
-	__L4_PMC_SEL_0						\
-	__L4_RDPMC_0						\
-	__L4_PMC_SEL_1						\
-	__L4_RDPMC_1						\
-	"2:					\n"		\
-	:							\
-	"=D" (_addr), 						\
-	"=c" (_dummy), 						\
-	"=S" (_dummy) 						\
-	:							\
-	"i" (sizeof (L4_TraceRecord_t)), 			\
-	"i" (__L4_TRACEBUFFER_SIZE - 1),			\
-	"c" ((event & 0xffff)), 				\
-	"S" (tid.raw),						\
-	"D" (0) 						\
-	:							\
-	"eax", "edx");						\
-    _addr;							\
-})
+#define __L4_TBUF_GET_NEXT_RECORD(tid, event)				\
+    ({									\
+	L4_Word_t _dummy, _addr;					\
+	asm volatile (							\
+	    /* Check wheter to filter the event */			\
+	    "	mov	%%fs:2*%c9, %3			\n"		\
+	    "	and	%1, %3				\n"		\
+	    "	xor	%%fs:3*%c9, %3			\n"		\
+	    "	jnz	2f				\n"		\
+									\
+	    /* Get record offset into EDI */				\
+	    "1:	mov	%%fs:1*%c9, %3			\n"		\
+	    "	mov	%8, %0				\n"		\
+	    "	mov	%0, %2				\n"		\
+	    "	add	%3, %0				\n"		\
+	    "	and	$"MKSTR(__L4_TRACEBUFFER_SIZE-1)", %0	\n"	\
+	    "	cmovz	%2, %0			      	\n"		\
+	    __L4_TBUF_LOCK						\
+	    "	cmpxchg	%0, %%fs:1*%c9			\n"		\
+	    "	jnz	1b				\n"		\
+									\
+	    /* Store type, cpu, thread, counters */			\
+	    "	movl	%%ecx, %%fs:(%0)		\n"		\
+	    "	mov	%%gs:0, %1			\n"		\
+	    "	mov 	"MKSTR(4 *__L4_TCR_PROCESSOR_NO)"(%1), %2\n"	\
+	    "	movl 	%%edx, %%fs:4(%0)		\n"		\
+	    "	mov 	"MKSTR(4 *__L4_TCR_MY_GLOBAL_ID)"(%1), %2\n"	\
+	    "	movl 	%%edx, %%fs:3*%c9(%0)		\n"		\
+	    __L4_TBUF_RDTSC						\
+	    __L4_TBUF_PMC_SEL_0						\
+	    __L4_TBUF_RDPMC_0						\
+	    __L4_TBUF_PMC_SEL_1						\
+	    __L4_TBUF_RDPMC_1						\
+	    "2:						\n"		\
+	    :								\
+		"=D" (_addr),				/* 0  */	\
+		"=c" (_dummy),				/* 1  */	\
+		"=d" (_dummy),				/* 2  */	\
+		"=a" (_dummy)				/* 3  */	\
+	    :								\
+		"0" (0),				/* 4  */	\
+		"1" (event & 0xffff),			/* 5  */	\
+		"2" (0),				/* 6  */	\
+		"3" (0),				/* 7  */	\
+		"i" (sizeof (L4_TraceRecord_t)),	/* 8  */	\
+		"i" (sizeof(L4_Word_t))			/* 9  */	\
+	    );								\
+	_addr;								\
+    })
 
 
-#define __L4_TBUF_STORE_ITEM(addr, offset, item)		\
+/**
+ * Record (format) string into event buffer.
+ *
+ * @param addr		offset of event record
+ * @param offset	string to be recorded
+ */
+#define __L4_TBUF_STORE_STR(addr, str)				\
 do {								\
     asm volatile (						\
-	"	movl	%0, %%fs:("#offset"*4+12)(%%edi)"	\
+	"mov   %0, %%fs:6*%c2(%1)\n"				\
 	:							\
 	:							\
-	"r" (item),						\
-	"D" (addr));						\
+	"r" (str),						\
+	"D" (addr),						\
+	"i" (sizeof(L4_Word_t)));				\
 } while (0)
+
+
+/**
+ * Record arguments into event buffer at indicated location.
+ *
+ * @param addr		offset of event record
+ * @param offset	offset within event record
+ * @param item		value to be recorded
+ */
+#define __L4_TBUF_STORE_DATA(addr, offset, item)		\
+do {								\
+    L4_Word_t _dummy;						\
+    asm volatile (						\
+	"mov  %2, %%fs:(%1)\n"					\
+	:							\
+	"=D" (_dummy)						\
+	:							\
+	"0" (addr + (7 + offset) * sizeof(L4_Word_t)),	\
+	"r" (item));						\
+} while (0)
+
 
 
 #endif /* !__L4__IA32__TRACEBUFFER_H__ */
