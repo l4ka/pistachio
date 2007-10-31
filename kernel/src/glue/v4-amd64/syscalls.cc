@@ -126,7 +126,7 @@ extern "C" amd64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
     }  
     else if (syscall == user_memory_control)
     {
-	TRACEPOINT(SYSCALL_MEMORY_CONTROL, printf("SYS_MEMORY_CONTROL\n"));
+	TRACEPOINT(SYSCALL_MEMORY_CONTROL, "SYS_MEMORY_CONTROL\n");
 	//sys_memory_control(arg2, arg3, arg4, arg5, arg6);
 	ret.rax = 0;
 	ret.rdx = 0;
