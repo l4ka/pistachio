@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/ipcx.cc
  * Description:   Extended transfer of IPC
@@ -55,9 +55,8 @@ extern "C" void * memcpy (void * dst, const void * src, word_t len);
 word_t ipc_copy (tcb_t * src, addr_t src_addr,
 		 tcb_t * dst, addr_t dst_addr, word_t len)
 {
-    TRACEPOINT (IPC_STRING_COPY,
-		printf ("IPC string copy: %t @ %p -> %t @ %p, len=0x%x\n",
-			src, src_addr, dst, dst_addr, len));
+    TRACEPOINT (IPC_STRING_COPY, "IPC string copy: %t @ %p -> %t @ %p, len=0x%x\n",
+		src, src_addr, dst, dst_addr, len);
 
     space_t * src_space = src->get_space ();
     space_t * dst_space = dst->get_space ();
@@ -109,7 +108,7 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     if (total_mrs > IPC_NUM_MR)
     {
 	printf("message exceeds MR's (untyped=%d, typed=%d)\n", 
-	    msgtag.get_untyped(), msgtag.get_typed());
+	       msgtag.get_untyped(), msgtag.get_typed());
 	enter_kdebug("message exceeds MR's");
 	goto message_overflow;
     }
@@ -125,9 +124,8 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     /* does the receiver (still) accepts strings? */
     accept_strings = acceptor.accept_strings();
 
-    TRACEPOINT(IPC_EXT_TRANSFER,
-	printf("tag=%p, untyped: %d, typed: %d, acceptor: %x\n", 
-	   msgtag.raw, msgtag.get_untyped(), msgtag.get_typed(), acceptor));
+    TRACEPOINT(IPC_EXT_TRANSFER, "tag=%p, untyped: %d, typed: %d, acceptor: %x\n", 
+	       msgtag.raw, msgtag.get_untyped(), msgtag.get_typed(), acceptor);
 
     for (word_t src_idx = msgtag.get_untyped() + 1; src_idx < total_mrs; )
     {
@@ -150,10 +148,9 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 		goto message_overflow;
 
 
-	    TRACEPOINT(IPC_MAPGRANT_ITEM,
-		printf("%s item: snd_base=%p, fpage=%p\n",
-		    src_item.is_map_item() ? "map" : "grant",
-		    src_item.get_snd_base(), snd_fpage.raw));
+	    TRACEPOINT(IPC_MAPGRANT_ITEM, "%s item: snd_base=%p, fpage=%p\n",
+		       src_item.is_map_item() ? "map" : "grant", 
+		       src_item.get_snd_base(), snd_fpage.raw);
 	    
 	    /* does the receiver accept mappings */
 	    if (EXPECT_FALSE( rcv_fpage.is_nil_fpage() ))
@@ -168,7 +165,7 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 		     dst->get_space(), rcv_fpage, src_item.is_grant_item());
 	    else if (snd_fpage.is_archpage ())
 		arch_map_fpage(src, snd_fpage, src_item.get_snd_base (),
-		     dst, rcv_fpage, src_item.is_grant_item ());
+			       dst, rcv_fpage, src_item.is_grant_item ());
 
 	    if (EXPECT_FALSE (src_item.is_grant_item () &&
 			      snd_fpage.get_size_log2 () >
@@ -219,19 +216,19 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    dst_len  = dst_item.get_string_length ();
 	    dst_ptridx = 1;
 
-	    TRACEPOINT (IPC_STRING_ITEM,
-			printf ("IPC string item:  src_item=%p  dst_item=%p\n"
-				"  src: substrings=%d (idx=%d)  len=%p %s\n"
-				"  dst: substrings=%d (idx=%d)  len=%p %s\n",
-				src_item.raw, dst_item.raw,
-				src_item.get_string_ptr_count (),
-				src_ptridx, src_len,
-				src_item.is_string_compound () ?	
-				"compound" : "",
-				dst_item.get_string_ptr_count (),
-				dst_ptridx, dst_len,
-				dst_item.is_string_compound () ?
-				"compound" : ""));
+	    TRACEPOINT (IPC_STRING_ITEM, 
+			"IPC string item:  src_item=%p  dst_item=%p\n"
+			"  src: substrings=%d (idx=%d)  len=%p %s\n"
+			"  dst: substrings=%d (idx=%d)  len=%p %s\n",
+			src_item.raw, dst_item.raw,
+			src_item.get_string_ptr_count (),
+			src_ptridx, src_len,
+			src_item.is_string_compound () ?	
+			"compound" : "",
+			dst_item.get_string_ptr_count (),
+			dst_ptridx, dst_len,
+			dst_item.is_string_compound () ?
+			"compound" : "");
 
 	    // Sanity checking
 	    if (! dst_item.is_string_item ())
@@ -244,11 +241,11 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 
 	    while (! end_of_send_string)
 	    {
-		TRACEPOINT (IPC_STRING_ITEM,
-			    printf ("  src: addr=%p len=%p (idx=%d)\n"
-				    "  dst: addr=%p len=%p (idx=%d)\n",
-				    src_addr, src_len, src_ptridx,
-				    dst_addr, dst_len, dst_ptridx));
+		TRACEPOINT (IPC_STRING_ITEM, 
+			    "  src: addr=%p len=%p (idx=%d)\n"
+			    "  dst: addr=%p len=%p (idx=%d)\n",
+			    src_addr, src_len, src_ptridx,
+			    dst_addr, dst_len, dst_ptridx);
 
 		copy_mr (dst, src, src_idx + src_ptridx);
 
@@ -297,12 +294,11 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 				      total_mrs);
 
 			TRACEPOINT (IPC_STRING_ITEM,
-				    printf ("  src: substrings=%d (idx=%d)"
-					    "  len=%p %s\n",
+				    "  src: substrings=%d (idx=%d) len=%p %s\n",
 					    src_item.get_string_ptr_count (),
 					    src_ptridx, src_len,
 					    src_item.is_string_compound () ?
-					    "compound" : ""));
+					    "compound" : "");
 		    }
 		    else
 		    {
@@ -369,12 +365,12 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 
 			    TRACEPOINT (
 				IPC_STRING_ITEM,
-				printf ("  dst: substrings=%d (idx=%d)"
+				"  dst: substrings=%d (idx=%d)"
 					"  len=%p %s\n",
 					dst_item.get_string_ptr_count (),
 					dst_ptridx, src_len,
 					dst_item.is_string_compound () ?
-					"compound" : ""));
+					"compound" : "");
 			}
 			else
 			{
@@ -410,9 +406,8 @@ message_overflow:
     // Cancel any pending XFER timeouts.
     get_current_scheduler ()->cancel_timeout (src);
 
-    TRACEPOINT (IPC_MESSAGE_OVERFLOW,
-		printf("IPC message overflow (%t->%t), len=0x%x\n",
-		       src, dst, total_len));
+    TRACEPOINT (IPC_MESSAGE_OVERFLOW, "IPC message overflow (%t->%t), len=0x%x\n",
+		src, dst, total_len);
 
     // Report message overflow error
     dst->set_error_code (IPC_RCV_ERROR (ERR_IPC_MSG_OVERFLOW (total_len)));
