@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
- * File path:     debug.h
+ * File path:     generic/debug.h
  * Description:   Debug functions
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -64,7 +64,7 @@
 
 #if defined(CONFIG_DEBUG)
 
-#include INC_ARCH(debug.h)
+#include INC_GLUE(debug.h)
 
 void init_console (void);
 extern "C" int printf (const char * format, ...);
