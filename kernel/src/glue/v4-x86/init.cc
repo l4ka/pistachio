@@ -65,7 +65,26 @@ cpuid_t SECTION(".init.cpu") init_cpu();
 void SECTION(SEC_INIT) init_bootmem();
 void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid);
 
-void SECTION(SEC_INIT) setup_tracebuffer (void);
+#if defined(CONFIG_TRACEBUFFER)
+tracebuffer_t * tracebuffer;
+EXTERN_KMEM_GROUP (kmem_misc);
+
+void SECTION(SEC_INIT) setup_tracebuffer (void)
+{
+    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
+    for (word_t p = 0; p < TRACEBUFFER_SIZE; p += page_size(TRACEBUFFER_PGENTSZ))
+    {	
+	//TRACEF("add tbuf mapping %t -> %t\n", addr_offset(tracebuffer, p),
+	//     virt_to_phys(addr_offset(tracebuffer, p)));
+	get_kernel_space()->add_mapping(addr_offset(tracebuffer, p),
+					virt_to_phys(addr_offset(tracebuffer, p)),
+					TRACEBUFFER_PGENTSZ,
+					true, false, true);
+    }
+    tracebuffer->initialize ();
+}
+#endif /* CONFIG_TRACEBUFFER */
+
 
 #if defined(CONFIG_SMP)
 /**************************************************************************
