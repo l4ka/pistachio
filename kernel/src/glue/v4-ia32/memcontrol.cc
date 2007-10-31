@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-ia32/memcontrol.cc
  * Description:   MemoryControl syscall (temporary)
@@ -45,9 +45,8 @@ SYS_MEMORY_CONTROL (word_t control, word_t attrib0, word_t attrib1,
     space_t * space = current->get_space ();
 
     TRACEPOINT (SYSCALL_MEMORY_CONTROL, 
-		printf ("SYS_MEMORY_CONTROL: control=%lx, "
-			"attribs=[%lx %lx %lx %lx]\n",
-    			control, attrib0, attrib1, attrib2, attrib3));
+		"SYS_MEMORY_CONTROL: control=%lx, attribs=[%lx %lx %lx %lx]\n",
+		control, attrib0, attrib1, attrib2, attrib3);
 
     // Check parameters
 
