@@ -57,9 +57,9 @@ static bool send_exception_ipc(ia32_exceptionframe_t * frame, word_t exception)
     if (current->get_exception_handler().is_nilthread())
 	return false;
 
-    TRACEPOINT_TB (EXCEPTION_IPC, ("exception_ipc at %x (current=%p)", frame->eip, (u32_t)current),
-		   printf ("exception ipc at %x, %T (%p) -> %T \n", frame->eip, current->get_global_id().get_raw(),
-			   current, current->get_scheduler().get_raw()));
+    TRACEPOINT (EXCEPTION_IPC, "exception ipc at %x, %T (%p) -> %T \n", 
+		frame->eip, current->get_global_id().get_raw(),
+		current, current->get_scheduler().get_raw());
 
     /* setup exception IPC */
     word_t saved_mr[13];
@@ -182,15 +182,11 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 
 #if defined(CONFIG_IO_FLEXPAGES)
 
-#define HANDLE_IO_PAGEFAULT(port, size)								\
-	tcb_t *tcb = get_current_tcb();								\
-	TRACEPOINT_TB (IA32_IO_PAGEFAULT, ("IO-Pagefault @ %x [size %x] (current=%T)",		\
-					   (u32_t)port, (u32_t) size,				\
-					   TID(tcb->get_global_id())),				\
-		       printf("IO-Pagefault at %x [size %x] (current=%T)\n",			\
-			      (u32_t)port, (u32_t) size,					\
-			      TID(tcb->get_global_id())));					\
-	handle_io_pagefault(tcb, port, size, (addr_t)frame->eip);				\
+#define HANDLE_IO_PAGEFAULT(port, size)							\
+    tcb_t *tcb = get_current_tcb();							\
+	TRACEPOINT (IA32_IO_PAGEFAULT, "IO-Pagefault @ %x [size %x] (current=%T)",	\
+		    (u32_t)port, (u32_t) size, TID(tcb->get_global_id()));		\
+	    handle_io_pagefault(tcb, port, size, (addr_t)frame->eip);			\
 	return true;
     
     
@@ -361,7 +357,7 @@ static bool handle_faulting_instruction (ia32_exceptionframe_t * frame)
 	    // Assume that kernel knows what it is doing.
 	    break;
 
-	TRACEPOINT (IA32_SEGRELOAD);
+	TRACEPOINT (IA32_SEGRELOAD, "segment register reload");
 	reload_user_segregs ();
 	frame->ds = frame->es = X86_UDS;
 	frame->eip++;
@@ -403,8 +399,7 @@ X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
     space_t * space = current->get_space();
     addr_t addr = (addr_t)frame->eip;
 
-    TRACEPOINT_TB (IA32_UD, ("ia32_ud at %x (current=%x)", (u32_t)addr, (u32_t)current),
-		   printf ("%t: invalid opcode at IP %p\n", current, addr));
+    TRACEPOINT (IA32_UD, "%t: invalid opcode at IP %p\n", current, addr);
 
     /* instruction emulation, only in user area! */
     if (space->is_user_area(addr))
@@ -486,7 +481,7 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 	if ((frame->ds & 0xffff) == 0 || (frame->es & 0xffff) == 0 ||
 	    fs == 0 || gs == 0 )
 	{
-	    TRACEPOINT (IA32_SEGRELOAD);
+	    TRACEPOINT (IA32_SEGRELOAD, "segment register reload");
 	    reload_user_segregs ();
 	    frame->ds = frame->es =
 		(frame->cs & 0xffff) == X86_UCS ? X86_UDS : X86_KDS;
@@ -502,17 +497,13 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     if (handle_faulting_instruction (frame))
 	return;
 
-    TRACEPOINT_TB (IA32_GP, ("ia32_gp at %x (error=%d)",
-			     frame->eip, frame->error),
-		   printf ("general protection fault @ %p, error: %x\n", 
-			   frame->eip, frame->error));
+    TRACEPOINT (IA32_GP, "general protection fault @ %p, error: %x\n", frame->eip, frame->error);
 
     if (send_exception_ipc(frame, X86_EXC_GENERAL_PROTECTION))
 	return;
 
 #ifdef CONFIG_KDB
-    void ia32_dump_frame (ia32_exceptionframe_t * frame);
-    ia32_dump_frame (frame);
+    x86_dump_frame (frame);
 
     enter_kdebug("#GP");
 #endif
@@ -525,8 +516,7 @@ X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 {
     tcb_t * current = get_current_tcb();
 
-    TRACEPOINT(IA32_NOMATH, 
-        printf("IA32_NOMATH %t @ %p\n", current, frame->eip));
+    TRACEPOINT(IA32_NOMATH, "IA32_NOMATH %t @ %p\n", current, frame->eip);
 
     current->resources.x86_no_math_exception(current);
 }
