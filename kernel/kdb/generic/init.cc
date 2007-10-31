@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/init.cc
  * Description:   Invoke all kernel debugger init functions
@@ -31,6 +31,7 @@
  ********************************************************************/
 #include <kdb/kdb.h>
 #include <kdb/linker_set.h>
+#include <kdb/tracepoints.h>
 #include <kdb/init.h>
 
 
@@ -76,4 +77,9 @@ void SECTION (".init") kdb_t::init (void)
     kdb_initfuncs.reset ();
     while ((initfunc = (kdb_initfunc_t) kdb_initfuncs.next ()) != NULL)
 	initfunc ();
+    
+#if defined(CONFIG_TRACEPOINTS)
+    init_tracepoints();
+#endif
+    
 }
