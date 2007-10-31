@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007,  Karlsruhe University
  *                
  * File path:     kdb/arch/amd64/stepping.cc
  * Description:   Single stepping for IA-32
@@ -31,6 +31,7 @@
  ********************************************************************/
 
 
+#include <debug.h>	
 #include <kdb/kdb.h>
 #include INC_ARCH(trapgate.h)	/* for ia32_exceptionframe_t */
 
@@ -38,7 +39,8 @@ DECLARE_CMD (cmd_singlestep, root, 's', "singlestep", "Single step");
 
 CMD(cmd_singlestep, cg)
 {
-    amd64_exceptionframe_t* f = (amd64_exceptionframe_t*) kdb.kdb_param;
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_exceptionframe_t* f = param->frame;
     
     /* set RF and TF in eflags */
     f->rflags |= ((1 << 8) | (1 << 16));
