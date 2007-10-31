@@ -81,8 +81,7 @@ void thread_resources_t::load(tcb_t * tcb)
     {
 	ASSERT (fpu_owner == tcb);
 	ASSERT (fpu_state != NULL);
-	TRACEPOINT(AMD64_FPU_REENABLE, 
-		   printf("strictly reenabling FPU for %t\n", tcb));
+	TRACEPOINT(AMD64_FPU_REENABLE, "strictly reenabling FPU for %t\n", tcb);
 	x86_fpu_t::enable();
     }
 #endif
