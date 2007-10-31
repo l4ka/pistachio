@@ -32,7 +32,6 @@
 #ifndef __GLUE__V4_IA32__TCB_H__
 #define __GLUE__V4_IA32__TCB_H__
 
-#include <kdb/tracebuffer.h>
 #include INC_ARCH(tss.h)
 #include INC_ARCH(trapgate.h)
 #include INC_API(syscalls.h)
@@ -180,6 +179,7 @@ INLINE void tcb_t::init_stack()
 
 #ifndef BUILD_TCB_LAYOUT
 #include <tcb_layout.h>
+#include <kdb/tracebuffer.h>
 
 /**
  * tcb_t::switch_to: switches to specified tcb
@@ -198,7 +198,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
     /* modify stack in tss */
     tss.set_esp0((u32_t)dest->get_stack_top());
 
-    tbuf_record_event (1, "switch %t => %t", (word_t)this, (word_t)dest);
+    tbuf_record_event (1, 0, "switch %t => %t", (word_t)this, (word_t)dest);
 
 #ifdef CONFIG_SMP
     active_cpu_space.set(get_cpu(), dest->space);
