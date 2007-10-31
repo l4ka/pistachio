@@ -33,63 +33,45 @@
 #define __KDB__TRACEBUFFER_H__
 #if defined(CONFIG_TRACEBUFFER)
 
+
 #include INC_ARCH(tracebuffer.h)
+#include <stdarg.h>	/* for va_list, ... comes with gcc */
 
 INLINE void tbuf_inc_counter (word_t counter)
 {
     TBUF_INCREASE_COUNTER (counter);
 }
 
-INLINE void tbuf_record_event (word_t event, char * str)
-{
-    word_t addr = TBUF_GET_NEXT_RECORD (event);
-    if (addr == 0)
-	return;
-    TBUF_STORE_ITEM (addr, 0, (word_t) str);
-}
+#define tbuf_record_event(event, tpid, str, args...)			\
+    __tbuf_record_event(event, tpid, str, ##args, TRACEBUFFER_MAGIC);
 
-INLINE void tbuf_record_event (word_t event, char * str, word_t p0)
+INLINE void __tbuf_record_event(word_t event, word_t tpid, const char *str, ...)
 {
-    word_t addr = TBUF_GET_NEXT_RECORD (event);
-    if (addr == 0)
-	return;
-    TBUF_STORE_ITEM (addr, 0, (word_t) str);
-    TBUF_STORE_ITEM (addr, 1, p0);
-}
 
-INLINE void tbuf_record_event (word_t event, char * str, word_t p0, word_t p1)
-{
-    word_t addr = TBUF_GET_NEXT_RECORD (event);
+    va_list args;
+    word_t arg;
+    
+    word_t addr = TBUF_GET_NEXT_RECORD (event, tpid);
+    
     if (addr == 0)
 	return;
-    TBUF_STORE_ITEM (addr, 0, (word_t) str);
-    TBUF_STORE_ITEM (addr, 1, p0);
-    TBUF_STORE_ITEM (addr, 2, p1);
-}
+   
+    TBUF_STORE_STR  (addr, str);
 
-INLINE void tbuf_record_event (word_t event, char * str, word_t p0,
-			       word_t p1, word_t p2)
-{
-    word_t addr = TBUF_GET_NEXT_RECORD (event);
-    if (addr == 0)
-	return;
-    TBUF_STORE_ITEM (addr, 0, (word_t) str);
-    TBUF_STORE_ITEM (addr, 1, p0);
-    TBUF_STORE_ITEM (addr, 2, p1);
-    TBUF_STORE_ITEM (addr, 3, p2);
-}
-
-INLINE void tbuf_record_event (word_t event, char * str, word_t p0,
-			       word_t p1, word_t p2, word_t p3)
-{
-    word_t addr = TBUF_GET_NEXT_RECORD (event);
-    if (addr == 0)
-	return;
-    TBUF_STORE_ITEM (addr, 0, (word_t) str);
-    TBUF_STORE_ITEM (addr, 1, p0);
-    TBUF_STORE_ITEM (addr, 2, p1);
-    TBUF_STORE_ITEM (addr, 3, p2);
-    TBUF_STORE_ITEM (addr, 3, p3);
+    va_start(args, str);
+    
+    word_t i;
+    for (i=0; i < tracerecord_t::num_args; i++)
+    {
+	arg = va_arg(args, word_t);
+	if (arg == TRACEBUFFER_MAGIC)
+	    break;
+	
+	TBUF_STORE_DATA(addr, i, arg);
+	
+    }
+    
+    va_end(args);
 }
 
 #else /* !CONFIG_TRACEBUFFER */
@@ -106,13 +88,11 @@ INLINE void tbuf_record_event (word_t event, char * str, word_t p0,
 #define TBUF_EV_TRACEPOINT_TB		(1 << 14)
 
 #if defined(CONFIG_TBUF_LIGHT)
-# define TBUF_REC_TRACEPOINT(args...)
+# define TBUF_REC_TRACEPOINT(tpid, str, args...)
 #else
-# define TBUF_REC_TRACEPOINT(args...) \
-    tbuf_record_event (TBUF_EV_TRACEPOINT, args)
-#endif
-#define TBUF_REC_TRACEPOINT_TB(args...) \
-    tbuf_record_event (TBUF_EV_TRACEPOINT_TB, args)
 
+# define TBUF_REC_TRACEPOINT(tpid, str, args...)		\
+    tbuf_record_event (TBUF_EV_TRACEPOINT, tpid, str, ##args)
+#endif
 
 #endif /* !__KDB__TRACEBUFFER_H__ */
