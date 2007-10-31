@@ -199,10 +199,9 @@ mdb_node_t * mdb_t::map (mdb_node_t * f_node,
 			 void * obj, word_t objsize, word_t addr,
 			 word_t out_rights, word_t in_rights)
 {
-    TRACEPOINT (MDB_MAP,
-		printf ("%s::map (%p, %p, %d, %p, %x, %x)\n",
-			get_name (), f_node, obj, objsize, addr,
-			out_rights & 7, in_rights & 7));
+    TRACEPOINT (MDB_MAP, "%s::map (%p, %p, %d, %p, %x, %x)",
+		get_name (),  f_node,  obj, objsize,   addr,  (out_rights & 7UL), 
+		(in_rights & 7UL));
 
     mdb_lock.lock();
 
@@ -431,19 +430,11 @@ word_t mdb_t::mapctrl (mdb_node_t * node, range_t range,
 		       mdb_t::ctrl_t ctrl, word_t rights, word_t attrib)
 {
     TRACEPOINT (MDB_MAPCTRL,
-		printf ("%s::mapctrl (%p, <%x,%x>, %x [%c%c%c%c%c%c], %x, %p)"
-			" phys=%p\n",
-			get_name (), node,
-			range.get_low (), range.get_high (),
-			ctrl.raw,
-			ctrl.set_attribute ? 'm' : '~',
-			ctrl.deliver_status ? 'd' : '~',
-			ctrl.reset_status ? 'r' : '~',
-			ctrl.set_rights ? 'p' : '~',
-			ctrl.unmap ? 'u' : '~',
-			ctrl.mapctrl_self ? 'c' : '~',
-			rights & 0x7, attrib,
-			node->get_phys_address (this)));
+		"%s::mapctrl (%p, <%x,%x>, %x [%s], %p) phys=%p\n",
+		(word_t) get_name (), (word_t) node, 
+		range.get_low (), range.get_high (),
+		ctrl.raw, (word_t) ctrl.string(),
+		rights & 0x7, node->get_phys_address (this));
 
     mdb_lock.lock();
 
