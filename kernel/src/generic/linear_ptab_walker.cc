@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     generic/linear_ptab_walker.cc
  * Description:   Linear page table manipulation
@@ -243,10 +243,8 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
      */
 
 
-    TRACEPOINT (FPAGE_MAP,
-		printf ("%s_fpage (f_spc=%p  f_fp=%p  t_spc=%p  t_fp=%p)\n",
-			grant ? "grant" : "map",
-			this, snd_fp.raw, t_space, rcv_fp.raw));
+    TRACEPOINT (FPAGE_MAP,"%s_fpage (f_spc=%p  f_fp=%p  t_spc=%p  t_fp=%p)\n",
+		grant ? "grant" : "map", this, snd_fp.raw, t_space, rcv_fp.raw);
 
     /* Since get_size returns 1 for nil fpages, and get_size_log2 cannot
        return a useful value anyway, check for nil fpages at first. */
@@ -457,16 +455,10 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 	     * mapping or subtree from destination space.
 	     */
 
-	    TRACEPOINT (FPAGE_OVERMAP,
-			word_t fsz = page_size (f_size);
-			word_t tsz = page_size (t_size);
-			printf ("overmapping: "
-				"faddr=%p fsz=%d%cB  taddr=%p tsz=%d%cB "
-				"(%s)\n",
-				f_addr, dbg_pgsize (fsz), dbg_szname (fsz),
-				t_addr, dbg_pgsize (tsz), dbg_szname (tsz),
-				tpg->is_subtree (t_space, t_size) ?
-				"subtree" : "single map"));
+	    TRACEPOINT (FPAGE_OVERMAP,"overmapping: faddr=%p fsz=%d%cB  taddr=%p tsz=%d%cB (%s)\n",
+			f_addr, dbg_pgsize (page_size (f_size)), dbg_szname (page_size (f_size)),
+			t_addr, dbg_pgsize (page_size (t_size)), dbg_szname (page_size (t_size)),
+			tpg->is_subtree (t_space, t_size) ? "subtree" : "single map");
 
 	    word_t num = 1;
 	    addr_t vaddr = t_addr;
@@ -497,13 +489,9 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 
 #if !defined(CONFIG_NEW_MDB)
 		    TRACEPOINT
-			(MDB_UNMAP,
-			 word_t tsz = page_size (t_size);
-			 printf ("mdb_flush (spc=%p pg=%p map=%p vaddr=%p rwx "
-				 "tsz=%d%cB)  paddr=%p\n",
-				 t_space, tpg, map, vaddr,
-				 dbg_pgsize (tsz), dbg_szname (tsz),
-				 tpg->address (t_space, t_size)));
+			(MDB_UNMAP, "mdb_flush (spc=%p pg=%p map=%p vaddr=%p rwx tsz=%d%cB)  paddr=%p\n",
+			 t_space, tpg, map, vaddr, dbg_pgsize (page_size (t_size)), 
+			 dbg_szname (page_size (t_size)), tpg->address (t_space, t_size));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
@@ -634,18 +622,13 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 		 */
 
 #if !defined(CONFIG_NEW_MDB)
-		TRACEPOINT (MDB_MAP,
-			    word_t fsz = page_size (f_size);
-			    word_t tsz = page_size (t_size);
-			    printf ("mdb_map (from {sigma0 "
-				    "pg=%p addr=%p %d%cB} to {"
-				    "spc=%p pg=%p addr=%p %d%cB})  "
-				    "paddr=%p\n",
-				    fpg, addr_offset (f_addr, offset),
-				    dbg_pgsize (fsz), dbg_szname (fsz),
-				    t_space, tpg, t_addr,
-				    dbg_pgsize (tsz), dbg_szname (tsz),
-				    addr_offset (f_addr, offset + f_off)));
+		TRACEPOINT (MDB_MAP, "mdb_map (from {sigma0 pg=%p addr=%p %d%cB} to {"
+				    "spc=%p pg=%p addr=%p %d%cB})  paddr=%p\n",
+			    fpg, addr_offset (f_addr, offset),
+			    dbg_pgsize (page_size (f_size)), dbg_szname (page_size (f_size)),
+			    t_space, tpg, t_addr,
+			    dbg_pgsize (page_size(t_size)), dbg_szname (page_size(t_size)),
+			    addr_offset (f_addr, offset + f_off));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
@@ -680,19 +663,13 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 				    addr_mask (f_addr, ~page_mask (f_size)));
 
 #if !defined(CONFIG_NEW_MDB)
-		TRACEPOINT (MDB_MAP,
-			    word_t fsz = page_size (f_size);
-			    word_t tsz = page_size (t_size);
-			    printf ("mdb_map (node=%p from {"
-				    "spc=%p pg=%p addr=%p %d%cB} to {"
-				    "spc=%p pg=%p addr=%p %d%cB})  "
-				    "paddr=%p\n",
-				    map, this, fpg, f_addr,
-				    dbg_pgsize (fsz), dbg_szname (fsz),
-				    t_space, tpg, t_addr,
-				    dbg_pgsize (tsz), dbg_szname (tsz),
-				    addr_offset (fpg->address (this, f_size),
-						 offset + f_off)));
+		TRACEPOINT (MDB_MAP, "mdb_map (node=%p from {spc=%p pg=%p addr=%p %d%cB} to {"
+				    "spc=%p pg=%p addr=%p %d%cB})  paddr=%p\n",
+				      map, this, fpg, f_addr, 
+				      dbg_pgsize (page_size(f_size)), dbg_szname (page_size(f_size)),  
+				      t_space, tpg, t_addr,
+				      dbg_pgsize (page_size(t_size)), dbg_szname (page_size(t_size)),
+				      addr_offset (fpg->address (this, f_size),  offset + f_off));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
@@ -840,19 +817,11 @@ fpage_t space_t::mapctrl (fpage_t fpage, mdb_t::ctrl_t ctrl,
     word_t r_num[pgent_t::size_max];
 
     TRACEPOINT (FPAGE_MAPCTRL,
-		printf ("<spc=%p>::mapctrl (%p [%p, %d, %x], "
-			"%x [%c%c%c%c%c%c], %x, %c)\n",
-			this, fpage.raw, fpage.get_address (),
-			fpage.get_size_log2 (),	fpage.get_rwx (),
-			ctrl.raw,
-			ctrl.set_attribute ? 'm' : '~',
-			ctrl.deliver_status ? 'd' : '~',
-			ctrl.reset_status ? 'r' : '~',
-			ctrl.set_rights ? 'p' : '~',
-			ctrl.unmap ? 'u' : '~',
-			ctrl.mapctrl_self ? 'c' : '~',
-			attribute,
-			unmap_all ? 't' : 'f'));
+		"<spc=%p>::mapctrl ([%d, %x %x] [%s], %x, %c)\n",
+		this, fpage.get_address (), 
+		fpage.get_size_log2 (), fpage.get_rwx (),
+		ctrl.raw, ctrl.string(),attribute,
+		unmap_all ? 't' : 'f');
     
 #if !defined(CONFIG_NEW_MDB)
     // Fpage access bits semantics are reversed for old MDB
@@ -936,19 +905,16 @@ fpage_t space_t::mapctrl (fpage_t fpage, mdb_t::ctrl_t ctrl,
 			       addr_mask (vaddr, ~page_mask (size)));
 
 #if !defined(CONFIG_NEW_MDB)
-	    TRACEPOINT (MDB_UNMAP,
-			word_t fsz = page_size (size);
-			word_t tsz = page_size (pgsize);
-			printf ("mdb_%s (spc=%p pg=%p map=%p vaddr=%p %c%c%c "
-				"fsz=%d%cB tsz=%d%cB)  paddr=%p\n",
-				ctrl.mapctrl_self ? "flush" : "unmap",
-				this, pg, map, vaddr,
-				fpage.is_read () ? 'r' : '~',
-				fpage.is_write () ? 'w' : '~',
-				fpage.is_execute () ? 'x' : '~',
-				dbg_pgsize (fsz), dbg_szname (fsz),
-				dbg_pgsize (tsz), dbg_szname (tsz),
-				pg->address (this, size)));
+	    TRACEPOINT (MDB_UNMAP, "mdb_%s (spc=%p pg=%p map=%p vaddr=%p %c%c%c "
+			"fsz=%d%cB tsz=%d%cB)  paddr=%p\n",
+			ctrl.mapctrl_self ? "flush" : "unmap",
+			this, pg, map, vaddr,
+			fpage.is_read () ? 'r' : '~',
+			fpage.is_write () ? 'w' : '~',
+			fpage.is_execute () ? 'x' : '~',
+			dbg_pgsize (page_size(size)), dbg_szname (page_size(size)),
+			dbg_pgsize (page_size(pgsize)), dbg_szname (page_size(pgsize)),
+			pg->address (this, size));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
