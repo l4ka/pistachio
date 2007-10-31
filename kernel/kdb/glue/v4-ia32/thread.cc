@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2005,  Karlsruhe University
+ * Copyright (C) 2003, 2005, 2007,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-ia32/thread.cc
  * Description:   Various thread management stuff
@@ -36,8 +36,6 @@
 
 #include INC_API(tcb.h)
 
-void ia32_dump_frame (ia32_exceptionframe_t * frame);
-
 
 DECLARE_CMD (cmd_dump_frame, root, 'F', "dumpframe",
 	     "show exception frame");
@@ -45,11 +43,11 @@ DECLARE_CMD (cmd_dump_frame, root, 'F', "dumpframe",
 CMD (cmd_dump_frame, cg)
 {
     tcb_t * current = get_thread ("Thread");
-    ia32_exceptionframe_t * f =
-	(ia32_exceptionframe_t *) current->get_stack_top () - 1;
+    x86_exceptionframe_t * f =
+	(x86_exceptionframe_t *) current->get_stack_top () - 1;
 
     word_t frame = get_hex ("Frame", (word_t) f, "current user frame");
-    ia32_dump_frame ((ia32_exceptionframe_t *) frame);
+    x86_dump_frame ((x86_exceptionframe_t *) frame);
 
     return CMD_NOQUIT;
 }
