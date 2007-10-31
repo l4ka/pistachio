@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/processor.cc
  * Description:   Processor Management
@@ -42,9 +42,8 @@ DECLARE_TRACEPOINT(SYSCALL_PROCESSOR_CONTROL);
 SYS_PROCESSOR_CONTROL (word_t processor_no, word_t internal_frequency,
 		       word_t external_frequency, word_t voltage)
 {
-    TRACEPOINT(SYSCALL_PROCESSOR_CONTROL, 
-	       printf("SYS_PROCESSOR_CONTROL (cpu=%d, ifreq=%d, efreq=%d, voltage=%d\n",
-		      processor_no, internal_frequency, external_frequency, voltage));
+    TRACEPOINT(SYSCALL_PROCESSOR_CONTROL, "SYS_PROCESSOR_CONTROL (cpu=%d, ifreq=%d, efreq=%d, voltage=%d\n",
+	       processor_no, internal_frequency, external_frequency, voltage);
 
     return_processor_control();
 }
