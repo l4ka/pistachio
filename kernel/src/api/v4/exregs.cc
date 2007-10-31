@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     api/v4/exregs.cc
  * Description:   Iplementation of ExchangeRegisters() 
@@ -40,11 +40,11 @@ DECLARE_TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS);
 void handle_ipc_error (void);
 void thread_return (void);
 
-
-#if defined(CONFIG_SMP)
-static void perform_exregs (tcb_t * tcb, word_t * control, word_t * usp,
+static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle);
+
+#if defined(CONFIG_SMP)
 
 /**
  * Handler invoked to pass the return values of an ExchangeRegisters()
@@ -94,15 +94,14 @@ static void do_xcpu_exregs_reply (cpu_mb_entry_t * entry)
  */
 static void do_xcpu_exregs (cpu_mb_entry_t * entry)
 {
-    tcb_t * tcb = entry->tcb;
+    tcb_t * dest = entry->tcb;
     tcb_t * from = (tcb_t *) entry->param[0];
 
-    //TRACEF ("current=%t, tcb=%t, from=%t\n", get_current_tcb (), tcb, from);
 
-    if (EXPECT_FALSE (! tcb->is_local_cpu ()))
+    if (EXPECT_FALSE (! dest->is_local_cpu ()))
     {
 	// Forward request.
-	xcpu_request (tcb->get_cpu (), do_xcpu_exregs, tcb, entry->param[0],
+	xcpu_request (dest->get_cpu (), do_xcpu_exregs, dest, entry->param[0],
 		      entry->param[1], entry->param[2], entry->param[3],
 		      entry->param[4], entry->param[5], entry->param[6]);
 	return;
@@ -110,40 +109,43 @@ static void do_xcpu_exregs (cpu_mb_entry_t * entry)
 
     threadid_t pager_tid;
     pager_tid.set_raw (entry->param[5]);
-    perform_exregs (tcb,
-		    &entry->param[1],
+    exregs_ctrl_t ctrl(entry->param[1]);
+    
+    perform_exregs (from, dest,
+		    &ctrl,
 		    &entry->param[2],
 		    &entry->param[3],
 		    &entry->param[4],
 		    &pager_tid,
-		    &entry->param[6]);
-
+		    &entry->param[6]
+	);
+    
+    
     // Pass return values back to invoker thread.
     xcpu_request (from->get_cpu (), do_xcpu_exregs_reply, from,
-		  entry->param[1], entry->param[2], entry->param[3],
+		  ctrl.raw, entry->param[2], entry->param[3],
 		  entry->param[4], pager_tid.get_raw (), entry->param[6]);
+    
 }
 
 
 /**
- * Peform ExchangeRegisters() on a remore CPU.
+ * Peform ExchangeRegisters() on a remote CPU.
  */
-static void remote_exregs (tcb_t * tcb, word_t * control,
+static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
 			   word_t * usp, word_t * uip, word_t * uflags,
 			   threadid_t * pager, word_t * uhandle)
 {
-    tcb_t * current = get_current_tcb ();
-
-    //TRACEF ("current=%t  tcb=%t\n", current, tcb);
-
+    ///TRACEF ("current=%t  tcb=%t\n", current, dest);
+    
     // Pass exregs request to remote CPU.
-    xcpu_request (tcb->get_cpu (), do_xcpu_exregs, tcb, (word_t) current,
+    xcpu_request (dest->get_cpu (), do_xcpu_exregs, dest, (word_t) current,
 		  *control, *usp, *uip, *uflags, pager->get_raw (),
 		  *uhandle);
 
     // Now wait for operation to complete.
-    get_current_tcb ()->set_state (thread_state_t::xcpu_waiting_exregs);
-    get_current_tcb ()->switch_to_idle ();
+    current->set_state(thread_state_t::xcpu_waiting_exregs);
+    current->switch_to_idle ();
 
     // Grab exregs return values from tcb.
     *control =	current->misc.exregs.control;
@@ -153,6 +155,7 @@ static void remote_exregs (tcb_t * tcb, word_t * control,
     *pager =	current->misc.exregs.pager;
     *uhandle =	current->misc.exregs.user_handle;
 }
+
 #endif /* CONFIG_SMP */
 
 
@@ -160,6 +163,7 @@ static void remote_exregs (tcb_t * tcb, word_t * control,
  * Do the actual ExhangeRegisters() syscall.  Separated into a
  * separate function so that it can be invoked on a remote CPU.
  *
+ * @return if destination thread should be scheduled
  * @param tcb		destination tcb
  * @param control	control parameter (in/out)
  * @param usp		stack pointer (in/out)
@@ -168,84 +172,87 @@ static void remote_exregs (tcb_t * tcb, word_t * control,
  * @param pager		pager (in/out)
  * @param uhandler	user defined handle (in/out)
  */
-static void perform_exregs (tcb_t * tcb, word_t * control, word_t * usp,
+static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle)
 {
-    word_t ctrl = *control;
+    exregs_ctrl_t ctrl = *control;
 
     // Load return values before they are clobbered.
-    word_t old_usp = (word_t) tcb->get_user_sp();
-    word_t old_uip = (word_t) tcb->get_user_ip();
-    word_t old_uhandle = tcb->get_user_handle();
-    word_t old_uflags = tcb->get_user_flags();
-    threadid_t old_pager = tcb->get_pager();
-    word_t old_control = 0;
+    word_t old_usp = (word_t) dest->get_user_sp();
+    word_t old_uip = (word_t) dest->get_user_ip();
+    word_t old_uhandle = dest->get_user_handle();
+    word_t old_uflags = dest->get_user_flags();
+    threadid_t old_pager = dest->get_pager();
+    exregs_ctrl_t old_control = 0;
+    
+    if (ctrl.is_set(exregs_ctrl_t::sp_flag))
+	dest->set_user_sp ((addr_t) *usp);
+    
+    if (ctrl.is_set(exregs_ctrl_t::ip_flag))
+	dest->set_user_ip ((addr_t) *uip);
+    
+    if (ctrl.is_set(exregs_ctrl_t::flags_flag))
+	dest->set_user_flags (*uflags);
 
-    if (ctrl & EXREGS_CONTROL_SP)
-	tcb->set_user_sp ((addr_t) *usp);
+    if (ctrl.is_set(exregs_ctrl_t::pager_flag))
+	dest->set_pager (*pager);
 
-    if (ctrl & EXREGS_CONTROL_IP)
-	tcb->set_user_ip ((addr_t) *uip);
+    if (ctrl.is_set(exregs_ctrl_t::uhandle_flag))
+	dest->set_user_handle (*uhandle);
 
-    if (ctrl & EXREGS_CONTROL_PAGER)
-	tcb->set_pager (*pager);
-
-    if (ctrl & EXREGS_CONTROL_UHANDLE)
-	tcb->set_user_handle (*uhandle);
-
-    if (ctrl & EXREGS_CONTROL_FLAGS)
-	tcb->set_user_flags (*uflags);
-
+    
     // Check if thread was IPCing
-    if (tcb->get_state().is_sending())
+    if (dest->get_state().is_sending())
     {
-	old_control |= EXREGS_CONTROL_SEND;
-	if (ctrl & EXREGS_CONTROL_SEND)
+	old_control.set(exregs_ctrl_t::send_flag);
+	if (ctrl.is_set(exregs_ctrl_t::send_flag))
 	{
-	    tcb->unwind (tcb_t::abort);
-	    tcb->set_state(thread_state_t::running);
-	    tcb->notify(handle_ipc_error);
-	    get_current_scheduler()->enqueue_ready(tcb);
+	    dest->unwind (tcb_t::abort);
+	    dest->set_state(thread_state_t::running);
+	    dest->notify(handle_ipc_error);
+	    get_current_scheduler()->enqueue_ready(dest);
+   
 	}
     }
-    else if (tcb->get_state().is_receiving())
+    else if (dest->get_state().is_receiving())
     {
-	old_control |= EXREGS_CONTROL_RECV;
-	if (ctrl & EXREGS_CONTROL_RECV)
+	old_control.set(exregs_ctrl_t::recv_flag);
+	if (ctrl.is_set(exregs_ctrl_t::recv_flag))
 	{
-	    tcb->unwind (tcb_t::abort);
-	    tcb->set_state(thread_state_t::running);
-	    tcb->notify(handle_ipc_error);
-	    get_current_scheduler()->enqueue_ready(tcb);
+	    dest->unwind (tcb_t::abort);
+	    dest->set_state(thread_state_t::running);
+	    dest->notify(handle_ipc_error);
+	    get_current_scheduler()->enqueue_ready(dest);
 	}
     }
 
     // Check if we should resume the thread.
-    if (tcb->get_state().is_halted())
+    if (dest->get_state().is_halted())
     {
-	old_control |= EXREGS_CONTROL_HALT;
+	old_control.set(exregs_ctrl_t::halt_flag);
 
 	// If thread is halted - resume it.
-	if ((ctrl & EXREGS_CONTROL_HALTFLAG) && !(ctrl & EXREGS_CONTROL_HALT))
+	if ((ctrl.is_set(exregs_ctrl_t::haltflag_flag)) && !(ctrl.is_set(exregs_ctrl_t::halt_flag)))
 	{
-	    tcb->set_state(thread_state_t::running);
-#warning VU: do we have to preserve prios on ex-regs?
-	    get_current_scheduler()->enqueue_ready(tcb);
+	    dest->set_state(thread_state_t::running);
+	    get_current_scheduler()->enqueue_ready(dest);
 	}
     } 
 
     // Check if we should halt the thread.
-    else if ((ctrl & EXREGS_CONTROL_HALTFLAG) && (ctrl & EXREGS_CONTROL_HALT))
+    else if ((ctrl.is_set(exregs_ctrl_t::haltflag_flag)) && (ctrl.is_set(exregs_ctrl_t::halt_flag)))
     {
-	if (tcb->get_state().is_running())
+	if (dest->get_state().is_running())
 	{
 	    // Halt a running thread
-	    tcb->set_state(thread_state_t::halted);
-	    if (tcb == get_current_tcb())
-		get_current_tcb()->switch_to_idle();
+	    dest->set_state(thread_state_t::halted);
 	}
-#warning eSk: Halting a thread with ongoing kernel operations is not supported
+	else
+	{
+	    printf("Halting a thread with ongoing kernel operations is not supported");
+	    enter_kdebug("UNIMPLEMENTED");
+	}
 	// Need to halt the thread after any ongoing IPC or other
 	// kernel operations are finished.  We can not let the thread
 	// return to user level.
@@ -258,7 +265,9 @@ static void perform_exregs (tcb_t * tcb, word_t * control, word_t * usp,
     *uflags =	old_uflags;
     *pager =	old_pager;
     *uhandle =	old_uhandle;
+    
 }
+
 
 
 #if defined(CONFIG_X_PAGER_EXREGS)
@@ -293,27 +302,15 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
 			word_t uhandle, threadid_t pager_tid,
 			bool is_local)
 {
-    TRACEPOINT_TB (SYSCALL_EXCHANGE_REGISTERS,
-		   ("sys_exchange_registers (dest=%t, control=%x)",
-		    TID(dest_tid), control),
-		   printf ("SYS_EXCHANGE_REGISTERS: dest=%t [%s], "
-			   "control=0x%x [%c%c%c%c%c%c%c%c%c], "
-			   "usp=%p, uip=%p, uflags=%p, pager=%t, "
-			   "uhandle=%x\n", 
-			   TID (dest_tid),
-			   is_local ? "local" : "global",
-			   control,
-			   control & EXREGS_CONTROL_HALTFLAG? 'h' : '~',
-			   control & EXREGS_CONTROL_PAGER   ? 'p' : '~',
-			   control & EXREGS_CONTROL_UHANDLE ? 'u' : '~',
-			   control & EXREGS_CONTROL_FLAGS   ? 'f' : '~',
-			   control & EXREGS_CONTROL_IP      ? 'i' : '~',
-			   control & EXREGS_CONTROL_SP      ? 's' : '~',
-			   control & EXREGS_CONTROL_SEND    ? 'S' : '~',
-			   control & EXREGS_CONTROL_RECV    ? 'R' : '~',
-			   control & EXREGS_CONTROL_HALT    ? 'H' : '~',
-			   usp, uip, uflags,
-			   TID (pager_tid), uhandle));
+
+    tcb_t *current = get_current_tcb();
+    exregs_ctrl_t ctrl(control);
+    
+    TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS,
+		"SYS_EXCHANGE_REGISTERS: current %t, dest=%t [%s], control=0x%x [%s]"
+		"usp=%p, uip=%p, uflags=%p, pager=%t, uhandle=%x\n", 
+		current, TID(dest_tid), is_local ? "local" : "global",
+		ctrl.raw, ctrl.string(), usp, uip, uflags, TID(pager_tid), uhandle);
 
     // Upon entry a local dest_tid will be converted into a global
     // thread ID before kernel entry.  If user somehow tricked kernel
@@ -321,37 +318,45 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
     // below.
 
     space_t * space = get_current_space();
-    tcb_t * tcb = space->get_tcb(dest_tid);
+    tcb_t * dest = space->get_tcb(dest_tid);
 
     // Only allow exregs on:
     //  - active threads
     //  - in the same address space
     //  - with a valid thread ID.
-    if ((! tcb->is_activated ()) || (! has_exregs_perms(tcb, dest_tid)) )
+
+    // Only allow exregs on:
+    //  - active threads
+    //  - in the same address space
+    //  - with a valid thread ID.
+    if ((! dest->is_activated ()) || (! has_exregs_perms(dest, dest_tid)) )
     {
+    
 	get_current_tcb ()->set_error_code (EINVALID_THREAD);
 	return_exchange_registers (threadid_t::nilthread (), 0, 0, 0, 0,
 				   threadid_t::nilthread (), 0);
     }
-
+ 
 #if defined(CONFIG_SMP)
-    if (! tcb->is_local_cpu ())
+    if (! dest->is_local_cpu ())
     {
 	// Destination thread on remote CPU.  Must perform operation
 	// remotely.
-	remote_exregs (tcb, &control, &usp, &uip, &uflags,
+	remote_exregs (current, dest, &ctrl.raw, &usp, &uip, &uflags,
 		       &pager_tid, &uhandle);
     }
     else
 #endif
     {
 	// Destination thread on same CPU.  Perform operation immediately.
-	perform_exregs (tcb, &control, &usp, &uip, &uflags,
+	perform_exregs (current, dest, &ctrl, &usp, &uip, &uflags,
 			&pager_tid, &uhandle);
+	    
     }
 
     return_exchange_registers
-	(is_local ? tcb->get_global_id () : tcb->get_local_id (),
-	 control, usp, uip, uflags, pager_tid, uhandle);
+	(is_local ? dest->get_global_id () : dest->get_local_id (),
+	 ctrl.raw, usp, uip, uflags, pager_tid, uhandle);
+
 }
 
