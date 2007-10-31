@@ -108,45 +108,13 @@ CMD (cmd_dump_msrs, cg)
     return CMD_NOQUIT;
 }
 
-static void SECTION(SEC_KDEBUG) dump_eflags(const u32_t eflags)
-{
-    printf("%c%c%c%c%c%c%c%c%c%c%c",
-	   eflags & (1 <<  0) ? 'C' : 'c',
-	   eflags & (1 <<  2) ? 'P' : 'p',
-	   eflags & (1 <<  4) ? 'A' : 'a',
-	   eflags & (1 <<  6) ? 'Z' : 'z',
-	   eflags & (1 <<  7) ? 'S' : 's',
-	   eflags & (1 << 11) ? 'O' : 'o',
-	   eflags & (1 << 10) ? 'D' : 'd',
-	   eflags & (1 <<  9) ? 'I' : 'i',
-	   eflags & (1 <<  8) ? 'T' : 't',
-	   eflags & (1 << 16) ? 'R' : 'r',
-	   ((eflags >> 12) & 3) + '0'
-	);
-}
-
-void ia32_dump_frame (ia32_exceptionframe_t * frame)
-{
-   printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
-	   frame->eip, frame->esp, frame->error, frame);
-
-    printf("eax: %8x\tebx: %8x\n", frame->eax, frame->ebx);
-    printf("ecx: %8x\tedx: %8x\n", frame->ecx, frame->edx);
-    printf("esi: %8x\tedi: %8x\n", frame->esi, frame->edi);
-    printf("ebp: %8x\tefl: %8x [", frame->ebp, frame->eflags);
-    dump_eflags(frame->eflags);printf("]\n");
-    printf("cs:      %4x\tss:      %4x\n",
-	   frame->cs & 0xffff, frame->ss & 0xffff);
-    printf("ds:      %4x\tes:      %4x\n",
-	   frame->ds & 0xffff, frame->es & 0xffff);
-}
-
 DECLARE_CMD (cmd_dump_current_frame, root, ' ', "frame",
 	     "show current exception frame");
 
 CMD (cmd_dump_current_frame, cg)
-{
-    ia32_dump_frame ((ia32_exceptionframe_t *) kdb.kdb_param);
+{ 
+    debug_param_t * param = (debug_param_t*)kdb.kdb_param;
+    x86_dump_frame (param->frame);
     return CMD_NOQUIT;
 }
 
