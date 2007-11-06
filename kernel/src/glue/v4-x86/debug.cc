@@ -39,9 +39,13 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCHX(x86,apic.h)
 
+#include INC_GLUE(debug.h)
+
+#if defined(CONFIG_DEBUG)
 #define KDB_STACK_SIZE	KTCB_SIZE
 static char kdb_stack[KDB_STACK_SIZE] UNIT("cpulocal")
     __attribute__ ((aligned (KDB_STACK_SIZE) ));
+#endif
 
 X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
