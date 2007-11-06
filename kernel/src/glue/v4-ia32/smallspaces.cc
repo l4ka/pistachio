@@ -152,9 +152,8 @@ bool space_t::make_small (smallspace_id_t id)
     word_t size = id.size () >> 22;
     word_t offset = id.offset () >> 22;
 
-    TRACEPOINT (SMALLSPACE_CREATE,
-		printf ("make_small: space=%p  size=%dMB  offset=%dMB\n",
-			this, size*4, offset*4));
+    TRACEPOINT (SMALLSPACE_CREATE, "make_small: space=%p  size=%dMB  offset=%dMB\n",
+		this, size*4, offset*4);
 
     if (offset + size > max_idx)
 	return false;
@@ -249,10 +248,8 @@ void space_t::make_large (void)
     word_t size = id.size () >> 22;
     word_t offset = id.offset () >> 22;
 
-    TRACEPOINT (SMALLSPACE_ENLARGE,
-		printf ("make_large: space=%p  "
-			"(current size=%dMB  offset=%dMB)\n",
-			this, size*4, offset*4));
+    TRACEPOINT (SMALLSPACE_ENLARGE, "make_large: space=%p (current size=%dMB  offset=%dMB)\n",
+			this, size*4, offset*4);
 
     small_space_owner_lock.lock ();
 
@@ -423,9 +420,8 @@ bool space_t::sync_smallspace (addr_t faddr)
     // Copy page directory entry if it is valid.
     if (pgent_s->is_valid (this, size) && ! pgent_f->is_valid (this, size))
     {
-	TRACEPOINT (SMALLSPACE_SYNC,
-		    printf ("smallspace_sync: s=%p:v=%p => s=%p:v=%p\n",
-			    this, addr, fspace, faddr));
+	TRACEPOINT (SMALLSPACE_SYNC, "smallspace_sync: s=%p:v=%p => s=%p:v=%p\n",
+		    this, addr, fspace, faddr);
 	*pgent_f = *pgent_s;
 
 	// Mark fault space as polluted with small space entries.
