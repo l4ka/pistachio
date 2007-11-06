@@ -33,6 +33,7 @@
 #include <mapping.h>
 #include <ctors.h>
 #include <init.h>
+#include <linear_ptab.h>
 
 #include INC_GLUE(idt.h)
 #include INC_GLUE(intctrl.h)
