@@ -15,6 +15,8 @@
 
 #include INC_GLUEX(x86,debug.h)
 
+#if defined(CONFIG_DEBUG)
+
 INLINE void x86_dump_frame (x86_exceptionframe_t * frame)
 {
    printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
@@ -52,5 +54,13 @@ INLINE void x86_dump_frame (x86_exceptionframe_t * frame)
        "1"(&param),							\
        "2"(get_kip()->kdebug_entry)					\
      : "eax", "ecx", "edx", "memory");			
+
+#else
+
+#define x86_dump_frame(x...)	do { } while (true)
+#define do_enter_kdebug(x...)	do { } while (true)
+
+#endif /* defined(CONFIG_DEBUG) */
+
 
 #endif /* !__GLUE__IA32__DEBUG_H__ */
