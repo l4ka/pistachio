@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  National ICT Australia (NICTA)
+ * Copyright (C) 2003, 2007,  National ICT Australia (NICTA)
  *                
- * File path:     arch/powerpc64/debug.h
+ * File path:     glue/v4-powerpc64/debug.h
  * Description:   Debug support
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #define SPIN_TIMER_INT  60
 #define SPIN_IPC        75
 
+#if defined(CONFIG_DEBUG)
+
 INLINE void spin_forever(int pos = 0)
 {
     while(1);
@@ -66,5 +68,7 @@ INLINE void spin(int pos = 0, int cpu = 0)
     )
 
 #define HERE()               printf("Here %s:%d\n", __PRETTY_FUNCTION__, __LINE__)
+
+#endif	/* CONFIG_DEBUG */
 
 #endif /* __ARCH__POWERPC64__DEBUG_H__ */
