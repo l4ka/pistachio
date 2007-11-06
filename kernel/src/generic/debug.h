@@ -61,10 +61,9 @@
 #define TXT_BG_WHITE		"\e[47m"
 
 
+#include INC_GLUE(debug.h)
 
 #if defined(CONFIG_DEBUG)
-
-#include INC_GLUE(debug.h)
 
 void init_console (void);
 extern "C" int printf (const char * format, ...);
