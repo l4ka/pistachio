@@ -16,6 +16,8 @@
 
 #include INC_GLUEX(x86,debug.h)
 
+#if defined(CONFIG_DEBUG)
+
 INLINE void x86_dump_frame (x86_exceptionframe_t * frame)
 {
    printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
@@ -29,7 +31,6 @@ INLINE void x86_dump_frame (x86_exceptionframe_t * frame)
     printf("cs:      %4x\tss:      %4x\n",
 	   frame->cs & 0xffff, frame->ss & 0xffff);
 }
-
 
 #define do_enter_kdebug(frame, exc)					\
     debug_param_t param = {exc, get_current_space() ?			\
@@ -51,6 +52,14 @@ INLINE void x86_dump_frame (x86_exceptionframe_t * frame)
        "1"(&param),							\
        "2"(get_kip()->kdebug_entry)					\
      : "rax", "rcx", "rdx", "memory");			
+
+
+#else
+
+#define x86_dump_frame(x...)	do { } while (true)
+#define do_enter_kdebug(x...)	do { } while (true)
+
+#endif /* defined(CONFIG_DEBUG) */
 
 
 #endif /* !__GLUE__AMD64__DEBUG_H__ */
