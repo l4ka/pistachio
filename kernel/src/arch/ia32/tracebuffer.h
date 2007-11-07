@@ -33,7 +33,7 @@
 #include <tcb_layout.h>
 
 #define TRACEBUFFER_MAGIC 	0x143acebf
-#define TRACEBUFFER_SIZE	(16 * 1024 * 1024)
+#define TRACEBUFFER_SIZE	(4 * 1024 * 1024)
 
 #define TRACEBUFFER_PGENTSZ        pgent_t::size_4m
 
