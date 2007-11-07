@@ -31,7 +31,7 @@
 #define __ARCH__AMD64__TRACEBUFFER_H__
 
 #define TRACEBUFFER_MAGIC 	0x1464b123acebf
-#define TRACEBUFFER_SIZE	(16 * 1024 * 1024)
+#define TRACEBUFFER_SIZE	(4 * 1024 * 1024)
 
 #define TRACEBUFFER_PGENTSZ        pgent_t::size_2m
 
