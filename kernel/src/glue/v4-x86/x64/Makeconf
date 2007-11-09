@@ -43,12 +43,8 @@ SOURCES += src/generic/acpi.cc
 endif
 
 # use linear_ptab_walker if need be
-ifeq (1,1)
 SOURCES+=src/generic/linear_ptab_walker.cc \
 	 src/generic/mapping_alloc.cc 
-else
-SOURCES+=src/glue/$(API)-$(ARCH)/$(SUBARCH)/space-stub.cc
-endif
 
 ifeq ("$(CONFIG_NEW_MDB)","y")
 SOURCES+=	src/generic/mdb.cc \
