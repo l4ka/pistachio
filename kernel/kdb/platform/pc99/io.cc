@@ -30,7 +30,7 @@
  *                
  ********************************************************************/
 #include INC_ARCH(cpu.h)
-#include INC_ARCHX(x86,ioport.h)
+#include INC_ARCH(ioport.h)
 #include INC_API(tcb.h)
 #include <kdb/kdb.h>
 #include <kdb/init.h>
@@ -393,7 +393,7 @@ CMD(cmd_dumpvga, cg)
     return CMD_NOQUIT;
 }
 
-#if defined(CONFIG_IO_FLEXPAGES)
+#if defined(CONFIG_X86_IO_FLEXPAGES)
 /**
  * Dump IO-port mappings for given port.
  */
@@ -444,4 +444,4 @@ CMD (cmd_dump_iospace, cg)
     return CMD_NOQUIT;
 }
 
-#endif /* defined (CONFIG_IO_FLEXPAGES) */
+#endif /* defined (CONFIG_X86_IO_FLEXPAGES) */
