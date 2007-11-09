@@ -32,7 +32,7 @@
 #ifndef __PLATFORM__PC99__RTC_H__
 #define __PLATFORM__PC99__RTC_H__
 
-#include INC_ARCHX(x86,ioport.h)	/* for in_u8/out_u8	*/
+#include INC_ARCH(ioport.h)	/* for in_u8/out_u8	*/
 
 
 /**
