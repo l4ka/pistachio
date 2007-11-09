@@ -77,13 +77,13 @@ static tcb_t * get_dummy_tcb()
 
 bool space_t::handle_hash_miss( addr_t vaddr )
 {
-    TRACEPOINT(hash_miss_cnt);
+    TRACEPOINT(hash_miss_cnt, "hash_miss_cnt");
 
     pgent_t *pgent = this->page_lookup( vaddr );
     if( !pgent || !pgent->is_valid(this, pgent_t::size_4k) )
 	return false;
 
-    TRACEPOINT(hash_insert_cnt);
+    TRACEPOINT(hash_insert_cnt, "hash_insert_cnt");
 
     get_pghash()->insert_4k_mapping( this, vaddr, pgent );
     return true;
