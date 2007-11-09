@@ -120,7 +120,7 @@ void kdebug_entry (void *);
  * Define all functions as empty.
  */
 
-# define init_console()
+# define init_console(...)
 # define printf(fmt, args...)	do { } while (false)
 # define enter_kdebug(x)	do { } while (true)
 # define UNIMPLEMENTED()	do { } while (true)
