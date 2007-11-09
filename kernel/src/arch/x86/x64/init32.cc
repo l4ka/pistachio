@@ -80,7 +80,15 @@ static void SECTION(".init.init32") init32_cons (void) {};
 
 #else
 
-#define INIT32_COMPORT	CONFIG_KDB_COMPORT
+#if !defined(CONFIG_KDB_COMPORT)
+#define CONFIG_KDB_COMPORT 0x3f8
+#endif
+
+#if !defined(CONFIG_KDB_COMSPEED)
+#define CONFIG_KDB_COMSPEED 115200
+#endif
+
+#define INIT32_COMPORT		CONFIG_KDB_COMPORT
 #define INIT32_RATE		CONFIG_KDB_COMSPEED
 
 void inline SECTION(".init.init32") init32_out(const u16_t port, const u8_t val)
