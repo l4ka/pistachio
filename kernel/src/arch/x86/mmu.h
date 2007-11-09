@@ -32,10 +32,7 @@
 #ifndef __ARCH__X86__MMU_H__
 #define __ARCH__X86__MMU_H__
 
-#include INC_ARCHX(x86,cpu.h)
-#if defined(CONFIG_IS_64BIT)
-# include INC_ARCH(cpuid.h)
-#endif
+#include INC_ARCH(cpu.h)
 
 class x86_mmu_t
 {
