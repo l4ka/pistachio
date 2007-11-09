@@ -10,7 +10,7 @@ ifeq ("$(CONFIG_SMP)","y")
 SOURCES += src/platform/pc99/smp.S
 endif
 
-ifeq ("$(CONFIG_IO_FLEXPAGES)","y")
+ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
 SOURCES += $(addprefix src/platform/pc99/, mdb_io.cc vrt_io.cc io_space.cc)
 endif
 
