@@ -1,0 +1,3 @@
+SOURCES+=	kdb/arch/x86/breakpoints.cc
+SOURCES+=	kdb/arch/x86/stepping.cc
+SOURCES+=	kdb/arch/x86/x86.cc
