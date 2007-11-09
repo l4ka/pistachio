@@ -36,7 +36,7 @@
 enum resource_type_e {
     FPU			= 0,
     COPY_AREA		= 1,
-#if defined(CONFIG_IA32_SMALL_SPACES)
+#if defined(CONFIG_X86_SMALL_SPACES)
     IPC_PAGE_TABLE	= 2,
 #endif
 #if defined(CONFIG_IS_64BIT)
@@ -67,13 +67,7 @@ private:
     addr_t fpu_state;
     word_t last_copy_area;
 
-#if defined(CONFIG_IS_32BIT)
-    word_t copy_area_pgdir_idx[COPY_AREA_COUNT];
-#else
-    amd64_pgent_t * pdp;
-    word_t copy_area_pml4_idx[COPY_AREA_COUNT];
-    word_t copy_area_pdp_idx[COPY_AREA_COUNT];
-#endif
+    word_t copy_area_pdir_idx[COPY_AREA_COUNT][COPY_AREA_PDIRS];
 };
 
 
