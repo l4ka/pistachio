@@ -38,12 +38,12 @@
 #include INC_GLUE(idt.h)
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(space.h)
-#include INC_GLUEX(x86,timer.h)
-#include INC_GLUEX(x86,memory.h)
-#include INC_GLUEX(x86,cpu.h)
+#include INC_GLUE(timer.h)
+#include INC_GLUE(memory.h)
+#include INC_GLUE(cpu.h)
 
-#include INC_ARCHX(x86,apic.h)
-#include INC_ARCHX(x86,amdhwcr.h)
+#include INC_ARCH(apic.h)
+#include INC_ARCH(amdhwcr.h)
 
 #include INC_API(kernelinterface.h)
 #include INC_API(processor.h)
@@ -51,10 +51,10 @@
 
 #include INC_PLAT(perfmon.h)
 
-#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
-#include INC_GLUE(ia32/kernelinterface.h)
-#include INC_GLUE(ia32/init.h)
-#endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+#include INC_GLUE_SA(x32comp/kernelinterface.h)
+#include INC_GLUE_SA(x32comp/init.h)
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
 
 // from either glue/v4-ia32/ or glue/v4-x86/
@@ -222,9 +222,14 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     x86_mmu_t::enable_global_pages();
 #endif
 
-#if defined(CONFIG_FLUSHFILTER)
-    TRACE_INIT("Enabling flush filter (CPU %d)\n", cpuid);
+#if defined(CONFIG_CPU_X86_K8) 
+#if defined(CONFIG_K8_FLUSHFILTER)
+    TRACE_INIT("Enabling K8 Flush Filter\n");
     x86_amdhwcr_t::enable_flushfilter();
+#else
+    TRACE_INIT("Disabling K8 Flush Filter\n");
+    x86_amdhwcr_t::disable_flushfilter();
+#endif
 #endif
 
     TRACE_INIT("Activating MSRS (CPU %d)\n", cpuid);
@@ -315,7 +320,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
     TRACE_INIT("Initializing mapping database\n");
     init_mdb();
 
-#if defined(CONFIG_IO_FLEXPAGES)
+#if defined(CONFIG_X86_IO_FLEXPAGES)
     TRACE_INIT("Initializing IO port space\n");
     init_io_space();
 #endif
@@ -396,12 +401,12 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 #endif
 
 
-#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
     TRACE_INIT("Initializing 32-bit kernel interface page (%p)\n",
-	       ia32::get_kip());
-    ia32::get_kip()->init();
+	       x32::get_kip());
+    x32::get_kip()->init();
     init_kip_32();
-#endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
     /* initialize the scheduler */
     get_current_scheduler()->init(true);
