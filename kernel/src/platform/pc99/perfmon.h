@@ -20,7 +20,7 @@
  * Pentium 3 processors
  *********************************************************************/
 
-#if defined(CONFIG_CPU_IA32_I686) 
+#if defined(CONFIG_CPU_X86_I686) 
 
 #define PMC_MSR_EVTSEL0		       0x186      /* Performance EVT0 */
 #define PMC_MSR_EVTSEL1		       0x187      /* Performance EVT1 */
@@ -32,7 +32,7 @@
  * Athlon and Opteron processors
  *********************************************************************/
 
-#elif defined(CONFIG_CPU_AMD64_K8) || defined(CONFIG_CPU_IA32_K8)
+#elif defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
 
 #define PMC_MSR_EVTSEL0		       0xC0010000      /* Performance EVT0 */
 #define PMC_MSR_EVTSEL1		       0xC0010001      /* Performance EVT1 */
@@ -48,7 +48,7 @@
  * P4, Pentium D and Xeon processors
  *********************************************************************/
 
-#elif defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_AMD64_P4)
+#elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
 
 #define PMC_MSR_BASE			0x300
 #define PMC_MSR_CTR_NO(addr)		(addr - AMD64_MRS_PMC_BASE) 
@@ -137,13 +137,13 @@
 #define PMC_MSR_IQ_CTR_SSU_ESCR01	3
 #define PMC_MSR_IQ_CTR_ALF_ESCR01	1
 
-#endif /* defined(CONFIG_CPU_IA32_I686) */
+#endif /* defined(CONFIG_CPU_X86_I686) */
 
 
 INLINE void setup_perfmon_cpu(word_t cpuid)
 {
 
-#if defined(CONFIG_CPU_IA32_I686) || defined(CONFIG_CPU_AMD64_K8) || defined(CONFIG_CPU_IA32_K8)
+#if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
     
     /* disable PerfEvents */
      x86_wrmsr(PMC_MSR_EVTSEL0, 0);
@@ -158,7 +158,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
      x86_wrmsr(PMC_MSR_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
 
 
-#elif defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_AMD64_P4)
+#elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
 
      /* disable PMCs via CCCR*/
      x86_wrmsr(PMC_MSR_IQ_CCCR(0), 3 << 16);
