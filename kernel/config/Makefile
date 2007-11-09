@@ -36,8 +36,7 @@ CMLCONFIG=	$(CMLPATH)/cmlconfigure.py
 CMLCONFIGTRANS=	$(CMLPATH)/configtrans.py
 
 CML_INPUT=	$(addprefix $(SRCDIR)/config/, rules.cml \
-		  amd64.cml	\
-		  ia32.cml	\
+		  x86.cml	\
 		  powerpc.cml	\
 		  powerpc64.cml	\
 		 )
@@ -65,7 +64,12 @@ config.h .config: config.out
 
 $(BUILDDIR)/Makeconf.local: .config
 	@echo "Rewriting $(@F) ..."
-	@awk -F'[_=]' '/^CONFIG_ARCH_[^_]*=y/ { ARCH=$$3 } /^CONFIG_CPU_[^_]*_[^_]*=y/ { CPU=$$4 } /^CONFIG_PLAT_[^_]*=y/ { PLATFORM=$$3 } END{ { printf(",s/^ARCH *=.*/ARCH=%s/\n,s/^CPU *=.*/CPU=%s/\n,s/^PLATFORM *=.*/PLATFORM=%s/\nwq\n", tolower(ARCH), tolower(CPU), tolower(PLATFORM)) }}' $< | ed -s $@
+	@awk -F'[_=]' '/^CONFIG_ARCH_[^_]*=y/ { ARCH=$$3 }\
+		       /^CONFIG_SUBARCH_[^_]*=y/ { SUBARCH=$$3 }\
+		       /^CONFIG_CPU_[^_]*_[^_]*=y/ { CPU=$$4 }\
+		       /^CONFIG_PLAT_[^_]*=y/ { PLATFORM=$$3 } END\
+		       { { printf(",s/^ARCH *=.*/ARCH=%s/\n,s/^SUBARCH *=.*/SUBARCH=%s/\n,s/^CPU *=.*/CPU=%s/\n,s/^PLATFORM *=.*/PLATFORM=%s/\nwq\n",\
+			 tolower(ARCH), tolower(SUBARCH), tolower(CPU), tolower(PLATFORM)) }}' $< | ed -s $@
 
 menuconfig batchconfig ttyconfig xconfig: $(BUILDDIR)/Makeconf.local
 
