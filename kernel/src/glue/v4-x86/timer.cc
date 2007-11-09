@@ -33,7 +33,7 @@
 
 #include INC_PLAT(rtc.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUEX(x86,timer.h)
+#include INC_GLUE(timer.h)
 
 #include INC_API(schedule.h)
 
@@ -98,12 +98,12 @@ void SECTION (".init") timer_t::init_global()
 
 void SECTION (".init") timer_t::init_cpu()
 {
-#if defined(CONFIG_CPU_AMD64_SIMICS)
+#if defined(CONFIG_CPU_X86_SIMICS)
     u64_t cpu_cycles;
 
     TRACE_INIT("Simics CPU hardcoding processor speed ...\n");
     /* Set frequencies statically on SIMICS, waiting would take ages... */
-    cpu_cycles = CONFIG_CPU_AMD64_SIMICS_SPEED * 1000 * 1000;
+    cpu_cycles = CONFIG_CPU_X86_SIMICS_SPEED * 1000 * 1000;
     proc_freq = cpu_cycles  / 1000;
     bus_freq = 0;
 
@@ -128,7 +128,7 @@ void SECTION (".init") timer_t::init_cpu()
     TRACE_INIT("CPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
     return;
 
-#elif defined(CONFIG_CPU_IA32_I486)
+#elif defined(CONFIG_CPU_X86_I486)
     /* We just estimate the current cpu speed, this is needed in
      * absence of any TSC.
      * We simply assume that it's really something like an i486
@@ -166,12 +166,12 @@ void SECTION (".init") timer_t::init_cpu()
                rounds, (word_t)((rounds * 10000) / (99)));
     return;
 
-#else /* !defined(CONFIG_CPU_IA32_I486) */
+#else /* !defined(CONFIG_CPU_X86_I486) */
 
     proc_freq = 0;
     bus_freq = 0;
     return;
 
-#endif /* !defined(CONFIG_CPU_AMD64_SIMICS) */
+#endif /* !defined(CONFIG_CPU_X86_SIMICS) */
 }
 
