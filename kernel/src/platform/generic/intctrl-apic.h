@@ -37,9 +37,9 @@
 #endif
 
 #include INC_PLAT(82093.h)
-#include INC_ARCHX(x86,apic.h)
-#include INC_ARCHX(x86,apic.h)
-#include INC_ARCHX(x86,ioport.h)
+#include INC_ARCH(apic.h)
+#include INC_ARCH(apic.h)
+#include INC_ARCH(ioport.h)
 #include <sync.h>
 #include <linear_ptab.h>
 
