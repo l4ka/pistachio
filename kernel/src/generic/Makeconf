@@ -5,7 +5,7 @@ ifeq ("$(CONFIG_ACPI)","y")
 SOURCES+=	src/generic/acpi.cc
 endif
 
-ifeq ("$(CONFIG_IO_FLEXPAGES)","y")
+ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
 SOURCES+=	src/generic/vrt.cc 
 endif
 
