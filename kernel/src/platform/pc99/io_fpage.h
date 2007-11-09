@@ -35,7 +35,7 @@
 #define __PLATFORM__PC99__IO_FPAGE_H__
 
 
-#if !defined(CONFIG_IO_FLEXPAGES)
+#if !defined(CONFIG_X86_IO_FLEXPAGES)
 
 #include INC_API(generic-archfpage.h)
 
@@ -176,6 +176,6 @@ public:
 	}
 
 };
-#endif /* !defined(CONFIG_IO_FLEXPAGES) */
+#endif /* !defined(CONFIG_X86_IO_FLEXPAGES) */
 
 #endif /* !__PLATFORM__PC99__IO_FPAGE_H__ */
