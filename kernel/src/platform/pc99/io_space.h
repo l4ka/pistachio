@@ -34,7 +34,7 @@
 #define __PLATFORM__PC99__IO_SPACE_H__
 
 
-#if !defined(CONFIG_IO_FLEXPAGES)
+#if !defined(CONFIG_X86_IO_FLEXPAGES)
 
 #include INC_API(generic-archmap.h)
 
@@ -63,7 +63,7 @@ void handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t size, addr_t ip);
 void zero_io_bitmap(space_t *space, word_t port, word_t log2size);
 void set_io_bitmap(space_t *space, word_t port, word_t log2size);
 
-#endif /* !defined(CONFIG_IO_FLEXPAGES) */
+#endif /* !defined(CONFIG_X86_IO_FLEXPAGES) */
 
 
 
