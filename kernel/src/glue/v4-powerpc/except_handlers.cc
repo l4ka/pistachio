@@ -184,7 +184,7 @@ static void dispatch_exception( except_regs_t *regs, word_t exc_no )
 
 EXCDEF( dsi_handler, word_t dar, word_t dsisr )
 {
-    TRACEPOINT(except_dsi_cnt);
+    TRACEPOINT(except_dsi_cnt, "except_dsi_cnt");
 
     // Let the debugger have a first shot at inspecting the data fault.
     try_to_debug( frame, EXCEPT_ID(DSI), dar, dsisr );
@@ -243,7 +243,7 @@ EXCDEF( machine_check_handler )
 
 EXCDEF( isi_handler )
 {
-    TRACEPOINT(except_isi_cnt);
+    TRACEPOINT(except_isi_cnt, "except_isi_cnt");
 
     // Let the debugger have a first shot at inspecting the instr fault.
     try_to_debug( frame, EXCEPT_ID(ISI) );
@@ -282,7 +282,7 @@ EXCDEF( alignment_handler )
 
 EXCDEF( program_handler )
 {
-    TRACEPOINT(except_prog_cnt);
+    TRACEPOINT(except_prog_cnt, "except_prog_cnt");
 
     space_t *space = get_current_space();
     if( EXPECT_FALSE(space == NULL) )
@@ -323,7 +323,7 @@ EXCDEF( decrementer_handler )
 	frame->srr1_flags = srr1;
     }
 
-    TRACEPOINT(except_decr_cnt);
+    TRACEPOINT(except_decr_cnt, "except_decr_cnt");
 
     ppc_set_dec( decrementer_interval );
     get_current_scheduler()->handle_timer_interrupt();
