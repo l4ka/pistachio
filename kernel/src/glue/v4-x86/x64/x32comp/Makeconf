@@ -1,0 +1,22 @@
+SOURCES += $(addprefix src/glue/v4-x86/x64/x32comp/, init.cc kernelinterface.cc syscalls.cc user.cc)
+
+ifeq ("$(CONFIG_CPU_X86_P4)","y")
+SOURCES += $(addprefix src/glue/v4-x86/x64/x32comp/, trap-sysenter.S)
+else
+SOURCES += $(addprefix src/glue/v4-x86/x64/x32comp/, trap-syscall.S)
+endif
+
+src/glue/v4-x86/x64/x32comp/kernelinterface.o: include/version.h
+
+# Copied from src/arch/amd64/Makeconf
+
+CCFLAGS_src/glue/v4-x86/x64/x32comp/user = -DAMD64_32BIT_CODE\
+				      $(subst -m64,-m32,\
+					$(subst -mcmodel=kernel,,\
+					  $(CCFLAGS)))
+
+src/glue/v4-x86/x64/x32comp/user.o: src/glue/v4-x86/x64/x32comp/user.cc
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(CPPFLAGS) $(CCFLAGS_$*) -x c++ -c $< -o $(notdir $@)
+	cd $(dir $@) && $(OBJCOPY) -g -O elf64-x86-64 $(notdir $@) $(notdir $@)
