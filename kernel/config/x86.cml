@@ -1,0 +1,175 @@
+######################################################################
+##                
+## Copyright (C) 2003-2007,  Karlsruhe University
+##                
+## File path:     config/x86.cml
+## Description:   IA32 specific rules
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id: ia32.cml,v 1.11 2006/11/16 19:51:44 skoglund Exp $
+##                
+######################################################################
+
+symbols
+
+ARCH_X86			'X86'
+
+x86_type			'Processor Type'
+x86_arch			'X86 Processor Architecture'
+x86_platform			'Platform'
+
+SUBARCH_X32			'32-Bit  x86 Processors (IA-32)'
+SUBARCH_X64			'64-Bit  x86 Processors (AMD64/EM64T)'
+
+CPU_X86_I486			'486'
+CPU_X86_I586			'Pentium1'
+CPU_X86_I686			'Pentium2/3'
+CPU_X86_P4			'Pentium4'
+CPU_X86_K8			'AMD K8'
+CPU_X86_C3      		'VIA C3'
+CPU_X86_SIMICS			'SIMICS'
+CPU_X86_SIMICS_SPEED		'Speed of SIMICS CPU (Mhz)'
+
+
+PLAT_PC99			'PC99 Compatible Machines (Standard PC)'
+
+#
+# X86 specific kernel configurations
+#
+
+X86_SMALL_SPACES	'Small address spaces' text
+Small address spaces is an optimization that emulates tagged TLBs (and
+tagged virtual caches in general) using the segmentation facility in
+the IA-32 processors.  It can greatly reduce the costs associated with
+address space switching.
+.
+
+#
+#  IO Fpages for X86 processors
+#
+
+
+X86_IO_FLEXPAGES	'IO Flexpages' text
+Enable support for IO port protection via fpages.
+.
+
+
+#
+#  X86_COMPATIBILITY_MODE specific kernel configuration
+#
+
+X86_COMPATIBILITY_MODE 	'Enable 32-bit Compatibility Mode' text 
+Enable support for X64 32-bit Compatibility Mode. In a kernel with
+Compatibility Mode enabled, most existing 32-bit x86 applications will
+run without modification.
+.
+
+
+#
+# X86 specific debug configurations
+#
+
+X86_KEEP_LAST_BRANCHES	'Keep last branch' text
+Keep the state of the last-branch model specific registers upon
+exceptions and enter kdebug instructions.  Useful for seeing where the
+last branch occured in user level (e.g., where a branch to an invalid
+instruction occured).
+
+Enabling this will incur some overhead during exception/interrupt
+handling.
+.
+
+#
+#  Flushfilter for AMD K8 processors
+#
+
+K8_FLUSHFILTER  'Enable K8 Flush Filter' text 
+Enable the K8 flush filter functionality, which (in some cases)
+prevents the TLB from being flushed on a context switch. Be warned
+that, in case of SMP, AMD suggests to turn off the flush filter for
+some processor revisions.
+.
+
+
+
+unless ARCH_X86 suppress dependent x86_type
+unless ARCH_X86 suppress dependent x86_arch
+
+unless SUBARCH_X32 suppress dependent CPU_X86_I486 CPU_X86_I586 CPU_X86_C3
+
+when CPU_X86_I486 or CPU_X86_C3 suppress TRACEBUFFER
+when CPU_X86_I486 or CPU_X86_C3 suppress IOAPIC
+when CPU_X86_I486 or CPU_X86_C3 suppress SMP
+
+default X86_SMALL_SPACES from n
+unless SUBARCH_X32 suppress dependent X86_SMALL_SPACES
+
+default X86_COMPATIBILITY_MODE from n
+unless SUBARCH_X64 suppress dependent X86_COMPATIBILITY_MODE
+
+default X86_KEEP_LAST_BRANCHES from n
+unless CPU_X86_I686 suppress X86_KEEP_LAST_BRANCHES
+
+default K8_FLUSHFILTER from n
+unless CPU_X86_K8 suppress dependent K8_FLUSHFILTER
+
+default X86_IO_FLEXPAGES from n
+unless ARCH_X86 suppress dependent X86_IO_FLEXPAGES
+
+require X86_IO_FLEXPAGES implies X86_SMALL_SPACES==n
+require X86_SMALL_SPACES implies X86_IO_FLEXPAGES==n
+
+
+choices x86_type
+	CPU_X86_I486
+	CPU_X86_I586
+	CPU_X86_I686
+	CPU_X86_P4
+	CPU_X86_K8
+	CPU_X86_C3
+	CPU_X86_SIMICS
+	default CPU_X86_P4
+
+
+choices x86_arch
+	SUBARCH_X32
+	SUBARCH_X64
+	default SUBARCH_X32
+
+choices x86_platform
+	PLAT_PC99
+	default PLAT_PC99
+
+unless ARCH_X86 suppress dependent x86_platform
+
+derive X86_SYSENTER from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_K8
+derive X86_FXSR from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_K8
+derive X86_PGE from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_K8 or CPU_X86_C3
+derive X86_HTT from CPU_X86_P4
+derive X86_SMALL_SPACES_GLOBAL from X86_SMALL_SPACES and X86_PGE
+derive X86_PSE from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_I586 or CPU_X86_K8
+derive X86_TSC from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_I586 or CPU_X86_K8 or CPU_X86_C3
+derive X86_PAT from CPU_X86_I686 or CPU_X86_P4 or CPU_X86_K8
+
+derive X86_EM64T from SUBARCH_X64 and CPU_X86_P4
+derive MULTI_ARCHITECTURE from SUBARCH_X64 and X86_COMPATIBILITY_MODE
