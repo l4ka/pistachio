@@ -1,0 +1,63 @@
+######################################################################
+##                
+## Copyright (C) 2003-2007,  Karlsruhe University
+##                
+## File path:     glue/v4-x86/x64/Makeconf
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id$
+##                
+######################################################################
+
+LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/$(SUBARCH)/linker.lds
+
+SOURCES += $(addprefix src/glue/$(API)-$(ARCH)/$(SUBARCH)/, \
+	space.cc exception.cc init.cc resources.cc \
+	trampoline.S trap.S user.cc syscalls.cc)
+
+CFLAGS_/src/glue/$(API)-$(ARCH)/$(SUBARCH)/pagefault = -fomit-frame-pointer
+CFLAGS_/src/glue/$(API)-$(ARCH)/$(SUBARCH)/exception = -fomit-frame-pointer
+
+ifeq ("$(CONFIG_IOAPIC)","y")
+SOURCES += src/generic/acpi.cc
+endif
+
+# use linear_ptab_walker if need be
+ifeq (1,1)
+SOURCES+=src/generic/linear_ptab_walker.cc \
+	 src/generic/mapping_alloc.cc 
+else
+SOURCES+=src/glue/$(API)-$(ARCH)/$(SUBARCH)/space-stub.cc
+endif
+
+ifeq ("$(CONFIG_NEW_MDB)","y")
+SOURCES+=	src/generic/mdb.cc \
+		src/generic/mdb_mem.cc
+else
+SOURCES+=	src/generic/mapping.cc
+endif
+
+
+ifeq ("$(CONFIG_X86_COMPATIBILITY_MODE)","y")
+include $(SRCDIR)/src/glue/v4-x86/x64/x32comp/Makeconf
+endif
