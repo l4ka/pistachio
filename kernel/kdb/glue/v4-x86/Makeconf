@@ -1,0 +1,14 @@
+######################################################################
+##                
+## Copyright (C) 2007,  Karlsruhe University
+##                
+## File path:     kdb/glue/v4-x86/Makeconf
+## Description:   
+##                
+## @LICENSE@
+##                
+## $Id:$
+##                
+######################################################################
+SOURCES+=	kdb/glue/v4-x86/thread.cc kdb/glue/v4-x86/prepost.cc \
+		kdb/glue/v4-x86/readmem.cc kdb/glue/v4-x86/resources.cc
