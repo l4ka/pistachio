@@ -1,0 +1,12 @@
+SOURCES += $(addprefix src/arch/x86/x64/, init32.cc cpu.cc)
+
+CCFLAGS_src/arch/x86/x64/init32 = -DX64_32BIT_CODE\
+				  $(patsubst -m64, -m32,\
+				  $(patsubst -mcmodel=kernel, ,\
+				  $(CCFLAGS)))
+
+src/arch/x86/x64/init32.o: src/arch/x86/x64/init32.cc
+	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)
+	@if [ ! -d $(dir $@) ]; then $(MKDIRHIER) $(dir $@); fi
+	cd $(dir $@) && $(CC) $(CPPFLAGS) $(CCFLAGS_$*) -x c++ -c $< -o $(notdir $@)
+	cd $(dir $@) && $(OBJCOPY) -g -O elf64-x86-64  $(notdir $@) $(notdir $@)
