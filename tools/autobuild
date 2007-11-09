@@ -90,6 +90,18 @@ function do_configuration() {
     # Configure and compile user land
     cd $BUILDDIR/user;
     TARGET_ARCH=`grep "^ARCH" $BUILDDIR/kernel/Makeconf.local | sed "s/^[A-Z]*\=//"`
+    if [ $TARGET_ARCH == "x86" ]; then 
+	TARGET_SUBARCH=`grep "^SUBARCH" $BUILDDIR/kernel/Makeconf.local | sed "s/^[A-Z]*\=//"`
+	echo $TARGET_SUBARCH
+	case $TARGET_SUBARCH in 
+	x32)
+	TARGET_ARCH="ia32"
+	;;
+	x64)
+	TARGET_ARCH="amd64"
+	;;
+	esac
+    fi
     TARGET_PLATFORM=`grep "^PLATFORM" $BUILDDIR/kernel/Makeconf.local | sed "s/^[A-Z]*\=//"`
     TARGET=$TARGET_ARCH-$TARGET_PLATFORM
     # This is an evil hack to avoid using a cross-compiler when
