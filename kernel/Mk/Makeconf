@@ -104,10 +104,20 @@ endif
 
 API?=	v4
 
+######################################################################
+#
+# Hardware specific options
+#
+# Known so far: CFLAGS_<arch>, CFLAGS_<cpu>, CFLAGS_<platform>
+#               ASMFLAGS_<arch> ASMFLAGS_<cpu>, ASMFLAGS_<platform>
+#		DEFINES_<arch>
+
+-include $(SRCDIR)/Mk/Makeconf.$(ARCH)
+
+
 # these macros will be undefined first - they may have default values
 UNDEFS	 += $(ARCH) $(CPU) $(PLATFORM) $(API)
 DEFINES	 += __ARCH__=$(ARCH) __CPU__=$(CPU) __PLATFORM__=$(PLATFORM) __API__=$(API) $(DEFINES_$(ARCH))
-
 INCLUDES += $(BUILDDIR)/include $(SRCDIR)/src $(SRCDIR)/src/generic $(LIBGCCINC)
 
 
@@ -133,16 +143,6 @@ APPFLAGS += -DASSEMBLY $(PPFLAGS)
 # Flags for Makefile.voodoo LD
 VFLAGS =
 
-
-######################################################################
-#
-# Hardware specific options
-#
-# Known so far: CFLAGS_<arch>, CFLAGS_<cpu>, CFLAGS_<platform>
-#               ASMFLAGS_<arch> ASMFLAGS_<cpu>, ASMFLAGS_<platform>
-#		DEFINES_<arch>
-
--include $(SRCDIR)/Mk/Makeconf.$(ARCH)
 
 ######################################################################
 #
@@ -247,6 +247,7 @@ clean::
 
 .depend:	$(SOURCES) $(SYMSRCS) $(BUILDDIR)/Makeconf.local $(wildcard $(addprefix $(SRCDIR)/, $(addsuffix /Makeconf, $(SRCSRC))))
 	@$(RM_F) $@
+	@$(ECHO_MSG) Building dependencies 
 	@if [ ! -d $(BUILDDIR)/include ]; then $(MKDIRHIER) $(BUILDDIR)/include; fi
 	@echo > include/version.h
 #	@$(ECHO_MSG) Building dependencies for $(SOURCES) $(SYMSRCS)
