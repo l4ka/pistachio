@@ -34,26 +34,9 @@
 
 #include INC_ARCH(trapgate.h)
 #include INC_GLUE(config.h)
+#include INC_GLUE_SA(debug.h)
 
 #if defined(CONFIG_DEBUG)
-
-extern "C" int printf(const char* format, ...);
-INLINE void dump_flags(const word_t flags)
-{
-    printf("%c%c%c%c%c%c%c%c%c%c%c",
-	   flags & (1 <<  0) ? 'C' : 'c',
-	   flags & (1 <<  2) ? 'P' : 'p',
-	   flags & (1 <<  4) ? 'A' : 'a',
-	   flags & (1 <<  6) ? 'Z' : 'z',
-	   flags & (1 <<  7) ? 'S' : 's',
-	   flags & (1 << 11) ? 'O' : 'o',
-	   flags & (1 << 10) ? 'D' : 'd',
-	   flags & (1 <<  9) ? 'I' : 'i',
-	   flags & (1 <<  8) ? 'T' : 't',
-	   flags & (1 << 16) ? 'R' : 'r',
-	   ((flags >> 12) & 3) + '0'
-	);
-}
 
 #define DEBUG_SCREEN (KERNEL_OFFSET + 0xb8000)
 
@@ -105,7 +88,8 @@ INLINE void spin(int pos, int cpu = 0)
             : "a" (0UL))
 
 #else
-#define dump_flags(x...)	do { } while (true)
+#define x86_dump_frame(x...)	do { } while (true)
+#define x86_dump_flags(x...)	do { } while (true)
 
 #endif /* defined(CONFIG_DEBUG) */
 
