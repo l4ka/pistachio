@@ -11,7 +11,7 @@ SOURCES+=	kdb/generic/bootinfo.cc \
 		kdb/generic/tid_format.cc \
 		kdb/generic/tracepoints.cc 
 
-ifeq ("$(CONFIG_IO_FLEXPAGES)","y")
+ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
 SOURCES+=	kdb/generic/vrt.cc
 endif
 
