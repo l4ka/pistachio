@@ -29,8 +29,8 @@
  * $Id: io_space.cc,v 1.4 2006/12/05 15:23:16 skoglund Exp $
  *                
  ********************************************************************/
-#include INC_ARCH(ptab.h)
-#include INC_ARCH(tss.h)
+#include INC_ARCH_SA(ptab.h)
+#include INC_ARCH_SA(tss.h)
 #include INC_API(fpage.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
@@ -218,7 +218,7 @@ void init_io_space(void)
     for (u32_t i=0; i < IOPERMBITMAP_SIZE / sizeof(word_t); i++)
 	*(p + i) = ~0UL;
     
-#if defined(CONFIG_IA32_PVI)
+#if defined(CONFIG_X86_PVI)
     /* Enable PVI Bit */
 #warning Setting PVI bit in CR4 will not work with vmware
     x86_cr4_set(X86_CR4_PVI);
