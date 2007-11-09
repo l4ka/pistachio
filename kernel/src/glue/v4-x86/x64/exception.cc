@@ -1,0 +1,190 @@
+/*********************************************************************
+ *                
+ * Copyright (C) 2002-2007,  Karlsruhe University
+ *                
+ * File path:     glue/v4-x86/x64/exception.cc
+ * Description:   exception handling
+ *                
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ *                
+ * $Id: exception.cc,v 1.14 2006/10/21 00:46:39 reichelt Exp $ 
+ *                
+ ********************************************************************/
+
+#include <debug.h>
+#include <linear_ptab.h>
+#include <kdb/tracepoints.h>
+#include INC_ARCH(traps.h)
+#include INC_ARCH(trapgate.h)
+#include INC_GLUE(traphandler.h)
+#include INC_API(tcb.h)
+#include INC_API(space.h)
+#include INC_API(kernelinterface.h)
+
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+#include INC_GLUE_SA(x32comp/kernelinterface.h)
+#endif
+
+
+DECLARE_TRACEPOINT (X86_UD);
+
+const word_t x86_exc_reg_t::mr2reg[NUM_EXC_REGS][2] = 
+{    
+    {    19, ~0 /* EXC	*/},
+    {     1, x86_exceptionframe_t::ipreg	/* RIP	*/},
+    {     2, x86_exceptionframe_t::breg		/* RBX	*/},
+    {     3, x86_exceptionframe_t::r10reg	/* R10	*/},
+    {     4, x86_exceptionframe_t::r12reg	/* R12	*/},
+    {     5, x86_exceptionframe_t::r13reg	/* R13	*/},
+    {     6, x86_exceptionframe_t::r14reg	/* R14	*/},
+    {     7, x86_exceptionframe_t::r15reg	/* R15	*/},
+    {     8, x86_exceptionframe_t::areg  	/* RAX	*/},
+    {     9, x86_exceptionframe_t::creg  	/* RCX	*/},
+    {    10, x86_exceptionframe_t::dreg  	/* RDX	*/},
+    {    11, x86_exceptionframe_t::Sreg  	/* RSI	*/},
+    {    12, x86_exceptionframe_t::Dreg  	/* RDI	*/},
+    {    13, x86_exceptionframe_t::Breg  	/* RBP	*/},	
+    {    14, x86_exceptionframe_t::r8reg   	/* R8  */},
+    {    15, x86_exceptionframe_t::r9reg   	/* R9   */},
+    {    16, x86_exceptionframe_t::r11reg  	/* R11	*/},
+    {    17, x86_exceptionframe_t::spreg  	/* RSP	*/},
+    {    18, x86_exceptionframe_t::freg  	/* RFL	*/},
+    {    20, x86_exceptionframe_t::ereg  	/* ERR	*/},
+};
+
+#if defined(CONFIG_DEBUG)
+const word_t x86_exceptionframe_t::dbgreg[x86_exceptionregs_t::num_dbgregs] = 
+{
+    x86_exceptionframe_t::areg,  x86_exceptionframe_t::breg,
+    x86_exceptionframe_t::creg,  x86_exceptionframe_t::dreg,
+    x86_exceptionframe_t::Sreg,  x86_exceptionframe_t::Dreg,
+    x86_exceptionframe_t::Breg,  x86_exceptionframe_t::freg,
+    x86_exceptionframe_t::r8reg, x86_exceptionframe_t::r9reg,
+    x86_exceptionframe_t::r10reg, x86_exceptionframe_t::r11reg,
+    x86_exceptionframe_t::r12reg, x86_exceptionframe_t::r13reg,
+    x86_exceptionframe_t::r14reg, x86_exceptionframe_t::r15reg,
+    x86_exceptionframe_t::csreg, x86_exceptionframe_t::ssreg,
+};
+
+const char *x86_exceptionframe_t::name[x86_exceptionregs_t::num_regs] = 
+{   "reason",    "r15",	 "r14",	 "r13",	 "r12",	 "r11",	 "r10",	 "r09",	 
+    "r08",	 "rdi",	 "rsi",	 "rbp",	 "rdx",	 "rbx",	 "rcx",	 "rax",	 
+    "err",	 "rip",	 "cs ",	 "rfl",	 "rsp",	 "ss "	 };    
+#endif
+
+
+
+X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
+{
+    tcb_t * current = get_current_tcb();
+    space_t * space = current->get_space();
+    addr_t addr = (addr_t) frame->rip;
+
+    TRACEPOINT (X86_UD, "x86_ud at %x (%x) (current=%x)", addr, space->get_from_user(addr), current);
+
+    /* instruction emulation */
+    switch( (u8_t) space->get_from_user(addr))
+    {
+    case 0xf0: /* lock prefix */
+ 	if ( (u8_t) space->get_from_user(addr_offset(addr, 1)) == 0x90)
+ 	{
+ 	    /* lock; nop */
+ 	    frame->rax = (u64_t)space->get_kip_page_area().get_base();
+ 	    frame->rcx = get_kip()->api_version;
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+ 	    if (space->is_compatibility_mode())
+ 	    {
+		/* srXXX: Hack: Update system and user base in 32-bit KIP.
+		   This is necessary because they are not set in the initialization phase. */
+		x32::get_kip()->thread_info.set_system_base(get_kip()->thread_info.get_system_base());
+		x32::get_kip()->thread_info.set_user_base(get_kip()->thread_info.get_user_base());
+ 		frame->rdx = x32::get_kip()->api_flags;
+ 	    }
+ 	    else
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
+ 		frame->rdx = get_kip()->api_flags;
+ 	    frame->rsi = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
+ 	    frame->rip += 2;
+ 	    return;
+ 	}
+      
+    default:
+	printf ("%p: invalid opcode at IP %p\n", current, addr);
+ 	enter_kdebug("invalid opcode");
+    }
+    
+    if (send_exception_ipc(frame, X86_EXC_INVALIDOPCODE))
+	return;
+    
+    get_current_tcb()->set_state(thread_state_t::halted);
+    get_current_tcb()->switch_to_idle();
+
+
+}
+
+void exc_catch_common_wrapper() 					
+{							
+    __asm__ (						
+        ".section .data.x86.exc_common,\"a\",@progbits		\n"
+        ".global exc_catch_common				\n"
+	"\t.type exc_catch_common,@function			\n"
+	"exc_catch_common:					\n"
+        "pushq %%rax						\n"
+	"pushq %%rcx						\n"
+	"pushq %%rbx						\n"
+	"pushq %%rdx						\n"
+	"pushq %%rbp						\n"
+    	"pushq %%rsi						\n"
+    	"pushq %%rdi						\n"
+    	"pushq %%r8						\n"
+    	"pushq %%r9						\n"
+    	"pushq %%r10						\n"
+    	"pushq %%r11						\n"
+    	"pushq %%r12						\n" 
+    	"pushq %%r13						\n"
+    	"pushq %%r14						\n" 
+    	"pushq %%r15						\n"
+	"pushq %0			    			\n"
+	"call exc_catch_common_handler				\n"		
+	"addq  $8, %%rsp					\n"		
+    	"popq  %%r15						\n"		
+    	"popq  %%r14						\n"		
+    	"popq  %%r13						\n"		
+    	"popq  %%r12						\n"		
+    	"popq  %%r11						\n"		
+    	"popq  %%r10						\n"		
+    	"popq  %%r9						\n"		
+    	"popq  %%r8						\n"		
+    	"popq  %%rdi						\n"		
+    	"popq  %%rsi						\n"		
+	"popq  %%rbp						\n"		
+	"popq  %%rdx						\n"		
+	"popq  %%rbx						\n"		
+	"popq  %%rcx						\n"		
+        "popq  %%rax						\n"		
+	"addq  $8, %%rsp					\n"		
+	"iretq							\n"		
+	".previous						\n"
+	:						
+	: "i"(0)					
+	);						
+}							
