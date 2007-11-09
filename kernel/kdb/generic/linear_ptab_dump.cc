@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/linear_ptab_dump.cc
  * Description:   Linear page table dump
@@ -41,7 +41,7 @@
 void get_ptab_dump_ranges (addr_t * vaddr, word_t * num,
 			   pgent_t::pgsize_e * max_size);
 
-#if !defined(CONFIG_ARCH_IA32) && !defined(CONFIG_ARCH_AMD64)
+#if !defined(CONFIG_ARCH_X86)
 void get_ptab_dump_ranges (addr_t * vaddr, word_t * num,
 			   pgent_t::pgsize_e * max_size)
 {
