@@ -44,8 +44,11 @@ CFLAGS_x86	+= $(CFLAGS_x86_$(SUBARCH))
 LDFLAGS_x86_x64	+= -melf_x86_64 -n -z max-page-size=4096
 LDFLAGS_x86	+= $(LDFLAGS_x86_$(SUBARCH))
 
-ASMFLAGS_x86_64  += -m64 
-ASMFLAGS_x86	+= $(ASMFLAGS_x86_$(SUBARCH))
+ASMFLAGS_x86_x64 += -m64 
+ASMFLAGS_x86	 += $(ASMFLAGS_x86_$(SUBARCH))
+
+VFLAGS_x86_x64	 = -m elf_x86_64
+VFLAGS		 += $(VFLAGS_x86_$(SUBARCH))
 
 
 ifeq "$(SUBARCH)" "x64"
@@ -53,12 +56,11 @@ TOOLPREFIX=	$(patsubst %gcc,%,$(firstword $(shell type -p x86_64-pc-linux-gnu-gc
 endif
 
 CFLAGS_k8       += -march=k8
-VFLAGS 		 = -m elf_x86_64
-
-CFLAGS_i486+=	-march=i486
-CFLAGS_i586+=	-march=i586
-CFLAGS_i686+=	-march=i686
-
+CFLAGS_i486	+=-march=i486
+CFLAGS_i586	+=-march=i586
+ifeq "$(SUBARCH)" "x32"
+CFLAGS_i686	+=-march=i686
+endif
 
 ifeq "$(CC_VERSION)" "4"
 CFLAGS_p4  +=	-march=nocona
