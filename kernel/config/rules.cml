@@ -34,17 +34,6 @@ prefix "CONFIG_"	# Stripped at read time, prepended at save time
 
 # symbol definitions
 symbols
-x86_platform	'Platform'
-PLAT_PC99	'PC99 Compatible Machines (Standard PC)'
-IO_FLEXPAGES	'IO Flexpages'
-
-
-K8_FLUSHFILTER  'Enable K8 Flush Filter' text 
-Enable the K8 flush filter functionality, which (in some cases)
-prevents the TLB from being flushed on a context switch. Be warned
-that, in case of SMP, AMD suggests to turn off the flush filter for
-some processor revisions.
-.
 
 
 #
@@ -226,10 +215,10 @@ hardware_misc	'Miscellaneous'
 
 menu hardware
 	arch
-	ia32_type
-	powerpc_type
-	amd64_type
+	x86_arch
+	x86_type
 	x86_platform
+	powerpc_type
 	powerpc_platform
 	powerpc64_platform
 	powerpc64_type
@@ -238,27 +227,19 @@ menu hardware
 	
 
 choices arch    # Basic architecture
-	ARCH_IA32
+	ARCH_X86
 	ARCH_POWERPC
 	ARCH_POWERPC64
-	ARCH_AMD64
-	default ARCH_IA32
+	default ARCH_X86
 
 choices powerpc_type
 	CPU_POWERPC_IBM750
 	CPU_POWERPC_PPC604
 	default CPU_POWERPC_PPC604
 
-choices amd64_type
-	CPU_AMD64_K8
-	CPU_AMD64_P4
-	CPU_AMD64_SIMICS
-	default CPU_AMD64_K8
-
 unless ARCH_POWERPC suppress dependent powerpc_type
-unless ARCH_AMD64 suppress dependent amd64_type
-unless ARCH_IA32 or ARCH_POWERPC or ARCH_AMD64 suppress dependent SMP
-unless ARCH_IA32 and SMP suppress dependent SMP_IDLE_POLL
+unless ARCH_X86 or ARCH_POWERPC suppress dependent SMP
+unless ARCH_X86 and SMP suppress dependent SMP_IDLE_POLL
 
 
 choices powerpc_platform
@@ -267,17 +248,12 @@ choices powerpc_platform
 
 unless ARCH_POWERPC suppress dependent powerpc_platform
 
-choices x86_platform
-	PLAT_PC99
-	default PLAT_PC99
-
-unless ARCH_IA32 or ARCH_AMD64 suppress dependent x86_platform
 
 menu hardware_misc
 	IOAPIC { MAX_IOAPICS% APIC_TIMER_TICK% }
 	PPC_EXPOSE_OPIC
 	BOOTMEM_PAGES%
-	CPU_AMD64_SIMICS_SPEED%
+	CPU_X86_SIMICS_SPEED%
 
 default MAX_IOAPICS from 2
 default APIC_TIMER_TICK from 1000
@@ -287,46 +263,41 @@ when ARCH_POWERPC or ARCH_POWERPC64 suppress IOAPIC
 default BOOTMEM_PAGES from 1024
 unless ARCH_POWERPC64 suppress BOOTMEM_PAGES
 default SMP_MAX_PROCS from 4
-default CPU_AMD64_SIMICS_SPEED from 100
-unless CPU_AMD64_SIMICS suppress CPU_AMD64_SIMICS_SPEED
+default CPU_X86_SIMICS_SPEED from 100
+unless CPU_X86_SIMICS suppress CPU_X86_SIMICS_SPEED
 
 menu experimental
 	X_PAGER_EXREGS
-	IO_FLEXPAGES
 
 default X_PAGER_EXREGS from n
-unless ARCH_IA32 or ARCH_AMD64 suppress IO_FLEXPAGES
 menu kernel
 	IPC_FASTPATH
 	DEBUG
 	DEBUG_SYMBOLS
 	EXPERIMENTAL
 	experimental
-	PPC_BAT_SYSCALLS
-	IA32_SMALL_SPACES
 	K8_FLUSHFILTER
-	AMD64_COMPATIBILITY_MODE
-	PPC64_TRASH_OF
         PERFMON
 	SPIN_WHEELS
 	NEW_MDB
+	PPC_BAT_SYSCALLS
+	PPC64_TRASH_OF
+	X86_SMALL_SPACES
+	X86_COMPATIBILITY_MODE
+	X86_IO_FLEXPAGES
 
 default EXPERIMENTAL from n
 default IPC_FASTPATH from n
 default PPC_BAT_SYSCALLS from y
-default IO_FLEXPAGES from n
 default NEW_MDB from n
 unless EXPERIMENTAL suppress dependent experimental
 unless ARCH_POWERPC suppress PPC_BAT_SYSCALLS
 unless ARCH_POWERPC64 suppress PPC64_TRASH_OF
-unless CPU_IA32_I686 or CPU_IA32_P4 or CPU_IA32_K8 or ARCH_AMD64 suppress dependent PERFMON
-unless ARCH_POWERPC or ARCH_IA32 or ARCH_AMD64 suppress IPC_FASTPATH
-unless ARCH_AMD64 or ARCH_IA32 suppress SPIN_WHEELS
-unless ARCH_IA32 or ARCH_AMD64 suppress NEW_MDB
-default K8_FLUSHFILTER from n
-unless CPU_AMD64_K8 or CPU_IA32_K8 suppress dependent K8_FLUSHFILTER
-unless ARCH_IA32 or ARCH_AMD64 suppress dependent IO_FLEXPAGES
-unless NEW_MDB suppress IO_FLEXPAGES
+unless CPU_X86_I686 or CPU_X86_P4 or CPU_X86_K8 suppress dependent PERFMON
+unless ARCH_POWERPC or ARCH_X86 suppress IPC_FASTPATH
+unless ARCH_X86 suppress SPIN_WHEELS
+unless ARCH_X86 suppress NEW_MDB
+unless NEW_MDB suppress X86_IO_FLEXPAGES
 
 
 menu debugger
@@ -370,12 +341,11 @@ menu trace
         TRACEBUFFER
 	TBUF_LIGHT
 	TBUF_PERFMON
-	IA32_KEEP_LAST_BRANCHES
+	X86_KEEP_LAST_BRANCHES
 
-unless ARCH_IA32 or ARCH_AMD64 suppress dependent TRACEBUFFER
+unless ARCH_X86 suppress dependent TRACEBUFFER
 unless TRACEBUFFER suppress TBUF_LIGHT
 unless TRACEBUFFER and PERFMON suppress TBUF_PERFMON
-unless CPU_IA32_I686 suppress IA32_KEEP_LAST_BRANCHES
 default TBUF_LIGHT from n
 default TBUF_PERFMON from PERFMON
 
@@ -396,25 +366,14 @@ menu main       # Configure the Pistachio kernel
 
 
 
-derive IS_32BIT from ARCH_IA32 or ARCH_POWERPC
-derive IS_64BIT from ARCH_AMD64 or ARCH_POWERPC64
+derive IS_32BIT from SUBARCH_X32 or ARCH_POWERPC
+derive IS_64BIT from SUBARCH_X64 or ARCH_POWERPC64
 derive BIGENDIAN from ARCH_POWERPC or ARCH_POWERPC64
-derive CPU_K8 from CPU_AMD64_K8 or CPU_IA32_K8
-derive CPU_AMD64_EM64T from CPU_AMD64_P4
 derive HAVE_MEMORY_CONTROL from ARCH_POWERPC64
-require IO_FLEXPAGES implies IA32_SMALL_SPACES==n
-require IA32_SMALL_SPACES implies IO_FLEXPAGES==n
-derive FLUSHFILTER from CPU_K8 and K8_FLUSHFILTER
-derive MULTI_ARCHITECTURE from ARCH_AMD64 and AMD64_COMPATIBILITY_MODE
-derive X86_TSC from IA32_TSC or AMD64_TSC
-derive X86_PAT from IA32_PAT or AMD64_PAT
-derive X86_FXSR from IA32_FXSR or AMD64_FXSR
-derive X86_PGE from IA32_PGE or AMD64_PGE
 
 source "powerpc.cml"
 source "powerpc64.cml"
-source "ia32.cml"
-source "amd64.cml"
+source "x86.cml"
 
 #
 # here comes the real stuff
