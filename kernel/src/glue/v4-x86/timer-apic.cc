@@ -31,7 +31,7 @@
 
 #include INC_GLUE(idt.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUEX(x86,timer.h)
+#include INC_GLUE(timer.h)
 
 #include INC_PLAT(rtc.h)
 
@@ -70,7 +70,7 @@ void timer_t::init_cpu()
     // avoid competing for the RTC
     static DEFINE_SPINLOCK(timer_lock);
 
-#if !defined(CONFIG_CPU_AMD64_SIMICS)
+#if !defined(CONFIG_CPU_X86_SIMICS)
     TRACE_INIT("Calculating processor speed ...");
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
@@ -113,7 +113,7 @@ void timer_t::init_cpu()
      * Set frequencies statically on SIMICS, waiting would take ages...
      */
 
-    cpu_cycles = CONFIG_CPU_AMD64_SIMICS_SPEED * 1000 * 1000;
+    cpu_cycles = CONFIG_CPU_X86_SIMICS_SPEED * 1000 * 1000;
     proc_freq = cpu_cycles  / 1000;
     bus_freq = 0;
 
