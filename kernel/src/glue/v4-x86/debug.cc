@@ -35,11 +35,11 @@
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
 
-#include INC_ARCHX(x86,traps.h)
+#include INC_ARCH(traps.h)
 #include INC_ARCH(trapgate.h)
-#include INC_ARCHX(x86,apic.h)
+#include INC_ARCH(apic.h)
 
-#include INC_GLUE(debug.h)
+#include INC_GLUE_SA(debug.h)
 
 #if defined(CONFIG_DEBUG)
 #define KDB_STACK_SIZE	KTCB_SIZE
@@ -54,6 +54,7 @@ X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 
 X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
+    TRACEF("frame %x\n", frame);
     do_enter_kdebug(frame, X86_EXC_DEBUG);
 }
 
@@ -64,7 +65,7 @@ X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
    local_apic_t<APIC_MAPPINGS> local_apic;
     local_apic.EOI();
     printf("Current Frame:\n");
-    x86_dump_frame(frame); 
+    frame->dump(); 
     printf("Current TCB:\n");
     dump_tcb(get_current_tcb());
     printf("CPU Mailbox:\n");
