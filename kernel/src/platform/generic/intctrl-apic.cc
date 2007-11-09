@@ -36,13 +36,13 @@
 
 #include INC_PLAT(acpi.h)
 
-#include INC_ARCHX(x86,ioport.h)
+#include INC_ARCH(ioport.h)
 #include INC_ARCH(trapgate.h)
 #include INC_GLUE(idt.h)
 #include INC_GLUE(space.h)
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(hwirq.h)
-#include INC_GLUEX(x86,cpu.h)
+#include INC_GLUE(cpu.h)
 
 intctrl_t intctrl;
 EXC_INTERRUPT(spurious_interrupt)
@@ -437,7 +437,7 @@ void intctrl_t::init_local_apic()
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_lint1);
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_error);
 
-#if defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_IA32_C2)
+#if defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_C2)
     local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_thermal_monitor);
 #endif
     
