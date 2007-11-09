@@ -31,8 +31,7 @@
 #ifndef __ARCH__X86__TRACEBUFFER_H__
 #define __ARCH__X86__TRACEBUFFER_H__
 
-#include <tcb_layout.h>
-
+#include INC_ARCH_SA(tracebuffer.h)
 
 /**
  * A tracebuffer record indicates the type of event, the time of the
@@ -116,10 +115,10 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 
 #if defined(CONFIG_TBUF_PERFMON)
 
-# if defined(CONFIG_CPU_IA32_I686) || defined(CONFIG_CPU_IA32_K8) || defined(CONFIG_CPU_AMD64_K8)
+# if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
 # define TBUF_PMC_SEL_0		"       xor  %1, %1		\n"
 # define TBUF_PMC_SEL_1		"	inc  %1			\n"
-# elif defined(CONFIG_CPU_IA32_P4) || defined(CONFIG_CPU_AMD64_P4)
+# elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
 /* PMC_MSR_IQ_COUNTER 0 and 2 */
 #  define TBUF_PMC_SEL_0	"	mov	$12, %1		\n"
 #  define TBUF_PMC_SEL_1	"	add	$2, %1		\n"
