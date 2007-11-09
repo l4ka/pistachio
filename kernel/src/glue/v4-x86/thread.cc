@@ -31,7 +31,7 @@
 #include INC_GLUE(config.h)
 #include INC_API(thread.h)
 #include INC_API(tcb.h)
-#include INC_ARCH(tss.h)
+#include INC_ARCH_SA(tss.h)
 
 #if defined(CONFIG_IS_64BIT)
 # define EXC_FRAME_SIZE ((sizeof(x86_exceptionframe_t)/BYTES_WORD) - 5)
@@ -93,11 +93,11 @@ void tcb_t::create_startup_stack(void (*func)())
     push(stack, X86_UDS);               /* ss (rpl = 3) */
     push(stack, 0x12345678);            /* sp */
     push(stack, X86_USER_FLAGS);
-#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
     if (resource_bits.have_resource(COMPATIBILITY_MODE))
         push(stack, AMD64_UCS32);       /* cs */
     else
-#endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
     {
         push(stack, X86_UCS);           /* cs */
     }
