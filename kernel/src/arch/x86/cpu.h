@@ -32,6 +32,8 @@
 #ifndef __ARCH__X86__CPU_H__
 #define __ARCH__X86__CPU_H__
 
+#include INC_ARCH_SA(cpu.h)
+
 INLINE void x86_pause()
 {
 
