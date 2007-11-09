@@ -29,7 +29,7 @@
  * $Id: io.cc,v 1.4 2006/10/19 22:57:38 ud3 Exp $
  *                
  ********************************************************************/
-#include INC_ARCHX(x86,ioport.h)
+#include INC_ARCH(ioport.h)
 
 #include <kdb/kdb.h>
 #include <kdb/init.h>
