@@ -40,6 +40,9 @@ name:
 
 #define END_PROC(name)
 
+#define X86_64BIT_ZERO       0
+#define X86_64BIT_ONE        1
+
 #define BOOT_KCS    X86_KCS
 #define BOOT_KDS    X86_KDS
 
