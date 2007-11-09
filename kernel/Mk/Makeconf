@@ -61,7 +61,9 @@ PRINTF=		printf
 
 # Go fishing for cross development toolchain
 # we take the first one reported by type -p <list>
-TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p $(ARCH)-linux-gcc $(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc)))
+TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p \
+			$(ARCH)-gcc $(ARCH)-linux-gcc \
+			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc)))
 
 # Try to use ccache if installed (and NO_CCACHE is not defined)
 ifndef NO_CCACHE
