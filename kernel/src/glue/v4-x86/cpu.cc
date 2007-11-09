@@ -32,9 +32,9 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(idt.h)
 #include INC_API(smp.h)
-#include INC_ARCHX(x86,apic.h)
+#include INC_ARCH(apic.h)
 #include INC_ARCH(trapgate.h)
-#include INC_GLUEX(x86,cpu.h)
+#include INC_GLUE(cpu.h)
 #include <debug.h>
 
 cpu_t cpu_t::descriptors[CONFIG_SMP_MAX_CPUS];
