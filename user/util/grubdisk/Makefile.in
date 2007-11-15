@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2004,  Karlsruhe University
+## Copyright (C) 2004, 2007,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ## Description:   Build a bootable disk image
@@ -38,7 +38,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 
 do-all:	bootdisk.img
 
-bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0 ${top_builddir}/apps/bench/pingpong/pingpong ${kerneldir}/${ARCH}-kernel
+bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0 ${top_builddir}/apps/bench/pingpong/pingpong ${kerneldir}/${KERNEL}
 	@# Create a disk image
 	/sbin/mkdosfs -C bootdisk.img 1440
 	@# Make it a GRUB disk
@@ -46,9 +46,9 @@ bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstar
 	#@ Strip binaries
 	strip ${top_builddir}/*/*/{kickstart,sigma0} 
 	strip ${top_builddir}/apps/bench/pingpong/pingpong
-	strip ${kerneldir}/${ARCH}-kernel 
+	strip ${kerneldir}/${KERNEL} 
 	@# Copy the binaries to it
-	cp ${kerneldir}/${ARCH}-kernel kernel
+	cp ${kerneldir}/${KERNEL} kernel
 	export MTOOLSRC=mtoolsrc ; \
 	 mcopy -m ${srcdir}/menu.lst y:boot/grub ; \
 	 mcopy -m ${top_builddir}/*/*/{kickstart,sigma0} y: ; \
