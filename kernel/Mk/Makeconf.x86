@@ -50,11 +50,6 @@ ASMFLAGS_x86	 += $(ASMFLAGS_x86_$(SUBARCH))
 VFLAGS_x86_x64	 = -m elf_x86_64
 VFLAGS		 += $(VFLAGS_x86_$(SUBARCH))
 
-
-ifeq "$(SUBARCH)" "x64"
-TOOLPREFIX=	$(patsubst %gcc,%,$(firstword $(shell type -p x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc amd64-gcc)))
-endif
-
 CFLAGS_k8       += -march=k8
 CFLAGS_i486	+=-march=i486
 CFLAGS_i586	+=-march=i586
