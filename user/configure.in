@@ -60,15 +60,19 @@ esac
 case $HOST in
   ia32|x86|i386*|i486*|i586*|i686*)
 	ARCH=ia32
+	KERNEL=x86-kernel
 	;;
   powerpc64*|ppc64*)
 	ARCH=powerpc64
+	KERNEL=$ARCH-kernel
 	;;
   powerpc*)
 	ARCH=powerpc
+	KERNEL=$ARCH-kernel
 	;;
   amd64*)
 	ARCH=amd64
+	KERNEL=x86-kernel
 	LIBGCCFLAGS=-m64
 	;;
   *)
@@ -203,31 +207,31 @@ case $kerneldir in
 	my_confname=`echo $my_builddir | sed s,.*/,,`
 
 	# Relative to build directory
-	if test -f $my_builddir/../kernel/$ARCH-kernel; then
+	if test -f $my_builddir/../kernel/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../kernel
-	elif test -f $my_builddir/../kernel-$ARCH/$ARCH-kernel; then
+	elif test -f $my_builddir/../kernel-$ARCH/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../kernel-$ARCH
-	elif test -f $my_builddir/../pistachio-kernel/$ARCH-kernel; then
+	elif test -f $my_builddir/../pistachio-kernel/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../pistachio-kernel
-	elif test -f $my_builddir/../pistachio-$ARCH-kernel/$ARCH-kernel; then
-	  kerneldir='$(top_builddir)'/../pistachio-$ARCH-kernel
-	elif test -f $my_builddir/../pistachio-kernel-$ARCH/$ARCH-kernel; then
+	elif test -f $my_builddir/../pistachio-$KERNEL/$KERNEL; then
+	  kerneldir='$(top_builddir)'/../pistachio-$KERNEL
+	elif test -f $my_builddir/../pistachio-kernel-$ARCH/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../pistachio-kernel-$ARCH
-	elif test -f $my_builddir/../pistachio-$ARCH/$ARCH-kernel; then
+	elif test -f $my_builddir/../pistachio-$ARCH/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../pistachio-$ARCH
-	elif test -f $my_builddir/../build-kernel/$ARCH-kernel; then
+	elif test -f $my_builddir/../build-kernel/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../build-kernel
-	elif test -f $my_builddir/../build-kernel-$ARCH/$ARCH-kernel; then
+	elif test -f $my_builddir/../build-kernel-$ARCH/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../build-kernel-$ARCH
-	elif test -f $my_builddir/../build-$ARCH-kernel/$ARCH-kernel; then
-	  kerneldir='$(top_builddir)'/../build-$ARCH-kernel
-	elif test -f $my_builddir/../build-$ARCH/$ARCH-kernel; then
+	elif test -f $my_builddir/../build-$KERNEL/$KERNEL; then
+	  kerneldir='$(top_builddir)'/../build-$KERNEL
+	elif test -f $my_builddir/../build-$ARCH/$KERNEL; then
 	  kerneldir='$(top_builddir)'/../build-$ARCH
 
 	# Relative to source directory
-	elif test -f $my_srcdir/../kernel/$my_confname/$ARCH-kernel; then
+	elif test -f $my_srcdir/../kernel/$my_confname/$KERNEL; then
 	  kerneldir='$(top_srcdir)'/../kernel/$my_confname
-	elif test -f $my_srcdir/../kernel/$ARCH/$ARCH-kernel; then
+	elif test -f $my_srcdir/../kernel/$ARCH/$KERNEL; then
 	  kerneldir='$(top_srcdir)'/../kernel/$ARCH
 
 	# Default
@@ -309,6 +313,7 @@ esac
 
 AC_SUBST([CXXFLAGS])
 AC_SUBST([ARCH])
+AC_SUBST([KERNEL])
 AC_SUBST([KICKSTART_LINKBASE])
 AC_SUBST([SIGMA0_LINKBASE])
 AC_SUBST([ROOTTASK_LINKBASE])
