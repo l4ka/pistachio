@@ -86,7 +86,7 @@ bool kdb_t::pre()
 		x86_single_step_on_branches = false;
 #if defined(CONFIG_CPU_X86_I686)
 		last_branch_ip = (addr_t) (word_t)
-		    x86_rdmsr (X86_LASTBRANCHFROMIP);
+		    x86_rdmsr (X86_LASTBRANCHFROMIP_MSR);
 #else
 		last_branch_ip = (addr_t) (word_t)
 		    (x86_rdmsr (X86_LASTBRANCH_0_MSR +
