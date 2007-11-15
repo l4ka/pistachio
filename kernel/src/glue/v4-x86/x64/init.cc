@@ -63,15 +63,15 @@
 #include INC_GLUE_SA(x32comp/init.h)
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
-amd64_cpu_features_t boot_cpu_ft UNIT("amd64.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
-x86_tss_t tss UNIT("amd64.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
-bool tracebuffer_initialized UNIT("amd64.cpulocal");
+amd64_cpu_features_t boot_cpu_ft UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
+x86_tss_t tss UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
+bool tracebuffer_initialized UNIT("x86.cpulocal");
 
 
 struct gdt_struct {
     x86_segdesc_t segdsc[GDT_SIZE - 2];	/* 6 entries a  8 byte */
     x86_tssdesc_t tssdsc;		/* 1 entries a 16 byte */
-} gdt UNIT("amd64.cpulocal");
+} gdt UNIT("x86.cpulocal");
 
 u8_t amd64_cache_line_size;
 
