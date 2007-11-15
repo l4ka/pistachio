@@ -59,11 +59,17 @@ CAT=		cat
 TR=		tr
 PRINTF=		printf
 
+
 # Go fishing for cross development toolchain
 # we take the first one reported by type -p <list>
+ifeq "$(SUBARCH)" "x64"
+TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
+		x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc amd64-gcc)))
+else
 TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p \
 			$(ARCH)-gcc $(ARCH)-linux-gcc \
 			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc)))
+endif
 
 # Try to use ccache if installed (and NO_CCACHE is not defined)
 ifndef NO_CCACHE
