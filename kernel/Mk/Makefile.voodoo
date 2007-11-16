@@ -112,7 +112,7 @@ SYMOBJS=	$(patsubst %.cc, %.o, \
 asmsyms.h:	$(BUILDDIR)/include/asmsyms.h
 $(BUILDDIR)/include/asmsyms.h:	$(SYMOBJS) $(SRCDIR)/Mk/Makefile.voodoo
 	@${ECHO_MSG} Generating $(subst $(BUILDDIR)/,,$@)
-	@$(LD) $(VFLAGS) -r $(SYMOBJS) -o $(ASMSYMS)
+	@$(LD) $(LDFLAGS) $(VFLAGS) -r $(SYMOBJS) -o $(ASMSYMS)
 	@$(PRINTF) "/* machine-generated file - do NOT edit */\n"	> $@
 	@$(PRINTF) "#ifndef __ASMSYMS_H__\n"				>> $@
 	@$(PRINTF) "#define __ASMSYMS_H__\n\n"				>> $@
