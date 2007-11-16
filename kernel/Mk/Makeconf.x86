@@ -65,4 +65,5 @@ CFLAGS_p4  +=	-march=pentium4
 CFLAGS_k8  +=   -march=athlon
 endif
 
-LIBS_x86  +=   -lgcc
+LIBS_x86_x32  +=   -lgcc
+LIBS_x86      +=   $(LIBS_x86_$(SUBARCH))
