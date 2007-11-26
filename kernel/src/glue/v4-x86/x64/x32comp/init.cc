@@ -33,7 +33,7 @@
 
 #include INC_API(types.h)
 #include INC_API(kernelinterface.h)
-#include INC_ARCH_SA(pagebits.h)
+#include INC_ARCH(x86.h)
 #include INC_GLUE_SA(x32comp/kernelinterface.h)
 
 static void SECTION(SEC_INIT) copy_boot_info(word_t *binfo, x32::word_t *binfo_32)
@@ -100,17 +100,17 @@ static void SECTION(SEC_INIT) copy_memdesc(memdesc_t *mdesc, x32::memory_info_t 
 	if (high & ~0xffffffffUL)
 	    high = 0xffffffffUL;
 	if (mdesc->is_virtual()
-	    && low < UTCB_MAPPING_32 + AMD64_4KPAGE_SIZE
+	    && low < UTCB_MAPPING_32 + X86_PAGE_SIZE
 	    && high >= UTCB_MAPPING_32)
 	{
 	    if (UTCB_MAPPING_32 > low)
 		minfo_32->insert((x32::memdesc_t::type_e) mdesc->type(),
 				 mdesc->subtype(), true,
 				 (x32::addr_t) low, UTCB_MAPPING_32 - 1);
-	    if (high >= UTCB_MAPPING_32 + AMD64_4KPAGE_SIZE)
+	    if (high >= UTCB_MAPPING_32 + X86_PAGE_SIZE)
 		minfo_32->insert((x32::memdesc_t::type_e) mdesc->type(),
 				 mdesc->subtype(), true,
-				 UTCB_MAPPING_32 + AMD64_4KPAGE_SIZE, (x32::addr_t) high);
+				 UTCB_MAPPING_32 + X86_PAGE_SIZE, (x32::addr_t) high);
 	}
 	else
 	{
