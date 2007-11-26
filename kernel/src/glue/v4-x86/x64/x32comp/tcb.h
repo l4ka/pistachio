@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/ia32/tcb.h
+ * File path:     glue/v4-x86/x64/x32comp/tcb.h
  * Description:   TCB for AMD64 compatibility mode
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,23 @@
  * $Id: tcb.h,v 1.2 2006/10/21 00:15:21 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE_V4_X86__X64__IA32__TCB_H__
-#define __GLUE_V4_X86__X64__IA32__TCB_H__
+
+
+#ifndef __GLUE__V4_X86__X64__X32COMP__TCB_H__
+#define __GLUE__V4_X86__X64__X32COMP__TCB_H__
 
 #ifndef __GLUE_V4_X86__X64__TCB_H__
 #error not for stand-alone inclusion
 #endif
+
+INLINE void tcb_t::set_space(space_t * space)
+{
+    this->space = space;
+    this->pdir_cache = space ? (word_t)space->get_top_pdir_phys(get_cpu()) : NULL;
+    if (space && space->is_compatibility_mode())
+	resource_bits += COMPATIBILITY_MODE;
+
+}
 
 
 /* Copied from glue/v4-amd64/tcb.h */
@@ -52,15 +63,50 @@ INLINE void tcb_t::set_cpu(cpuid_t cpu)
     if (utcb)
     {
 	if (EXPECT_FALSE(resource_bits.have_resource(COMPATIBILITY_MODE)))
-	    utcb->ia32.processor_no = cpu;
+	    utcb->x32.processor_no = cpu;
 	else
-	    utcb->amd64.processor_no = cpu;
+	    utcb->x64.processor_no = cpu;
     }
 
     /* update the pdir cache on migration */
     if (this->space)
-	this->pdir_cache = (word_t) space->get_pagetable(get_cpu());
+	this->pdir_cache = (word_t) space->get_top_pdir_phys(get_cpu());
 }
+
+
+/**********************************************************************
+ * 
+ *            utcb state manipulation
+ *
+ **********************************************************************/
+
+INLINE void tcb_t::set_utcb_location(word_t utcb_location)
+{ 
+    /* utcb address points to mr0 at offset 0x200 */
+    myself_local.set_raw (utcb_location + 0x200);
+}
+
+INLINE word_t tcb_t::get_utcb_location()
+{
+    /*
+     * srXXX: This is rather ugly!
+     * To create a 32-bit thread in a new address space, an application
+     * must call ThreadControl without a pager, then SpaceControl with
+     * appropriate flags, then ThreadControl with a pager.
+     * The ThreadControl implementation will call space_t::allocate_utcb,
+     * which is implemented in glue, and the AMD64 implementation will
+     * call this function. Therefore we update the resource bits here.
+     * To make this a little less ugly, it should be done in
+     * allocate_utcb, but unfortunately the resource bits are private.
+     * The correct way to implement this would be to maintain a list of
+     * TCBs in every address space, and update all of these in
+     * space_control.
+     */
+    if (get_space() && get_space()->is_compatibility_mode())
+	resource_bits += COMPATIBILITY_MODE;
+    return myself_local.get_raw() - 0x200;
+}
+
 
 /**
  * read value of message register
@@ -70,7 +116,7 @@ INLINE word_t tcb_t::get_mr(word_t index)
 {
     if (EXPECT_FALSE(resource_bits.have_resource(COMPATIBILITY_MODE)))
     {
-	x32::word_t result = get_utcb()->ia32.mr[index];
+	x32::word_t result = get_utcb()->x32.mr[index];
 	/* Sign-extend the label (mainly for page fault protocol),
 	   but do not sign-extend other MRs since that would mean
 	   that page faults beyond 2G cannot be handled. */
@@ -80,7 +126,7 @@ INLINE word_t tcb_t::get_mr(word_t index)
 	    return result;
     }
     else
-	return get_utcb()->amd64.mr[index];
+	return get_utcb()->x64.mr[index];
 }
 
 /*
@@ -91,9 +137,9 @@ INLINE word_t tcb_t::get_mr(word_t index)
 INLINE void tcb_t::set_mr(word_t index, word_t value)
 {
     if (EXPECT_FALSE(resource_bits.have_resource(COMPATIBILITY_MODE)))
-	get_utcb()->ia32.mr[index] = value;
+	get_utcb()->x32.mr[index] = value;
     else
-	get_utcb()->amd64.mr[index] = value;
+	get_utcb()->x64.mr[index] = value;
 }
 
 /**
@@ -121,20 +167,20 @@ INLINE void tcb_t::copy_mrs(tcb_t *dest, word_t start, word_t count)
 		: /* output */
 		"=S"(dummy), "=D"(dummy), "=c"(dummy)
 		: /* input */
-		"c"(count), "S"(&this_utcb->ia32.mr[start]),
-		"D"(&dest_utcb->ia32.mr[start]));
+		"c"(count), "S"(&this_utcb->x32.mr[start]),
+		"D"(&dest_utcb->x32.mr[start]));
 	}
 	else
 	{
 	    if (start == 0)
 	    {
 		/* Sign-extend the label (for page fault protocol). */
-		dest_utcb->amd64.mr[0] = (s32_t) this_utcb->ia32.mr[0];
+		dest_utcb->x64.mr[0] = (s32_t) this_utcb->x32.mr[0];
 		count--;
 		start++;
 	    }
 	    for (; count > 0; count--, start++)
-		dest_utcb->amd64.mr[start] = this_utcb->ia32.mr[start];
+		dest_utcb->x64.mr[start] = this_utcb->x32.mr[start];
 	}
     }
     else
@@ -142,7 +188,7 @@ INLINE void tcb_t::copy_mrs(tcb_t *dest, word_t start, word_t count)
 	if (EXPECT_FALSE(dest->resource_bits.have_resource(COMPATIBILITY_MODE)))
 	{
 	    for (; count > 0; count--, start++)
-		dest_utcb->ia32.mr[start] = this_utcb->amd64.mr[start];
+		dest_utcb->x32.mr[start] = this_utcb->x64.mr[start];
 	}
 	else
 	{
@@ -152,8 +198,8 @@ INLINE void tcb_t::copy_mrs(tcb_t *dest, word_t start, word_t count)
 		: /* output */
 		"=S"(dummy), "=D"(dummy), "=c"(dummy)
 		: /* input */
-		"c"(count), "S"(&this_utcb->amd64.mr[start]),
-		"D"(&dest_utcb->amd64.mr[start]));
+		"c"(count), "S"(&this_utcb->x64.mr[start]),
+		"D"(&dest_utcb->x64.mr[start]));
 	}
     }
 }
@@ -165,9 +211,9 @@ INLINE void tcb_t::copy_mrs(tcb_t *dest, word_t start, word_t count)
 INLINE word_t tcb_t::get_br(word_t index)
 {
     if (EXPECT_FALSE(resource_bits.have_resource(COMPATIBILITY_MODE)))
-	return get_utcb()->ia32.br[32U-index];
+	return get_utcb()->x32.br[32U-index];
     else
-	return get_utcb()->amd64.br[32U-index];
+	return get_utcb()->x64.br[32U-index];
 }
 
 
@@ -179,9 +225,10 @@ INLINE word_t tcb_t::get_br(word_t index)
 INLINE void tcb_t::set_br(word_t index, word_t value)
 {
     if (EXPECT_FALSE(resource_bits.have_resource(COMPATIBILITY_MODE)))
-	get_utcb()->ia32.br[32U-index] = value;
+	get_utcb()->x32.br[32U-index] = value;
     else
-	get_utcb()->amd64.br[32U-index] = value;
+	get_utcb()->x64.br[32U-index] = value;
 }
 
-#endif /* !__GLUE_V4_X86__X64__IA32__TCB_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__TCB_H__ */
