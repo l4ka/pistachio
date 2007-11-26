@@ -277,11 +277,15 @@ CMD (cmd_tb_dump, cg)
     word_t mask, eventsel;
     word_t start, size, count, chunk, num, index;
     tracerecord_t * rec;
+    
     struct {
 	word_t tsc;
 	word_t pmc0;
 	word_t pmc1;
-    } old = { 0, 0, 0 }, sum = { 0, 0, 0 };
+    } old[CONFIG_SMP_MAX_CPUS], sum = { 0, 0, 0 };
+
+    for (word_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+	old[cpu].tsc = old[cpu].pmc0 = old[cpu].pmc1 = 0;
 
     tracebuffer_t * tracebuffer = get_tracebuffer ();
 
@@ -370,14 +374,15 @@ CMD (cmd_tb_dump, cg)
 	if (rec->is_kernel_event() && !tbuf_filter.pass(rec))
 	    continue;
 
+	word_t cpu = rec->cpu;
 	
 	num++;
 
-        if (! old.tsc)
+	if (! old[cpu].tsc)
 	{
-            old.tsc = rec->tsc;
-	    IF_PERFMON (old.pmc0 = rec->pmc0);
-	    IF_PERFMON (old.pmc1 = rec->pmc1);
+            old[cpu].tsc = rec->tsc;
+	    IF_PERFMON (old[cpu].pmc0 = rec->pmc0);
+	    IF_PERFMON (old[cpu].pmc1 = rec->pmc1);
 	}
 
 	threadid_t tid;
@@ -396,16 +401,16 @@ CMD (cmd_tb_dump, cg)
 
         printf ( "%6d %02d %04x %c %3d %wt %10u" IF_PERFMON("%10u%10u") "  ",
 		 index, rec->cpu, rec->get_type (), rec->is_kernel_event () ? 'k' : 'u', 
-		 rec->tpid, tid.get_raw (),  rec->tsc - old.tsc
-		 IF_PERFMON (, rec->pmc0-old.pmc0, rec->pmc1-old.pmc1));
+		 rec->tpid, tid.get_raw (),  rec->tsc - old[cpu].tsc
+		 IF_PERFMON (, rec->pmc0-old[cpu].pmc0, rec->pmc1-old[cpu].pmc1));
 
-        sum.tsc  += (rec->tsc - old.tsc);
-        IF_PERFMON (sum.pmc0 += (rec->pmc0 - old.pmc0));
-        IF_PERFMON (sum.pmc1 += (rec->pmc1 - old.pmc1));
+        sum.tsc  += (rec->tsc - old[cpu].tsc);
+        IF_PERFMON (sum.pmc0 += (rec->pmc0 - old[cpu].pmc0));
+        IF_PERFMON (sum.pmc1 += (rec->pmc1 - old[cpu].pmc1));
 
-        old.tsc = rec->tsc;
-	IF_PERFMON (old.pmc0 = rec->pmc0);
-	IF_PERFMON (old.pmc1 = rec->pmc1);
+        old[cpu].tsc = rec->tsc;
+	IF_PERFMON (old[cpu].pmc0 = rec->pmc0);
+	IF_PERFMON (old[cpu].pmc1 = rec->pmc1);
 
 	if (rec->is_kernel_event ())
 	{
