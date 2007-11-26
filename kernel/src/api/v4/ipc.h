@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/ipc.h
  * Description:   IPC declarations
@@ -64,6 +64,7 @@ class tcb_t;
 #define IPC_MR0_ERROR			(1 << 15)
 #define IPC_MR0_PAGEFAULT		((-2UL) << 4)
 
+#define IPC_NUM_SAVED_MRS		3
 
 class msg_tag_t 
 {
