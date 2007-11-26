@@ -36,11 +36,21 @@
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
 
-#if defined(CONFIG_IS_64_BIT)
+#if defined(CONFIG_IS_64BIT)
 #define __PADSTRING__ "        "
 #else
 #define __PADSTRING__ ""
 #endif
+
+u16_t dbg_get_current_cpu()
+{
+    return get_current_cpu();
+}
+
+word_t dbg_get_current_tcb()
+{
+    return (word_t) get_current_tcb();
+}
 
 
 DECLARE_CMD(cmd_show_tcb, root, 't', "showtcb",  "show thread control block");
@@ -74,17 +84,7 @@ void SECTION(SEC_KDEBUG) dump_tcb(tcb_t * tcb)
 	   tcb->wait_list.next, tcb->wait_list.prev,
 	   tcb->get_space());
     printf("USP: %p   tstate: %ws  ready: %wt:%-wt   pdir : %p\n",
-	   tcb->get_user_sp(),
-	   tcb->get_state() == thread_state_t::running		? "RUNNING" :
-	   tcb->get_state() == thread_state_t::polling		? "POLLING" :
-	   tcb->get_state() == thread_state_t::waiting_forever	? "WAIT_FE" :
-	   tcb->get_state() == thread_state_t::waiting_timeout	? "WAIT_TO" :
-	   tcb->get_state() == thread_state_t::waiting_tunneled_pf? "WAIT_PF" :
-	   tcb->get_state() == thread_state_t::locked_running	? "LCKRUNN" :
-	   tcb->get_state() == thread_state_t::locked_waiting	? "LCKWAIT" :
-	   tcb->get_state() == thread_state_t::halted		? "HALTED " :
-	   tcb->get_state() == thread_state_t::aborted		? "ABORTED" :
-								  "???????",
+	   tcb->get_user_sp(), tcb->get_state().string(),
 	   tcb->ready_list.next, tcb->ready_list.prev,
 	   tcb->pdir_cache);
     printf("KSP: %p   sndhd : %-wt  send : %wt:%-wt   pager: %t\n",
@@ -103,6 +103,9 @@ void SECTION(SEC_KDEBUG) dump_tcb(tcb_t * tcb)
 	   tcb->sensitive_prio, tcb->max_delay, tcb->current_max_delay);
     printf("resources: %p [", (word_t) tcb->resource_bits);
     tcb->resources.dump (tcb);
+    printf("]");
+    printf("   flags: %p [", (word_t) tcb->flags);
+    printf("%c", (tcb->flags.is_set (tcb_t::has_xfer_timeout)) 		? 'T' : 't');
     printf("]\n");
 
     printf("partner: %t, saved partner: %t, saved state: %s, scheduler: %t\n",
