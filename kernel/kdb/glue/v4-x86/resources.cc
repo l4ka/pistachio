@@ -41,7 +41,7 @@ void thread_resources_t::dump (tcb_t * tcb)
 	printf("COPYAREA (");
 	for (word_t i = 0;  i < COPY_AREA_COUNT; i++)
 	    for (word_t j = 0; j < COPY_AREA_PDIRS; j++)
-		printf(" %x ", copy_area_pdir_idx[i][j]);
+		printf(" %x ", copy_area_pdir_idx(i,j));
 	printf(") ");
     }
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
