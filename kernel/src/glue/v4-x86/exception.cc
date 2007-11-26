@@ -27,7 +27,6 @@ DECLARE_TRACEPOINT (X86_GP);
 DECLARE_TRACEPOINT (X86_SEGRELOAD);
 #if defined(CONFIG_X86_IO_FLEXPAGES)
 #include INC_PLAT(io_space.h)
-DECLARE_TRACEPOINT (X86_IO_PAGEFAULT);
 #endif
 
 bool send_exception_ipc(x86_exceptionframe_t * frame, word_t exception)
@@ -41,60 +40,52 @@ bool send_exception_ipc(x86_exceptionframe_t * frame, word_t exception)
 		current, current->get_scheduler().get_raw());
 
     /* setup exception IPC */
-    word_t saved_mr[NUM_EXC_REGS];
+    word_t saved_mr[NUM_EXC_REGS-IPC_NUM_SAVED_MRS];
     msg_tag_t tag;
-
-    // save message registers 
-    for (word_t i = 0; i < NUM_EXC_REGS; i++)
-	saved_mr[i] = current->get_mr(i);
-    word_t saved_br0 = current->get_br(0);
-    current->set_saved_partner (current->get_partner());
-    current->set_saved_state (current->get_state());
-
-    tag.set(0, NUM_EXC_REGS, (word_t) (-5 << 4));
     
-    current->set_mr(0, tag.raw);
-    
+    tag.set(0, 2, (word_t) (-5 << 4));
+
+    current->save_state();
+
+    tag.x.untyped += NUM_EXC_REGS - 3;
+	
+    for (int i = 0; i < NUM_EXC_REGS-IPC_NUM_SAVED_MRS; i++)
+	saved_mr[i] = current->get_mr(i+IPC_NUM_SAVED_MRS);
+	
     current->set_mr(x86_exc_reg_t::mr(0), exception); 
     for (word_t num=1; num < NUM_EXC_REGS; num++)
 	current->set_mr(x86_exc_reg_t::mr(num), frame->regs[x86_exc_reg_t::reg(num)]);
     
+    current->set_mr(0, tag.raw);
     tag = current->do_ipc(current->get_exception_handler(), 
-	current->get_exception_handler(), 
-	timeout_t::never());
+			  current->get_exception_handler(), 
+			  timeout_t::never());
 
-    if (!tag.is_error())
+    if (tag.is_error())
     {
-	word_t flags = current->get_user_flags();
-	
-	for (word_t num=0; num < NUM_EXC_REGS; num++)
-	    frame->regs[x86_exc_reg_t::reg(num)] = current->get_mr(x86_exc_reg_t::mr(num));
-    
-	/* mask eflags appropriately */
-	current->get_stack_top()[KSTACK_UFLAGS] &= X86_USER_FLAGMASK;
-	current->get_stack_top()[KSTACK_UFLAGS] |= (flags & ~X86_USER_FLAGMASK);
-
-    }
-    else
-    {
-	printf("exception delivery error no %d, tag=%x, error code=%x\n", 
-	       exception, tag.raw, current->get_error_code());
+	printf("exception delivery error tag=%x, error code=%x\n", 
+	       tag.raw, current->get_error_code());
 	
 	enter_kdebug("exception delivery error");
     }
 
-    for (word_t i = 0; i < NUM_EXC_REGS; i++)
-	current->set_mr(i, saved_mr[i]);
-    current->set_br(0, saved_br0);
-    current->set_partner(current->get_saved_partner ());
-    current->set_saved_partner (NILTHREAD);
-    current->set_state (current->get_saved_state ());
-    current->set_saved_state (thread_state_t::aborted);
-#if 0
+    
+   
+    word_t flags = current->get_user_flags();
+	
+    for (word_t num=0; num < NUM_EXC_REGS; num++)
+	frame->regs[x86_exc_reg_t::reg(num)] = current->get_mr(x86_exc_reg_t::mr(num));
+    
+    /* mask eflags appropriately */
+    current->get_stack_top()[KSTACK_UFLAGS] &= X86_USER_FLAGMASK;
+    current->get_stack_top()[KSTACK_UFLAGS] |= (flags & ~X86_USER_FLAGMASK);
+	
+    for (int i = 0; i < NUM_EXC_REGS-IPC_NUM_SAVED_MRS; i++)
+	current->set_mr(i+IPC_NUM_SAVED_MRS, saved_mr[i]);
+	
+    current->restore_state();  
+   
     return !tag.is_error();
-#else
-    return true;
-#endif
 }
 
 /**
@@ -142,43 +133,30 @@ static bool handle_faulting_instruction (x86_exceptionframe_t * frame)
 
 #if defined(CONFIG_X86_IO_FLEXPAGES)
     
-#define HANDLE_IO_PAGEFAULT(port, size)							\
-    tcb_t *tcb = get_current_tcb();							\
-	TRACEPOINT (X86_IO_PAGEFAULT, "IO-Pagefault @ %x [size %x] (current=%T)",	\
-		    (u32_t)port, (u32_t) size, TID(tcb->get_global_id()));		\
-	    handle_io_pagefault(tcb, port, size,					\
-				(addr_t)frame->regs[x86_exceptionframe_t::ipreg]);	\
-	return true;
-    
-    
     case 0xe4:  /* in  %al,      port imm8  (byte)  */
     case 0xe6:  /* out %al,      port imm8  (byte)  */
     {
 	if (!readmem (space, addr_offset(instr, 1), &i[1]))
 	    return false;
-	HANDLE_IO_PAGEFAULT(i[1], 0);
+	return handle_io_pagefault(current, i[1], 0, instr);
     }
     case 0xe5:  /* in  %eax, port imm8  (dword) */
     case 0xe7:  /* out %eax, port imm8  (dword) */
     {
 	if (!readmem (space, addr_offset(instr, 1), &i[1]))
 	    return false;
-	HANDLE_IO_PAGEFAULT(i[1], 2);
+	return handle_io_pagefault(current, i[1], 2, instr);
     }
     case 0xec:  /* in  %al,        port %dx (byte)  */
     case 0xee:  /* out %al,        port %dx (byte)  */
     case 0x6c:  /* insb		   port %dx (byte)  */
     case 0x6e:  /* outsb           port %dx (byte)  */
-    {
-	HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 0);
-    }
+	return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 0, instr);
     case 0xed:  /* in  %eax,   port %dx (dword) */
     case 0xef:  /* out %eax,   port %dx (dword) */
     case 0x6d:  /* insd	       port %dx (dword) */
     case 0x6f:  /* outsd       port %dx (dword) */
-    {
-	HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 2);
-    }
+	return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 2, instr);
     case 0x66:
     {
 	if (!readmem (space, addr_offset(instr, 1), &i[1]))
@@ -191,15 +169,13 @@ static bool handle_faulting_instruction (x86_exceptionframe_t * frame)
 	{
 	    if (!readmem (space, addr_offset(instr, 2), &i[2]))
 	    return false;
-	    HANDLE_IO_PAGEFAULT(i[2], 1);
+	    return handle_io_pagefault(current, i[2], 1, instr);
 	}
 	case 0xed:  /* in  %ax, port %dx  (word) */
 	case 0xef:  /* out %ax, port %dx  (word) */
 	case 0x6d:  /* insw     port %dx  (word) */
 	case 0x6f:  /* outsw    port %dx  (word) */
-	{
-	    HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 1);
-	}
+	    return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 1, instr);
 	}
     }
     case 0xf3:
@@ -214,29 +190,25 @@ static bool handle_faulting_instruction (x86_exceptionframe_t * frame)
         {
 	    if (!readmem (space, addr_offset(instr, 2), &i[2]))
 		return false;
-	    HANDLE_IO_PAGEFAULT(i[2], 0);
+	    return handle_io_pagefault(current, i[2], 0, instr);
         }
         case 0xe5:  /* in  %eax, port imm8  (dword) */
         case 0xe7:  /* out %eax, port imm8  (dword) */
         {
 	    if (!readmem (space, addr_offset(instr, 2), &i[2]))
 		return false;
-	    HANDLE_IO_PAGEFAULT(i[2], 2);
+	    return handle_io_pagefault(current, i[2], 2, instr);
         }
         case 0xec:  /* in  %al,    port %dx (byte)  */
         case 0xee:  /* out %al,    port %dx (byte)  */
         case 0x6c:  /* insb        port %dx (byte)  */
         case 0x6e:  /* outsb       port %dx (byte)  */
-        {
-	    HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 0);
-        }
+	    return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 0, instr);
         case 0xed:  /* in  %eax,   port %dx (dword) */
         case 0xef:  /* out %eax,   port %dx (dword) */
         case 0x6d:  /* insd        port %dx (dword) */
         case 0x6f:  /* outsd       port %dx (dword) */
-        {
-	    HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 2);
-        }
+	    return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 2, instr);
         case 0x66:
 	{	    
             /* operand size override prefix */
@@ -249,15 +221,13 @@ static bool handle_faulting_instruction (x86_exceptionframe_t * frame)
             {
 		if (!readmem (space, addr_offset(instr, 3), &i[3]))
 		    return false;
-		HANDLE_IO_PAGEFAULT(i[3], 1);
+		return handle_io_pagefault(current, i[3], 1, instr);
             }
             case 0xed:  /* in  %ax, port %dx  (word) */
             case 0xef:  /* out %ax, port %dx  (word) */
             case 0x6d:  /* insw	    port %dx  (word) */
             case 0x6f:  /* outsw    port %dx  (word) */
-            {
-		HANDLE_IO_PAGEFAULT(frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 1);
-	    }
+		return handle_io_pagefault(current, frame->regs[x86_exceptionframe_t::dreg] & 0xFFFF, 1, instr);
 	    }
 	}
 	}
@@ -358,6 +328,10 @@ extern "C" void reenter_sysexit (void);
 X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
     kdebug_check_breakin();
+
+    TRACEPOINT (X86_GP, "general protection fault @ %p, error: %x\n", 
+		frame->regs[x86_exceptionframe_t::ipreg], frame->error);
+
 #if defined(CONFIG_X86_SMALL_SPACES) && defined(CONFIG_X86_SYSENTER)
     /*
      * Check if we caught an exception in the sysexit trampoline.
@@ -418,8 +392,6 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     if (handle_faulting_instruction (frame))
 	return;
 
-    TRACEPOINT (X86_GP, "general protection fault @ %p, error: %x\n", 
-		frame->regs[x86_exceptionframe_t::ipreg], frame->error);
 
     if (send_exception_ipc(frame, X86_EXC_GENERAL_PROTECTION))
 	return;
@@ -460,11 +432,11 @@ X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
 }
 
 
-word_t exc_catch_all[IDT_SIZE] UNIT("x86.exc_all");
-extern "C" void exc_catch_common_handler(x86_exceptionframe_t *frame){
+u64_t exc_catch_all[IDT_SIZE] UNIT("x86.exc_all");
+extern "C" void exc_catch_common_handler(x86_exceptionframe_t *frame)
+{
 
     word_t exc  = (frame->error - 5 - (word_t) exc_catch_all) / 8;
-    
     if (send_exception_ipc(frame, exc))
 	return;
 
