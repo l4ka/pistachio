@@ -33,7 +33,6 @@
 #define __GLUE_V4_X86__X64__CONFIG_H__
 
 #include INC_ARCH(x86.h)
-#include INC_ARCH_SA(pagebits.h)
 #include INC_GLUE_SA(offsets.h)
 
 /**
@@ -99,21 +98,18 @@
 
 /**
  * 
- * 
  * On change, adapt offsets.h!
- * 
- * TODO: As 64bit mode does not check segment limits, we might want to place two invalid
- *	 mappings around the UTCB_MAPPING
- * 
  * pml4[511] pdp[511] 
  */
 
-#define KERNEL_AREA_END		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(511) << AMD64_PDIR_BITS)
-#define APIC_MAPPINGS		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(510) << AMD64_PDIR_BITS)
+#define KERNEL_AREA_END		(~0UL)
+#define APIC_MAPPINGS_START	(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(510) << AMD64_PDIR_BITS)
 #define UTCB_MAPPING		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(509) << AMD64_PDIR_BITS)
 /*      KERNEL_OFFSET           (AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS) */
+
 #define VIDEO_MAPPING		(0xB8000)
-#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS + ((x)+1)*AMD64_4KPAGE_SIZE)
+#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS_START + ((x)+1)*X86_PAGE_SIZE)
+#define APIC_MAPPINGS_END	(APIC_MAPPINGS_START + (CONFIG_MAX_IOAPICS + 1) * X86_PAGE_SIZE)
 
 #define UTCB_MAPPING_32		((u32_t) UTCB_MAPPING)
 
@@ -130,6 +126,7 @@
  */
 #define REMAP_32BIT_END		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS)
 #define REMAP_32BIT_START	(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(507) << AMD64_PDP_BITS)		 
+#define REMAP_32BIT_SIZE	(REMAP_32BIT_END - REMAP_32BIT_START)		 
 
 /**
  * KTCB Area 
@@ -142,7 +139,6 @@
 #define KTCB_AREA_START		((REMAP_32BIT_START - KTCB_AREA_SIZE) & (AMD64_SIGN_EXTEND_MASK | AMD64_PML4_MASK | AMD64_PDP_MASK) )
 #define KTCB_AREA_END		(KTCB_AREA_START + KTCB_AREA_SIZE)
 
-#define KERNEL_AREA_START	KTCB_AREA_START
 
 
 /**
@@ -153,23 +149,15 @@
  * thus count must be less than 506/2 = 253
  */
 
+#define COPY_AREA_COUNT		1
 #define COPY_AREA_PDIRS		2
-#define COPY_AREA_COUNT		10
 #define COPY_AREA_SIZE		(__UL(2) * AMD64_PDP_SIZE)
 #define COPY_AREA_START		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS)
 #define COPY_AREA_END		(COPY_AREA_START + (COPY_AREA_COUNT * COPY_AREA_SIZE))
 
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-
-/**
- * TSS Area	pml[510] (needs its own top level entry)
- * User Area	pml[509] .. pml[0]
- * pml[510] 
- *   
- */
-#define TSS_MAPPING		(AMD64_SIGN_EXTENSION | __UL(510) << AMD64_PML4_BITS)
-#define USER_AREA_END		(AMD64_SIGN_EXTENSION | __UL(510) << AMD64_PML4_BITS)		
-#else
+#define SPACE_BACKLINK		(AMD64_SIGN_EXTENSION | __UL(510) << AMD64_PML4_BITS)
+#define KERNEL_AREA_START	(SPACE_BACKLINK)
+#define KERNEL_AREA_SIZE	(KERNEL_AREA_END - KERNEL_AREA_START + 1)
 
 /**
  * User Area
@@ -178,10 +166,10 @@
  * 
  * 
  */
-#define USER_AREA_END		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS)		
-#endif
-#define USER_AREA_START		(__UL(0))				
 
+#define USER_AREA_END		(KERNEL_AREA_START)
+#define USER_AREA_START		(__UL(0))				
+#define USER_AREA_SIZE		(USER_AREA_END - USER_AREA_START)
 
 
 
@@ -197,7 +185,12 @@
 #define ROOT_KIP_START		(0xBFF00000)
 
 /* defines the granularity kernel code and data is mapped */
-#define KERNEL_PAGE_SIZE        (AMD64_2MPAGE_SIZE)
+/* defines the granularity kernel code and data is mapped */
+#if !defined(CONFIG_X86_IO_FLEXPAGES) && defined (CONFIG_X86_PSE) 
+#define KERNEL_PAGE_SIZE	(X86_SUPERPAGE_SIZE)
+#else
+#define KERNEL_PAGE_SIZE	(X86_PAGE_SIZE)
+#endif
 
 #define VIDEO_AREA
 
@@ -213,15 +206,15 @@
  * TSS descriptor is 16 bytes long, therefore we place it at the end
  */
 #define AMD64_INVS	         0x0		/* 0		*/
-#define X86_KCS                0x8		/* 1, RPL = 0	*/
-#define X86_KDS                0x10		/* 2, RPL = 0	*/
-#define AMD64_UCS32              0x1b		/* 3, RPL = 3	*/
+#define X86_KCS                  0x8		/* 1, RPL = 0	*/
+#define X86_KDS                  0x10		/* 2, RPL = 0	*/
+#define X86_UCS32                0x1b		/* 3, RPL = 3	*/
 #define X86_UDS                  0x23		/* 4, RPL = 3	*/
 #define X86_UCS                  0x2b		/* 5, RPL = 3	*/
 #define X86_UTCBS                0x33		/* 6, RPL = 3	*/
 #define AMD64_KDBS               0x38		/* 7, RPL = 0	*/
 #define X86_TBS                  0x43		/* 8, RPL = 0	*/
-#define AMD64_TSS                0x48		/* 9, RPL = 0	*/
+#define X86_TSS			 0x48		/* 9, RPL = 0	*/
 
 /* user mode e-flags   */
 #if defined(CONFIG_X86_PVI)
@@ -254,8 +247,8 @@
  *		SS <- AMD64_SYSRETCS + 8
  */
 
-#define AMD64_SYSCALLCS		((u64_t) X86_KCS)
-#define AMD64_SYSRETCS		((u64_t) AMD64_UCS32)
+#define X86_SYSCALLCS		((u64_t) X86_KCS)
+#define X86_SYSRETCS		((u64_t) X86_UCS32)
 
 /* Syscall/Sysret RFLAGS MASK register value */
 #define AMD64_SYSCALL_FLAGMASK	(X86_FLAGS_IF | X86_FLAGS_RF | X86_FLAGS_VM)
