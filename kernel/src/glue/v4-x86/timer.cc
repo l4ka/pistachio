@@ -71,6 +71,7 @@ X86_EXCNO_ERRORCODE(timer_interrupt, IRQLINE)
 }
 
 
+
 void SECTION (".init") timer_t::init_global()
 {
     /* TODO: Should be irq_manager.register(hwirq, 8, &timer_interrupt); */
@@ -96,7 +97,7 @@ void SECTION (".init") timer_t::init_global()
 }
 
 
-void SECTION (".init") timer_t::init_cpu()
+void SECTION (".init") timer_t::init_cpu(cpuid_t cpu)
 {
 #if defined(CONFIG_CPU_X86_SIMICS)
     u64_t cpu_cycles;
@@ -107,13 +108,13 @@ void SECTION (".init") timer_t::init_cpu()
     proc_freq = cpu_cycles  / 1000;
     bus_freq = 0;
 
-    TRACE_INIT("CPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
+    TRACE_INIT("\tCPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
     return;
 
 #elif defined(CONFIG_X86_TSC)
     u64_t cpu_cycles;
 
-    TRACE_INIT("Calculating processor speed ...\n");
+    TRACE_INIT("\tCalculating processor speed ...\n");
     /* calculate processor speed */
     wait_for_second_tick();
 
@@ -125,7 +126,7 @@ void SECTION (".init") timer_t::init_cpu()
     proc_freq = cpu_cycles / 1000;
     bus_freq = 0;
 
-    TRACE_INIT("CPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
+    TRACE_INIT("\tCPU speed: %d MHz\n", (word_t)(cpu_cycles / (1000000)));
     return;
 
 #elif defined(CONFIG_CPU_X86_I486)
@@ -133,7 +134,7 @@ void SECTION (".init") timer_t::init_cpu()
      * absence of any TSC.
      * We simply assume that it's really something like an i486
      */
-    TRACE_INIT("Estimating processor speed ...\n");
+    TRACE_INIT("\tEstimating processor speed ...\n");
 
     rtc_t<0x70> rtc;
     u64_t ticks = 0;
@@ -162,7 +163,7 @@ void SECTION (".init") timer_t::init_cpu()
     proc_freq = (rounds * 10000) / (99);
     bus_freq = 0;
 
-    TRACE_INIT("Rounds: %d CPU speed: %d kHz\n",
+    TRACE_INIT("\tRounds: %d CPU speed: %d kHz\n",
                rounds, (word_t)((rounds * 10000) / (99)));
     return;
 
