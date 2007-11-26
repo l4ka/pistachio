@@ -20,7 +20,7 @@
 			   get_current_space() : get_kernel_space(),	\
 			   get_current_tcb(), frame};			\
     word_t dummy;							\
-    asm volatile							\
+    __asm__ __volatile__						\
     ("pushl %%ebp	\n"						\
      "mov %%esp, %%ebp	\n"						\
      "mov %0, %%esp	\n"						\
@@ -34,7 +34,7 @@
      : "0"(&kdb_stack[KDB_STACK_SIZE]),					\
        "1"(&param),							\
        "2"(get_kip()->kdebug_entry)					\
-     : "eax", "ecx", "edx", "memory");			
+     : "memory");			
 
 #else
 
