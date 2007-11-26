@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2006,  Karlsruhe University
+ * Copyright (C) 2003-2007,  Karlsruhe University
  *                
- * File path:     kdb/glue/v4-ia32/space.cc
+ * File path:     kdb/glue/v4-x86/x32/space.cc
  * Description:   Various space management stuff
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ void get_ptab_dump_ranges (addr_t * vaddr, word_t * num,
     case 'm':	
     {
 	*vaddr =   (addr_t) get_hex ("start address", 0UL, "00000000");
-	addr_t end_vaddr =   (addr_t) get_hex ("end address", 0xC0000000UL, "0xC0000000");
+	addr_t end_vaddr =   (addr_t) get_hex ("end address", 0UL, "00000000");
 	*num = page_table_index (max, (addr_t) ((word_t) end_vaddr - (word_t) *vaddr));
 	break;
     }
@@ -79,14 +79,6 @@ void get_ptab_dump_ranges (addr_t * vaddr, word_t * num,
     case 's':
 	*vaddr = (addr_t) SMALLSPACE_AREA_START;
 	*num = page_table_index (max, (addr_t) SMALLSPACE_AREA_SIZE);
-	break;
-#endif
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-    case 's':
-	*vaddr = (addr_t) TSS_MAPPING;
-	*num = page_table_index (max, (addr_t) (TSS_MAPPING + 4 * IA32_PAGE_SIZE)) - 
-	    page_table_index (max, (addr_t) TSS_MAPPING);
-	*num = 1;
 	break;
 #endif
     }
