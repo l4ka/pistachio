@@ -74,11 +74,11 @@ static void irq_thread()
 
              handler_tcb->lock();
              current->dequeue_send(handler_tcb);
-             handler_tcb->unlock();
-
              handler_tcb->set_tag(msg_tag_t::irq_tag());
              handler_tcb->set_partner(current->get_global_id());
-             current->set_partner(current->get_irq_handler());
+	     handler_tcb->unlock();
+	     
+	     current->set_partner(current->get_irq_handler());
              current->set_state(thread_state_t::waiting_forever);
              current->switch_to(handler_tcb);
          }
@@ -101,23 +101,37 @@ static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
 {
     tcb_t * handler_tcb = entry->tcb;
     word_t irq = entry->param[0];
-
+    threadid_t irq_tid = threadid_t::irqthread(irq);
+    tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
+	
+    
     if (!handler_tcb->is_local_cpu())
 	UNIMPLEMENTED();
 
-    if (handler_tcb->get_state().is_waiting() &&
-	( handler_tcb->get_partner().is_anythread() ||
-	  handler_tcb->get_partner() == threadid_t::irqthread(irq) ))
+    if ((handler_tcb->get_state().is_waiting() || 
+	 handler_tcb->get_state().is_locked_waiting()) &&  
+	(handler_tcb->get_partner().is_anythread() ||
+	 handler_tcb->get_partner() == threadid_t::irqthread(irq)))
     {
 	// ok, thread is waiting -- deliver IRQ
-	printf("xcpu-IRQ delivery (%d->%t)\n", irq, handler_tcb);
+	TRACE_IRQ(irq, ("xcpu-IRQ delivery (%d->%t)", irq, handler_tcb));
 	handler_tcb->set_tag(msg_tag_t::irq_tag());
 	handler_tcb->set_partner(threadid_t::irqthread(irq));
 	handler_tcb->set_state(thread_state_t::running);
 	get_current_scheduler()->enqueue_ready(handler_tcb);
     }
     else
-	UNIMPLEMENTED();
+    {
+	TRACEF("xcpu-IRQ %d handler not ready %t s=%s\n", 
+	       irq, handler_tcb, handler_tcb->get_state().string());
+	enter_kdebug("UNTESTED");
+	irq_tcb->set_tag(msg_tag_t::irq_tag());
+	irq_tcb->set_partner(handler_tcb->get_global_id());	
+	irq_tcb->set_state(thread_state_t::polling);
+	handler_tcb->lock();
+	irq_tcb->enqueue_send(handler_tcb);
+	handler_tcb->unlock();
+    }
 }
 
 /* for IRQ forwarding */
