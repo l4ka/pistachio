@@ -42,7 +42,7 @@ word_t cpu_t::count;
 
 #if defined(CONFIG_SMP)
 
-static local_apic_t<APIC_MAPPINGS> apic;
+static local_apic_t<APIC_MAPPINGS_START> apic;
 
 X86_EXCNO_ERRORCODE(smp_trigger_ipi, 0)
 {
