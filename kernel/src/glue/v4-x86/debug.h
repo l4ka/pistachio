@@ -87,6 +87,18 @@ INLINE void spin(int pos, int cpu = 0)
             :                                   \
             : "a" (0UL))
 
+
+enum x86_breakpoint_type_e {
+    x86_bp_instr =  0x00000000,
+    x86_bp_write =  0x00010000,
+    x86_bp_port  =  0x00020000,
+    x86_bp_access = 0x00030000
+};
+
+extern void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb);
+
+
+
 #else
 #define x86_dump_frame(x...)	do { } while (true)
 #define x86_dump_flags(x...)	do { } while (true)
