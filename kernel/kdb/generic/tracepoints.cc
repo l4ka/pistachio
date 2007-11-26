@@ -34,6 +34,7 @@
 #include <kdb/cmd.h>
 #include <kdb/input.h>
 #include <kdb/linker_set.h>
+#include INC_API(smp.h)
 
 #if defined(CONFIG_TRACEPOINTS) || defined(CONFIG_TRACEBUFFER)
 
