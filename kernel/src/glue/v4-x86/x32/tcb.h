@@ -35,57 +35,16 @@
 #include INC_ARCH_SA(tss.h)
 #include INC_ARCH(trapgate.h)
 #include INC_API(syscalls.h)
-#include INC_GLUE_SA(resource_functions.h)
-
-/* forward declaration */
-tcb_t * get_idle_tcb();
-
-INLINE void tcb_t::set_utcb_location(word_t utcb_location)
-{
-    utcb_t * dummy = (utcb_t*)NULL;
-    myself_local.set_raw (utcb_location + ((word_t)&dummy->mr[0]));
-}
-
-INLINE word_t tcb_t::get_utcb_location()
-{
-    utcb_t * dummy = (utcb_t*)NULL;
-    return myself_local.get_raw() - ((word_t)&dummy->mr[0]);
-}
-
-INLINE void tcb_t::set_cpu(cpuid_t cpu) 
-{ 
-    this->cpu = cpu;
-
-    // only update UTCB if there is one
-    if (get_utcb())
-	get_utcb()->processor_no = cpu;
-
-    // update the pdir cache on migration
-    if (space) 
-	this->pdir_cache = (word_t)space->get_pagetable(get_cpu());
-}
+#include INC_GLUE(resource_functions.h)
 
 
-/**
- * tcb_t::get_mr: returns value of message register
- * @index: number of message register
- */
-INLINE word_t tcb_t::get_mr(word_t index)
-{
-    ASSERT(index < IPC_NUM_MR);
-    return get_utcb()->mr[index];
-}
 
-/**
- * tcb_t::set_mr: sets the value of a message register
- * @index: number of message register
- * @value: value to set
- */
-INLINE void tcb_t::set_mr(word_t index, word_t value)
-{
-    ASSERT(index < IPC_NUM_MR);
-    get_utcb()->mr[index] = value;
-}
+/**********************************************************************
+ * 
+ *            utcb state manipulation
+ *
+ **********************************************************************/
+
 
 /**
  * copies a set of message registers from one UTCB to another
@@ -107,7 +66,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
        transfers */
     __asm__ __volatile__ (
 	"cld\n"
-	"rep   movsl (%%esi), (%%edi)\n"
+	"rep  movsl (%0), (%1)\n"
 	: /* output */
 	"=S"(dummy), "=D"(dummy), "=c"(dummy)
 	: /* input */
@@ -119,55 +78,6 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 #endif
 }
 
-/**
- * tcb_t::get_br: returns value of buffer register
- * @index: number of buffer register
- */
-INLINE word_t tcb_t::get_br(word_t index)
-{
-    ASSERT(index < IPC_NUM_BR);
-    return get_utcb()->br[32U-index];
-}
-
-/**
- * tcb_t::set_br: sets the value of a buffer register
- * @index: number of buffer register
- * @value: value to set
- */
-INLINE void tcb_t::set_br(word_t index, word_t value)
-{
-    ASSERT(index < IPC_NUM_BR);
-    get_utcb()->br[32U-index] = value;
-}
-
-
-
-
-INLINE void tcb_t::allocate()
-{
-    __asm__ __volatile__(
-	"orl $0, %0\n"
-	: 
-	: "m"(*this));
-
-}
-
-INLINE void tcb_t::set_space(space_t * space)
-{
-    this->space = space;
-    this->pdir_cache = (word_t)space->get_pagetable(get_cpu());
-}
-
-INLINE word_t * tcb_t::get_stack_top()
-{
-    return (word_t*)addr_offset(this, KTCB_SIZE);
-}
-
-INLINE void tcb_t::init_stack()
-{
-    stack = get_stack_top();
-    //TRACE("stack = %p\n", stack);
-}
 
 
 
@@ -177,9 +87,24 @@ INLINE void tcb_t::init_stack()
  *
  **********************************************************************/
 
-#ifndef BUILD_TCB_LAYOUT
+#if !defined(BUILD_TCB_LAYOUT)
 #include <tcb_layout.h>
+#include <kdb/tracepoints.h>
 #include <kdb/tracebuffer.h>
+
+/**
+ * initial_switch_to: switch to first thread
+ */
+INLINE void NORETURN initial_switch_to (tcb_t * tcb)
+{
+    asm("movl %0, %%esp\n"
+	"ret\n"
+	:
+	: "r"(tcb->stack));
+
+    while (true)
+	/* do nothing */;
+}
 
 /**
  * tcb_t::switch_to: switches to specified tcb
@@ -290,9 +215,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"i" (OFS_TCB_STACK),			// 4
 	"i" (OFS_TCB_SPACE),			// 5
 	"i" (OFS_TCB_PDIR_CACHE),		// 6
-	"a" ((word_t) dest->space
-	     + (CONFIG_SMP_MAX_CPUS * IA32_PAGE_SIZE)
-	     + (SMALL_SPACE_ID >> IA32_PAGEDIR_BITS) * 4) // 7
+	"a" ((word_t) dest->space->smallid())	// 7
 	:
 	"ecx", "edx", "memory");
 
@@ -306,21 +229,14 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	
 	"movl	%%esp, %c4(%1)	\n\t"	/* switch stacks	*/
 	"movl	%c4(%2), %%esp	\n\t"
-#ifndef CONFIG_CPU_X86_P4
-	"movl	%%cr3, %8	\n\t"	/* load current ptab */
-	"cmpl	$0, %c5(%2)	\n\t"	/* if kernel thread-> use current */
-	"je	2f		\n\t"
-#endif
 	"cmpl	%7, %8		\n\t"	/* same page dir?	*/
 	"je	2f		\n\t"
-#ifdef CONFIG_CPU_X86_P4
 	"cmpl	$0, %c5(%2)	\n\t"	/* kernel thread (space==NULL)?	*/
 	"jne	1f		\n\t"
 	"movl	%8, %c6(%2)	\n\t"	/* rewrite dest->pdir_cache */
 	"jmp	2f		\n\t"
 
 	"1:			\n\t"
-#endif
 	"movl	%7, %%cr3	\n\t"	/* reload pagedir */
 	"2:			\n\t"
 	"popl	%%edx		\n\t"	/* load activation addr */
@@ -341,11 +257,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"i" (OFS_TCB_SPACE),			// 5
 	"i" (OFS_TCB_PDIR_CACHE),		// 6
 	"a" (dest->pdir_cache),			// 7
-#ifdef CONFIG_CPU_X86_P4
 	"c" (this->pdir_cache)			// 8
-#else
-	"c" (dest->pdir_cache)			// dummy
-#endif
 	: "edx", "memory"
 	);
 
@@ -354,8 +266,6 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
     if ( EXPECT_FALSE(resource_bits) )
 	resources.load(this);
 }
-#endif
-
 
 /**********************************************************************
  *
@@ -426,39 +336,6 @@ INLINE void tcb_t::notify(void (*func)(word_t, word_t), word_t arg1, word_t arg2
     *(--stack) = (word_t)func;
 }
 
-/* 
- * access functions for ex-regs'able registers
- */
-INLINE addr_t tcb_t::get_user_ip()
-{
-    return (addr_t)get_stack_top()[KSTACK_UIP];
-}
-
-INLINE addr_t tcb_t::get_user_sp()
-{
-    return (addr_t)get_stack_top()[KSTACK_USP];
-}
-
-INLINE word_t tcb_t::get_user_flags()
-{
-    return (word_t)get_stack_top()[KSTACK_UFLAGS];
-}
-
-INLINE void tcb_t::set_user_ip(addr_t ip)
-{
-    get_stack_top()[KSTACK_UIP] = (u32_t)ip;
-}
-
-INLINE void tcb_t::set_user_sp(addr_t sp)
-{
-    get_stack_top()[KSTACK_USP] = (u32_t)sp;
-}
-
-INLINE void tcb_t::set_user_flags(const word_t flags)
-{
-    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~X86_USER_FLAGMASK)) | (flags & X86_USER_FLAGMASK);
-}
-
 INLINE void tcb_t::return_from_ipc (void)
 {
     asm("movl %0, %%esp\n"
@@ -481,35 +358,36 @@ INLINE void tcb_t::return_from_user_interruption (void)
 	: "r"(&get_stack_top()[- sizeof(x86_exceptionframe_t)/4 - 2]));
 }
 
-
 /**********************************************************************
  *
  *                  copy-area related functions
  *
  **********************************************************************/
 
-INLINE void tcb_t::adjust_for_copy_area (tcb_t * dst,
-					 addr_t * saddr, addr_t * daddr)
-{
-    resources.enable_copy_area (this, saddr, dst, daddr);
-}
 
-INLINE void tcb_t::release_copy_area (void)
-{
-    resources.release_copy_area (this, true);
-}
+/**
+ * Retrieve the real address associated with a copy area address.
+ *
+ * @param addr		address within copy area
+ *
+ * @return address translated into a regular user-level address
+ */
 
 INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
 {
     ASSERT (space->is_copy_area (addr));
 
     word_t copyarea_num = 
-	(((word_t) addr - COPY_AREA_START) >> IA32_PAGEDIR_BITS) /
-	(COPY_AREA_SIZE >> IA32_PAGEDIR_BITS);
+	(((word_t) addr - COPY_AREA_START) >> IA32_PDIR_BITS) /
+	(COPY_AREA_SIZE >> IA32_PDIR_BITS);
 
     return addr_offset (resources.copy_area_real_address (copyarea_num),
 			(word_t) addr & (COPY_AREA_SIZE-1));
 }
+
+#endif /* !defined(BUILD_TCB_LAYOUT) */
+
+
 
 
 /**********************************************************************
@@ -518,37 +396,11 @@ INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
  *
  **********************************************************************/
 
-INLINE tcb_t * addr_to_tcb (addr_t addr)
-{
-    return (tcb_t *) ((word_t) addr & KTCB_MASK);
-}
-
 INLINE tcb_t * get_current_tcb()
 {
     addr_t stack;
     asm ("lea -4(%%esp), %0" :"=r" (stack));
-    return addr_to_tcb (stack);
-}
-
-#ifdef CONFIG_SMP
-INLINE cpuid_t get_current_cpu()
-{
-    return get_idle_tcb()->get_cpu();
-}
-#endif
-
-/**
- * initial_switch_to: switch to first thread
- */
-INLINE void __attribute__((noreturn)) initial_switch_to(tcb_t * tcb) 
-{
-    asm("movl %0, %%esp\n"
-	"ret\n"
-	:
-	: "r"(tcb->stack));
-
-    while (true)
-	/* do nothing */;
+    return (tcb_t *) ((word_t) stack & KTCB_MASK);
 }
 
 /**
@@ -577,11 +429,13 @@ INLINE void ipc_string_copy(void *dst, const void *src, word_t len)
 #endif
 }
 
+
 /**********************************************************************
  *
  *                  architecture-specific functions
  *
  **********************************************************************/
+
 
 /**
  * initialize architecture-dependent root server properties based on
