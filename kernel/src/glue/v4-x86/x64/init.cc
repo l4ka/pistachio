@@ -63,6 +63,7 @@
 #include INC_GLUE_SA(x32comp/init.h)
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
+
 amd64_cpu_features_t boot_cpu_ft UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
 x86_tss_t tss UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
 bool tracebuffer_initialized UNIT("x86.cpulocal");
@@ -118,77 +119,13 @@ void SECTION(SEC_INIT) check_cpu_features()
     amd64_cache_line_size = boot_cpu_ft.get_l1_cache().d.dcache.l_size;
 }
 
-/**
- * Initialize boot memory 
- * 
- */
-
-void SECTION(SEC_INIT) init_bootmem (void)
-{
-    
-    extern u8_t _start_bootmem[];
-    extern u8_t _end_bootmem[];
-    
-    
-    for (u8_t * p = _start_bootmem; p < _end_bootmem; p++){
-	*p = 0;
-    }
-
-    kmem.init(start_bootmem, end_bootmem); 
-}
-
-
-
-void add_more_kmem (void)
-{
-
-    /* 
-     * Scan memory descriptors for a block of reserved physical memory
-     * that is within the range of (to be) contiguously mapped
-     * physical memory.  If there's one, it has been set up by the
-     * boot loader for us. 
-     */
-    
-    bool found = false;
-
-    for (word_t i = 0;
-         i < get_kip()->memory_info.get_num_descriptors();
-         i++)
-    {
-        memdesc_t* md = get_kip()->memory_info.get_memdesc(i);
-
-        if (!md->is_virtual() &&
-            (md->type() == memdesc_t::reserved) &&
-            (word_t) md->high() <= KERNEL_AREA_END)
-        {
-	    TRACE_INIT("Using region %x size %x for kernel memory\n", md->low(), md->size());
-            /* Map region kernel writable  */
-            get_kernel_space()->remap_area(
-                phys_to_virt(md->low()), md->low(),
-                (KERNEL_PAGE_SIZE == AMD64_2MPAGE_SIZE)
-                 ? pgent_t::size_2m
-                 : pgent_t::size_4k,
-                (md->size() + (KERNEL_PAGE_SIZE-1)) & ~(KERNEL_PAGE_SIZE-1),
-                true, true, true);
-
-            /* Add it to allocator */
-            kmem.add(phys_to_virt(md->low()),
-                     md->size());
-	    found = true;
-        }
-    }
-    
-    if (!found)
-	TRACE_INIT("Did not find any region usable for kernel memory\n");
-
-}
-
 void SECTION(SEC_INIT) init_meminfo (void)
 {
 
     extern word_t _memory_descriptors_size[];
 
-    if (get_kip()->memory_info.get_num_descriptors() == (word_t) &_memory_descriptors_size){
+    if (get_kip()->memory_info.get_num_descriptors() == (word_t) &_memory_descriptors_size)
+    {
 	TRACE_INIT("\tBootloader did not patch memory info...\n");
 	get_kip()->memory_info.n = 0;
     }
@@ -252,23 +189,19 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
     gdt.segdsc[GDT_IDX(X86_UDS)].set_seg((u64_t) 0, x86_segdesc_t::data, 3, x86_segdesc_t::m_long);
     
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
-    gdt.segdsc[GDT_IDX(AMD64_UCS32)].set_seg((u64_t) 0, x86_segdesc_t::code, 3, x86_segdesc_t::m_comp);
+    gdt.segdsc[GDT_IDX(X86_UCS32)].set_seg((u64_t) 0, x86_segdesc_t::code, 3, x86_segdesc_t::m_comp);
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
     /* TODO: Assertion correct ? */
-    ASSERT(unsigned(cpuid * AMD64_CACHE_LINE_SIZE) < AMD64_2MPAGE_SIZE);
+    ASSERT(unsigned(cpuid * AMD64_CACHE_LINE_SIZE) < X86_SUPERPAGE_SIZE);
     
     /* Set TSS */
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-    gdt.tssdsc.set_seg((u64_t) TSS_MAPPING, sizeof(amd64_tss_t) - 1);
-#else 
     gdt.tssdsc.set_seg((u64_t) &tss, sizeof(amd64_tss_t) - 1);
-#endif    
 
     /* Load descriptor registers */
     x86_descreg_t gdtr((word_t) &gdt, sizeof(gdt));
     gdtr.setdescreg(x86_descreg_t::gdtr);
-    x86_descreg_t tr(AMD64_TSS);
+    x86_descreg_t tr(X86_TSS);
     tr.setselreg(x86_descreg_t::tr);
 
 
@@ -340,7 +273,7 @@ void setup_msrs (void)
 #endif
 
     /* sysret (63..48) / syscall (47..32)  CS/SS MSR */
-    x86_wrmsr(AMD64_STAR_MSR, ((AMD64_SYSRETCS << 48) | (AMD64_SYSCALLCS << 32)));
+    x86_wrmsr(AMD64_STAR_MSR, ((X86_SYSRETCS << 48) | (X86_SYSCALLCS << 32)));
     
     /* long mode syscalls MSR */
     x86_wrmsr(AMD64_LSTAR_MSR, (u64_t)(syscall_entry));
@@ -348,13 +281,10 @@ void setup_msrs (void)
     /* compatibility mode syscalls MSR */
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 #if defined(CONFIG_X86_EM64T)
-    x86_wrmsr(X86_SYSENTER_CS_MSR, AMD64_SYSCALLCS);
+    x86_wrmsr(X86_SYSENTER_CS_MSR, X86_SYSCALLCS);
     x86_wrmsr(X86_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u64_t)(TSS_MAPPING) + 4);
-#else
     x86_wrmsr(X86_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
-#endif
+    
 #else /* !defined(CONFIG_X86_EM64T) */
     x86_wrmsr(AMD64_CSTAR_MSR, (u64_t)(syscall_entry_32));
 #endif /* !defined(CONFIG_X86_EM64T) */
