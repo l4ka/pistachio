@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     api/v4/tcb.h
  * Description:   V4 TCB
@@ -50,6 +50,7 @@
 #include INC_GLUE(utcb.h)
 
 typedef int prio_t;
+typedef void (*requeue_callback_t)(tcb_t* tcb);
 class space_t;
 class prio_queue_t;
 
@@ -241,7 +242,7 @@ public:
     typedef union {
 	struct {
 	    /* IPC copy */
-	    word_t		saved_mr[3];
+	    word_t		saved_mr[IPC_NUM_SAVED_MRS];
 	    word_t		saved_br0;
 	    word_t		saved_error;
 
@@ -308,6 +309,10 @@ public:
     ringlist_t<tcb_t>	xcpu_list;
     cpuid_t		xcpu;
     word_t		xcpu_status;
+    
+    lockstate_t		lock_state;
+    tcb_t		*requeue;
+    requeue_callback_t	requeue_callback;
 #endif
 
 public:
@@ -329,7 +334,7 @@ private:
     space_t *		space;
 
 public:
-    bitmask_t		flags;
+    bitmask_t<word_t>	flags;
     arch_ktcb_t		arch;
 
 public:
