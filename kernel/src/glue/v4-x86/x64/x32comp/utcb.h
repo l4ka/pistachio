@@ -29,8 +29,8 @@
  * $Id: utcb.h,v 1.6 2006/10/21 02:02:01 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE_V4_X86__X64__IA32__UTCB_H__
-#define __GLUE_V4_X86__X64__IA32__UTCB_H__
+#ifndef __GLUE_V4_X86__X64__X32__UTCB_H__
+#define __GLUE_V4_X86__X64__X32__UTCB_H__
 
 #include INC_GLUE_SA(x32comp/types.h)
 #include INC_GLUE_SA(x32comp/thread.h)
@@ -59,10 +59,10 @@ class utcb_t
 {
 public:
     union {
-	x64::utcb_t amd64;
+	x64::utcb_t x64;
 	struct {
 	    word_t padding[32];
-	    x32::utcb_t ia32;
+	    x32::utcb_t x32;
 	};
 	bool compatibility_mode;
 	utcb_exreg32_t exreg32;
@@ -105,129 +105,129 @@ INLINE void utcb_t::set_compatibility_mode(bool cm)
 INLINE void utcb_t::set_my_global_id(threadid_t tid)
 {
     if (is_compatibility_mode())
-	ia32.set_my_global_id(threadid_32(tid));
+	x32.set_my_global_id(threadid_32(tid));
     else
-	amd64.set_my_global_id(tid);
+	x64.set_my_global_id(tid);
 }
 
 INLINE word_t utcb_t::get_user_defined_handle()
 {
     if (is_compatibility_mode())
-	return ia32.get_user_defined_handle();
+	return x32.get_user_defined_handle();
     else
-	return amd64.get_user_defined_handle();
+	return x64.get_user_defined_handle();
 }
 
 INLINE void utcb_t::set_user_defined_handle(word_t handle)
 {
     if (is_compatibility_mode())
-	ia32.set_user_defined_handle(handle);
+	x32.set_user_defined_handle(handle);
     else
-	amd64.set_user_defined_handle(handle);
+	x64.set_user_defined_handle(handle);
 }
 
 INLINE threadid_t utcb_t::get_pager()
 {
     if (is_compatibility_mode())
-	return threadid(ia32.get_pager());
+	return threadid(x32.get_pager());
     else
-	return amd64.get_pager();
+	return x64.get_pager();
 }
 
 INLINE void utcb_t::set_pager(threadid_t tid)
 {
     if (is_compatibility_mode())
-	ia32.set_pager(threadid_32(tid));
+	x32.set_pager(threadid_32(tid));
     else
-	amd64.set_pager(tid);
+	x64.set_pager(tid);
 }
 
 INLINE threadid_t utcb_t::get_exception_handler()
 {
     if (is_compatibility_mode())
-	return threadid(ia32.get_exception_handler());
+	return threadid(x32.get_exception_handler());
     else
-	return amd64.get_exception_handler();
+	return x64.get_exception_handler();
 }
 
 INLINE void utcb_t::set_exception_handler(threadid_t tid)
 {
     if (is_compatibility_mode())
-	ia32.set_exception_handler(threadid_32(tid));
+	x32.set_exception_handler(threadid_32(tid));
     else
-	amd64.set_exception_handler(tid);
+	x64.set_exception_handler(tid);
 }
 
 INLINE u8_t utcb_t::get_preempt_flags()
 {
     if (is_compatibility_mode())
-	return ia32.get_preempt_flags();
+	return x32.get_preempt_flags();
     else
-	return amd64.get_preempt_flags();
+	return x64.get_preempt_flags();
 }
 
 INLINE void utcb_t::set_preempt_flags(u8_t flags)
 {
     if (is_compatibility_mode())
-	ia32.set_preempt_flags(flags);
+	x32.set_preempt_flags(flags);
     else
-	amd64.set_preempt_flags(flags);
+	x64.set_preempt_flags(flags);
 }
 
 INLINE u8_t utcb_t::get_cop_flags()
 {
     if (is_compatibility_mode())
-	return ia32.get_cop_flags();
+	return x32.get_cop_flags();
     else
-	return amd64.get_cop_flags();
+	return x64.get_cop_flags();
 }
 
 INLINE void utcb_t::set_error_code(word_t err)
 {
     if (is_compatibility_mode())
-	ia32.set_error_code(err);
+	x32.set_error_code(err);
     else
-	amd64.set_error_code(err);
+	x64.set_error_code(err);
 }
 
 INLINE word_t utcb_t::get_error_code()
 {
     if (is_compatibility_mode())
-	return ia32.get_error_code();
+	return x32.get_error_code();
     else
-	return amd64.get_error_code();
+	return x64.get_error_code();
 }
 
 INLINE timeout_t utcb_t::get_xfer_timeout()
 {
     if (is_compatibility_mode())
-	return timeout(ia32.get_xfer_timeout());
+	return timeout(x32.get_xfer_timeout());
     else
-	return amd64.get_xfer_timeout();
+	return x64.get_xfer_timeout();
 }
 
 INLINE threadid_t utcb_t::get_intended_receiver()
 {
     if (is_compatibility_mode())
-	return threadid(ia32.get_intended_receiver());
+	return threadid(x32.get_intended_receiver());
     else
-	return amd64.get_intended_receiver();
+	return x64.get_intended_receiver();
 }
 
 INLINE threadid_t utcb_t::get_virtual_sender()
 {
     if (is_compatibility_mode())
-	return threadid(ia32.get_virtual_sender());
+	return threadid(x32.get_virtual_sender());
     else
-	return amd64.get_virtual_sender();
+	return x64.get_virtual_sender();
 }
 
 INLINE void utcb_t::set_virtual_sender(threadid_t tid)
 {
     if (is_compatibility_mode())
-	ia32.set_virtual_sender(threadid_32(tid));
+	x32.set_virtual_sender(threadid_32(tid));
     else
-	amd64.set_virtual_sender(tid);
+	x64.set_virtual_sender(tid);
 }
 
-#endif /* !__GLUE_V4_X86__X64__IA32__UTCB_H__ */
+#endif /* !__GLUE_V4_X86__X64__X32__UTCB_H__ */
