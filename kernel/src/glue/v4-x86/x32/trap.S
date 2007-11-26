@@ -34,8 +34,8 @@
 #include <asmsyms.h>
 
 .macro TID_TO_TCB reg
-	shr	$THREADNO_SHIFT, \reg
-	andl	$(THREADNO_MASK << KTCB_BITS), \reg
+	shr	$VALID_THREADNO_SHIFT, \reg
+	andl	$(VALID_THREADNO_MASK << KTCB_BITS), \reg
 	add	$KTCB_AREA_START, \reg
 .endm
 
@@ -213,9 +213,7 @@ fp_save_resources_done:
 
 	/* calculate location of smallspace id in page table */
 	movl	OFS_TCB_SPACE(%esi), %eax
-	add	$((CONFIG_SMP_MAX_CPUS * IA32_PAGE_SIZE) + \
-	 	  (SMALL_SPACE_ID >> IA32_PAGEDIR_BITS) * 4), %eax
-
+	add	$OFS_SPACE_SMALLID, %eax
 	movl	__is_small, %edx
 	movl	OFS_TCB_PDIR_CACHE(%ebx), %ebp
 	cmpl	$0, (%eax)
