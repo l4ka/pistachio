@@ -34,11 +34,20 @@
 #ifndef __ARCH__X86__X64__PTAB_H__
 #define __ARCH__X86__X64__PTAB_H__
 
-#include INC_ARCH_SA(pagebits.h)
+#include INC_ARCH(x86.h)
 
 #if !defined(ASSEMBLY)
 
-class amd64_pgent_t 
+#define HW_PGSHIFTS             { 12, 21, 30, 39, 48, 64 }
+#define HW_VALID_PGSIZES        ((1 << 12) | (1 << 21))
+
+#define MDB_PGSHIFTS            { 12, 21, 30, 39, 48 }
+#define MDB_NUM_PGSIZES         (4)
+
+#define X86_PGSIZES		{ size_4k = 0, size_2m = 1, size_1g = 2, size_512g = 3, \
+				  size_sync = size_1g, size_superpage = size_2m, size_max = size_512g }
+
+class x86_pgent_t 
 {
 public:
     enum pagesize_e {
@@ -61,12 +70,13 @@ public:
 
     bool is_dirty()
 	{ return pg4k.dirty == 1; }
-    
-    /** 
-     * JS: This is only a correct superpage predicate,
-     * if PAT Tables aren't enabled 
-     * 
-     */
+
+    bool is_global ()
+	{ return pg4k.global == 1; }
+
+    bool is_cpulocal ()
+	{ return pg4k.cpulocal == 1; }
+
     bool is_superpage()
 	{ return pg2m.super == 1; }
 
@@ -85,13 +95,13 @@ public:
     addr_t get_address(const pagesize_e size = size_4k)
 	{ 
 	    if (size == size_4k)
-		return (addr_t) (raw & AMD64_4KPAGE_MASK);
+		return (addr_t) (raw & X86_PAGE_MASK);
 	    else 
-		return (addr_t) (raw & AMD64_2MPAGE_MASK);
+		return (addr_t) (raw & X86_SUPERPAGE_MASK);
 	}
 
-    amd64_pgent_t * get_ptab()
-	{ return (amd64_pgent_t*)(raw & AMD64_PTE_MASK); }
+    x86_pgent_t * get_ptab()
+	{ return (x86_pgent_t*)(raw & AMD64_PTE_MASK); }
 
     u64_t get_raw()
 	{ return raw; }
@@ -104,12 +114,12 @@ public:
     void set_entry(addr_t addr, pagesize_e size, u64_t attrib)
 	{ 
 	    if (size == size_4k){
-		raw = ((u64_t)(addr) & AMD64_4KPAGE_MASK);
-		raw |= (attrib & AMD64_4KPAGE_FLAGS_MASK);
+		raw = ((u64_t)(addr) & X86_PAGE_MASK);
+		raw |= (attrib & X86_PAGE_FLAGS_MASK);
 	    }
 	    else{
-		raw = ((u64_t)(addr) & AMD64_2MPAGE_MASK) | AMD64_2MPAGE_SUPER;
-		raw |= (attrib & AMD64_2MPAGE_FLAGS_MASK);
+		raw = ((u64_t)(addr) & X86_SUPERPAGE_MASK) | X86_PAGE_SUPER;
+		raw |= (attrib & X86_SUPERPAGE_FLAGS_MASK);
 		
 	    }
 
@@ -139,42 +149,22 @@ public:
 	this->pg4k.global = global;
     }
 
+    void set_cpulocal (bool local)
+    {
+	this->pg4k.cpulocal = local;
+    }
+
     /* used to set an entry pointing to the next table in hierarchy */
     void set_ptab_entry(addr_t addr, u32_t attrib)
 	{
-	    raw = ((u64_t)(addr) & AMD64_PTE_MASK) | AMD64_PAGE_VALID | (attrib & AMD64_PTE_FLAGS_MASK);
+	    raw = ((u64_t)(addr) & AMD64_PTE_MASK) | X86_PAGE_VALID | (attrib & AMD64_PTE_FLAGS_MASK);
 	}
 		
-    void copy(const amd64_pgent_t pgent)
+    void copy(const x86_pgent_t pgent)
 	{
 	    raw = pgent.raw;
 	}
 
-    /* SMP specific synchronization flag */
-    bool must_sync()
-    {
-	return (pg4k.sync == 1);
-    }
-
-    /* SMP specific synchronization flag */
-    void set_sync()
-    {
-	pg4k.sync = 1;
-    }
-
-
-    /* SMP specific cpu-local flag */
-    bool is_cpulocal()
-    {
-	return (pg4k.cpu_local == 1);
-    }
-
-
-    /* SMP specific cpu-local flag */
-    void set_cpulocal()
-    {
-	pg4k.cpu_local = 1;
-    }
 
 
 private:
@@ -191,9 +181,8 @@ private:
 	    u64_t pat			:1;  
 
 	    u64_t global		:1;
-	    u64_t sync                  :1;
-	    u64_t cpu_local             :1;
-	    u64_t avl			:1;
+	    u64_t cpulocal		:1;
+	    u64_t avl			:2;
 	    
 	    u64_t base			:40;
 	    u64_t available		:11;
@@ -209,12 +198,11 @@ private:
 	    u64_t cache_disabled	:1;
 	    u64_t accessed		:1;
 	    u64_t dirty			:1;
-
 	    u64_t super			:1;
+	    
 	    u64_t global		:1;
-	    u64_t sync                  :1;
-	    u64_t cpu_local             :1;
-	    u64_t avl			:1;
+	    u64_t cpulocal		:1;
+	    u64_t avl			:2;
 	    
 	    u64_t pat			:1;  
 	    u64_t mbz			:8;
