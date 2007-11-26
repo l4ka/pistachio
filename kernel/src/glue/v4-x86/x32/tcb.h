@@ -229,14 +229,21 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	
 	"movl	%%esp, %c4(%1)	\n\t"	/* switch stacks	*/
 	"movl	%c4(%2), %%esp	\n\t"
+#if !defined(CONFIG_CPU_X86_P4)
+	"movl	%%cr3, %8	\n\t"	/* load current ptab */
+	"cmpl	$0, %c5(%2)	\n\t"	/* if kernel thread-> use current */
+	"je	2f		\n\t"
+#endif
 	"cmpl	%7, %8		\n\t"	/* same page dir?	*/
 	"je	2f		\n\t"
+#if defined(CONFIG_CPU_X86_P4)
 	"cmpl	$0, %c5(%2)	\n\t"	/* kernel thread (space==NULL)?	*/
 	"jne	1f		\n\t"
 	"movl	%8, %c6(%2)	\n\t"	/* rewrite dest->pdir_cache */
 	"jmp	2f		\n\t"
 
 	"1:			\n\t"
+#endif
 	"movl	%7, %%cr3	\n\t"	/* reload pagedir */
 	"2:			\n\t"
 	"popl	%%edx		\n\t"	/* load activation addr */
@@ -257,7 +264,11 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"i" (OFS_TCB_SPACE),			// 5
 	"i" (OFS_TCB_PDIR_CACHE),		// 6
 	"a" (dest->pdir_cache),			// 7
+#if defined(CONFIG_CPU_X86_P4)
 	"c" (this->pdir_cache)			// 8
+#else
+	"c" (dest->pdir_cache)			// dummy
+#endif
 	: "edx", "memory"
 	);
 
