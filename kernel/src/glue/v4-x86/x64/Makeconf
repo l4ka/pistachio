@@ -32,8 +32,7 @@
 LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/$(SUBARCH)/linker.lds
 
 SOURCES += $(addprefix src/glue/$(API)-$(ARCH)/$(SUBARCH)/, \
-	space.cc exception.cc init.cc resources.cc \
-	trampoline.S trap.S user.cc syscalls.cc)
+	space.cc exception.cc init.cc trampoline.S trap.S user.cc syscalls.cc)
 
 CFLAGS_/src/glue/$(API)-$(ARCH)/$(SUBARCH)/pagefault = -fomit-frame-pointer
 CFLAGS_/src/glue/$(API)-$(ARCH)/$(SUBARCH)/exception = -fomit-frame-pointer
