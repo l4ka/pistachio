@@ -39,36 +39,31 @@
  *    MMU
  **********************************************************************/
 
-#define IA32_PAGEDIR_BITS	22
-#define IA32_PAGEDIR_SIZE	(__UL(1) << IA32_PAGEDIR_BITS)
-#define IA32_PAGEDIR_MASK	(~(IA32_PAGEDIR_SIZE - 1))
+#define IA32_PDIR_BITS		22
+#define IA32_PDIR_SIZE          (__UL(1) << IA32_PDIR_BITS)
+#define IA32_PDIR_MASK          (~(IA32_PDIR_SIZE - 1))
+#define IA32_PDIR_IDX(x)	((x & IA32_PDIR_MASK) >> IA32_PDIR_BITS)
 
-#define IA32_SUPERPAGE_BITS	22
-#define IA32_SUPERPAGE_SIZE	(__UL(1) << IA32_SUPERPAGE_BITS)
-#define IA32_SUPERPAGE_MASK	(~(IA32_SUPERPAGE_SIZE - 1))
+/* Pagetable 20..12  */
+#define IA32_PTAB_BITS          12
+#define IA32_PTAB_SIZE          (__UL(1) << IA32_PTAB_BITS)
+#define IA32_PTAB_MASK          ((~(IA32_PTAB_SIZE - 1))  ^ (~(IA32_PTAB_SIZE - 1)))
+#define IA32_PTAB_IDX(x)        ((x & IA32_PTAB_MASK) >> IA32_PTAB_BITS)
 
-#define IA32_PAGE_BITS		12
-#define IA32_PAGE_SIZE		(__UL(1) << IA32_PAGE_BITS)
-#define IA32_PAGE_MASK		(~(IA32_PAGE_SIZE - 1))
 
-#define IA32_PTAB_BYTES		4096
-
-#define IA32_PAGE_VALID		(1<<0)
-#define IA32_PAGE_WRITABLE	(1<<1)
-#define IA32_PAGE_USER		(1<<2)
-#define IA32_PAGE_KERNEL	(0<<2)
-#define IA32_PAGE_WRITE_THROUGH	(1<<3)
-#define IA32_PAGE_CACHE_DISABLE	(1<<4)
-#define IA32_PAGE_ACCESSED	(1<<5)
-#define IA32_PAGE_DIRTY		(1<<6)
-#define IA32_PAGE_SUPER		(1<<7)
-#define IA32_PAGE_GLOBAL	(1<<8)
-#define IA32_PAGE_FLAGS_MASK	(0x01ff)
-#define IA32_SPAGE_FLAGS_MASK	(0x11ff)
 #define IA32_PTAB_FLAGS_MASK	(0x0007)
 
+#define X86_SUPERPAGE_BITS	22
+#define X86_SUPERPAGE_SIZE	(__UL(1) << X86_SUPERPAGE_BITS)
+#define X86_SUPERPAGE_MASK	(~(X86_SUPERPAGE_SIZE - 1))
+#define X86_SUPERPAGE_FLAGS_MASK (0x11ff)
 
+#define X86_PAGE_FLAGS_MASK	 (0x01ff)
 
+#define X86_TOP_PDIR_BITS	IA32_PDIR_BITS
+#define X86_TOP_PDIR_SIZE	IA32_PDIR_SIZE
+#define X86_TOP_PDIR_IDX(x)	IA32_PDIR_IDX(x)
+#define X86_PAGEFAULT_BITS	(X86_PAGE_WRITABLE)
 /**********************************************************************
  *    CPU features (CPUID)  
  **********************************************************************/
@@ -91,7 +86,7 @@
 #define IA32_FEAT_FGPAT	(1 << 16)
 #define IA32_FEAT_PSE36	(1 << 17)
 #define IA32_FEAT_PSN	(1 << 18)
-#define IA32_FEAT_CLFLSH	(1 << 19)
+#define IA32_FEAT_CLFLH	(1 << 19)
 #define IA32_FEAT_DS	(1 << 21)
 #define IA32_FEAT_ACPI	(1 << 22)
 #define IA32_FEAT_MMX	(1 << 23)
