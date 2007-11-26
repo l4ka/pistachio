@@ -116,7 +116,7 @@ SECTIONS
 	_end_bootmem = .;
 
 	_start_init = . - KERNEL_OFFSET;
-	.init (. - KERNEL_OFFSET) :
+	.init (. - KERNEL_OFFSET) : AT (ADDR(.init))
 	{
 		*(.init)
 		*(.roinit)
@@ -142,9 +142,10 @@ SECTIONS
 		*(.comment)
 	}*/
 
-	/* all the physical address calculations */
-	_end_text_phys = _end_text - KERNEL_OFFSET;
-	_start_bootmem_phys = _start_bootmem - KERNEL_OFFSET;
-	_end_bootmem_phys = _end_bootmem - KERNEL_OFFSET;
-	_start_utramp_p = _start_utramp - KERNEL_OFFSET;
 }
+/* all the physical address calculations */
+_end_text_phys = _end_text - KERNEL_OFFSET;
+_start_bootmem_phys = _start_bootmem - KERNEL_OFFSET;
+_end_bootmem_phys = _end_bootmem - KERNEL_OFFSET;
+_start_utramp_p = _start_utramp - KERNEL_OFFSET;
+
