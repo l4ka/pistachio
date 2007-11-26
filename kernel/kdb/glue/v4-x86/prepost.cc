@@ -33,13 +33,14 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 #include <kdb/console.h>
+#include <kdb/tracepoints.h>
 
 #include <debug.h>
 #include <linear_ptab.h>
 #include INC_API(tcb.h)
 
-#include INC_ARCH(traps.h)		/* for exception numbers	*/
-#include INC_ARCH(trapgate.h)	/* for ia32_exceptionframe_t	*/
+#include INC_ARCH(traps.h)	/* for exception numbers	*/
+#include INC_ARCH(trapgate.h)	/* for x86_exceptionframe_t	*/
 
 #include INC_PLAT(nmi.h)
 extern space_t *current_disas_space;
@@ -62,22 +63,28 @@ INLINE void disas_addr (addr_t ip, char * str = "")
 
 static spinlock_t x86_kdb_lock;
 
+#if defined(CONFIG_TRACEPOINTS)
+extern bool x86_breakpoint_cpumask;
+extern bool x86_breakpoint_cpumask_kdb;
+DECLARE_TRACEPOINT(X86_BREAKPOINT);
+#endif
+
 bool kdb_t::pre() 
 {
     bool enter_kernel_debugger = true;
 
     debug_param_t * param = (debug_param_t*)kdb_param;
     x86_exceptionframe_t* f = param->frame;
-
+    
     switch (param->exception)
     {
     case X86_EXC_DEBUG:	/* single step, hw breakpoints */
     {
-	/* Debug exception */
+	/* breakpoint exception */
 	if (f->regs[x86_exceptionframe_t::freg] & (1 << 8))
 	{
 	    extern u32_t x86_last_ip;
-#if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_P4)
+#if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_P4) 
 	    extern bool x86_single_step_on_branches;
 	    if (x86_single_step_on_branches)
 	    {
@@ -103,7 +110,59 @@ bool kdb_t::pre()
 	}
 	else
 	{
+#if defined(CONFIG_TRACEPOINTS)
+	    // TCB, address, content
+	    word_t db7, db6, dbnum = 0, db = 0;
+	    __asm__ ("mov %%db7,%0": "=r"(db7));
+	    __asm__ ("mov %%db6,%0": "=r"(db6));
+	    
+	    if (db6 & 8)
+	    {
+		dbnum = 3;
+		__asm__ ("mov %%db3,%0": "=r"(db));
+	    }
+	    else if (db6 & 4)
+	    {
+		dbnum = 2;
+		__asm__ ("mov %%db2,%0": "=r"(db));
+
+	    }
+	    else if (db6 & 2)
+	    {
+		dbnum = 1;
+		__asm__ ("mov %%db1,%0": "=r"(db));
+
+	    }
+	    else if (db6 & 1)
+	    {
+		dbnum = 0;
+		__asm__ ("mov %%db0,%0": "=r"(db));
+
+	    }
+	    else 
+	    {
+		printf("--- Debug Exception NO DR---\n");
+		break;
+	    }
+	    space_t *space = kdb.kdb_current->get_space();
+	    if (!space)
+		space = get_kernel_space();
+	    
+
+	    word_t content;
+	    ENABLE_TRACEPOINT(X86_BREAKPOINT, x86_breakpoint_cpumask, 0);
+
+	    if  (! readmem(space, (addr_t) db, &content) )
+		TRACEPOINT(X86_BREAKPOINT, "breakpoint dr%d ip: %x addr %x content ########", 
+			   dbnum, f->regs[x86_exceptionframe_t::ipreg], db);
+	    else
+		TRACEPOINT(X86_BREAKPOINT, "breakpoint dr%d ip: %x addr %x content %x", 
+			   dbnum, f->regs[x86_exceptionframe_t::ipreg], db, content);
+	    
+	    return (x86_breakpoint_cpumask_kdb & (1 << get_current_cpu()));
+#else
 	    printf("--- Debug Exception ---\n");
+#endif
 	}
 	break;
     }
@@ -121,7 +180,6 @@ bool kdb_t::pre()
 	
 	unsigned char c;
 	
-
 	if (! readmem(space, addr, &c) )
 	    break;
 
@@ -153,7 +211,7 @@ bool kdb_t::pre()
 		break;
 
 	    addr_t user_addr = NULL;
-	    bool mapped;
+	    bool mapped = false;
 	    if (c == 0xb8)
 	    {
 
@@ -162,7 +220,7 @@ bool kdb_t::pre()
 		    /* movl addr32, %eax */
 		    mapped = readmem (space, addr_offset(addr, 3), (u32_t *) &user_addr);
 		else
-#endif /* defined(CONFIG_AMD64_COMPATIBILITY_MODE) */
+#endif 
 		    /* mov addr, AREG  */
 		    mapped = readmem (space, addr_offset(addr, 3), (word_t *) &user_addr);
 	    }
@@ -259,11 +317,15 @@ bool kdb_t::pre()
 		       space->get_from_user(addr_offset(addr, 1)));
 	    }
 	}
+	else
+	    printf("kdb: unknown kdb op: %x ip %x\n", 
+		   c, f->regs[x86_exceptionframe_t::ipreg]);
+	
     }
     break;
 
     default:
-	printf("--- KD# unknown reason ---\n");
+	printf("--- KD# unknown reason %d ---\n", param->exception);
 	break;
     } /* switch */
 
