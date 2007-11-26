@@ -29,6 +29,8 @@
  * $Id: io_space.cc,v 1.4 2006/12/05 15:23:16 skoglund Exp $
  *                
  ********************************************************************/
+#include <linear_ptab.h>
+#include <kdb/tracepoints.h>
 #include INC_ARCH_SA(ptab.h)
 #include INC_ARCH_SA(tss.h)
 #include INC_API(fpage.h)
@@ -37,10 +39,9 @@
 #include INC_API(thread.h)
 #include INC_GLUE(space.h)
 #include INC_PLAT(io_space.h)
-#include <linear_ptab.h>
 
 
-DECLARE_KMEM_GROUP(kmem_iofp);
+DECLARE_TRACEPOINT (X86_IO_PORT_SPACE);
 
 
 /* 
@@ -60,23 +61,15 @@ void zero_io_bitmap(space_t *space, word_t port, word_t log2size)
      * set to ~0). Create a new one, set it to 0 between port and port + size,
      * and to ~0 else
      */
-
+   
     if (space->get_io_bitmap() == tss.get_io_bitmap())
     {
 	
-	    
-	word_t *new_iopbm = (word_t*) kmem.alloc(kmem_iofp, IOPERMBITMAP_SIZE);
-	    
-	if (new_iopbm == NULL)
-	{
-	    TRACEF("zero_io_bitmap(): out of memory\n");
-	    return;
-	}
-
-	space->install_io_bitmap((addr_t) new_iopbm);
-
+	word_t *new_iopbm = (word_t *) space->install_io_bitmap(true);
+	TRACEPOINT (X86_IO_PORT_SPACE, "installed IO bitmap %x", new_iopbm);
+	
+	ASSERT(new_iopbm);
 	word_t *w = new_iopbm;
-
 	/* 
 	 * until we reach the port, all bits are set to 1 (word-wise) 
 	 */	    
@@ -86,8 +79,12 @@ void zero_io_bitmap(space_t *space, word_t port, word_t log2size)
 	/* 
 	 * Set the bits before port, zero the others 
 	 */	    
+	TRACEPOINT (X86_IO_PORT_SPACE, "clear IO bitmap %x port %d size %d -> %p",
+		    new_iopbm, port, log2size, w);
+	
 	word_t bits = min(size , BITS_WORD - (port & (BITS_WORD - 1) ) );
 	*w++ =  ~(( ~(0UL) >> (BITS_WORD - bits)) << (port & (BITS_WORD - 1))); 
+
 
 	/* 
 	 * Wordwise zero between bit port and bit port+size 
@@ -121,6 +118,9 @@ void zero_io_bitmap(space_t *space, word_t port, word_t log2size)
     /* 
      * Zero the bits after bit port 
      */	    
+    TRACEPOINT (X86_IO_PORT_SPACE, "clear IO bitmap %x port %d size %d -> %p",
+		space->get_io_bitmap(), port, log2size, w);
+
     bits = min(size , BITS_WORD - (port & (BITS_WORD - 1)) );
 
     *w++ &=  ~(( ~(0U) >> (BITS_WORD - bits)) << (port & (BITS_WORD -1))); 
@@ -149,8 +149,7 @@ void set_io_bitmap(space_t *space, word_t port, word_t log2size)
     word_t bits;
     word_t size = (1UL << log2size);
     word_t *w = (word_t *) space->get_io_bitmap();
-    
-    //TRACEF("set_io_bitmap(): port=%x, size=%x, space=%p\n", port, size, space);
+     
     
     /* 
      * Jump to the right word 
@@ -160,6 +159,8 @@ void set_io_bitmap(space_t *space, word_t port, word_t log2size)
     /* 
      * Set the bits after bit port 
      */	    
+    TRACEPOINT (X86_IO_PORT_SPACE, "set IO bitmap %x port %d size %d -> %p",
+		space->get_io_bitmap(), port, log2size, w);
   
     bits = min(size , BITS_WORD - (port & (BITS_WORD - 1)) );
     *w++ |=   ((~(0U) >> (BITS_WORD - bits)) << (port & (BITS_WORD - 1))); 
@@ -181,26 +182,6 @@ void set_io_bitmap(space_t *space, word_t port, word_t log2size)
 }
 
 
-/*
- * get_io_pbm_phys
- *
- * returns the physical address of the IO Bitmap 
- */
-
-addr_t space_t::get_io_bitmap()
-{
-
-    pgent_t *pgent;
-    pgent_t::pgsize_e pgsize;
-
-    if (this->lookup_mapping(addr_offset((addr_t) TSS_MAPPING, tss.get_io_bitmap_offset()), &pgent, &pgsize)){
-	return phys_to_virt(pgent->address(this, pgsize));
-    }
-    
-    TRACEF("BUG: get_io_bitmap_phys returns NULL\n");
-    enter_kdebug("IO-Fpage BUG");
-    return NULL;
-}
 
 /*
  * init_io_space()
@@ -224,7 +205,7 @@ void init_io_space(void)
     x86_cr4_set(X86_CR4_PVI);
 #endif
     
-
+   
 }
 
 /*
@@ -240,9 +221,9 @@ void arch_map_fpage (tcb_t * src, fpage_t snd_fpage,
 		     bool grant)
 {
 
-    //TRACEF("raw = %x, port = %x, size %x, base = %x, from = %p, to = %p\n", 
-    //   snd_fpage.raw, snd_fpage.arch.get_base(), snd_fpage.arch.get_size(), snd_base,
-    //   src->get_space(), dst->get_space());
+    TRACEPOINT (X86_IO_PORT_SPACE, "map %t, raw = %x, port = %x, size %x, base = %x, from = %p, to = %p", 
+		dst, snd_fpage.raw, snd_fpage.arch.get_base(), snd_fpage.arch.get_size(), snd_base,
+		src->get_space(), dst->get_space());
     
     if (src->get_space()->get_io_space())
     {
@@ -278,17 +259,26 @@ void arch_unmap_fpage (tcb_t * from, fpage_t fpage, bool flush)
  */
 
 
-void handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t log2size, addr_t ip)
+bool handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t log2size, addr_t ip)
 {
+
+    TRACEPOINT (X86_IO_PORT_SPACE, "IO-Pagefault @ %x [size %x] (current=%T)", 
+		(word_t) port, (word_t) log2size, TID(tcb->get_global_id()));	
+
+
     space_t *space = tcb->get_space();
     
+
     if (space == sigma0_space)
     {
 	//TRACEF("sigma0 IO Pagefault %x [%x] @ %p\n", port, log2size, ip); 
 	zero_io_bitmap(space, port, log2size);
-	return;
+	return true;
     }
-	
+    
+    if (space->sync_io_bitmap())
+	return true;
+    
     tcb->save_state ();
 
     /* generate pagefault message (rw) */
@@ -312,11 +302,12 @@ void handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t log2size, addr_t ip)
     tag = tcb->do_ipc(tcb->get_pager(), tcb->get_pager(), timeout_t::never());
     if (tag.is_error())
     {
-	printf("result tag = %p, ip = %p, port = %x, size = %x\n", tag.raw, ip, port, log2size);
+	printf("result tag = %p, ip = %p, port = %x, size = %x", tag.raw, ip, port, log2size);
 	enter_kdebug("IO-pagefault IPC error");
     }
 
     tcb->restore_state ();
 
+    return true;
 }
 
