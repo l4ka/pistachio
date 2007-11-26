@@ -248,7 +248,7 @@ SYSCALL_STUB(system_clock)
 	:
 	/* Dirty hack to get the offset of the tick variable in the
 	 * dark part of the KIP */
-	: "r"((word_t)&ticks & ~IA32_PAGE_MASK),
+	: "r"((word_t)&ticks & ~X86_PAGE_MASK),
 	  "i"(TIMER_TICK_LENGTH)
 	);
 #endif /* !CONFIG_X86_TSC */
