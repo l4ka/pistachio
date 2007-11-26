@@ -158,7 +158,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
      x86_wrmsr(PMC_MSR_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
 
 
-#elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
+#elif defined(CONFIG_CPU_X86_P4)
 
      /* disable PMCs via CCCR*/
      x86_wrmsr(PMC_MSR_IQ_CCCR(0), 3 << 16);
