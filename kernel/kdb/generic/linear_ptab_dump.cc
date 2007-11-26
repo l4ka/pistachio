@@ -77,8 +77,10 @@ CMD(cmd_dump_ptab, cg)
     space = get_space ("Space");
     size = pgent_t::size_max;
     
+    word_t cpuid = get_dec("CPU id", get_current_cpu(), NULL);
+    
     get_ptab_dump_ranges (&vaddr, &num, &max_size);
-    pg = space->pgent (page_table_index (pgent_t::size_max, vaddr));
+    pg = space->pgent (page_table_index (pgent_t::size_max, vaddr), cpuid);
 
     if (!pg)
     {
@@ -88,7 +90,11 @@ CMD(cmd_dump_ptab, cg)
 
     while (size != max_size)
     {
-	ASSERT(pg->is_subtree (space, size));
+	if (!pg->is_subtree (space, size))
+	{
+	    printf ("No subtree");
+	    return CMD_NOQUIT;
+	}
 	pg = pg->subtree (space, size--);
 	pg = pg->next (space, size, page_table_index (size, vaddr));
    }
