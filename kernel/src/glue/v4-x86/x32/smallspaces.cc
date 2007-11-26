@@ -35,6 +35,7 @@
 
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
+#include INC_API(smp.h)
 #include INC_GLUE(space.h)
 
 
@@ -48,7 +49,7 @@ DECLARE_TRACEPOINT (SMALLSPACE_SYNC);
 /**
  * Array containing the owners of small space slots.
  */
-space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> IA32_PAGEDIR_BITS];
+x86_space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS];
 
 
 /**
@@ -60,7 +61,7 @@ DEFINE_SPINLOCK (small_space_owner_lock);
 /**
  * Linked list of spaces that are polluted with small space mappings.
  */
-static space_t * polluted_spaces = NULL;
+static x86_space_t * polluted_spaces = NULL;
 
 
 /**
@@ -76,7 +77,7 @@ DEFINE_SPINLOCK (polluted_spaces_lock);
 word_t __is_small UNIT ("cpulocal");
 
 
-#if defined(CONFIG_X86_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
 /**
  * Modify global bits in the page tables of indicated space.
  *
@@ -113,14 +114,14 @@ static void modify_global_bits (space_t * space, pgent_t * pg,
 	pg = pg->next (space, pgsize, 1);
     }
 }
-#endif /* CONFIG_X86_SMALL_SPACES_GLOBAL */
+#endif /* CONFIG_IA32_SMALL_SPACES_GLOBAL */
 
 
 /*
  * When global small spaces is enabled we must do a global TLB flush
  * to get rid of the small space TLB entries.
  */
-#if defined(CONFIG_X86_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
 #define FLUSH_GLOBAL true
 #else
 #define FLUSH_GLOBAL false
@@ -128,8 +129,9 @@ static void modify_global_bits (space_t * space, pgent_t * pg,
 
 
 #if defined(CONFIG_SMP)
-static void do_xcpu_flush_tlb (cpu_mb_entry_t * entry)
+static void do_xcpu_flush_tlb(cpu_mb_entry_t * entry)
 {
+    spin(60, get_current_cpu());
     x86_mmu_t::flush_tlb (FLUSH_GLOBAL);
 }
 #endif /* CONFIG_SMP */
@@ -145,15 +147,15 @@ static void do_xcpu_flush_tlb (cpu_mb_entry_t * entry)
  *
  * @return true if conversion succeeded, false otherwise
  */
-bool space_t::make_small (smallspace_id_t id)
+bool x86_space_t::make_small (smallspace_id_t id)
 {
-    const word_t max_idx = SMALLSPACE_AREA_SIZE >> IA32_PAGEDIR_BITS;
+    const word_t max_idx = SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS;
 
     word_t size = id.size () >> 22;
     word_t offset = id.offset () >> 22;
 
-    TRACEPOINT (SMALLSPACE_CREATE, "make_small: space=%p  size=%dMB  offset=%dMB\n",
-		this, size*4, offset*4);
+    TRACEPOINT (SMALLSPACE_CREATE,
+		"make_small: space=%p  size=%dMB  offset=%dMB\n", this, size*4, offset*4);
 
     if (offset + size > max_idx)
 	return false;
@@ -207,7 +209,7 @@ bool space_t::make_small (smallspace_id_t id)
 
     small_space_owner_lock.unlock ();
 
-#if defined(CONFIG_X86_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
     // Set global bits for all pages in small space area.
     modify_global_bits (this, pgent (0), smallspace_size (), true);
 #endif
@@ -218,9 +220,9 @@ bool space_t::make_small (smallspace_id_t id)
 	extern x86_segdesc_t gdt[];
 
 	gdt[X86_UCS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
-				   3, x86_segdesc_t::code);
+				    3, x86_segdesc_t::code);
 	gdt[X86_UDS >> 3].set_seg (smallspace_offset (), smallspace_size ()-1,
-				   3, x86_segdesc_t::data);
+				    3, x86_segdesc_t::data);
 
 	reload_user_segregs ();
 
@@ -237,7 +239,7 @@ bool space_t::make_small (smallspace_id_t id)
  * operation since all stale pagedir entries in the small space area
  * of other page directories must be purged.
  */
-void space_t::make_large (void)
+void x86_space_t::make_large (void)
 {
     smallspace_id_t id = *smallid ();
 
@@ -247,9 +249,11 @@ void space_t::make_large (void)
 
     word_t size = id.size () >> 22;
     word_t offset = id.offset () >> 22;
+    
+    //ENABLE_TRACEPOINT(SMALLSPACE_ENLARGE,~0,~0);
 
     TRACEPOINT (SMALLSPACE_ENLARGE, "make_large: space=%p (current size=%dMB  offset=%dMB)\n",
-			this, size*4, offset*4);
+		this, size*4, offset*4);
 
     small_space_owner_lock.lock ();
 
@@ -262,7 +266,7 @@ void space_t::make_large (void)
 
     smallid ()->set_large ();
 
-#if defined(CONFIG_X86_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
     // Clear global bits for all pages in small space area.
     modify_global_bits (this, pgent (0), id.size (), false);
 #endif
@@ -272,13 +276,14 @@ void space_t::make_large (void)
 
     if (polluted_spaces)
     {
-	space_t * s = polluted_spaces;
-	space_t * b = s;
+	x86_space_t * s = polluted_spaces;
+	x86_space_t * b = s;
 	do {
 	    for (word_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
 	    {
-		for (word_t i = 0; i < size; i++)
-		    s->x[cpu].small[offset + i].clear ();
+		if (this->data.cpu_ptab[cpu].top_pdir) 
+		    for (word_t i = 0; i < size; i++)
+			s->data.cpu_ptab[cpu].top_pdir->small[offset + i].clear ();
 	    }
 	    s = s->get_next ();
 	} while (s != b);
@@ -294,15 +299,15 @@ void space_t::make_large (void)
 	extern x86_segdesc_t gdt[];
 
 	gdt[X86_UCS >> 3].set_seg (0, USER_AREA_END-1,
-				   3, x86_segdesc_t::code);
+				    3, x86_segdesc_t::code);
 	gdt[X86_UDS >> 3].set_seg (0, USER_AREA_END-1,
-				   3, x86_segdesc_t::data);
+				    3, x86_segdesc_t::data);
 
 	reload_user_segregs ();
 
 	// Make sure that we run on our own page table.
 	x86_mmu_t::set_active_pagetable
-	    ((u32_t) get_pagetable (get_current_tcb ()->get_cpu ()));
+	    ((u32_t) get_current_space ()->get_top_pdir_phys (get_current_tcb ()->get_cpu ()));
 
 	// Make sure that there are no stale TLB entries.
 	x86_mmu_t::flush_tlb (FLUSH_GLOBAL);
@@ -319,7 +324,7 @@ void space_t::make_large (void)
     {
 	if (cpu == get_current_cpu ())
 	    continue;
-	sync_xcpu_request (cpu, do_xcpu_flush_tlb);
+	xcpu_request (cpu, do_xcpu_flush_tlb);
     }
 #endif
 }
@@ -328,7 +333,7 @@ void space_t::make_large (void)
 /**
  * Dequeue space from the list of polluted spaces.
  */
-void space_t::dequeue_polluted (void)
+void x86_space_t::dequeue_polluted (void)
 {
     polluted_spaces_lock.lock ();
 
@@ -344,8 +349,8 @@ void space_t::dequeue_polluted (void)
     else
     {
 	// Fixup pointers of neighbor spaces.
-	space_t * n = get_next ();
-	space_t * p = get_prev ();
+	x86_space_t * n = get_next ();
+	x86_space_t * p = get_prev ();
 	n->set_prev (p);
 	p->set_next (n);
 	if (polluted_spaces == this)
@@ -362,20 +367,19 @@ void space_t::dequeue_polluted (void)
 /**
  * Enqueue into list of polluted spaces.
  */
-void space_t::enqueue_polluted (void)
+void x86_space_t::enqueue_polluted (void)
 {
     polluted_spaces_lock.lock ();
 
     if (get_next () != NULL)
     {
 	// Space already in list.
-	return;
     }
     else if (polluted_spaces != NULL)
     {
 	// Insert into list.
-	space_t * p = polluted_spaces->get_prev ();
-	space_t * n = polluted_spaces;
+	x86_space_t * p = polluted_spaces->get_prev ();
+	x86_space_t * n = polluted_spaces;
 
 	n->set_prev (this);
 	p->set_next (this);
@@ -403,30 +407,33 @@ void space_t::enqueue_polluted (void)
  *
  * @return true if a valid page directory entry was copied
  */
-bool space_t::sync_smallspace (addr_t faddr)
+bool x86_space_t::sync_smallspace (addr_t faddr)
 {
     pgent_t::pgsize_e size = pgent_t::size_max;
 
     // Get space which fault occured in.
-    space_t * fspace = (space_t *)
-	phys_to_virt (x86_mmu_t::get_active_pagetable ());
-
+    space_t * sspace = (space_t *) this;
+    space_t * fspace = space_t::top_pdir_to_space(x86_mmu_t::get_active_pagetable());
+	
     // Calculate real fault address.
     addr_t addr = addr_offset (faddr, 0 - smallspace_offset ());
 
-    pgent_t * pgent_s = pgent (page_table_index (size, addr));
+    pgent_t * pgent_s = sspace->pgent (page_table_index (size, addr));
     pgent_t * pgent_f = fspace->pgent (page_table_index (size, faddr));
 
     // Copy page directory entry if it is valid.
-    if (pgent_s->is_valid (this, size) && ! pgent_f->is_valid (this, size))
+    if (pgent_s->is_valid (sspace, size) && ! pgent_f->is_valid (fspace, size))
     {
-	TRACEPOINT (SMALLSPACE_SYNC, "smallspace_sync: s=%p:v=%p => s=%p:v=%p\n",
-		    this, addr, fspace, faddr);
+	TRACEPOINT(SMALLSPACE_SYNC,
+		   "smallspace_sync (%t, cr3 %p): s=%p:v=%p (p=%p) => s=%p:v=%p (p=%p)\n", 
+		   get_current_tcb(), x86_mmu_t::get_active_pagetable(),
+		   this, addr, pgent_s, fspace, faddr, pgent_f);
+	
 	*pgent_f = *pgent_s;
+	pgent_f->sync(fspace, size);
 
 	// Mark fault space as polluted with small space entries.
 	fspace->enqueue_polluted ();
-
 	return true;
     }
 
