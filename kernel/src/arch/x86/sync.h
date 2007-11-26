@@ -55,24 +55,62 @@ public: // to allow initializers
 #define DECLARE_SPINLOCK(name) extern spinlock_t name;
 #define DEFINE_SPINLOCK(name) spinlock_t name = {_lock: 0}
 
+#undef DEBUG_LOCK
+#define SYNC_THRESHOLD	0x8000000
 
-INLINE void spinlock_t::lock(void)
+extern "C" void sync_debug (word_t lock);
+
+INLINE void spinlock_t::lock()
 {
     word_t dummy;
+#if defined(DEBUG_LOCK)
     __asm__ __volatile__ (
-        "1:                     \n"
-        "   xchg    %1, %2      \n"
-        "   or     $0, %2      \n"
-        "   jnz     2f          \n"
-        ".section .spinlock     \n"
-        "2:                     \n"
-        "   testb   $1, %1      \n"
-        "   jne     2b          \n"
-        "   jmp     1b          \n"
-        ".previous              \n"
-        : "=r"(dummy)
-        : "m"(this->_lock), "0"(1ULL));
+        "1:                     		\n\t"
+	"mov $1, %2				\n\t"
+	"xchg	%1, %2				\n\t"
+	"test	$0xff, %2			\n\t"
+	"jnz	2f				\n\t"
+        ".section .spinlock     		\n\t"
+	"2:					\n\t"
+	"mov $"MKSTR(SYNC_THRESHOLD)", %2	\n\t" 
+	"3:					\n\t"
+	"rep; nop				\n\t"
+	"dec	%2				\n\t"
+	"jnz 4f					\n\t"
+	"lea %1, %0				\n\t"
+	"push %0				\n\t"
+	"call sync_debug			\n\t"
+	"pop %0					\n\t"
+	"4:					\n\t"
+	"testb $1, %1				\n\t" 
+	"jne 3b					\n\t"
+        "jmp    1b              		\n\t"
+        ".previous              		\n\t"
+        : "=D" (dummy)
+        : "m"(this->_lock), 
+ 	  "0"  ((word_t) 1)
+	);
+#else
+    __asm__ __volatile__ (
+        "1:                     		\n\t"
+	"xchg	%1, %2				\n\t"
+	"test	$0xff, %2			\n\t"
+	"jnz	2f				\n\t"
+        ".section .spinlock     		\n\t"
+	"2:					\n\t"
+	"rep; nop				\n\t"
+        "testb $1, %1				\n\t"
+        "jne    2b              		\n\t"
+        "jmp    1b              		\n\t"
+        ".previous              		\n\t"
+        : "=D" (dummy)
+        : "m"(this->_lock), 
+ 	  "0"  ((word_t) 1)
+	);
+#endif
+
 }
+
 
 
 #endif /* !__ARCH__X86__SYNC_H__ */
