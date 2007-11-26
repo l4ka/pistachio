@@ -39,6 +39,9 @@ enum resource_type_e {
 #if defined(CONFIG_X86_SMALL_SPACES)
     IPC_PAGE_TABLE	= 2,
 #endif
+#if defined(CONFIG_SMP)
+    SMP_PAGE_TABLE	= 3,
+#endif
 #if defined(CONFIG_IS_64BIT)
     COMPATIBILITY_MODE	= 4,
 #endif
@@ -57,18 +60,23 @@ public:
 
 public:
     void x86_no_math_exception(tcb_t * tcb);
+    void smp_xcpu_pagetable (tcb_t * tcb, cpuid_t cpu);
     void enable_copy_area (tcb_t * tcb, addr_t * saddr,
 			   tcb_t * partner, addr_t * daddr);
     void release_copy_area (tcb_t * tcb, bool disable_copyarea);
+    
     addr_t copy_area_address (word_t n);
     addr_t copy_area_real_address (word_t n);
-
+    word_t copy_area_pdir_idx (word_t n, word_t p);
+   
 private:
     addr_t fpu_state;
     word_t last_copy_area;
 
-    word_t copy_area_pdir_idx[COPY_AREA_COUNT][COPY_AREA_PDIRS];
+    word_t pdir_idx[COPY_AREA_COUNT][COPY_AREA_PDIRS];
 };
+
+
 
 
 #endif /* !__GLUE__V4_X86__RESOURCES_H__ */
