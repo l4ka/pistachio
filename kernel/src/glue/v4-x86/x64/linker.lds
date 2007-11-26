@@ -69,7 +69,7 @@ SECTIONS
 	_memory_descriptors_size =
 		(4K - ((memory_descriptors - kip) & (4K-1))) / 16;
 
-	. = ALIGN(2M);
+	. = ALIGN(KERNEL_PAGE_SIZE);
 	_start_syscalls = .;
 	.syscalls .  : AT (ADDR(.syscalls) - KERNEL_OFFSET)
 	{
@@ -95,7 +95,7 @@ SECTIONS
 		. = ALIGN(SYSCALL_ALIGN);
 		*(.user.syscall.memctrl);
 	}
-	. = ALIGN(2M);
+	. = ALIGN(KERNEL_PAGE_SIZE);
 	_end_syscalls = .;
 
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
@@ -137,14 +137,14 @@ SECTIONS
 		+ _memory_descriptors_size_32;
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
-	. = ALIGN(2M);
+	. = ALIGN(KERNEL_PAGE_SIZE);
 	_start_cpu_local = .;
 	.cpulocal . : AT (ADDR(.cpulocal) - KERNEL_OFFSET)
 	{
 		*(.data.cpulocal)
 		*(.data.x86.cpulocal)
 	}
-	. = ALIGN(2M);
+	. = ALIGN(KERNEL_PAGE_SIZE);
 	_end_cpu_local = .; 
 
 	.data . :  AT (ADDR(.data) - KERNEL_OFFSET)
@@ -173,6 +173,7 @@ SECTIONS
 	_end_text = .;
 
 
+	. = ALIGN(4K);
 	_start_bootmem = .;
 	. = . + BOOTMEM_SIZE;
 	_end_bootmem = .;
