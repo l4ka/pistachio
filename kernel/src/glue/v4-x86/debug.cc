@@ -31,6 +31,7 @@
  ********************************************************************/
 
 #include <debug.h>
+#include <kdb/tracepoints.h>
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
@@ -54,7 +55,6 @@ X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 
 X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
 {
-    TRACEF("frame %x\n", frame);
     do_enter_kdebug(frame, X86_EXC_DEBUG);
 }
 
@@ -62,7 +62,7 @@ X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
 #ifdef CONFIG_DEBUG 
 #if defined CONFIG_SMP
-   local_apic_t<APIC_MAPPINGS> local_apic;
+   local_apic_t<APIC_MAPPINGS_START> local_apic;
     local_apic.EOI();
     printf("Current Frame:\n");
     frame->dump(); 
@@ -82,5 +82,28 @@ X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
 {
     
+}
+#endif
+
+
+#if defined(DEBUG_LOCK)
+DECLARE_SPINLOCK(printf_spin_lock);
+DECLARE_TRACEPOINT(DEBUG_LOCK);
+static bool sync_dbg_enter = false;
+
+extern "C" void sync_debug (word_t address)
+{
+    printf_spin_lock.unlock();
+    //ENABLE_TRACEPOINT(DEBUG_LOCK, ~0, 0);
+    
+    if (!sync_dbg_enter)
+    {
+	sync_dbg_enter = true;
+	TRACEPOINT(DEBUG_LOCK, "CPU %d, tcb %t, spinlock BUG (lock %x) @ %x\n", 
+		   get_current_cpu(), get_current_tcb(), 
+		   address, __builtin_return_address((0)));
+	enter_kdebug("spinlock BUG");
+    }
+    sync_dbg_enter = false;
 }
 #endif
