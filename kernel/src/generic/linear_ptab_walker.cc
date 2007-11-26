@@ -1045,9 +1045,9 @@ bool space_t::readmem (addr_t vaddr, word_t * contents)
  * @return true if mapping exists, false otherwise
  */
 bool space_t::lookup_mapping (addr_t vaddr, pgent_t ** r_pg,
-			      pgent_t::pgsize_e * r_size)
+			      pgent_t::pgsize_e * r_size, cpuid_t cpu)
 {
-    pgent_t * pg = this->pgent (page_table_index (pgent_t::size_max, vaddr));
+    pgent_t * pg = this->pgent (page_table_index (pgent_t::size_max, vaddr), cpu);
     pgent_t::pgsize_e pgsize = pgent_t::size_max;
 
     for (;;)
