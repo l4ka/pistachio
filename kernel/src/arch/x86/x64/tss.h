@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2005, 2007,  Karlsruhe University
  *                
- * File path:     arch/amd64/tss.h
+ * File path:     arch/x86/x64/tss.h
  * Description:   AMD64 Task State Segment
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +52,6 @@ public:
     void set_rsp0(u64_t rsp0);
     u64_t get_rsp0();
     addr_t get_io_bitmap();
-    static word_t get_io_bitmap_offset();
 
 private:
     u32_t	reserved0;
@@ -88,11 +87,6 @@ INLINE addr_t amd64_tss_t::get_io_bitmap()
     return (addr_t) io_bitmap;
 }
 
-INLINE word_t amd64_tss_t::get_io_bitmap_offset()
-{
-    amd64_tss_t *t = (amd64_tss_t *) 0;
-    return (word_t) &(t->io_bitmap);
-}
 
 extern amd64_tss_t tss;
 
