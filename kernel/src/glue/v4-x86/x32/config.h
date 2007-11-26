@@ -50,10 +50,10 @@
 #define KIP_KIP_AREA		{ size:12 }
 #if defined(CONFIG_X86_PSE)
 /* write+read, 4M+4K */
-#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:((1 << IA32_SUPERPAGE_BITS) | (1 << IA32_PAGE_BITS)) >> 10)}
+#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:((1 << X86_SUPERPAGE_BITS) | (1 << X86_PAGE_BITS)) >> 10)}
 #else /* !CONFIG_X86_PSE */
 /* write+read, 4K */
-#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:((1 << IA32_PAGE_BITS)) >> 10)}
+#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:((1 << X86_PAGE_BITS)) >> 10)}
 #endif
 #define KIP_SYSCALL(x)		((u8_t*)(x) - (u8_t*)&kip)
 
@@ -65,8 +65,8 @@
 #define KTCB_MASK		(~(KTCB_SIZE-1))
 
 #define VALID_THREADNO_BITS	(17)
-#define THREADNO_SHIFT		(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
-#define THREADNO_MASK		((1 << VALID_THREADNO_BITS) - 1)
+#define VALID_THREADNO_SHIFT	(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
+#define VALID_THREADNO_MASK	((__UL(1) << VALID_THREADNO_BITS) - 1)
 
 
 /**********************************************************************
@@ -76,59 +76,41 @@
 /* user area */
 #define USER_AREA_START		__UL(0x00000000)
 #define USER_AREA_END		__UL(0xC0000000)
+#define USER_AREA_SIZE		(USER_AREA_END - USER_AREA_START)
 
 /* small space area */
 #define SMALLSPACE_AREA_START	(USER_AREA_END)
-#define SMALLSPACE_AREA_SIZE	__UL(0x10000000)
+#define SMALLSPACE_AREA_SIZE	(16 * IA32_PDIR_SIZE)
 #define SMALLSPACE_AREA_END	(SMALLSPACE_AREA_START + SMALLSPACE_AREA_SIZE)
 
 /* copy areas, 8MB each */
-#define COPY_AREA_PDIRS		1
 #define COPY_AREA_COUNT		1
+#define COPY_AREA_PDIRS		1
+#define COPY_AREA_SIZE		(2 * IA32_PDIR_SIZE)
 #define COPY_AREA_START		(SMALLSPACE_AREA_END)
-#define COPY_AREA_SIZE		__UL(0x00800000)
 #define COPY_AREA_END		(COPY_AREA_START + (COPY_AREA_COUNT * COPY_AREA_SIZE))
 
 /* readmem_phys remap area */
 #define MEMREAD_AREA_START	(COPY_AREA_END)
-
-/* abused some entries */
-#define KIP_AREA_INFO		(MEMREAD_AREA_START + IA32_PAGEDIR_SIZE)
-#define UTCB_AREA_INFO		(KIP_AREA_INFO + IA32_PAGEDIR_SIZE)
-#define THREAD_COUNT		(UTCB_AREA_INFO + IA32_PAGEDIR_SIZE)
-
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-#define IO_SPACE		(THREAD_COUNT + IA32_PAGEDIR_SIZE)
-#define PAGEDIR_STUFF_END	(IO_SPACE + IA32_PAGEDIR_SIZE)
-#elif defined(CONFIG_X86_SMALL_SPACES)
-#define SMALL_SPACE_ID		(THREAD_COUNT + IA32_PAGEDIR_SIZE)
-#define SEGDESC_LOW		(SMALL_SPACE_ID + IA32_PAGEDIR_SIZE)
-#define SEGDESC_HIGH		(SEGDESC_LOW + IA32_PAGEDIR_SIZE)
-#define PAGEDIR_STUFF_END	(SEGDESC_HIGH + IA32_PAGEDIR_SIZE)
-#else
-#define PAGEDIR_STUFF_END	(THREAD_COUNT + IA32_PAGEDIR_SIZE)
-#endif
+#define MEMREAD_AREA_SIZE	(2 * IA32_PDIR_SIZE)
+#define MEMREAD_AREA_END	MEMREAD_AREA_START + MEMREAD_AREA_SIZE
+#define SPACE_BACKLINK		(MEMREAD_AREA_END)
 
 /* V4 UTCB addressed via %gs:0 */
-#define MYUTCB_MAPPING		__UL(0xDF000000)
+#define UTCB_MAPPING		__UL(0xDF000000)
 
 /* trampoline to set up segment registers after sysexit */
-#define UTRAMP_MAPPING		(MYUTCB_MAPPING + IA32_PAGE_SIZE)
+#define UTRAMP_MAPPING		(UTCB_MAPPING + X86_PAGE_SIZE)
 
 #if !defined(CONFIG_MAX_IOAPICS)
 #define CONFIG_MAX_IOAPICS	0
 #endif
 
 /* device memory */
-#define APIC_MAPPINGS		(UTRAMP_MAPPING + IA32_PAGE_SIZE)
-#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS + ((x)+1)*IA32_PAGE_SIZE)
-#define APIC_MAPPINGS_END	(APIC_MAPPINGS + (CONFIG_MAX_IOAPICS + 1) * IA32_PAGE_SIZE)
+#define APIC_MAPPINGS_START	(UTRAMP_MAPPING + X86_PAGE_SIZE)
+#define IOAPIC_MAPPING(x)	(APIC_MAPPINGS_START + ((x)+1)*X86_PAGE_SIZE)
+#define APIC_MAPPINGS_END	(APIC_MAPPINGS_START + (CONFIG_MAX_IOAPICS + 1) * X86_PAGE_SIZE)
 #define VIDEO_MAPPING		(0xb8000)
-
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-/* tss (max 4 * 4K-Page) */
-#define TSS_MAPPING		(APIC_MAPPINGS_END + IA32_PAGE_SIZE)
-#endif
 
 
 /* kernel level thread control blocks */
@@ -138,8 +120,9 @@
 
 /* KERNEL_AREA
  * synched on AS creation, so include all necessary regions!!! */
-#define KERNEL_AREA_START	(MYUTCB_MAPPING)
+#define KERNEL_AREA_START	(UTCB_MAPPING)
 #define KERNEL_AREA_END		(0xFF000000UL)
+#define KERNEL_AREA_SIZE	(KERNEL_AREA_END - KERNEL_AREA_START)
 
 /* address of UTCB and KIP for root servers, at end of user-AS */
 #define ROOT_UTCB_START		(0xBF000000)
@@ -152,10 +135,10 @@
 #define ADDITIONAL_KMEM_SIZE	(0x01000000)
 
 /* defines the granularity kernel code and data is mapped */
-#if !defined(CONFIG_SMP) && defined (CONFIG_X86_PSE)
-#define KERNEL_PAGE_SIZE	(IA32_SUPERPAGE_SIZE)
+#if !defined(CONFIG_SMP) && !defined(CONFIG_X86_IO_FLEXPAGES) && defined (CONFIG_X86_PSE) 
+#define KERNEL_PAGE_SIZE	(X86_SUPERPAGE_SIZE)
 #else
-#define KERNEL_PAGE_SIZE	(IA32_PAGE_SIZE)
+#define KERNEL_PAGE_SIZE	(X86_PAGE_SIZE)
 #endif
 
 /* Cache configuration */
@@ -173,8 +156,8 @@
 #define X86_UCS		0x1b
 #define X86_UDS		0x23
 #define X86_UTCBS      	0x2b
-#define IA32_TSS		0x30
-#define IA32_KDB		0x38
+#define X86_TSS		0x30
+#define X86_KDB		0x38
 #define X86_TBS		0x43
 
 /* user mode e-flags */
