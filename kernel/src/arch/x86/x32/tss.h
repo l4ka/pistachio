@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
  *                
- * File path:     arch/ia32/tss.h
+ * File path:     arch/x86/x32/tss.h
  * Description:   IA32 Task State Segment
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,6 @@ public:
     void set_esp0(u32_t esp);
     u32_t get_esp0();
     addr_t get_io_bitmap();
-    static word_t get_io_bitmap_offset();
 
 private:
     u32_t	link;
@@ -92,12 +91,6 @@ INLINE addr_t ia32_tss_t::get_io_bitmap()
     return (addr_t) io_bitmap;
 }
 
-INLINE word_t ia32_tss_t::get_io_bitmap_offset()
-{
-    ia32_tss_t *t = (ia32_tss_t *) 0;
-    return (word_t) &(t->io_bitmap);
-}
- 
 
 extern ia32_tss_t tss;
 
