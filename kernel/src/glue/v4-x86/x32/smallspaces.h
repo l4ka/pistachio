@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/smallspaces.h
+ * File path:     glue/v4-x86/x32/smallspaces.h
  * Description:   Small space id handling
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@
 #define __GLUE_V4_X86__X32__SMALLSPACES_H__
 
 #include INC_GLUE(config.h)
+
+class space_t;
 
 class smallspace_id_t
 {
@@ -104,6 +106,8 @@ public:
     word_t get_raw (void) { return raw; }
 };
 
+
+bool is_smallspace(space_t *s);
 
 
 #endif /* !__GLUE_V4_X86__X32__SMALLSPACES_H__ */
