@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
- * File path:     bitmask.h
+ * File path:     generic/bitmask.h
  * Description:   Generic bitmask class
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -36,16 +36,16 @@
 /**
  * Generic bitmask manipulation.
  */
-class bitmask_t
+template <typename T> class bitmask_t
 {
-    word_t	maskvalue;
+    T	maskvalue;
 
 public:
 
     // Constructors
 
     inline bitmask_t (void) { }
-    inline bitmask_t (word_t initvalue) { maskvalue = initvalue; }
+    inline bitmask_t (T initvalue) { maskvalue = initvalue; }
 
     // Modification
 
@@ -82,7 +82,7 @@ public:
 
     // Conversion
 
-    inline operator word_t (void)
+    inline operator T (void)
 	{
 	    return maskvalue;
 	}
