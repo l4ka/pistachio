@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
  * File path:     api/v4/schedule.h
  * Description:   scheduling declarations
@@ -36,6 +36,15 @@
 #include INC_API(tcb.h)
 #include INC_GLUE(schedule.h)
 #include <kdb/tracepoints.h>
+
+
+#define DEBUG_SCHEDULE
+#if defined(DEBUG_SCHEDULE)
+EXTERN_TRACEPOINT(SCHEDULE_DETAILS);
+#define TRACE_SCHEDULE_DETAILS(x...)	TRACEPOINT(SCHEDULE_DETAILS, x);
+#else
+#define TRACE_SCHEDULE_DETAILS(x...)			
+#endif
 
 class prio_queue_t 
 {
@@ -93,6 +102,52 @@ private:
 public:
     tcb_t * timeslice_tcb;
 };
+
+
+
+#ifdef CONFIG_SMP
+
+class smp_requeue_t 
+{
+    tcb_t* tcb_list;
+    char cache_pad0[CACHE_LINE_SIZE - sizeof(tcb_t*)];
+public:
+    spinlock_t lock;
+    char cache_pad1[CACHE_LINE_SIZE - sizeof(spinlock_t)];
+	
+    volatile bool is_empty() { return (tcb_list == NULL); }
+	
+    void enqueue_head(tcb_t *tcb)
+	{
+	    ASSERT(lock.is_locked());
+	    ASSERT(tcb);
+	    
+	    TRACE_SCHEDULE_DETAILS("smp_requeue:enqueue_head %t (s=%s) cpu %d (head %t)", 
+	    	   tcb, tcb->get_state().string(), tcb->get_cpu(), tcb_list);
+	    tcb->requeue = tcb_list;
+	    tcb_list = tcb;
+		
+
+	}
+    tcb_t *dequeue_head()
+	{
+	    ASSERT(lock.is_locked());
+	    ASSERT(!is_empty());
+ 
+	    tcb_t * tcb = tcb_list;
+	    tcb_list = tcb->requeue;
+	    tcb->requeue = NULL;
+		
+	    TRACE_SCHEDULE_DETAILS("smp_requeue:dequeue_head %t (s=%s) cpu %d (head %t)", 
+	    	    tcb, tcb->get_state().string(), tcb->get_cpu(), tcb_list);
+
+	    return (tcb_t *) tcb;
+		
+	}
+	
+};
+#endif /* defined(CONFIG_SMP) */
+
 
 class scheduler_t
 {
@@ -373,6 +428,18 @@ public:
      * @param tcb thread control block of the thread whose quantum expired
      */
     void total_quantum_expired(tcb_t * tcb);
+    
+#ifdef CONFIG_SMP
+    void remote_enqueue_ready(tcb_t * tcb);
+    void smp_requeue(bool holdlock);
+    void unlock_requeue() 
+	{ smp_requeue_lists[get_current_cpu()].lock.unlock(); }
+
+private:
+    static smp_requeue_t smp_requeue_lists[CONFIG_SMP_MAX_CPUS];
+
+#endif
+
 
 private:
     /**
