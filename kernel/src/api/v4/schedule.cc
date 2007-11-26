@@ -53,7 +53,6 @@ volatile u64_t scheduler_t::current_time = 0;
 #define TOTAL_QUANTUM_EXPIRED (~0ULL)
 
 DECLARE_TRACEPOINT(SYSCALL_THREAD_SWITCH);
-DECLARE_TRACEPOINT(SYSCALL_SCHEDULE);
 DECLARE_TRACEPOINT(TIMESLICE_EXPIRED);
 DECLARE_TRACEPOINT(TOTAL_QUANTUM_EXPIRED);
 DECLARE_TRACEPOINT(PREEMPTION_DELAYED);
@@ -61,6 +60,67 @@ DECLARE_TRACEPOINT(PREEMPTION_DELAY_OVERRULED);
 DECLARE_TRACEPOINT(PREEMPTION_FAULT);
 DECLARE_TRACEPOINT(PREEMPTION_DELAY_REFRESH);
 DECLARE_TRACEPOINT(WAKEUP_TIMEOUT);
+
+DECLARE_TRACEPOINT(SYSCALL_SCHEDULE);
+#if defined(DEBUG_SCHEDULE)
+DECLARE_TRACEPOINT(SCHEDULE_DETAILS);
+#endif
+
+
+#ifdef CONFIG_SMP
+smp_requeue_t scheduler_t::smp_requeue_lists[CONFIG_SMP_MAX_CPUS];
+
+void scheduler_t::smp_requeue(bool holdlock)
+{
+    smp_requeue_t * rq = &smp_requeue_lists[get_current_cpu()];
+    
+    if (!rq->is_empty() || holdlock)
+    {
+	rq->lock.lock();
+	tcb_t *tcb = NULL;
+
+	while (!rq->is_empty()) 
+	{
+	    tcb = rq->dequeue_head();
+	    ASSERT( tcb->get_cpu() == get_current_cpu() );
+	    
+	    if (tcb->requeue_callback) 
+	    {
+		tcb->requeue_callback(tcb);
+		tcb->requeue_callback = NULL;
+	    }
+	    else {
+		cancel_timeout( tcb );
+		enqueue_ready( tcb );
+	    }
+	}
+	if (!holdlock) 
+	    rq->lock.unlock();
+	
+    }
+}
+
+void scheduler_t::remote_enqueue_ready(tcb_t * tcb)
+{
+    if (!tcb->requeue)
+    {
+	cpuid_t cpu = tcb->get_cpu();
+	smp_requeue_t * rq = &smp_requeue_lists[cpu];
+	rq->lock.lock();
+	if (tcb->get_cpu() != cpu) 
+	{
+	    // thread may have migrated meanwhile
+	    TRACEF("curr=%p, %p, CPU#%d != CPU#%d\n", get_current_tcb(), 
+		   tcb, cpu, tcb->get_cpu());
+	    UNIMPLEMENTED();
+	}
+	//tcb->requeue_func = __builtin_return_address(0);
+	rq->enqueue_head(tcb);
+	rq->lock.unlock();
+	smp_xcpu_trigger(cpu);
+    }
+}
+#endif
 
 
 /**
@@ -123,6 +183,11 @@ void scheduler_t::total_quantum_expired(tcb_t * tcb)
 tcb_t * scheduler_t::find_next_thread(prio_queue_t * prio_queue)
 {
     ASSERT(prio_queue);
+
+#ifdef CONFIG_SMP
+    // requeue threads which got activated by other CPUs
+    smp_requeue(false);
+#endif
 
     for (prio_t prio = prio_queue->max_prio; prio >= 0; prio--)
     {
@@ -318,6 +383,7 @@ void scheduler_t::handle_timer_interrupt()
 
 #if defined(CONFIG_SMP)
     process_xcpu_mailbox();
+    smp_requeue(false);
 #endif
 
     tcb_t * current = get_current_tcb();
@@ -664,7 +730,8 @@ void SECTION(".init") scheduler_t::start(cpuid_t cpuid)
 
 void SECTION(".init") scheduler_t::init( bool bootcpu )
 {
-    TRACE_INIT ("Initializing threading\n");
+    
+    TRACE_INIT ("Initializing threading CPU %d\n", get_current_cpu());
 
     /* wakeup list */
     wakeup_list = NULL;
