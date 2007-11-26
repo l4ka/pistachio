@@ -31,6 +31,7 @@
 #define __GLUE__V4_X86__TIMER_H__
 
 #include <timer.h>
+#include INC_API(processor.h)
 
 #if !defined(CONFIG_X86_TSC)
 // In absence of a processor cycle counter we count timer ticks
@@ -40,7 +41,7 @@ extern u64_t ticks;
 class timer_t : public generic_periodic_timer_t {
 public:
     void init_global();
-    void init_cpu();
+    void init_cpu(cpuid_t cpu);
 
     word_t get_bus_freq() { return bus_freq; }
     word_t get_proc_freq() { return proc_freq; }
