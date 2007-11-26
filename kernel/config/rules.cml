@@ -154,7 +154,7 @@ Yes here. If unsure, say No.
 #
 # trace submenu
 #
-VERBOSE_INIT	'Verbose initializion'
+VERBOSE_INIT	'Verbose initialization'
 TRACEPOINTS	'Enable Tracepoints'
 KMEM_TRACE	'Enable tracing of kernel memory'
 TRACEBUFFER	'Enable Tracebuffer' text
