@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2007,  Karlsruhe University
  *                 
-* File path:     glue/v4-ia32/init.cc
+* File path:     glue/v4-x86/x32/init.cc
  * Description:   ia32-specific initialization
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -77,12 +77,12 @@ static word_t init_pdir[1024] __attribute__((aligned(4096))) SECTION(".init.data
 #if defined (CONFIG_X86_PSE)
 
 #define MAX_KERNEL_MAPPINGS	64
-#define PAGE_ATTRIB_INIT	(IA32_PAGE_VALID | IA32_PAGE_WRITABLE | IA32_PAGE_SUPER)
+#define PAGE_ATTRIB_INIT	(X86_PAGE_VALID | X86_PAGE_WRITABLE | X86_PAGE_SUPER)
 
 #else /* !CONFIG_X86_PSE */
 
 #define MAX_KERNEL_MAPPINGS	8
-#define PAGE_ATTRIB_INIT	(IA32_PAGE_VALID | IA32_PAGE_WRITABLE)
+#define PAGE_ATTRIB_INIT	(X86_PAGE_VALID | X86_PAGE_WRITABLE)
 // 2nd-level page tables for the initial page table
 static word_t init_ptable[MAX_KERNEL_MAPPINGS][1024] __attribute__((aligned(4096))) SECTION(".init.data");
 
@@ -120,7 +120,6 @@ ia32_tss_t	tss UNIT("x86.cpulocal");
 
 
 
-
 void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 {
 #   define gdt_idx(x) ((x) >> 3)
@@ -133,8 +132,8 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
     /* MyUTCB pointer, 
      * we use a separate page for all processors allocated in space_t 
      * and have one UTCB entry per cache line in the SMP case */
-    ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < IA32_PAGE_SIZE);
-    gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)MYUTCB_MAPPING + 
+    ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < X86_PAGE_SIZE);
+    gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)UTCB_MAPPING + 
 				    (cpuid * CACHE_LINE_SIZE),
 				    sizeof(threadid_t) - 1, 
 				    3, x86_segdesc_t::data);
@@ -143,15 +142,9 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
      * The last byte in ia32_tss_t is a stopper for the IO permission bitmap.
      * That's why we set the limit in the GDT to one byte less than the actual
      * size of the structure. (IA32-RefMan, Part 1, Chapter Input/Output) */
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), TSS_MAPPING, sizeof(ia32_tss_t)-1);
-    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) TSS_MAPPING, sizeof(ia32_tss_t)-1, 
-				   0, x86_segdesc_t::tss);
-#else
     //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), &tss, sizeof(ia32_tss_t)-1);
-    gdt[gdt_idx(IA32_TSS)].set_sys((u32_t) &tss, sizeof(ia32_tss_t)-1, 
+    gdt[gdt_idx(X86_TSS)].set_sys((u32_t) &tss, sizeof(ia32_tss_t)-1, 
 				   0, x86_segdesc_t::tss);
-#endif
     
 #ifdef CONFIG_TRACEBUFFER
     if (get_tracebuffer())
@@ -165,7 +158,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 
     x86_descreg_t gdtr((word_t) &gdt, sizeof(gdt));
     gdtr.setdescreg(x86_descreg_t::gdtr);
-    x86_descreg_t tr(IA32_TSS);
+    x86_descreg_t tr(X86_TSS);
     tr.setselreg(x86_descreg_t::tr);
 
 
@@ -209,11 +202,7 @@ void setup_msrs (void)
     /* here we also setup the model specific registers for the syscalls */
     x86_wrmsr(X86_SYSENTER_CS_MSR, (u32_t)(X86_KCS));
     x86_wrmsr(X86_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
-#if defined(CONFIG_X86_IO_FLEXPAGES)
-    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u32_t)(TSS_MAPPING) + 4);
-#else
     x86_wrmsr(X86_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
-#endif
 #endif
 
 #if defined(CONFIG_X86_FXSR)
@@ -303,44 +292,6 @@ static void __attribute__((unused)) dump_pdir()
 		   &init_pdir[i], init_pdir[i]);
 }
 
-/**
- * init_bootmem: initializes the boot memory
- *
- * At system startup, a fixed amount of kernel memory is allocated
- * to allow basic initialization of the system before sigma0 is up.
- */
-void SECTION(SEC_INIT) init_bootmem (void)
-{
-    TRACE_INIT("Initializing boot memory (%p - %p)\n", 
-	       start_bootmem, end_bootmem);
-    kmem.init(start_bootmem, end_bootmem);
-
-    /* now do reservations */
-#if 0
-    get_kip()->reserved_mem0.set(start_text_phys, end_text_phys);
-    get_kip()->reserved_mem1.set(start_bootmem_phys, end_bootmem_phys);
-#else
-#warning kernel memory hack
-
-    // Mark the kernel code as reserved
-    get_kip()->reserved_mem0.set(start_text_phys, end_bootmem_phys);
-
-    // Were we booted via RMGR?
-    if (!get_kip()->main_mem.is_empty())
-    {
-        word_t end = (word_t)get_kip()->main_mem.high;
-
-        /* Allocate from end of physical memory or from end of kernel
-         *accessible physical memory, whatever is lower  */
-	if (end < virt_to_phys (KERNEL_AREA_END))
-	    end = virt_to_phys(KERNEL_AREA_END);
-        
-        get_kip()->reserved_mem1.set((addr_t) (end - ADDITIONAL_KMEM_SIZE),
-                                     (addr_t) end);
-    }
-#endif
-
-}
 
 /**
  * init_meminfo: registers memory section with KIP
@@ -390,78 +341,6 @@ static void SECTION(SEC_INIT) __attribute__((unused)) init_arch()
 {
 }
 
-void SECTION(SEC_INIT) add_more_kmem (void)
-{
-    /* Scan memory descriptors for a block of reserved physical memory
-     * that is within the range of (to be) contiguously mapped
-     * physical memory.  If there's one, it has been set up by the
-     * boot loader for us. */
-    bool found = false;
-    for (word_t i = 0;
-         i < get_kip()->memory_info.get_num_descriptors();
-         i++)
-    {
-        memdesc_t* md = get_kip()->memory_info.get_memdesc(i);
-        if (!md->is_virtual() &&
-            (md->type() == memdesc_t::reserved) &&
-            (word_t) md->high() <= KERNEL_AREA_END)
-        {
-	    // If KMEM is larger than 32 MB, allocate it chunkwise
-	    addr_t low = md->low();
-	    word_t size = md->size();
-	    const word_t chunksize = 32 * 1024 * 1024;
-	    
-	    while (size) 
-	    {
-		if (size >= chunksize )
-		{
-		    // Map region kernel writable 
-		    get_kernel_space()->remap_area(
-			phys_to_virt(low), low,
-			(KERNEL_PAGE_SIZE == IA32_SUPERPAGE_SIZE)
-			? pgent_t::size_4m
-			: pgent_t::size_4k,
-			chunksize, true, true, true);	    
-		    
-		    // Add it to allocator
-		    kmem.add(phys_to_virt(low), chunksize);
-		    
-		    low = addr_offset(low, chunksize);
-		    size -= chunksize;
-		}
-		else
-		{
-		    size = (size + (KERNEL_PAGE_SIZE-1)) & ~(KERNEL_PAGE_SIZE-1);
-		    
-		    // Map region kernel writable 
-		    get_kernel_space()->remap_area(
-			phys_to_virt(low), low,
-			(KERNEL_PAGE_SIZE == IA32_SUPERPAGE_SIZE)
-			? pgent_t::size_4m
-			: pgent_t::size_4k,
-			size, true, true, true);
-		    
-		    // Add it to allocator
-		    kmem.add(phys_to_virt(low), size);
-		    size = 0;
-		}
-	    }
-            found = true;
-        }
-    }
-    
-    /* Fall back to ol'style if no memory descriptors can be
-       found */
-    if (!found)
-    {
-        if (!get_kip()->reserved_mem1.is_empty())
-        {
-            kmem.add(phys_to_virt(get_kip()->reserved_mem1.low), 
-                     get_kip()->reserved_mem1.get_size());
-        }
-    }
-}
-
 
 
 /**
@@ -487,19 +366,19 @@ extern "C" void SECTION(SEC_INIT) init_paging()
 #if defined(CONFIG_X86_PSE)
     for (int i = 0; i < MAX_KERNEL_MAPPINGS; i++)
 	init_pdir[i] = 
-	    init_pdir[(KERNEL_OFFSET >> IA32_PAGEDIR_BITS) + i] = 
-	    (i << IA32_PAGEDIR_BITS) | PAGE_ATTRIB_INIT;
+	    init_pdir[(KERNEL_OFFSET >> IA32_PDIR_BITS) + i] = 
+	    (i << IA32_PDIR_BITS) | PAGE_ATTRIB_INIT;
 #else
     for (int i = 0; i < MAX_KERNEL_MAPPINGS; i++)
     {
         // Fill 2nd-level page table
 	for (int j = 0; j<1024; j++) 
-	    init_ptable[i][j] = ((i << IA32_PAGEDIR_BITS) |
-                                 (j << IA32_PAGE_BITS) |
+	    init_ptable[i][j] = ((i << IA32_PDIR_BITS) |
+                                 (j << X86_PAGE_BITS) |
                                  PAGE_ATTRIB_INIT);
         // Install page table in page directory
 	init_pdir[i] = 
-	    init_pdir[(KERNEL_OFFSET >> IA32_PAGEDIR_BITS) + i] = 
+	    init_pdir[(KERNEL_OFFSET >> IA32_PDIR_BITS) + i] = 
 	    (word_t)(init_ptable[i]) | PAGE_ATTRIB_INIT;
     }
 #endif /* CONFIG_X86_PSE */
