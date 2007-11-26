@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005,  Karlsruhe University
+ * Copyright (C) 2005, 2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/io_space.h
  * Description:   IO space specific declarations
@@ -59,7 +59,7 @@ INLINE fpage_t acceptor_t::get_arch_specific_rcvwindow(tcb_t *dest)
     return fpage_t::complete_arch();
 }
 
-void handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t size, addr_t ip);
+bool handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t size, addr_t ip);
 void zero_io_bitmap(space_t *space, word_t port, word_t log2size);
 void set_io_bitmap(space_t *space, word_t port, word_t log2size);
 
