@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/ipc.cc
  * Description:   Various IPC tests
@@ -32,6 +32,8 @@
 #include <l4/ipc.h>
 #include <l4/space.h>
 #include <l4/thread.h>
+#include <l4/arch.h>
+#include <l4/kdebug.h>
 #include <l4io.h>
 #include <config.h>
 
@@ -76,10 +78,11 @@ void setup_ipc_threads (void (*f1)(void), void (*f2)(void),
 			bool xcpu = false)
 {
     ipc_pf_block_address = 0;
+    
+    ipc_t1 = create_thread (!rcv_same_space);
+    ipc_t2 = create_thread (!snd_same_space,
+			    xcpu ? ((L4_ProcessorNo () + 1) % 2) : (L4_Word_t) -1);
 
-    ipc_t1 = create_thread (rcv_same_space);
-    ipc_t2 = create_thread (snd_same_space,
-			    xcpu ? ((L4_ProcessorNo () + 1) % 2) : -1);
 
     // Do not start threads unless both threads have been created.
     start_thread (ipc_t1, f1);
@@ -123,16 +126,29 @@ void setup_ipc_threads (void (*f1)(void), void (*f2)(void),
 	    if (L4_Get (&msg, 0) == ipc_pf_block_address)
 		break;
 
-	    // Touch memory
-	    volatile L4_Word_t * mem = (L4_Word_t *)
-		(L4_Get (&msg, 0) & ~(sizeof (L4_Word_t) - 1));
-	    *mem = *mem;
 
 	    L4_Clear (&msg);
-	    L4_Append (&msg,
-		       L4_MapItem (L4_FpageLog2 (L4_Get (&msg, 0), PAGE_BITS) +
-				   L4_FullyAccessible, L4_Get (&msg, 0)));
+	    L4_Fpage_t fp;
+	    fp.raw = L4_Get(&msg, 0);
 	    
+#if defined(L4_ARCH_IA32) || defined(L4_ARCH_AMD64)
+#define L4_IO_PAGEFAULT		(-8UL << 20)
+#define L4_REQUEST_MASK		( ~((~0UL) >> ((sizeof (L4_Word_t) * 8) - 20)))
+	    // If pagefault is an IO-Page, return that IO Fpage 
+	    if ((tag.raw & L4_REQUEST_MASK) != L4_IO_PAGEFAULT || !L4_IsIoFpage(fp))
+#endif
+	    {
+		// Touch memory
+		volatile L4_Word_t * mem = (L4_Word_t *)
+		    (L4_Get (&msg, 0) & ~(sizeof (L4_Word_t) - 1));
+		*mem = *mem;
+		
+		fp = L4_FpageLog2 (L4_Get (&msg, 0), PAGE_BITS) + L4_FullyAccessible;
+	    }	    
+	    
+	    if ((tid == ipc_t1 && !rcv_same_space) ||
+		(tid == ipc_t2 && !snd_same_space))
+		L4_Append (&msg,  L4_MapItem (fp, L4_Get (&msg, 0)));
 	    L4_Load (&msg);
 	    tag = L4_ReplyWait (tid, &tid);
 	}
@@ -462,9 +478,9 @@ static void simple_ipc_t2_g (void)
 
 static void simple_ipc (void)
 {
-    printf ("\nSimple IPC test (only untyped words)\n");
-    setup_ipc_threads (simple_ipc_t1_l, simple_ipc_t2_l, false, false);
-    setup_ipc_threads (simple_ipc_t1_g, simple_ipc_t2_g, true, true);
+    printf ("\nSimple IPC test (inter-as, only untyped words)\n");
+    setup_ipc_threads (simple_ipc_t1_g, simple_ipc_t2_g, false, false);
+    setup_ipc_threads (simple_ipc_t1_l, simple_ipc_t2_l, true, true);
 }
 
 
