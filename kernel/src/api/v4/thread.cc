@@ -46,8 +46,6 @@
 
 DECLARE_TRACEPOINT(SYSCALL_THREAD_CONTROL);
 
-//#define TRACE_XCPU(x...) printf(x)
-#define TRACE_XCPU(x...)
 
 void handle_ipc_error (void);
 
@@ -143,7 +141,10 @@ void tcb_t::init(threadid_t dest)
 #warning VU: uninitialized threads assigned to CPU
     /* initially assign to this CPU */
     cpu = get_current_cpu();
+    lock_state.init(false);
+    requeue = NULL;
 #endif
+
 
     /* initialize scheduling */
     get_current_scheduler()->init_tcb(this);
@@ -250,24 +251,45 @@ static void do_xcpu_delete_done(cpu_mb_entry_t * entry)
     get_current_scheduler()->enqueue_ready(tcb);
 }
 
+static void idle_xcpu_delete(tcb_t *tcb, word_t src)
+{
+    tcb_t *src_tcb = (tcb_t *) src;
+
+    tcb->delete_tcb();
+    xcpu_request(src_tcb->get_cpu(), do_xcpu_delete_done, src_tcb, 0);
+    
+}
+
 static void do_xcpu_delete(cpu_mb_entry_t * entry)
 {
     tcb_t * tcb = entry->tcb;
+    tcb_t * current = get_current_tcb();
     tcb_t * src = (tcb_t*)entry->param[0];
     word_t done = 1;
-
-    //TRACEF("xcpu_delete of %t requested by %t\n", tcb, src);
 
     // migrated meanwhile?
     if (tcb->is_local_cpu())
     {
-	if (get_current_tcb() == tcb)
-	    UNIMPLEMENTED();
+        if (current == get_idle_tcb() || current == tcb)
+	{
+            // make sure we don't run on the deleted thread's ptab
+            space_t::switch_to_kernel_space(get_current_cpu());
+        }
 
-	tcb->delete_tcb();
-	done = 0;
+        if (current == tcb){
+	    get_idle_tcb()->notify(idle_xcpu_delete, tcb, (word_t) src);
+	    current->switch_to_idle();
+	}
+
+        tcb->delete_tcb();
+        done = 0;
+
     }
     xcpu_request(src->get_cpu(), do_xcpu_delete_done, src, done);
+    
+    if (!get_current_scheduler()->get_prio_queue(current)->timeslice_tcb) {
+	get_current_scheduler()->get_prio_queue(current)->timeslice_tcb =  current;
+    }
 }
 #endif
 
@@ -322,7 +344,14 @@ void tcb_t::delete_tcb()
 	// make sure that we don't get accounted anymore
 	if (sched->get_prio_queue(this)->timeslice_tcb == this)
 	    sched->get_prio_queue(this)->timeslice_tcb = NULL;
+	
+	// remove from requeue list
+	ON_CONFIG_SMP(if (this->requeue) sched->smp_requeue(false));
+	
     }
+#ifdef CONFIG_SMP
+    ASSERT(this->requeue == NULL);
+#endif
 
     // clear ids
     this->myself_global = NILTHREAD;
@@ -704,6 +733,8 @@ bool tcb_t::migrate_to_space(space_t * space)
     ASSERT(space);
     ASSERT(get_space());
     space_t *old_space = get_space();
+    
+    lock();
 
     if (this->is_activated ())
     {
@@ -720,7 +751,7 @@ bool tcb_t::migrate_to_space(space_t * space)
     }
 
     // remove from old space
-    if (old_space->remove_tcb(this))
+    if (old_space->remove_tcb(this, get_current_cpu()))
     {
 	old_space->free();
 	free_space(old_space);
@@ -728,7 +759,9 @@ bool tcb_t::migrate_to_space(space_t * space)
 
     // now change the space
     this->set_space(space);
-    space->add_tcb(this);
+    space->add_tcb(this, get_current_cpu());
+
+    unlock();
 
     return true;
 }
@@ -769,13 +802,21 @@ static void xcpu_release_thread(tcb_t * tcb)
 static void xcpu_integrate_thread(tcb_t * tcb)
 {
     ASSERT(!tcb->queue_state.is_set(queue_state_t::wakeup));
+    ASSERT (tcb != get_current_tcb());
+
+    TRACE_SCHEDULE_DETAILS("integrate %t (s=%s) current %t\n", tcb, tcb->get_state().string(), get_current_tcb());
+
+    tcb->lock();
 
     // interrupt threads are handled specially
     if (tcb->is_interrupt_thread())
     {
 	migrate_interrupt_end(tcb);
+	tcb->unlock();
 	return;
     }
+
+    tcb->unlock();
 
     /* VU: the thread may have received an IPC meanwhile hence we
      * check whether the thread is already running again.  to make it
@@ -787,21 +828,12 @@ static void xcpu_integrate_thread(tcb_t * tcb)
 	get_current_scheduler()->set_timeout(tcb, tcb->absolute_timeout);
 }
 
-/**
- * puts the thread onto the CPU the function is invoked on
- */
-static void do_xcpu_put_thread(cpu_mb_entry_t * entry)
-{
-    tcb_t * tcb = entry->tcb;
-    TRACE_XCPU("CPU%d (%t): %s %t\n", get_current_cpu(), 
-	       get_current_tcb(), __func__, tcb);
-
-    xcpu_integrate_thread(tcb);
-}
-
 static void xcpu_put_thread(tcb_t * tcb, word_t processor)
 {
-    TRACE_XCPU("%t migrating thread %t\n", get_current_tcb(), tcb);
+    TRACE_SCHEDULE_DETAILS("migrating %t from %d -> %d (%s)", 
+		    tcb, tcb->get_cpu(), processor, tcb->get_state().string());
+
+    tcb->lock();
 
     /* VU: it is only necessary to notify the other CPU if the thread
      * is in one of the scheduling queues (wakeup, ready) or is an
@@ -809,10 +841,25 @@ static void xcpu_put_thread(tcb_t * tcb, word_t processor)
     bool need_xcpu = tcb->get_state().is_runnable() || 
 	(tcb->absolute_timeout != 0) || tcb->is_interrupt_thread();
 
+    // dequeue all threads from requeue list and continue holding lock
+    scheduler_t *scheduler = get_current_scheduler();
+    scheduler->smp_requeue(true);
+    ASSERT(tcb->requeue == NULL);
+
+    if (tcb->get_space())
+	tcb->get_space()->move_tcb(tcb, get_current_cpu(), processor);
+
     tcb->set_cpu(processor);
+    scheduler->unlock_requeue();
     
-    if (need_xcpu)
-	xcpu_request(processor, do_xcpu_put_thread, tcb);
+    if (need_xcpu) 
+    {
+	tcb->requeue_callback = xcpu_integrate_thread;
+	get_current_scheduler()->remote_enqueue_ready(tcb);
+    }
+    
+    tcb->unlock();
+
 }
 
 /**
@@ -832,13 +879,13 @@ static void do_xcpu_set_thread(cpu_mb_entry_t * entry)
 bool tcb_t::migrate_to_processor(cpuid_t processor)
 {
     ASSERT(this);
-    
     // check if the thread is already on that processor
     if (processor == this->get_cpu())
 	return true;
 
-    TRACE_XCPU("CPU%d (%t): %s %t\n", get_current_cpu(), 
-	       get_current_tcb(), __func__, this);
+    tcb_t * current = get_current_tcb();
+
+    TRACE_SCHEDULE_DETAILS("%s %t %d", __func__, this, processor);
 
     if (EXPECT_FALSE( this->get_cpu() != get_current_cpu() ))
     {
@@ -850,12 +897,11 @@ bool tcb_t::migrate_to_processor(cpuid_t processor)
 	// thread is on local CPU and should be migrated
 	xcpu_release_thread(this);
 
-	// if we migrate ourself we use the idle thread to perform the
-	// notification
-	tcb_t *current = get_current_tcb(); 
+	// if we migrate ourself we use the idle thread to perform the notification
 	if (current == this)
 	{
 	    get_idle_tcb()->notify(xcpu_put_thread, this, processor);
+	    space_t::switch_to_kernel_space(get_current_cpu());
 	    this->switch_to_idle();
 	}
 	else 
@@ -863,7 +909,8 @@ bool tcb_t::migrate_to_processor(cpuid_t processor)
 	    xcpu_put_thread(this, processor);
 
 	    // schedule if we've been running on the thread's timeslice
-	    if (!get_current_scheduler()->get_prio_queue(this)->timeslice_tcb) {
+	    if (!get_current_scheduler()->get_prio_queue(this)->timeslice_tcb) 
+	    {
 		get_current_scheduler()->enqueue_ready(current);
 		current->switch_to_idle();
 	    }
@@ -944,9 +991,12 @@ void handle_ipc_timeout (word_t state)
 }
 
 
-void tcb_t::save_state (void)
+void tcb_t::save_state ()
 {
-    for (int i = 0; i < 3; i++)
+    TRACE_SCHEDULE_DETAILS("save_state sp %t ss %s", 
+			   TID(get_saved_partner()), get_saved_state().string());
+
+    for (word_t i = 0; i < IPC_NUM_SAVED_MRS; i++)
 	misc.ipc_copy.saved_mr[i] = get_mr (i);
     misc.ipc_copy.saved_br0 = get_br (0);
     misc.ipc_copy.saved_error = get_error_code ();
@@ -956,9 +1006,12 @@ void tcb_t::save_state (void)
     set_saved_state (get_state ());
 }
 
-void tcb_t::restore_state (void)
+void tcb_t::restore_state ()
 {
-    for (int i = 0; i < 3; i++)
+    TRACE_SCHEDULE_DETAILS("restore_state saved_partner %t saved_state %s", 
+			   TID( get_saved_partner()), get_saved_state().string());
+    
+    for (word_t i = 0; i < IPC_NUM_SAVED_MRS; i++)
 	set_mr (i, misc.ipc_copy.saved_mr[i]);
     set_br (0, misc.ipc_copy.saved_br0);
     set_partner (get_saved_partner ());
@@ -993,6 +1046,7 @@ void tcb_t::send_pagefault_ipc (addr_t addr, addr_t ip,
     set_br(0, acceptor.raw);
 
     //TRACEF("send pagefault IPC (%t)\n", TID(get_pager()));
+    
     tag = do_ipc(get_pager(), get_pager(), timeout_t::never());
     if (tag.is_error())
     {
@@ -1009,13 +1063,21 @@ bool tcb_t::send_preemption_ipc(u64_t time)
     save_state ();
 
     /* generate preemption message */
-    set_tag (msg_tag_t::preemption_tag());
+    msg_tag_t tag;
+    tag = msg_tag_t::preemption_tag();
+    
+    /* create acceptor for whole address space */
+    acceptor_t acceptor;
+    acceptor = get_br(0);
+    
+    set_tag(tag);
     set_mr (1, (word_t)time);
     set_mr (2, (word_t)((time >> (BITS_WORD-1)) >> 1)); // Avoid gcc warn
-    set_br (0, 0); // no acceptor
-    
+    set_br (0, acceptor.raw); // no acceptor
+
 #warning preemption IPC with timeout never -- should be zero
-    msg_tag_t tag = do_ipc(get_scheduler(), threadid_t::nilthread(), timeout_t::never());
+    
+    tag = do_ipc(get_scheduler(), threadid_t::nilthread(), timeout_t::never());
 
     restore_state ();
 
@@ -1058,7 +1120,7 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
 
     /* set the space */
     tcb->set_space(space);
-    space->add_tcb(tcb);
+    space->add_tcb(tcb, get_current_cpu());
     
     tcb->set_utcb_location (utcb_location);
 
@@ -1135,9 +1197,11 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	else if (dest_tcb->exists())
 	{
 	    space_t * space = dest_tcb->get_space();
+	    cpuid_t cpu = dest_tcb->get_cpu();
+		    
 	    dest_tcb->delete_tcb();
 
-	    if (space->remove_tcb(dest_tcb))
+	    if (space->remove_tcb(dest_tcb, cpu))
 	    {
 		// was the last thread
 		space->free();
@@ -1304,7 +1368,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 
 	    // set the space for the tcb
 	    dest_tcb->set_space (space);
-	    space->add_tcb (dest_tcb);
+	    space->add_tcb (dest_tcb, get_current_cpu());
 
 	    // if pager is not nil the thread directly goes into an IPC
 	    if (! pager_tid.is_nilthread() )
