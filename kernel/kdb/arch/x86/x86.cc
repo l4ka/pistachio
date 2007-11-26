@@ -172,7 +172,7 @@ CMD(cmd_send_nmi, cg)
 {
     word_t cpuid = get_dec("CPU id", 0, NULL);
     cpu_t* cpu = cpu_t::get(cpuid);
-    local_apic_t<APIC_MAPPINGS> local_apic;
+    local_apic_t<APIC_MAPPINGS_START> local_apic;
     // don't nmi ourselfs
     if (cpu->get_apic_id() == local_apic.id())
 	return CMD_NOQUIT;
@@ -187,14 +187,14 @@ DECLARE_CMD(cmd_show_lvt, arch, 'l', "lvt",
 
 CMD(cmd_show_lvt, cg)
 {
-    local_apic_t<APIC_MAPPINGS> local_apic;
+    local_apic_t<APIC_MAPPINGS_START> local_apic;
 
-    printf("  timer:   0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_timer));
-    printf("  lin0:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_lint0));
-    printf("  lin1:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_lint1));
-    printf("  error:   0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_error));
-    printf("  perf:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_perfcount));
-    printf("  thermal: 0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS>::lvt_thermal_monitor));
+    printf("  timer:   0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_timer));
+    printf("  lin0:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_lint0));
+    printf("  lin1:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_lint1));
+    printf("  error:   0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_error));
+    printf("  perf:    0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_perfcount));
+    printf("  thermal: 0x%8x\n", local_apic.read_vector (local_apic_t<APIC_MAPPINGS_START>::lvt_thermal_monitor));
 
     return CMD_NOQUIT;
 }
