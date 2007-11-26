@@ -33,8 +33,47 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 #include <kdb/input.h>
+#include <kdb/tracepoints.h>
+#include INC_API(tcb.h)
 
 DECLARE_CMD(cmd_breakpoint, root, 'b', "breakpoint", "set breakpoints");
+
+#if defined(CONFIG_TRACEPOINTS)
+EXTERN_TRACEPOINT(X86_BREAKPOINT);
+bool x86_breakpoint_cpumask;
+bool x86_breakpoint_cpumask_kdb;
+#endif
+
+void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb)
+{
+    word_t db7;
+    __asm__ __volatile__ ("mov %%db7,%0" : "=r" (db7));
+    
+    ASSERT(num < 4);
+    
+    if (enable)
+	db7 |=  (2 << (num * 2)); /* enable */
+    else
+	db7 &= ~(2 << (num * 2)); /* disable */
+    
+    db7 &= ~(0x000F0000 << (num * 4));
+    db7 |= (type << (num * 4));
+    
+    if (num==0) __asm__ __volatile__ ("mov %0, %%db0" : : "r" (addr));
+    if (num==1) __asm__ __volatile__ ("mov %0, %%db1" : : "r" (addr));
+    if (num==2) __asm__ __volatile__ ("mov %0, %%db2" : : "r" (addr));
+    if (num==3) __asm__ __volatile__ ("mov %0, %%db3" : : "r" (addr));
+    __asm__ __volatile__ ("mov %0, %%db7" : : "r" (db7));
+
+#if defined(CONFIG_TRACEPOINTS)
+    cpuid_t cpu = get_current_cpu();
+    if (kdb)
+	x86_breakpoint_cpumask_kdb |= (1 << cpu);
+    else
+	x86_breakpoint_cpumask_kdb &= ~(1 << cpu);
+    x86_breakpoint_cpumask |= (1 << cpu);
+#endif
+}
 
 CMD(cmd_breakpoint, cg)
 {
