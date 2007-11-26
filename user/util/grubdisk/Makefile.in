@@ -45,15 +45,16 @@ bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstar
 	dd if=grub.img of=bootdisk.img conv=notrunc > /dev/null
 	#@ Strip binaries
 	strip ${top_builddir}/*/*/{kickstart,sigma0} 
-	strip ${top_builddir}/apps/bench/pingpong/pingpong
-	strip ${kerneldir}/${KERNEL} 
+	strip ${top_builddir}/apps/bench/pingpong/pingpong	
+	cp ${kerneldir}/${KERNEL} ${kerneldir}/${KERNEL}.stripped
+	strip ${kerneldir}/${KERNEL}.stripped 
 	@# Copy the binaries to it
 	cp ${kerneldir}/${KERNEL} kernel
 	export MTOOLSRC=mtoolsrc ; \
 	 mcopy -m ${srcdir}/menu.lst y:boot/grub ; \
 	 mcopy -m ${top_builddir}/*/*/{kickstart,sigma0} y: ; \
 	 mcopy -m ${top_builddir}/apps/bench/pingpong/pingpong y: ; \
-	 mcopy -m kernel y:
+	 mcopy -m ${kerneldir}/${KERNEL}.stripped y:kernel
 
 grub.img:
 	# Fetch GRUB disk image from web if not local
