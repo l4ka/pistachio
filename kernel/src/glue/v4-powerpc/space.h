@@ -131,7 +131,7 @@ public:
     word_t get_from_user( addr_t );
     pgent_t *pgent( word_t num, word_t cpu=0 );
     bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg,
-	    pgent_t::pgsize_e *r_size );
+			 pgent_t::pgsize_e *r_size, cpuid_t cpu = 0);
     bool readmem (addr_t vaddr, word_t * contents);
     static word_t readmem_phys (addr_t paddr)
 	{ return *phys_to_virt((word_t*)paddr); }
@@ -320,7 +320,7 @@ INLINE ppc_segment_t space_t::get_segment_id()
  * adds a thread to the space
  * @param tcb pointer to thread control block
  */
-INLINE void space_t::add_tcb(tcb_t * tcb)
+INLINE void space_t::add_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     /* Make sure the valid bit does not get set */
     x.thread_count += 16;
@@ -331,7 +331,7 @@ INLINE void space_t::add_tcb(tcb_t * tcb)
  * @param tcb_t thread control block
  * @return true if it was the last thread
  */
-INLINE bool space_t::remove_tcb(tcb_t * tcb)
+INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     ASSERT(x.thread_count != 0);
     /* Make sure the valid bit does not get set */
