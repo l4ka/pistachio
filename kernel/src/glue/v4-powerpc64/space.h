@@ -345,7 +345,7 @@ INLINE void space_t::add_tcb(tcb_t * tcb, cpuid_t cpu)
  * @param tcb_t thread control block
  * @return true if it was the last thread
  */
-INLINE bool space_t::remove_tcb(tcb_t * tcb)
+INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     ASSERT(x.thread_count != 0);
     x.thread_count --;
