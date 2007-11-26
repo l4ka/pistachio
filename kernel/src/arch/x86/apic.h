@@ -346,8 +346,8 @@ INLINE bool local_apic_t<base>::disable()
 template <word_t base>
 INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_func)(void))
 {
-    //ASSERT(((word_t)startup & ~IA32_PAGE_MASK) == 0);
-    //ASSERT(((word_t)startup >> (IA32_PAGE_BITS + 8)) == 0);
+    //ASSERT(((word_t)startup & ~X86_PAGE_MASK) == 0);
+    //ASSERT(((word_t)startup >> (X86_PAGE_BITS + 8)) == 0);
 
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
