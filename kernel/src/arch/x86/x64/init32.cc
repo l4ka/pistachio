@@ -39,7 +39,7 @@
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(mmu.h)
 #include INC_ARCH(segdesc.h)
-#include INC_ARCH_SA(pagebits.h)
+#include INC_ARCH(x86.h)
 #include INC_GLUE_SA(offsets.h)
 
 /* ugly ... */
@@ -51,8 +51,8 @@ u64_t init_pdp[512] __attribute__((aligned(4096))) SECTION(".init.data");
 u64_t init_pml4[512] __attribute__((aligned(4096))) SECTION(".init.data");
 
 #define INIT32_PDIR_ENTRIES	256
-#define INIT32_PDIR_ATTRIBS	(AMD64_PAGE_VALID | AMD64_PAGE_WRITABLE | AMD64_2MPAGE_SUPER)
-#define INIT32_PTAB_ATTRIBS	(AMD64_PAGE_VALID | AMD64_PAGE_WRITABLE)
+#define INIT32_PDIR_ATTRIBS	(X86_PAGE_VALID | X86_PAGE_WRITABLE | X86_PAGE_SUPER)
+#define INIT32_PTAB_ATTRIBS	(X86_PAGE_VALID | X86_PAGE_WRITABLE)
 
 
 /* Temporary GDT (INVALID, CS), temporary CS */
@@ -73,9 +73,6 @@ INLINE void SECTION(".init.init32")  init32_spin(int pos = 0)
 }
 
 static void SECTION(".init.init32") init32_cons (void) {};
-
-
-
 
 
 #else
@@ -203,7 +200,7 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
     for (int i=0; i< INIT32_PDIR_ENTRIES; i++){
     	/* the pdir (used twice!) maps 1 GByte */
 	init_pdir[i] = init_pdir[i + AMD64_PDIR_IDX(KERNEL_OFFSET_TYPED)] =
-	    ((i << AMD64_2MPAGE_BITS) | (INIT32_PDIR_ATTRIBS & AMD64_2MPAGE_FLAGS_MASK));
+	    ((i << X86_SUPERPAGE_BITS) | (INIT32_PDIR_ATTRIBS & X86_SUPERPAGE_FLAGS_MASK));
     }
 
     /* 
