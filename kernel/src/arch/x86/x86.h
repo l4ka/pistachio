@@ -37,11 +37,27 @@
 /**********************************************************************
  *    MMU
  **********************************************************************/
-#define X86_4KPAGE_BITS	        12
-#define X86_4KPAGE_SIZE		(__UL(1) << X86_4KPAGE_BITS)
-#define X86_4KPAGE_MASK		(~(X86_4KPAGE_SIZE - 1))
+#define X86_PAGE_BITS		12
+#define X86_PAGE_SIZE		(__UL(1) << X86_PAGE_BITS)
+#define X86_PAGE_MASK		(~(X86_PAGE_SIZE - 1))
+
+#define X86_PAGE_VALID		(1<<0)
+#define X86_PAGE_WRITABLE	(1<<1)
+#define X86_PAGE_USER		(1<<2)
+#define X86_PAGE_KERNEL		(0<<2)
+#define X86_PAGE_WRITE_THROUGH	(1<<3)
+#define X86_PAGE_CACHE_DISABLE	(1<<4)
+#define X86_PAGE_ACCESSED	(1<<5)
+#define X86_PAGE_DIRTY		(1<<6)
+#define X86_PAGE_PAT		(1<<7)
+#define X86_PAGE_SUPER		(1<<7)
+#define X86_PAGE_GLOBAL		(1<<8)
+
+/* superpage specific page attribute bits */
+#define X86_SUPERPAGE_PAT  	(1<<12)
 
 
+#define X86_PTAB_BYTES		4096
 
 /**********************************************************************
  *    FLAGS register
