@@ -38,10 +38,20 @@
 
 #if !defined(ASSEMBLY)
 
+#define HW_PGSHIFTS		{ 12, 22, 32 }
+#define HW_VALID_PGSIZES	((1 << 12) | (1 << 22))
+
+#define MDB_BUFLIST_SIZES	{ {12}, {8}, {4096}, {0} }
+#define MDB_PGSHIFTS		{ 12, 22, 32 }
+#define MDB_NUM_PGSIZES		(2)
+
+#define X86_PGSIZES		{  size_4k = 0,	size_4m = 1, size_4g = 2, \
+				   size_sync = size_4m, size_superpage = size_4m, size_max = size_4m }
+
 class pgent_t;
 
 #include <debug.h>
-class ia32_pgent_t 
+class x86_pgent_t 
 {
 public:
     enum pagesize_e {
@@ -56,6 +66,9 @@ public:
     bool is_writable() 
 	{ return pg.rw == 1; }
 
+    bool is_executable() 
+	{ return pg.present == 1; }
+
     bool is_accessed()
 	{ return pg.accessed == 1; }
 
@@ -68,13 +81,34 @@ public:
     bool is_kernel()
 	{ return pg.privilege == 0; }
 
-    // retrival
-    addr_t get_address(pagesize_e size)
-	{ return (addr_t) (raw & (size == size_4k ? IA32_PAGE_MASK :
-				  IA32_SUPERPAGE_MASK)); }
+    bool is_write_through()
+	{ return pg.write_through == 1; }
 
-    ia32_pgent_t * get_ptab()
-	{ return (ia32_pgent_t*)(raw & IA32_PAGE_MASK); }
+    bool is_cache_disabled()
+	{ return pg.cache_disabled == 1; }
+    
+    bool is_pat(pagesize_e size)
+	{ 
+#if defined(CONFIG_X86_PAT)
+	    return (size == size_4k ? pg.size : pg4m.pat); 
+#else
+	    return false;
+#endif
+	}
+    
+    bool is_global ()
+	{ return pg.global == 1; }
+    
+    bool is_cpulocal ()
+	{ return false; }
+
+    // retrieval
+    addr_t get_address(pagesize_e size)
+	{ return (addr_t) (raw & (size == size_4k ? X86_PAGE_MASK :
+				  X86_SUPERPAGE_MASK)); }
+
+    x86_pgent_t * get_ptab()
+	{ return (x86_pgent_t*)(raw & X86_PAGE_MASK); }
 
     u32_t get_raw()
 	{ return raw; }
@@ -86,36 +120,26 @@ public:
     void set_entry(addr_t addr, pagesize_e size, u32_t attrib)
 	{ 
 	    if (size == size_4k)
-		raw = ((u32_t)(addr) & IA32_PAGE_MASK) |
-		    (attrib & IA32_PAGE_FLAGS_MASK);
+		raw = ((u32_t)(addr) & X86_PAGE_MASK) | (attrib & X86_PAGE_FLAGS_MASK);
 	    else
-		raw = ((u32_t)(addr) & IA32_SUPERPAGE_MASK) |
-		    IA32_PAGE_SUPER |
-		    (attrib & IA32_SPAGE_FLAGS_MASK);
+		raw = ((u32_t)(addr) & X86_SUPERPAGE_MASK) | X86_PAGE_SUPER |
+		    (attrib & X86_SUPERPAGE_FLAGS_MASK);
 	}
 
     void set_ptab_entry(addr_t addr, u32_t attrib)
 	{
-	    raw = ((u32_t)(addr) & IA32_PAGE_MASK) | 
-		IA32_PAGE_VALID |
+	    raw = ((u32_t)(addr) & X86_PAGE_MASK) | 
+		X86_PAGE_VALID |
 		(attrib & IA32_PTAB_FLAGS_MASK);
 	}
 		
-    void copy(const ia32_pgent_t pgent)
+    void copy(const x86_pgent_t pgent)
 	{
 	    raw = pgent.raw;
 	}
-
-    u32_t get_pdir_idx(addr_t addr)
-	{
-	    return (u32_t)addr >> IA32_PAGEDIR_BITS;
-	}
-
-    u32_t get_ptab_idx(addr_t addr)
-	{
-	    return (((u32_t)addr) & (~IA32_PAGEDIR_MASK)) >> IA32_PAGE_BITS;
-	}
-
+    
+    // attributes
+    
     void set_cacheability (bool cacheable, pagesize_e size)
 	{
 	    this->pg.cache_disabled = !cacheable;
@@ -143,6 +167,9 @@ public:
 	{
 	    this->pg.global = global;
 	}
+
+    void set_cpulocal (bool local) { }
+
 	      
 private:
     union {
