@@ -150,7 +150,7 @@ public:
     /* Methods needed by linear page table walker. */
     pgent_t *pgent( word_t num, word_t cpu=0 );
     bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg,
-	    pgent_t::pgsize_e *r_size );
+			 pgent_t::pgsize_e *r_size, cpuid_t cpu=0);
     bool readmem (addr_t vaddr, word_t * contents);
     static word_t readmem_phys (addr_t paddr)
 	{ return *phys_to_virt((word_t*)paddr); }
@@ -335,7 +335,7 @@ INLINE word_t space_t::get_vsid( addr_t addr )
  * adds a thread to the space
  * @param tcb pointer to thread control block
  */
-INLINE void space_t::add_tcb(tcb_t * tcb)
+INLINE void space_t::add_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     x.thread_count ++;
 }
