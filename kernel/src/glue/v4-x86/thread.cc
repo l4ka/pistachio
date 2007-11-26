@@ -95,7 +95,7 @@ void tcb_t::create_startup_stack(void (*func)())
     push(stack, X86_USER_FLAGS);
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
     if (resource_bits.have_resource(COMPATIBILITY_MODE))
-        push(stack, AMD64_UCS32);       /* cs */
+        push(stack, X86_UCS32);       /* cs */
     else
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
     {
