@@ -26,16 +26,14 @@
      "mov %%rsp, %%rbp	\n"						\
      "mov %0, %%rsp	\n"						\
      "pushq %%rbp	\n"						\
-     "pushq %1		\n"						\
      "callq *%2		\n"						\
-     "addq $8, %%rsp	\n"						\
      "popq %%rsp	\n"						\
      "popq %%rbp	\n"						\
-     : "=r"(dummy), "=r"(dummy), "=r"(dummy)				\
+     : "=r"(dummy), "=D"(dummy), "=r"(dummy)				\
      : "0"(&kdb_stack[KDB_STACK_SIZE]),					\
        "1"(&param),							\
        "2"(get_kip()->kdebug_entry)					\
-     : "rax", "rcx", "rdx", "memory");			
+     : "memory");			
 
 #else
 
