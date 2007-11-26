@@ -125,7 +125,7 @@ private:
     word_t pmtimer_ioport;
     
 public:
-    static local_apic_t<APIC_MAPPINGS> local_apic;
+    static local_apic_t<APIC_MAPPINGS_START> local_apic;
 
 public:
  
