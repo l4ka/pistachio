@@ -129,20 +129,20 @@ public:
     const char * string (void)
 	{
 	    switch (state) {
-	    case running:		return "RUNNING";
-	    case waiting_forever:	return "WAIT_FOREVER";
-	    case waiting_timeout:	return "WAIT_TIMEOUT";
-	    case waiting_tunneled_pf:	return "WAIT_TUNNELED_PF";
-	    case locked_waiting:	return "LCK_WAITING";
-	    case locked_running:	return "LCK_RUNNING";
-	    case locked_running_ipc_done: return "LCK_RUNNING_DONE";
-	    case locked_running_nested:	return "LCK_RUNNING_NEST";
-	    case polling:		return "POLLING";
-	    case halted:		return "HALTED";
-	    case aborted:		return "ABORTED";
-	    case xcpu_waiting_deltcb:	return "WAIT_XPU_DELTCB";
-	    case xcpu_waiting_exregs:	return "WAIT_XPU_EXREGS";
-	    default:			return "UNKNOWN";
+	    case running:			return "RUNNING ";
+	    case waiting_forever:		return "WAIT_FE ";
+	    case waiting_timeout:		return "WAIT_TO ";
+	    case waiting_tunneled_pf:		return "WAIT_TP ";
+	    case locked_waiting:		return "LOCK_WT ";
+	    case locked_running:		return "LOCK_RU ";
+	    case locked_running_ipc_done: 	return "LOCK_RD ";
+	    case locked_running_nested:		return "LOCK_RN ";
+	    case polling:			return "POLLING ";
+	    case halted:			return "HALTED  ";
+	    case aborted:			return "ABORTED ";
+	    case xcpu_waiting_deltcb:		return "XCPU_DT ";
+	    case xcpu_waiting_exregs:		return "XCPU_EX ";
+	    default:				return "UNKNOWN ";
 	    }
 	}
 
