@@ -77,8 +77,11 @@ word_t ipc_copy (tcb_t * src, addr_t src_addr,
 	src->misc.ipc_copy.copy_fault = src_addr;
     src->misc.ipc_copy.copy_start_dst = dst_addr;
 
+    // we may cause a nested pagefault ipc, therefore unlock the receiver tcb
+    dst->unlock();
     IPC_STRING_COPY (dst_addr, src_addr, len);
-
+    dst->lock();
+    
     src->misc.ipc_copy.copy_length += len;
 
     return len;
@@ -99,9 +102,9 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     word_t total_len = 0;
     bool accept_strings;
 
-//    ENABLE_TRACEPOINT (IPC_STRING_COPY, false);
-//    ENABLE_TRACEPOINT (IPC_STRING_ITEM, false);
-//    ENABLE_TRACEPOINT (IPC_MESSAGE_OVERFLOW, false);
+//    ENABLE_TRACEPOINT (IPC_STRING_COPY, ~0, 0);
+//    ENABLE_TRACEPOINT (IPC_STRING_ITEM, ~0, 0);
+//    ENABLE_TRACEPOINT (IPC_MESSAGE_OVERFLOW, ~0, 0);
 #undef TRACEF
 #define TRACEF(args...)
     
