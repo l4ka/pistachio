@@ -40,7 +40,7 @@
 
 /* global instance of timer object */
 timer_t timer UNIT("cpulocal");
-static local_apic_t<APIC_MAPPINGS> local_apic;
+static local_apic_t<APIC_MAPPINGS_START> local_apic;
 
 extern "C" void timer_interrupt(void);
 #if defined(CONFIG_IS_64BIT)
@@ -58,11 +58,11 @@ X86_EXCNO_ERRORCODE(timer_interrupt, 0)
 
 void timer_t::init_global()
 {
-    TRACE_INIT("Initializing global timer - trap gate %d\n", IDT_LAPIC_TIMER);
+    TRACE_INIT("\tglobal timer: trap gate %d\n", IDT_LAPIC_TIMER);
     idt.add_int_gate(IDT_LAPIC_TIMER, timer_interrupt);
 }
 
-void timer_t::init_cpu()
+void timer_t::init_cpu(cpuid_t cpu)
 { 
     intctrl_t *intctrl = get_interrupt_ctrl();
     bool pmtimer = intctrl->has_pmtimer();
@@ -71,7 +71,7 @@ void timer_t::init_cpu()
     static DEFINE_SPINLOCK(timer_lock);
 
 #if !defined(CONFIG_CPU_X86_SIMICS)
-    TRACE_INIT("Calculating processor speed ...");
+    TRACE_INIT("\tCalculating processor speed (CPU %d)...", cpu);
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set(-1UL);
@@ -120,8 +120,8 @@ void timer_t::init_cpu()
 #endif 
 
 
-    TRACE_INIT("\nCPU speed: %d MHz, bus speed: %d MHz\n", 
-               (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz);
+    TRACE_INIT("\n\tspeed: %d MHz, bus speed: %d MHz (CPU %d)\n", 
+               (word_t)(local_apic_cpu_mhz), local_apic_bus_mhz, cpu);
 
     /* now set timer IRQ to periodic timer */
     local_apic.timer_setup(IDT_LAPIC_TIMER, true);
