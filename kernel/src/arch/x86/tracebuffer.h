@@ -118,7 +118,7 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 # if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
 # define TBUF_PMC_SEL_0		"       xor  %1, %1		\n"
 # define TBUF_PMC_SEL_1		"	inc  %1			\n"
-# elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
+# elif defined(CONFIG_CPU_X86_P4) 
 /* PMC_MSR_IQ_COUNTER 0 and 2 */
 #  define TBUF_PMC_SEL_0	"	mov	$12, %1		\n"
 #  define TBUF_PMC_SEL_1	"	add	$2, %1		\n"
