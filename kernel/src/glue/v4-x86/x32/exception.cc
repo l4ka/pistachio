@@ -122,7 +122,7 @@ X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 void exc_catch_common_wrapper() 
 {							
     __asm__ (						
-	".section .data.x86.exc_common, \"awx\", @nobits	\n\t"
+        ".section .data.x86.exc_common,\"aw\",@progbits		\n\t"
 	".global exc_catch_common				\n\t"
 	"\t.type exc_catch_common,@function			\n\t"
 	"exc_catch_common:					\n\t"
