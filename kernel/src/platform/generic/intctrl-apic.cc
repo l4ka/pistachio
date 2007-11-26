@@ -149,12 +149,14 @@ void intctrl_t::init_arch()
     /* now walk the ACPI structure */
     addr_t addr = acpi_remap((addr_t)ACPI20_PC99_RSDP_START);
     acpi_rsdp_t* rsdp = acpi_rsdp_t::locate(addr);
-    TRACE_INIT("RSDP is at %p\n", rsdp);
+    TRACE_INIT("  Parsing ACPI tables\n", rsdp);
+
+    TRACE_INIT("\tRSDP is at %p\n", rsdp);
     
     if (rsdp == NULL)
     {
-	TRACE_INIT("Assuming local APIC defaults");
-	get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS),
+	TRACE_INIT("\tAssuming local APIC defaults");
+	get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS_START),
 					addr_t(0xFEE00000),
 					APIC_PGENTSZ, true, true, true);
 	
@@ -163,7 +165,7 @@ void intctrl_t::init_arch()
 
 	// reserve in KIP
 	get_kip()->memory_info.insert(memdesc_t::reserved, 0, false,
-	    addr_t(APIC_MAPPINGS), addr_t(APIC_MAPPINGS + X86_4KPAGE_SIZE));
+	    addr_t(APIC_MAPPINGS_START), addr_t(APIC_MAPPINGS_START + X86_PAGE_SIZE));
 	
 	cpu_t::add_cpu(local_apic.id());
 	return;
@@ -175,8 +177,8 @@ void intctrl_t::init_arch()
     if ((rsdt_phys == NULL) && (xsdt_phys == NULL))
 	return;
 
-    TRACE_INIT("RSDT is at %p\n", rsdt_phys);
-    TRACE_INIT("XSDT is at %p\n", xsdt_phys);
+    TRACE_INIT("\tRSDT is at %p\n", rsdt_phys);
+    TRACE_INIT("\tXSDT is at %p\n", xsdt_phys);
 
     acpi_fadt_t *fadt = NULL, *_fadt;
     acpi_madt_t *madt = NULL, *_madt; 
@@ -198,7 +200,7 @@ void intctrl_t::init_arch()
     if (fadt)	
     {
 	_fadt = (acpi_fadt_t*)acpi_remap(fadt);
-	TRACE_INIT("FADT is at %p (remap %p), pmtimer IO port %x\n",
+	TRACE_INIT("\tFADT is at %p (remap %p), pmtimer IO port %x\n",
 		   fadt, _fadt, _fadt->pmtimer_ioport());
 	
 	pmtimer_available = true;
@@ -213,18 +215,18 @@ void intctrl_t::init_arch()
     _madt = (acpi_madt_t*)acpi_remap(madt);
     
     
-    TRACE_INIT("MADT is at %p (remap %p), local APICs @ %p\n",
+    TRACE_INIT("\tMADT is at %p (remap %p), local APICs @ %p\n",
 	       madt, _madt, _madt->local_apic_addr);
     
-    TRACE_INIT("Mapping local APICs at %p to %p\n",
-	       _madt->local_apic_addr, APIC_MAPPINGS);
-    get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS),
+    TRACE_INIT("  Mapping local APICs at %p to %p\n",
+	       _madt->local_apic_addr, APIC_MAPPINGS_START);
+    get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS_START),
 				    addr_t(_madt->local_apic_addr),
 				    APIC_PGENTSZ, true, true, true);
 
     // reserve in KIP
     get_kip()->memory_info.insert(memdesc_t::reserved, 0, false,
-	addr_t(APIC_MAPPINGS), addr_t(APIC_MAPPINGS + X86_4KPAGE_SIZE));
+	addr_t(APIC_MAPPINGS_START), addr_t(APIC_MAPPINGS_START + X86_PAGE_SIZE));
 
 
     /* local apic */
@@ -233,7 +235,7 @@ void intctrl_t::init_arch()
 	acpi_madt_lapic_t* p;
 	for (word_t i = 0; ((p = _madt->lapic(i)) != NULL); i++)
 	{
-	    TRACE_INIT("Found local APIC: apic_id=%d use=%s proc_id=%d\n",
+	    TRACE_INIT("\tlocal APIC: apic_id=%d use=%s proc_id=%d\n",
 		       p->id, p->flags.enabled ? "ok" : "disabled",
 		       p->apic_processor_id);
 	    if (p->flags.enabled) {
@@ -241,11 +243,11 @@ void intctrl_t::init_arch()
 		total_cpus++;
 	    }
 	}
-	TRACE_INIT("Found %d active CPUs, boot CPU is %x\n",
+	TRACE_INIT("  Found %d active CPUs, boot CPU is %x\n",
 		   total_cpus, local_apic.id());
 
 	if (total_cpus > cpu_t::count)
-	    printf("WARNING: system has %d CPUs, but kernel supports %d\n",
+	    printf("  WARNING: system has %d CPUs, but kernel supports %d\n",
 		   total_cpus, cpu_t::count);
 #ifndef CONFIG_SMP
 	/* make sure the boot CPU is the first */
@@ -253,17 +255,19 @@ void intctrl_t::init_arch()
 #endif
     }
 
+    TRACE_INIT("  Initializing IOAPICs\n");
+
     /* IO APIC */
     {
 	acpi_madt_ioapic_t* p;
 
 	for (word_t i = 0; ((p = _madt->ioapic(i)) != NULL); i++)
 	{
-	    TRACE_INIT("Found IOAPIC: id=%d irq_base=%d addr=%p\n",
+	    TRACE_INIT("\tIOAPIC: id=%d irq_base=%d addr=%p\n",
 		       p->id, p->irq_base, p->address);
 	    if ((p->address & page_mask(APIC_PGENTSZ)) != 0)
 	    {
-		TRACE_INIT("  APIC %d IS MISALIGNED (%p). Ignoring!\n",
+		TRACE_INIT("\t  APIC %d IS MISALIGNED (%p). Ignoring!\n",
 			   i, p->address);
 		continue;
 	    }
@@ -278,7 +282,7 @@ void intctrl_t::init_arch()
 	acpi_madt_irq_t* p;
 	for (word_t i = 0; ((p = _madt->irq(i)) != NULL); i++)
 	{
-	    TRACE_INIT("Found IRQ source override: "
+	    TRACE_INIT("  IRQ source override: "
 		       "srcbus=%d, srcirq=%d, dest=%d, "
 		       "%s, trigger=%s \n",
 		       p->src_bus, p->src_irq, p->dest,
@@ -314,14 +318,14 @@ void intctrl_t::init_arch()
 		TRACE_INIT("MADT: found unknown type=%d, len=%d\n", p->type, p->len);
     }
     
-    TRACE_INIT("Found %d IRQ input lines, max IRQ ID is %d\n",
+    TRACE_INIT("  %d IRQ input lines, max IRQ ID is %d\n",
 	       num_intsources, max_intsource);
 
     for (word_t i = 0; i <= max_intsource; i++)
     {
 	if (redir[i].is_valid())
 	{
-	    TRACE_INIT(" IRQ %2d: APIC %d, line %2d, %s, %s active\n",
+	    TRACE_INIT("\tIRQ %2d: APIC %d, line %2d, %s, %s active\n",
 		       i, redir[i].ioapic->id, redir[i].line, 
 		       redir[i].entry.x.trigger_mode ? "level" : "edge",
 		       redir[i].entry.x.polarity ? "low" : "high");
@@ -335,7 +339,6 @@ void intctrl_t::init_arch()
 
 void intctrl_t::init_cpu()
 {
-    TRACE_INIT("APIC init CPU\n");
     init_local_apic();
 }
 
@@ -355,13 +358,13 @@ bool intctrl_t::init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t padd
 
     // reserve in KIP
     get_kip()->memory_info.insert(memdesc_t::reserved, 0, false, 
-	paddr, addr_offset(paddr, X86_4KPAGE_SIZE));
+	paddr, addr_offset(paddr, X86_PAGE_SIZE));
 
     ioapic_t * ioapic = &ioapics[idx];
     ioapic->init(id, addr_t(IOAPIC_MAPPING(idx)));
 
     word_t numirqs = ioapic->i82093->num_irqs();
-    TRACE_INIT("Initializing IOAPIC realid=%d maxint=%d, version=%d\n",
+    TRACE_INIT("\t        realid=%d maxint=%d, version=%d\n",
 	       ioapic->i82093->id(), numirqs, ioapic->i82093->version().ver.version);
 
     /* VU: we initialize all IO-APIC interrupts. By default all 
@@ -396,7 +399,7 @@ bool intctrl_t::init_io_apic(word_t idx, word_t id, word_t irq_base, addr_t padd
 }
 void intctrl_t::init_local_apic()
 {
-    TRACE_INIT("Local apic id=%d, version=%d\n",
+    TRACE_INIT("\tlocal APIC id=%d, version=%d\n",
 	       local_apic.id(), local_apic.version());
 
     if (!local_apic.enable(IDT_LAPIC_SPURIOUS_INT))
@@ -431,14 +434,14 @@ void intctrl_t::init_local_apic()
     local_apic.set_task_prio(0);
 
     /* now disable all interrupts */
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_timer);
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_perfcount);
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_lint0);
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_lint1);
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_error);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_timer);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_perfcount);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_lint0);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_lint1);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_error);
 
 #if defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_C2)
-    local_apic.mask(local_apic_t<APIC_MAPPINGS>::lvt_thermal_monitor);
+    local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_thermal_monitor);
 #endif
     
 
