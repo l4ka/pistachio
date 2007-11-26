@@ -34,6 +34,7 @@
 #include <kmemory.h>
 #include <kdb/tracepoints.h>
 #include INC_API(space.h)
+#include INC_API(smp.h)
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(schedule.h)
@@ -191,8 +192,7 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
 
     if (user_area || (!kernel))
     {
-	TRACEPOINT (PAGEFAULT_USER, "%t: user %s pagefault at %p, ip=%p\n", 
-		    current,
+	TRACEPOINT (PAGEFAULT_USER, "user %s pagefault at %x, ip=%p\n", 
 		    access == space_t::write     ? "write" :
 		    access == space_t::read	   ? "read"  :
 		    access == space_t::execute   ? "execute" :
@@ -247,9 +247,9 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
     else
     {
 	/* fault in kernel area */
-	TRACEPOINT (PAGEFAULT_KERNEL,
-		    "%t: kernel pagefault in space %p @ %p, ip=%p, type=%x\n",
-		    current, this, addr, ip, access);
+	TRACEPOINT (PAGEFAULT_KERNEL, 
+		    "kernel pagefault in space %p @ %p, ip=%p, type=%x",
+		    this, addr, ip, access);
 
 	if (sync_kernel_space(addr))
 	    return;
@@ -301,7 +301,7 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
 	    return;
 	}
     }
-    TRACEF("unhandled pagefault @ %p, %p\n", addr, ip);
+    TRACEF("cpu %d unhandled pagefault @ %p, %p\n", get_current_cpu(), addr, ip);
     enter_kdebug("unhandled pagefault");
 
     current->set_state(thread_state_t::halted);
@@ -406,7 +406,7 @@ SYSCALL_ATTR("unmap") void sys_unmap(word_t control)
 /**
  * allocate_space: allocates a new space_t
  */
-#if !defined(CONFIG_ARCH_ALPHA) && !defined(CONFIG_ARCH_ARM)
+#if !defined(CONFIG_ARCH_ALPHA) && !defined(CONFIG_ARCH_ARM) && !defined(CONFIG_ARCH_X86)
 space_t * allocate_space()
 {
     space_t * space = (space_t*)kmem.alloc(kmem_space, sizeof(space_t));
