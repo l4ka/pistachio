@@ -37,8 +37,8 @@ endif
 UNDEFS	 += $(SUBARCH)
 DEFINES	 += __SUBARCH__=$(SUBARCH)
 
-CFLAGS_x86_x32	+= -O2 -mpreferred-stack-boundary=2 --save-temps
-CFLAGS_x86_x64  += -m64 -mcmodel=kernel -mno-red-zone -O2
+CFLAGS_x86_x32	+= -O2 -mpreferred-stack-boundary=2 
+CFLAGS_x86_x64  += -O2 -m64 -mcmodel=kernel -mno-red-zone 
 CFLAGS_x86	+= $(CFLAGS_x86_$(SUBARCH))
 
 LDFLAGS_x86_x64	+= -melf_x86_64 -n -z max-page-size=4096
@@ -50,7 +50,6 @@ ASMFLAGS_x86	 += $(ASMFLAGS_x86_$(SUBARCH))
 VFLAGS_x86_x64	 = -m elf_x86_64
 VFLAGS		 += $(VFLAGS_x86_$(SUBARCH))
 
-CFLAGS_k8       += -march=k8
 CFLAGS_i486	+=-march=i486
 CFLAGS_i586	+=-march=i586
 ifeq "$(SUBARCH)" "x32"
