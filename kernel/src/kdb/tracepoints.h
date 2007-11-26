@@ -38,16 +38,15 @@
 
 
 // avoid including api/smp.h for non-SMP case
-#ifndef CONFIG_SMP
+#if !defined(CONFIG_SMP)
 # define TP_CPU 0
 #else
-# include INC_API(smp.h)
-# if defined(CONFIG_ARCH_IA64)
-#   define TP_CPU 0
-# else
-#   define TP_CPU get_current_cpu()
-# endif
+extern u16_t dbg_get_current_cpu();
+# define TP_CPU dbg_get_current_cpu()
 #endif
+
+extern word_t dbg_get_current_tcb();
+#define TP_TCB dbg_get_current_tcb()
 
 class tracepoint_t
 {
@@ -105,7 +104,8 @@ do {								\
     _tp->counter[TP_CPU]++;					\
     if (_tp->enabled & (1UL << TP_CPU))				\
     {								\
-	{printf(str, ##args); printf("\n");}			\
+	{ printf("tcb %t cpu %d: ", TP_TCB, TP_CPU);		\
+	    printf(str, ##args); printf("\n");}			\
 	if (_tp->enter_kdb & (1UL << TP_CPU))			\
 	    enter_kdebug (#tp);					\
     }								\
@@ -124,10 +124,10 @@ do {								\
     }								\
 } while (0)
 
-#define ENABLE_TRACEPOINT(tp, kdb)		\
+#define ENABLE_TRACEPOINT(tp, cpumask, kdbmask)	\
 do {						\
-    __tracepoint_##tp.enabled = ~0UL;		\
-    __tracepoint_##tp.enter_kdb = kdb;		\
+    __tracepoint_##tp.enabled = cpumask;	\
+    __tracepoint_##tp.enter_kdb = kdbmask;	\
 } while (0)
 
 #define TRACEPOINT_ENTERS_KDB(tp)		\
@@ -146,7 +146,7 @@ do {						\
 
 #define TRACEPOINT_NOTB(tp, code...)
 
-#define ENABLE_TRACEPOINT(tp, kdb)
+#define ENABLE_TRACEPOINT(tp, cpumask, kdbmask)
 #define TRACEPOINT_ENTERS_KDB(tp) (0)
 
 #endif
