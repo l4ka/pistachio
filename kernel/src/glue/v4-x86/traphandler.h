@@ -28,10 +28,9 @@ extern "C" void exc_nomath_coproc(void);
 
 /* catcher for all other interrupts and exceptions */
 typedef void (*func_exc)(void);
-extern word_t exc_catch_all[IDT_SIZE] UNIT("x86.exc_all");
-
-extern "C" void exc_catch_common_wrapper(void) UNIT("x86.exc_common");
-extern "C" void exc_catch_common(void) UNIT("x86.exc_common");
+extern u64_t exc_catch_all[IDT_SIZE] UNIT("x86.exc_all");
+extern "C" void exc_catch_common_wrapper(void);
+extern "C" void exc_catch_common(void);
 
 /* exception handling */
 class x86_exc_reg_t
