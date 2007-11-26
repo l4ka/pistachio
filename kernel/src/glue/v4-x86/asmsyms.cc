@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2007,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/asmsyms.cc
  * Description:   Various asm definitions for x86
@@ -35,7 +35,6 @@
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(queuestate.h)
-
 MKASMSYM (TSTATE_POLLING, (word_t) thread_state_t::polling);
 MKASMSYM (TSTATE_WAITING_FOREVER, (word_t) thread_state_t::waiting_forever);
 MKASMSYM (TSTATE_RUNNING, (word_t) thread_state_t::running);
@@ -45,3 +44,9 @@ MKASMSYM (QSTATE_LATE_WAKEUP, (word_t) queue_state_t::late_wakeup);
 
 MKASMSYM (OFS_KIP_PROCDESC, offsetof(kernel_interface_page_t, proc_desc_ptr));
 MKASMSYM (OFS_PROCDESC_INTFREQ, offsetof(procdesc_t, internal_freq));
+
+#if defined(CONFIG_X86_SMALL_SPACES)
+#define nonpod_class_hack_offsetof(type,member)\
+    ((word_t)((u8_t *)&(((type *)0x10)->member) - (u8_t)0x10))
+MKASMSYM (OFS_SPACE_SMALLID, nonpod_class_hack_offsetof(x86_space_t, data.smallid));
+#endif
