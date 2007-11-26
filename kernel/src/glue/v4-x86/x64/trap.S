@@ -38,7 +38,7 @@
  * 
  */
 #include INC_ARCH(asm.h)
-#include INC_ARCH_SA(pagebits.h)
+#include INC_ARCH(x86.h)
 #include <tcb_layout.h>
 #include <asmsyms.h>
 	
