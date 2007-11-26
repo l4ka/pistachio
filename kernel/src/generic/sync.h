@@ -56,6 +56,39 @@ public:
 
 #include INC_ARCH(sync.h)
 
+
+class lockstate_t {
+public:
+    union {
+	word_t raw;
+	struct {
+	    BITFIELD3(word_t,
+		      enabled : 1,
+		      promote : 1,
+		      demote  : 1);
+	} X;
+    } flags;
+    word_t rcu_epoch;
+
+public:
+    void init(bool enabled) 
+	{
+	    flags.raw = 0;
+	    flags.X.enabled = enabled;
+	}
+
+    bool is_enabled() {
+	//return is_active();
+	return flags.X.enabled;
+    }
+
+    bool is_active() {
+	//return true;
+	return flags.raw;
+    }
+};
+
+
 #endif
 
 #endif /* !__SYNC_H__ */
