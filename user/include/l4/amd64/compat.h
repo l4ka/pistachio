@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006-2007,  Karlsruhe University
  *                
  * File path:     l4/amd64/compat.h
  * Description:   L4 types for inter-architecture compatibility
@@ -64,9 +64,9 @@ typedef union {
 } L4_ThreadId32_t;
 
 
-#define L4_nilthread32		((L4_ThreadId32_t) { raw : 0UL})
-#define L4_anythread32		((L4_ThreadId32_t) { raw : ~0UL})
-#define L4_anylocalthread32	((L4_ThreadId32_t) { local : { X : {L4_SHUFFLE2(0, ~0UL)}}})
+#define L4_nilthread32	    ((L4_ThreadId32_t) { raw : 0UL})
+#define L4_anythread32	    ((L4_ThreadId32_t) { raw : (L4_Word32_t) ~0UL})
+#define L4_anylocalthread32 ((L4_ThreadId32_t) { local : { X : {L4_SHUFFLE2(0, ((1UL<<(26))-1)) }}})
 
 L4_INLINE L4_ThreadId32_t L4_GlobalId32 (L4_Word32_t threadno, L4_Word32_t version)
 {
