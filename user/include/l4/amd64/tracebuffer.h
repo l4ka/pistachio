@@ -218,10 +218,11 @@ do {								\
 	:							\
 	"=D" (_dummy)						\
 	:							\
-	"0" (addr + (7 + offset) * sizeof(L4_Word_t)),	\
+	"0" (addr + (7 + offset) * sizeof(L4_Word_t)),		\
 	"r" (item));						\
 } while (0)
 
+#undef __PLUS32
 
 
 #endif /* !__L4__AMD64__TRACEBUFFER_H__ */
