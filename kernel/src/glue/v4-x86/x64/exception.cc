@@ -49,7 +49,7 @@ DECLARE_TRACEPOINT (X86_UD);
 
 const word_t x86_exc_reg_t::mr2reg[NUM_EXC_REGS][2] = 
 {    
-    {    19, ~0 /* EXC	*/},
+    {    19, (word_t) ~0UL			/* EXC	*/},
     {     1, x86_exceptionframe_t::ipreg	/* RIP	*/},
     {     2, x86_exceptionframe_t::breg		/* RBX	*/},
     {     3, x86_exceptionframe_t::r10reg	/* R10	*/},
