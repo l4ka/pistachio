@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2006,  Karlsruhe University
+ * Copyright (C) 2005-2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/vrt_io.cc
  * Description:   VRT for thread objects
@@ -184,7 +184,7 @@ mdb_t * vrt_io_t::get_mapdb (void)
  * Get name of table structure.
  * @reurn name of table structure
  */
-char * vrt_io_t::get_name (void)
+const char * vrt_io_t::get_name (void)
 {
 #if defined(CONFIG_KDB)
     return name;
