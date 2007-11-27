@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/sprintf.cc
  * Description:   disassembler support code
@@ -164,7 +164,7 @@ static int SECTION(SEC_KDEBUG) do_sprintf(char** obuf, const char* format_p, va_
 		if (s)
 		    n += print_string(s, width);
 		else
-		    n += print_string("(null)", width);
+		    n += print_string((char *) "(null)", width);
 	    }
 	    break;
 	    case 'T':
@@ -227,7 +227,7 @@ static int SECTION(SEC_KDEBUG) do_sprintf(char** obuf, const char* format_p, va_
 		format++;
 		continue;
 	    default:
-		n += print_string("?", 0);
+		n += print_string((char *) "?", 0);
 		break;
 	    };
 	    i++;
