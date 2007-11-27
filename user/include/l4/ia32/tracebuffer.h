@@ -29,7 +29,7 @@
  ********************************************************************/
 #ifndef __L4__IA32__TRACEBUFFER_H__
 #define __L4__IA32__TRACEBUFFER_H__
-
+#include <l4/types.h>
 #define __L4_TRACEBUFFER_SIZE	(4 * 1024 * 1024)
 
 /* Turn preprocessor symbol definition into string */
@@ -213,6 +213,7 @@ do {								\
 	"r" (item));						\
 } while (0)
 
+#undef __PLUS32
 
 
 #endif /* !__L4__IA32__TRACEBUFFER_H__ */
