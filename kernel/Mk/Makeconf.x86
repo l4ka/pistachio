@@ -37,6 +37,10 @@ endif
 UNDEFS	 += $(SUBARCH)
 DEFINES	 += __SUBARCH__=$(SUBARCH)
 
+ifeq "$(CONFIG_X86_SMALL_SPACES)" "y"
+CFLAGS_x86 += -Wno-invalid-offsetof 
+endif
+
 CFLAGS_x86_x32	+= -O2 -mpreferred-stack-boundary=2 
 CFLAGS_x86_x64  += -O2 -m64 -mcmodel=kernel -mno-red-zone 
 CFLAGS_x86	+= $(CFLAGS_x86_$(SUBARCH))
