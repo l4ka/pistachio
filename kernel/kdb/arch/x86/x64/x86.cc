@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2007,  Karlsruhe University
  *                
- * File path:     kdb/arch/x86/x64/amd64.cc
+ * File path:     kdb/arch/x86/x64/x86.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ CMD(cmd_idt, cg)
 		   e.x.d.selector,
 		   e.x.d.offset_low | (e.x.d.offset_high << 16),
 		   e.x.d.dpl,
-		   ((char*[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,"INT ","TRAP"})[e.x.d.type],
+		   ((const char*[]){0,0,0,0,0,0,0,0,0,0,0,0,0,0,"INT ","TRAP"})[e.x.d.type],
 		   e.x.raw[0], e.x.raw[1]);
     };
     return CMD_NOQUIT;
@@ -113,7 +113,7 @@ CMD(cmd_gdt, cg)
                 ent->x.d.type & 0x1 ? ' ' : '!');
     }
 
-    x86_tssdesc_t *tss = (x86_tssdesc_t *) &gdt[GDT_SIZE - 2];
+    x86_tssdesc_t *tss = (x86_tssdesc_t *) (addr_t) &gdt[GDT_SIZE - 2];
     
     printf("GDT[%d] = %16x", GDT_SIZE-2, tss->x.raw);
     printf(" <%16x,%16x> ",
