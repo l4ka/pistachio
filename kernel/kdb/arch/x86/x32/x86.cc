@@ -67,7 +67,7 @@ CMD(cmd_idt, cg)
 		   e.x.d.sel,
 		   e.x.d.offset_low | (e.x.d.offset_high << 16),
 		   e.x.d.dpl,
-		   ((char*[]){0,0,0,0,0,0,"INT ","TRAP"})[e.x.d.type],
+		   ((const char*[]){0,0,0,0,0,0,"INT ","TRAP"})[e.x.d.type],
 		   e.x.raw[0], e.x.raw[1]);
     };
     return CMD_NOQUIT;
