@@ -203,8 +203,7 @@ INLINE msg_tag_t tcb_t::do_ipc (threadid_t to_tid, threadid_t from_tid,
                                 timeout_t timeout)
 {
     msg_tag_t tag;
-   
-    sys_ipc (to_tid, from_tid, 0, 0, 0, 0, timeout);
+    sys_ipc (timeout, to_tid, from_tid);
     tag.raw = get_mr (0);
 
     return tag;
