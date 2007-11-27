@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2006,  Karlsruhe University
+ * Copyright (C) 2005-2007,  Karlsruhe University
  *                
- * File path:     vrt.h
+ * File path:     generic/vrt.h
  * Description:   Generic Variable Radix Tables
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ public:
     virtual word_t get_next_objsize (word_t objsize);
     virtual word_t get_vrt_size (void);
     virtual mdb_t * get_mapdb (void);
-    virtual char * get_name (void);
+    virtual const char * get_name (void);
 
     // Node specific methods
 
