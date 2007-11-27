@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
  *                
  * File path:     kdb/cmd.h
  * Description:   Kernel debugger commands and command groups.
@@ -93,8 +93,8 @@ class cmd_t
 {
 public:
     char	key;
-    char	*command;
-    char	*description;
+    const char	*command;
+    const char	*description;
     cmd_func_t	function;
 };
 
@@ -107,9 +107,9 @@ class cmd_group_t
 public:
     linker_set_t	*cmd_set;
     cmd_group_t		*parent;
-    char 		*name;
+    const char 		*name;
 
-    cmd_ret_t interact (cmd_group_t * myparent, char * myname);
+    cmd_ret_t interact (cmd_group_t * myparent, const char * myname);
     void reset (void) { cmd_set->reset (); }
     cmd_t * next (void) { return (cmd_t *) cmd_set->next (); }
 
