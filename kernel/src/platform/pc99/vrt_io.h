@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2006,  Karlsruhe University
+ * Copyright (C) 2005-2007,  Karlsruhe University
  *                
  * File path:     platform/pc99/vrt_io.h
  * Description:   VRT for IO ports specific declarations
@@ -71,7 +71,7 @@ public:
     word_t get_next_objsize (word_t objsize);
     word_t get_vrt_size (void);
     mdb_t * get_mapdb (void);
-    char * get_name (void);
+    const char * get_name (void);
 
     // Node specific methods
     void set_object (vrt_node_t * n, word_t n_sz, word_t paddr,
