@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/kip.cc
  * Description:   Various KIP tests
@@ -52,8 +52,8 @@ bool check_kipptr(L4_KernelInterfacePage_t *kip, void * ptr)
 
 
 /* list of kernel ids, subids and what they are */
-struct { L4_Word_t id; L4_Word_t subid; char *kernel; char * supplier; } 
-kid_list[] = 
+typedef struct kid_list_t { L4_Word_t id; L4_Word_t subid; const char *kernel; const char * supplier; };
+kid_list_t kid_list[] = 
 {
 	{ 0, 1, "L4/486", "GMD" },
 	{ 0, 2, "L4/Pentium", "IBM" },
@@ -69,7 +69,8 @@ kid_list[] =
 
 /* list of API versions */
 #define NO_SUBVERSION (L4_Word_t)-1ULL
-struct { L4_Word_t version; L4_Word_t subversion; char *api; } api_list[] = 
+typedef struct api_list_t { L4_Word_t version; L4_Word_t subversion; const char *api; };
+api_list_t api_list[] = 
 {
 	{ L4_APIVERSION_2,  NO_SUBVERSION, "Version 2" },
 	{ L4_APIVERSION_X0, L4_APISUBVERSION_X0, "Experimental Version X.0" },
@@ -80,8 +81,8 @@ struct { L4_Word_t version; L4_Word_t subversion; char *api; } api_list[] =
 #define API_LIST_COUNT (sizeof(api_list)/sizeof(api_list[0]))
 
 /* assume these could have 2 * 3 filled in later */
-char *endianess[] = { "little", "big", "ERROR-2", "ERROR-3" };
-char *apiwidth [] = { "32-bit", "64-bit", "ERROR-2", "ERROR-3" };
+const char *endianess[] = { "little", "big", "ERROR-2", "ERROR-3" };
+const char *apiwidth [] = { "32-bit", "64-bit", "ERROR-2", "ERROR-3" };
 
 #define TAG0 0
 #define TAG1 1
@@ -94,7 +95,7 @@ print_kernelid( L4_Word_t kid_w )
 {
 	L4_KernelId_t kid;
 	L4_Word_t i;
-	char *kernel, *supplier;
+	const char *kernel, *supplier;
 
 	kid.raw = kid_w;
 
@@ -124,7 +125,7 @@ print_version( L4_Word_t apiv )
 {
 	L4_ApiVersion_t api;
 	L4_Word_t i;
-	char *version;
+	const char *version;
 
 	api.raw = apiv;
 
