@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/sig0.cc
  * Description:   Various sigma0 tests
@@ -95,7 +95,7 @@ do_req( int accept )
 {
 	void *page = get_new_page();
 	int r;
-	char *msg;
+	const char *msg;
 
 	/* setup an acceptor? */
 	if( accept )
