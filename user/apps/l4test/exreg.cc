@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/exreg.cc
  * Description:   Various ExchangeRegisers() tests
@@ -43,7 +43,7 @@
 #include "assert.h"
 #include "threads.h"
 
-static char*
+static const char*
 tidcmp( L4_ThreadId_t t1, L4_ThreadId_t t2 )
 {
 	if( t1.raw == t2.raw )
@@ -176,7 +176,7 @@ exreg_g2l(void)
 {
 	L4_ThreadId_t myg, myl;
 	L4_ThreadId_t rmyg, rmyl;
-	char *g_msg, *l_msg;
+	const char *g_msg, *l_msg;
 
 	/* get my IDs out of TCRs */
 	myg = L4_MyGlobalId();
