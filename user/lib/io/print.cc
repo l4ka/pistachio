@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007  Karlsruhe University
  *                
  * File path:     print.cc
  * Description:   fully featured printf
@@ -128,7 +128,8 @@ int __l4_vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap)
     int width, precision;
     int i, c, base, sign, signch, numdigits, numpr = 0, someflag;
     unsigned long uval, uval2;
-    char *digits, *string, *p = str;
+    const char *digits;
+    char *string, *p = str;
     L4_ThreadId_t tid;
 
 #define PUTCH(ch) do {			\
@@ -138,7 +139,7 @@ int __l4_vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap)
     } while (0)
 
 #define PUTSTR(st) do {			\
-	char *s = (st);			\
+	const char *s = (st);		\
 	while ( *s != '\0' ) {		\
 	    if ( size-- <= 0 )	\
 		goto Done;		\
