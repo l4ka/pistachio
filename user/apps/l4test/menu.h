@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/menu.h
  * Description:   Menu definitions
@@ -33,12 +33,12 @@
 struct menuitem
 {
 	void (*func)(void);  /* function to call on select (NULL == return) */
-	char *prompt;        /* user prompt */
+	const char *prompt;  /* user prompt */
 };
 
 struct menu
 {
-	char *title;            /* menu title */
+	const char *title;      /* menu title */
 	int clear;              /* always clear when drawing this */
 	int nitems;             /* number of items */
 	struct menuitem* items; /* ptr to an array of items */
