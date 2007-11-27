@@ -48,7 +48,7 @@ public:
 
     word_t get_radix (word_t objsize);
     word_t get_next_objsize (word_t objsize);
-    char * get_name (void);
+    const char * get_name (void);
 
     // Node specific operations
 
