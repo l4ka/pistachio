@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  University of New South Wales
+ * Copyright (C) 2002-2003, 2007,  University of New South Wales
  *                
  * File path:     l4test/main.cc
  * Description:   main setup/loop for L4/pistachio testing suite
@@ -60,7 +60,7 @@ static char *free_page = (char*) SCRATCHMEM_START;
 
 /* colours */
 static void 
-set_colour( char *col )
+set_colour( const char *col )
 {
 #ifdef USE_ANSI
 	printf( "%s", col );
