@@ -144,7 +144,7 @@ public:
 
     virtual word_t get_radix (word_t objsize);
     virtual word_t get_next_objsize (word_t objsize);
-    virtual char * get_name (void);
+    virtual const char * get_name (void);
 
     // MDB specific node operations
 
