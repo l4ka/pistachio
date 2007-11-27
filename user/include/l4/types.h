@@ -84,7 +84,7 @@ typedef L4_Word_t		L4_Bool_t;
 # define __14		32
 # define __18		32
 #else
-# define __PLUS32
+# define __PLUS32	+ 0	
 # define __14		14
 # define __18		18
 #endif
@@ -293,10 +293,9 @@ typedef union {
     L4_LthreadId_t	local;
 } L4_ThreadId_t;
 
-
-#define L4_nilthread		((L4_ThreadId_t) { raw : 0UL})
-#define L4_anythread		((L4_ThreadId_t) { raw : ~0UL})
-#define L4_anylocalthread	((L4_ThreadId_t) { local : { X : {L4_SHUFFLE2(0, ~0UL)}}})
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+#define L4_anythread      ((L4_ThreadId_t) { raw : ~0UL})
+#define L4_anylocalthread ((L4_ThreadId_t) { local : { X : {L4_SHUFFLE2(0, ((1UL<<(8*sizeof(L4_Word_t)-6))-1))}}})
 
 L4_INLINE L4_ThreadId_t L4_GlobalId (L4_Word_t threadno, L4_Word_t version)
 {
