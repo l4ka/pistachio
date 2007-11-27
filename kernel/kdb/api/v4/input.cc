@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/input.cc
  * Description:   Version 4 specific input functions
@@ -88,7 +88,7 @@ space_t SECTION(SEC_KDEBUG) * get_space (const char * prompt)
 
 
 
-static char * thread_names[] = {
+static const char * thread_names[] = {
     "nil_thrd", "irq_", "idlethrd", "sigma0", "sigma1", "roottask", 0
 };
 
