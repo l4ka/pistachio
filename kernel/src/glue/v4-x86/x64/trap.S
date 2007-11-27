@@ -251,6 +251,7 @@ slowpath:
 	movq	%r13,  UTCB_MR(5)(%rdi)
 	movq	%r14,  UTCB_MR(6)(%rdi)	
 	movq	%r15,  UTCB_MR(7)(%rdi)	
+	movq  %r8, %rdi					// timeout (1st argument)
 	subq $16, %rsp					// make room for from and to
 	movq %rdx,  8(%rsp)				// save from
 	movq %rsi,   (%rsp)				// save to
