@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2004, 2006,  Karlsruhe University
+## Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ##                
@@ -92,7 +92,7 @@ post-clean:
 	@(cd $(srcdir) ; grep "\$$[I][d]:" $(SRCS)) | \
 	  $(AWK) '{sum += $$5} END {print sum}' > $@
 
-copy_io32files:
+copy_io32files: $(top_srcdir)/lib/io/$(IO32FILES:.cc)
 	@for F in $(IO32FILES:.cc=); do \
 	  test $${F}32.cc -nt $(top_srcdir)/lib/io/$${F}.cc || \
 	    cp $(top_srcdir)/lib/io/$${F}.cc $${F}32.cc; \
