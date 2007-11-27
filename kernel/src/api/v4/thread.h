@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007,  Karlsruhe University
  *                
  * File path:     api/v4/thread.h
  * Description:   thread ids
@@ -55,8 +55,8 @@ public:
     static threadid_t anylocalthread()
     {
 	threadid_t tid;
-	tid.local.zero = 0;
-	tid.local.id = (word_t) (-1UL);
+	tid.local.zero = tid.local.id = 0;
+	tid.local.id -= 1;
 	return tid;
     }
     
