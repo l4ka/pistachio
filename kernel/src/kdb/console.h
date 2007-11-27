@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/console.h
  * Description:   Generic KDB console functionality
@@ -39,7 +39,7 @@ void init_console (void) SECTION (".init");
 class kdb_console_t
 {
 public:
-    char * name;
+    const char * name;
     void (*init) (void);
     void (*putc) (char c);
     char (*getc) (bool block);
