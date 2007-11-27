@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003, 2005-2006,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2005-2007,  Karlsruhe University
  *                
- * File path:     kmemory.h
+ * File path:     generic/kmemory.h
  * Description:   Kernel Memory Manager
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,8 @@
 class kmem_group_t
 {
 public:
-    word_t	mem;
-    char *	name;
+    word_t		mem;
+    const char *	name;
 };
 
 extern linker_set_t __kmem_groups;
