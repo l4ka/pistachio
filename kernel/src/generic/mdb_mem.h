@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2005, 2007,  Karlsruhe University
  *                
- * File path:     mdb_mem.h
+ * File path:     generic/mdb_mem.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ public:
 
     word_t get_radix (word_t objsize);
     word_t get_next_objsize (word_t objsize);
-    char * get_name (void);
+    const char * get_name (void);
 
     // Node specific operations
 
