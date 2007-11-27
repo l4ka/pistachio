@@ -47,7 +47,7 @@ extern space_t *current_disas_space;
 
 #if defined(CONFIG_KDB_DISAS)
 extern "C" int disas(addr_t pc);
-INLINE void disas_addr (addr_t ip, char * str = "")
+INLINE void disas_addr (addr_t ip, const char * str = "")
 {
     printf ("%p    ", ip);
     current_disas_space =  kdb.kdb_current->get_space();
@@ -55,7 +55,7 @@ INLINE void disas_addr (addr_t ip, char * str = "")
     printf ("\n");
 }
 #else
-INLINE void disas_addr (addr_t ip, char * str = "")
+INLINE void disas_addr (addr_t ip, const char * str = "")
 {
     printf ("ip=%p -- %s\n", ip, str);
 }
@@ -222,7 +222,7 @@ bool kdb_t::pre()
 		else
 #endif 
 		    /* mov addr, AREG  */
-		    mapped = readmem (space, addr_offset(addr, 3), (word_t *) &user_addr);
+		    mapped = readmem (space, addr_offset(addr, 3), (word_t *) (addr_t) &user_addr);
 	    }
 	    else if (c == 0x48)
 	    {
