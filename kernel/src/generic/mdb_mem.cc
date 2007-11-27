@@ -177,7 +177,7 @@ word_t mdb_mem_t::get_next_objsize (word_t objsize)
  * Get name of mapping database.
  * @return mapping database name
  */
-char * SECTION(SEC_KDEBUG) mdb_mem_t::get_name (void)
+const char * SECTION(SEC_KDEBUG) mdb_mem_t::get_name (void)
 {
     return "mem";
 }
