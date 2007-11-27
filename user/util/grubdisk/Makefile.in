@@ -49,7 +49,6 @@ bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstar
 	cp ${kerneldir}/${KERNEL} ${kerneldir}/${KERNEL}.stripped
 	strip ${kerneldir}/${KERNEL}.stripped 
 	@# Copy the binaries to it
-	cp ${kerneldir}/${KERNEL} kernel
 	export MTOOLSRC=mtoolsrc ; \
 	 mcopy -m ${srcdir}/menu.lst y:boot/grub ; \
 	 mcopy -m ${top_builddir}/*/*/{kickstart,sigma0} y: ; \
@@ -65,4 +64,4 @@ mtoolsrc:
 
 
 do-clean:
-	@$(RM) bootdisk.img mtoolsrc
+	@$(RM) bootdisk.img mtoolsrc ${KERNEL}.stripped
