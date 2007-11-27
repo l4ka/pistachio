@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  Karlsruhe University
+ * Copyright (C) 2004, 2007,  Karlsruhe University
  *                
  * File path:     kickstart.h
  * Description:   Global kickstart definitions
@@ -49,7 +49,7 @@ public:
     /**
      * String describing current loader format.
      */
-    char * name;
+    const char * name;
 
     /**
      * Detect if a valid loader format of this particular type is present.
