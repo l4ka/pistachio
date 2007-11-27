@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/cmd.cc
  * Description:   Command dialogs and standard command functions.
@@ -89,7 +89,7 @@ cmd_t SECTION(SEC_KDEBUG) * cmd_group_t::interact_by_command (void)
 		int nummatch = 0;
 		reset ();
 		while ((cmd = next ()) != NULL)
-		    if (strncmp (cmd->command, cmdstr, cmdlen) == 0)
+		    if (strncmp ((char *) cmd->command, cmdstr, cmdlen) == 0)
 			match = cmd, nummatch++;
 	    
 		if (nummatch == 1)
@@ -107,7 +107,7 @@ cmd_t SECTION(SEC_KDEBUG) * cmd_group_t::interact_by_command (void)
 		    putc ('\n');
 		    reset ();
 		    while ((cmd = next ()) != NULL)
-			if (strncmp (cmd->command, cmdstr, cmdlen) == 0)
+			if (strncmp ((char *) cmd->command, cmdstr, cmdlen) == 0)
 			    printf ("%s\n", cmd->command);
 		    cmdstr[cmdlen] = 0;
 		    printf (TXT_BRIGHT);
@@ -139,7 +139,7 @@ cmd_t SECTION(SEC_KDEBUG) * cmd_group_t::interact_by_command (void)
 	reset ();
 	while ((cmd = next ()) != NULL)
 	{
-	    if (strncmp (cmd->command, cmdstr, cmdlen) == 0 &&
+	    if (strncmp ((char *) cmd->command, cmdstr, cmdlen) == 0 &&
 		cmd->command[cmdlen] == 0)
 		return cmd;
 	}
@@ -161,7 +161,7 @@ cmd_t SECTION(SEC_KDEBUG) * cmd_group_t::interact_by_command (void)
 /**
  * cmd_group_t::interact: Perform user interaction on command group.
  */
-cmd_ret_t SECTION(SEC_KDEBUG) cmd_group_t::interact (cmd_group_t * myparent, char * myname)
+cmd_ret_t SECTION(SEC_KDEBUG) cmd_group_t::interact (cmd_group_t * myparent, const char * myname)
 {
     cmd_t * cmd;
 
