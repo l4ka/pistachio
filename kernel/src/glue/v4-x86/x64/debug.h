@@ -29,11 +29,11 @@
      "callq *%2		\n"						\
      "popq %%rsp	\n"						\
      "popq %%rbp	\n"						\
-     : "=r"(dummy), "=D"(dummy), "=r"(dummy)				\
+     : "=S"(dummy), "=D"(dummy), "=a"(dummy)				\
      : "0"(&kdb_stack[KDB_STACK_SIZE]),					\
        "1"(&param),							\
        "2"(get_kip()->kdebug_entry)					\
-     : "memory");			
+     : "memory", "rcx" , "rdx", "r8", "r9", "r10" , "r11" );			
 
 #else
 
