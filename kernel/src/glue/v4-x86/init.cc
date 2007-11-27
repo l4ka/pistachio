@@ -215,40 +215,36 @@ void SECTION(SEC_INIT) add_more_kmem (void)
         if (!md->is_virtual() &&
             (md->type() == memdesc_t::reserved) &&
             (word_t) md->high() <= KERNEL_AREA_END)
-        {
-	    // If KMEM is larger than 32 MB, allocate it chunkwise
-	    addr_t low = md->low();
-	    word_t size = md->size();
-	    const word_t chunksize = 32 * 1024 * 1024;
+	{	    
+	    TRACE_INIT("\tfound kmem %x %x %d\n", md->low(), md->high(), md->size());
 	    
-	    while (size) 
+	    // Align to kernel page size
+	    mem_region_t alloc = { addr_align_up(md->low(), KERNEL_PAGE_SIZE),
+				   addr_align(addr_offset(md->low(),md->size()), KERNEL_PAGE_SIZE) };
+
+	    // If KMEM is larger than 32 MB, allocate it chunkwise
+	    const word_t chunksize = 32 * 1024 * 1024;
+	    word_t allocsize = 0;
+	    
+	    while (alloc.get_size()) 
 	    {
-		if (size >= chunksize )
-		{
-		    // Map region kernel writable 
-		    get_kernel_space()->remap_area(
-			phys_to_virt(low), low,
-			PGSIZE_KERNEL,
-			chunksize, true, true, true);	    
-		    
-		    // Add it to allocator
-		    kmem.add(phys_to_virt(low), chunksize);
-		    
-		    low = addr_offset(low, chunksize);
-		    size -= chunksize;
-		}
-		else if (size &= ~(KERNEL_PAGE_SIZE-1))
-		{
-		    // Map region kernel writable 
-		    get_kernel_space()->remap_area(
-			phys_to_virt(low), low,
-			PGSIZE_KERNEL,
-			size, true, true, true);
-		    
-		    // Add it to allocator
-		    kmem.add(phys_to_virt(low), size);
-		    size = 0;
-		}
+		if (alloc.get_size() >= chunksize )
+		    allocsize = chunksize - (word_t) addr_mask(alloc.low, (chunksize-1));
+		else 
+		    allocsize = alloc.get_size();
+		
+
+		// Map region kernel writable 
+		//TRACEF("add %x %x\n", alloc.low, allocsize);
+		get_kernel_space()->remap_area(
+		    phys_to_virt(alloc.low), alloc.low,
+		    PGSIZE_KERNEL,
+		    allocsize, true, true, true);
+
+		// Add it to allocator
+		kmem.add(phys_to_virt(alloc.low), allocsize);
+		
+		alloc.low = addr_offset(alloc.low, allocsize);
 	    }
             found = true;
         }
