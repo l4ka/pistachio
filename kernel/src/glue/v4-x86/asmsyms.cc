@@ -46,7 +46,11 @@ MKASMSYM (OFS_KIP_PROCDESC, offsetof(kernel_interface_page_t, proc_desc_ptr));
 MKASMSYM (OFS_PROCDESC_INTFREQ, offsetof(procdesc_t, internal_freq));
 
 #if defined(CONFIG_X86_SMALL_SPACES)
+#if (__GNUC__ >= 4)
+MKASMSYM (OFS_SPACE_SMALLID, offsetof(x86_space_t, data.smallid));
+#else
 #define nonpod_class_hack_offsetof(type,member)\
     ((word_t)((u8_t *)&(((type *)0x10)->member) - (u8_t)0x10))
 MKASMSYM (OFS_SPACE_SMALLID, nonpod_class_hack_offsetof(x86_space_t, data.smallid));
+#endif
 #endif
