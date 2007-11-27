@@ -48,14 +48,19 @@ typedef struct {
 //
 //	Ipc ()
 //
-//      GCC won't put to, from in registers, as they are classes with overloaded
-//	operators.
+//      GCC <  4.2.3  doesn't put to, from in registers
+//	GCC >= 4.2.3 apparently does
 //
+//	the assembler stub in trap.S calls sys_ipc with from, to on the stack, and with
+//	   rdi (arg1) = timeout
+//	   rsi (arg2) = to
+//	   rdx (arg3) = from
+//
+
 #define SYS_IPC(to, from, timeout)		\
-  amd64_sysret_t SYSCALL_ATTR ("ipc")		\
-  sys_ipc (to, from, word_t amd64_rsi,		\
-	   word_t amd64_rdi, word_t amd64_rdx,	\
-	   word_t amd64_rcx, timeout)
+    amd64_sysret_t SYSCALL_ATTR ("ipc")		\
+	sys_ipc (timeout, to, from)		
+
 
 #define return_ipc(from)			\
 {						\
