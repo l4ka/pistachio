@@ -69,7 +69,7 @@ extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
     {
 	timeout_t timeout;
 	timeout.set_raw(arg7);
-	ret = sys_ipc(threadid(x32::threadid(arg6)), threadid(x32::threadid(arg3)), 0, 0, 0, 0, timeout);
+	ret = sys_ipc(timeout, threadid(x32::threadid(arg6)), threadid(x32::threadid(arg3)));
 	ret.rax = threadid_32(threadid(ret.rax)).get_raw();
 	return ret;
     }
