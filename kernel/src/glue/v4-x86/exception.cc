@@ -447,6 +447,7 @@ X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 	    /* lock; nop */
 	    frame->regs[x86_exceptionframe_t::areg] = (word_t)space->get_kip_page_area().get_base();
  	    frame->regs[x86_exceptionframe_t::creg] = get_kip()->api_version;
+	    frame->regs[x86_exceptionframe_t::Sreg] = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
  	    if (space->is_compatibility_mode())
  	    {
@@ -454,15 +455,12 @@ X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
 		   This is necessary because they are not set in the initialization phase. */
 		x32::get_kip()->thread_info.set_system_base(get_kip()->thread_info.get_system_base());
 		x32::get_kip()->thread_info.set_user_base(get_kip()->thread_info.get_user_base());
- 		frame->rdx = x32::get_kip()->api_flags;
-		frame->rdx = get_kip()->api_flags;
-		frame->rsi = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
-		frame->rip += 2;
+		frame->regs[x86_exceptionframe_t::dreg] = x32::get_kip()->api_flags;
+		frame->regs[x86_exceptionframe_t::ipreg] += 2;
 		return;
  	    }
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 	    frame->regs[x86_exceptionframe_t::dreg] = get_kip()->api_flags;
-	    frame->regs[x86_exceptionframe_t::Sreg] = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
 	    frame->regs[x86_exceptionframe_t::ipreg] += 2;
 	    return;
  	}
@@ -502,7 +500,17 @@ extern "C" void exc_catch_common_handler(x86_exceptionframe_t *frame)
     if (send_exception_ipc(frame, exc))
 	return;
 
+    
+#if defined(CONFIG_IOAPIC)
+    if (exc == 15)
+    {
+	TRACE("Ignoring spurious APIC interrupt\n");
+	return;
+    }
+#endif
+    
     printf("Unhandled exception %d\n", exc);
+    
     enter_kdebug("Exception caught");
     
     get_current_tcb()->set_state(thread_state_t::halted);
