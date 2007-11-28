@@ -162,9 +162,9 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
     for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
         if (cpu != current_cpu && space->data.cpu_ptab[cpu].top_pdir)
         {
-            TRACEF("smp sync %d / %x -> %d / %x\n",
-                   current_cpu, space->pgent(idx(), current_cpu),
-                   cpu, space->pgent(idx(), cpu));
+            //TRACEF("smp sync %d / %x -> %d / %x\n",
+	    //     current_cpu, space->pgent(idx(), current_cpu),
+	    //     cpu, space->pgent(idx(), cpu));
             *space->pgent(idx(), cpu) = *space->pgent(idx(), current_cpu);
         }
 }
