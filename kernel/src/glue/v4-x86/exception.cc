@@ -25,8 +25,14 @@ DECLARE_TRACEPOINT (EXCEPTION_IPC);
 DECLARE_TRACEPOINT (X86_NOMATH);
 DECLARE_TRACEPOINT (X86_GP);
 DECLARE_TRACEPOINT (X86_SEGRELOAD);
+DECLARE_TRACEPOINT (X86_UD);
+
 #if defined(CONFIG_X86_IO_FLEXPAGES)
 #include INC_PLAT(io_space.h)
+#endif
+
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+#include INC_GLUE_SA(x32comp/kernelinterface.h)
 #endif
 
 bool send_exception_ipc(x86_exceptionframe_t * frame, word_t exception)
@@ -329,6 +335,7 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
     kdebug_check_breakin();
 
+    
     TRACEPOINT (X86_GP, "general protection fault @ %p, error: %x\n", 
 		frame->regs[x86_exceptionframe_t::ipreg], frame->error);
 
@@ -419,6 +426,61 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     get_current_tcb()->set_state(thread_state_t::halted);
     get_current_tcb()->switch_to_idle();
 }
+
+
+
+
+X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
+{
+    tcb_t * current = get_current_tcb();
+    space_t * space = current->get_space();
+    addr_t addr = (addr_t) frame->regs[x86_exceptionframe_t::ipreg];
+
+    TRACEPOINT (X86_UD, "x86_ud at %x (%x) (current=%x)", addr, space->get_from_user(addr), current);
+    
+    /* instruction emulation */
+    switch( (u8_t) space->get_from_user(addr))
+    {
+    case 0xf0: /* lock prefix */
+ 	if ( (u8_t) space->get_from_user(addr_offset(addr, 1)) == 0x90)
+ 	{
+	    /* lock; nop */
+	    frame->regs[x86_exceptionframe_t::areg] = (word_t)space->get_kip_page_area().get_base();
+ 	    frame->regs[x86_exceptionframe_t::creg] = get_kip()->api_version;
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+ 	    if (space->is_compatibility_mode())
+ 	    {
+		/* srXXX: Hack: Update system and user base in 32-bit KIP.
+		   This is necessary because they are not set in the initialization phase. */
+		x32::get_kip()->thread_info.set_system_base(get_kip()->thread_info.get_system_base());
+		x32::get_kip()->thread_info.set_user_base(get_kip()->thread_info.get_user_base());
+ 		frame->rdx = x32::get_kip()->api_flags;
+		frame->rdx = get_kip()->api_flags;
+		frame->rsi = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
+		frame->rip += 2;
+		return;
+ 	    }
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
+	    frame->regs[x86_exceptionframe_t::dreg] = get_kip()->api_flags;
+	    frame->regs[x86_exceptionframe_t::Sreg] = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
+	    frame->regs[x86_exceptionframe_t::ipreg] += 2;
+	    return;
+ 	}
+      
+    default:
+	printf ("%p: invalid opcode at IP %p\n", current, addr);
+ 	enter_kdebug("invalid opcode");
+    }
+    
+    if (send_exception_ipc(frame, X86_EXC_INVALIDOPCODE))
+	return;
+    
+    get_current_tcb()->set_state(thread_state_t::halted);
+    get_current_tcb()->switch_to_idle();
+
+
+}
+
 
 
 X86_EXCNO_ERRORCODE(exc_nomath_coproc, X86_EXC_NOMATH_COPROC)
