@@ -40,8 +40,6 @@
 #include INC_API(kernelinterface.h)
 #include INC_GLUE(traphandler.h)
 
-DECLARE_TRACEPOINT (X86_UD);
-
 
 const word_t x86_exc_reg_t::mr2reg[NUM_EXC_REGS][2] = 
 {    
@@ -76,47 +74,6 @@ const char *x86_exceptionframe_t::name[x86_exceptionframe_t::num_regs] =
    "edx", "ecx", "eax", "err", "eip", "cs ", "efl", "esp", "ss "		
 };    
 #endif
-
-
-
-X86_EXCNO_ERRORCODE(exc_invalid_opcode, X86_EXC_INVALIDOPCODE)
-{
-    tcb_t * current = get_current_tcb();
-    space_t * space = current->get_space();
-    addr_t addr = (addr_t)frame->eip;
-
-    TRACEPOINT (X86_UD, "%t: invalid opcode at IP %p\n", current, addr);
-
-    /* instruction emulation, only in user area! */
-    if (space->is_user_area(addr))
-    {
-	switch(space->get_from_user(addr))
-	{
-	case 0xf0: /* lock prefix */
-	    if (space->get_from_user(addr_offset(addr, 1)) == 0x90)
-	    {
-		/* lock; nop */
-		frame->eax = (u32_t)space->get_kip_page_area().get_base();
-		frame->ecx = get_kip()->api_version;
-		frame->edx = get_kip()->api_flags;
-		frame->esi = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
-		frame->eip+= 2;
-		return;
-	    }
-	default:
-	    printf("invalid opcode  at IP %p\n", addr);
-	    enter_kdebug("invalid opcode");
-	}
-    }
-
-    if (send_exception_ipc(frame, X86_EXC_INVALIDOPCODE))
-	return;
-    
-    get_current_tcb()->set_state(thread_state_t::halted);
-    get_current_tcb()->switch_to_idle();
-}
-
-
 
 
 void exc_catch_common_wrapper() 
