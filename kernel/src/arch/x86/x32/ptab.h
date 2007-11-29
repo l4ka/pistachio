@@ -133,11 +133,6 @@ public:
 		(attrib & IA32_PTAB_FLAGS_MASK);
 	}
 		
-    void copy(const x86_pgent_t pgent)
-	{
-	    raw = pgent.raw;
-	}
-    
     // attributes
     
     void set_cacheability (bool cacheable, pagesize_e size)
