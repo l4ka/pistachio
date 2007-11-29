@@ -389,7 +389,7 @@ void space_t::populate_copy_area (word_t n, tcb_t *tcb, space_t *partner, cpuid_
 	    
 	pgent_t *dst_pgent = pgent(page_table_index(pgsize, 
 						    (addr_t) (COPY_AREA_START + n * COPY_AREA_SIZE)),
-				   data.reference_ptab);
+				   cpu);
 	    
 	    
 	for (word_t i=1; i < COPY_AREA_PDIRS; i++)
@@ -410,7 +410,7 @@ void space_t::populate_copy_area (word_t n, tcb_t *tcb, space_t *partner, cpuid_
 		       src_pgent->pgent.get_raw(), src_pgent, 
 		       dst_pgent->pgent.get_raw(), dst_pgent,
 		       tcb->resources.copy_area_pdir_idx(n,0), i, page_shift(pgsize));
-	    dst_pgent++->pgent.copy (src_pgent++->pgent);
+	    dst_pgent++->set_entry (this, pgsize, *src_pgent++);
 	}
     }
 }
