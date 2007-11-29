@@ -299,6 +299,7 @@ INLINE tcb_t * space_t::get_tcb(void * ptr)
 
 INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)
 {
+    ASSERT(cpu < CONFIG_SMP_MAX_CPUS);
     ASSERT(data.cpu_ptab[cpu].top_pdir);
     return &data.cpu_ptab[cpu].top_pdir->pgent[num];
 }
