@@ -49,7 +49,7 @@ DECLARE_TRACEPOINT(SYSCALL_IPC);
 DECLARE_TRACEPOINT(IPC_TRANSFER);
 
 
-#undef DEBUG_IPC
+#define DEBUG_IPC
 #if defined(DEBUG_IPC)
 DECLARE_TRACEPOINT(IPC_DETAILS);
 DECLARE_TRACEPOINT(IPC_ERROR);
@@ -407,7 +407,7 @@ send_path:
 	else if (EXPECT_FALSE( !to_tcb->is_local_cpu() && !to_tcb->lock_state.is_enabled() ))
 	{
     
-	    TRACE_XIPC_DETAILS(, "ipc xcpu send %t:%d (%s) -> %t:%d (%s)", 
+	    TRACE_XIPC_DETAILS("ipc xcpu send %t:%d (%s) -> %t:%d (%s)", 
 			       current, current->get_cpu(), current->get_state().string(),
 			       to_tcb, to_tcb->get_cpu(), to_tcb->get_state().string());
 	    
