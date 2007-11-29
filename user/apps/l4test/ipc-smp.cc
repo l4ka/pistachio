@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/ipc-smp.cc
  * Description:   Simple SMP IPC tests
@@ -271,5 +271,5 @@ void simple_smpipc (void)
     }
 
     setup_ipc_threads (simple_smpipc_t1, simple_smpipc_t2,
-		       false, false, true);
+		       true, true, true);
 }
