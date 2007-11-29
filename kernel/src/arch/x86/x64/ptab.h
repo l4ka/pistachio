@@ -160,13 +160,6 @@ public:
 	    raw = ((u64_t)(addr) & AMD64_PTE_MASK) | X86_PAGE_VALID | (attrib & AMD64_PTE_FLAGS_MASK);
 	}
 		
-    void copy(const x86_pgent_t pgent)
-	{
-	    raw = pgent.raw;
-	}
-
-
-
 private:
     union {
 	struct {
