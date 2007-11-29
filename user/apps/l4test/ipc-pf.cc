@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
  *                
  * File path:     l4test/ipc-pf.cc
  * Description:   String IPC test with pagefaults
@@ -548,8 +548,6 @@ string_smpipc_pf (void)
 
     t1_buf = (unsigned char *) get_pages (2, false);
     t2_buf = (unsigned char *) get_pages (2, false);
-    setup_ipc_threads (string_ipc_pf_t1_1, string_ipc_pf_t2_1,
-		       true, false, true);
-    setup_ipc_threads (string_ipc_pf_t1_2, string_ipc_pf_t2_2,
-		       false, true, true);
+    setup_ipc_threads (string_ipc_pf_t1_1, string_ipc_pf_t2_1, true, false, true);
+    setup_ipc_threads (string_ipc_pf_t1_2, string_ipc_pf_t2_2, false, true, true);
 }
