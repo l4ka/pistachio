@@ -40,7 +40,7 @@ DECLARE_TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS);
 void handle_ipc_error (void);
 void thread_return (void);
 
-static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
+static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle);
 
@@ -94,9 +94,11 @@ static void do_xcpu_exregs_reply (cpu_mb_entry_t * entry)
  */
 static void do_xcpu_exregs (cpu_mb_entry_t * entry)
 {
+    tcb_t * current = get_current_tcb();
     tcb_t * dest = entry->tcb;
     tcb_t * from = (tcb_t *) entry->param[0];
 
+    //TRACEF ("%t %t\n", get_current_tcb(), dest);
 
     if (EXPECT_FALSE (! dest->is_local_cpu ()))
     {
@@ -111,21 +113,25 @@ static void do_xcpu_exregs (cpu_mb_entry_t * entry)
     pager_tid.set_raw (entry->param[5]);
     exregs_ctrl_t ctrl(entry->param[1]);
     
-    perform_exregs (from, dest,
-		    &ctrl,
-		    &entry->param[2],
-		    &entry->param[3],
-		    &entry->param[4],
-		    &pager_tid,
-		    &entry->param[6]
-	);
-    
+    bool reschedule = perform_exregs (from, dest,
+				      &ctrl,
+				      &entry->param[2],
+				      &entry->param[3],
+				      &entry->param[4],
+				      &pager_tid,
+				      &entry->param[6]
+				      );
     
     // Pass return values back to invoker thread.
     xcpu_request (from->get_cpu (), do_xcpu_exregs_reply, from,
 		  ctrl.raw, entry->param[2], entry->param[3],
 		  entry->param[4], pager_tid.get_raw (), entry->param[6]);
     
+    if (reschedule && current != get_idle_tcb())
+    {
+	get_current_scheduler ()->enqueue_ready (current);
+	current->switch_to_idle(); 
+    }
 }
 
 
@@ -136,7 +142,7 @@ static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
 			   word_t * usp, word_t * uip, word_t * uflags,
 			   threadid_t * pager, word_t * uhandle)
 {
-    ///TRACEF ("current=%t  tcb=%t\n", current, dest);
+    //TRACEF ("current=%t tcb=%t\n", current, dest);
     
     // Pass exregs request to remote CPU.
     xcpu_request (dest->get_cpu (), do_xcpu_exregs, dest, (word_t) current,
@@ -172,10 +178,11 @@ static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
  * @param pager		pager (in/out)
  * @param uhandler	user defined handle (in/out)
  */
-static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
+static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle)
 {
+    //TRACEF("perform_exregs %x\n", dest);
     exregs_ctrl_t ctrl = *control;
 
     // Load return values before they are clobbered.
@@ -185,6 +192,7 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
     word_t old_uflags = dest->get_user_flags();
     threadid_t old_pager = dest->get_pager();
     exregs_ctrl_t old_control = 0;
+    bool reschedule = false;
     
     if (ctrl.is_set(exregs_ctrl_t::sp_flag))
 	dest->set_user_sp ((addr_t) *usp);
@@ -212,7 +220,7 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 	    dest->set_state(thread_state_t::running);
 	    dest->notify(handle_ipc_error);
 	    get_current_scheduler()->enqueue_ready(dest);
-   
+	    reschedule = true;
 	}
     }
     else if (dest->get_state().is_receiving())
@@ -224,6 +232,7 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 	    dest->set_state(thread_state_t::running);
 	    dest->notify(handle_ipc_error);
 	    get_current_scheduler()->enqueue_ready(dest);
+	    reschedule = true;
 	}
     }
 
@@ -237,6 +246,7 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 	{
 	    dest->set_state(thread_state_t::running);
 	    get_current_scheduler()->enqueue_ready(dest);
+	    reschedule = true;
 	}
     } 
 
@@ -247,6 +257,7 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 	{
 	    // Halt a running thread
 	    dest->set_state(thread_state_t::halted);
+	    reschedule = true;
 	}
 	else
 	{
@@ -265,6 +276,8 @@ static void perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
     *uflags =	old_uflags;
     *pager =	old_pager;
     *uhandle =	old_uhandle;
+    
+    return reschedule;
     
 }
 
@@ -349,8 +362,12 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
 #endif
     {
 	// Destination thread on same CPU.  Perform operation immediately.
-	perform_exregs (current, dest, &ctrl, &usp, &uip, &uflags,
-			&pager_tid, &uhandle);
+	if (perform_exregs (current, dest, &ctrl, &usp, &uip, &uflags,
+			    &pager_tid, &uhandle))
+	{
+	    get_current_scheduler ()->enqueue_ready (current);
+ 	    current->switch_to_idle();
+	}
 	    
     }
 
