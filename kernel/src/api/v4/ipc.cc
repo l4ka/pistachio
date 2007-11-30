@@ -456,6 +456,7 @@ send_path:
 	{
 	    /* error on transfer - activate the partner and return */
 	    current->set_tag(to_tcb->get_tag());
+	    current->set_state(thread_state_t::running);
 	    to_tcb->set_state(thread_state_t::running);
 	    to_tcb->unlock();
 
