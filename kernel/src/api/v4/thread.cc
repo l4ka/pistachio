@@ -949,7 +949,7 @@ void handle_ipc_error (void)
     {
 	// Thread was doing a pagefault IPC.  Restore thread state
 	// prior to IPC operation and return directly to user-level.
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
 	    current->set_mr (i, current->misc.ipc_copy.saved_mr[i]);
 	current->set_br (0, current->misc.ipc_copy.saved_br0);
 	current->set_partner (current->get_saved_partner ());
