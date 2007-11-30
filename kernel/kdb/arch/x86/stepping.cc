@@ -35,7 +35,7 @@
 #include INC_ARCH(cpu.h)
 
 bool x86_single_step_on_branches = false;
-u32_t x86_last_ip = ~0U;
+word_t x86_last_ip = ~0U;
 
 DECLARE_CMD (cmd_singlestep, root, 's', "singlestep", "Single step");
 
