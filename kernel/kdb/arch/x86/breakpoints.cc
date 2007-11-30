@@ -160,5 +160,15 @@ CMD(cmd_breakpoint, cg)
     if (num==3) __asm__ __volatile__ ("mov %0, %%db3" : : "r" (addr));
     __asm__ __volatile__ ("mov %0, %%db7" : : "r" (db7));
     
+#if defined(CONFIG_TRACEPOINTS)
+    cpuid_t cpu = get_current_cpu();
+    if (get_choice ("Enter KDB", "y/n", 'y') == 'y')
+	x86_breakpoint_cpumask_kdb |= (1 << cpu);
+    else
+	x86_breakpoint_cpumask_kdb &= ~(1 << cpu);
+    x86_breakpoint_cpumask |= (1 << cpu);
+ 
+#endif
+    
     return CMD_NOQUIT;
 }
