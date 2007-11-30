@@ -75,6 +75,8 @@ bool kdb_t::pre()
 
     debug_param_t * param = (debug_param_t*)kdb_param;
     x86_exceptionframe_t* f = param->frame;
+    space_t * space = kdb.kdb_current->get_space();
+    if (!space) space = get_kernel_space();
     
     switch (param->exception)
     {
@@ -83,7 +85,7 @@ bool kdb_t::pre()
 	/* breakpoint exception */
 	if (f->regs[x86_exceptionframe_t::freg] & (1 << 8))
 	{
-	    extern u32_t x86_last_ip;
+	    extern word_t x86_last_ip;
 #if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_P4) 
 	    extern bool x86_single_step_on_branches;
 	    if (x86_single_step_on_branches)
@@ -144,11 +146,7 @@ bool kdb_t::pre()
 		printf("--- Debug Exception NO DR---\n");
 		break;
 	    }
-	    space_t *space = kdb.kdb_current->get_space();
-	    if (!space)
-		space = get_kernel_space();
 	    
-
 	    word_t content;
 	    ENABLE_TRACEPOINT(X86_BREAKPOINT, x86_breakpoint_cpumask, 0);
 
@@ -159,7 +157,7 @@ bool kdb_t::pre()
 		TRACEPOINT(X86_BREAKPOINT, "breakpoint dr%d ip: %x addr %x content %x", 
 			   dbnum, f->regs[x86_exceptionframe_t::ipreg], db, content);
 	    
-	    return (x86_breakpoint_cpumask_kdb & (1 << get_current_cpu()));
+	    enter_kernel_debugger = ((x86_breakpoint_cpumask_kdb & (1 << get_current_cpu())) != 0);
 #else
 	    printf("--- Debug Exception ---\n");
 #endif
@@ -173,9 +171,6 @@ bool kdb_t::pre()
 	
     case X86_EXC_BREAKPOINT: /* int3 */
     {
-	space_t * space = kdb.kdb_current->get_space();
-	if (!space) space = get_kernel_space();
-
 	addr_t addr = (addr_t)(f->regs[x86_exceptionframe_t::ipreg]);
 	
 	unsigned char c;
