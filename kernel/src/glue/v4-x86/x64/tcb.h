@@ -136,9 +136,9 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 #endif
     __asm__ __volatile__ (
 	"/* switch_to_thread */			\n\t"
-	"movq	%[dtcb], %%r12			\n\t"	/* save dest			*/
+	"movq	%[dtcb], %%r11			\n\t"	/* save dest			*/
 	"pushq	%%rbp				\n\t"	/* save rbp			*/
-	
+
 	"pushq	$3f				\n\t"	/* store return address		*/
 	
 	"movq	%%rsp, %c[stack](%[stcb])	\n\t"	/* switch stacks		*/
@@ -155,26 +155,26 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"1:					\n\t"
 	"movq	%[dpdir], %%cr3			\n\t"	/* no:  reload pagedir		*/
 	"2:					\n\t"
-	/* srXXX: Replace popq and jmpq with retq? */
 	"popq	%%rdx				\n\t"	/* load (new) return address	*/
 	"movq   %[utcb], %%gs:0		        \n\t"   /* update current UTCB		*/
 	"jmpq	*%%rdx				\n\t"	/* jump to new return address 	*/
 
 	"3:					\n\t"
-	"movq   %%r12, %[stcb]			\n\t"   /* restore this			*/
+	"movq   %%r11, %[stcb]			\n\t"   /* restore this			*/
 	"popq	%%rbp				\n\t"	/* restore rbp			*/
 	"/* switch_to_thread */			\n\t"
 	: /* output */
-	  "=a" (dummy)						/* %0 RAX */
+	  "=a" (dummy),						/* %0 RAX */
+ 	  "=c" (dummy)						/* %1 RCX */
 	: /* input */
-	  [dtcb]	"D" (dest),				/* %1 RDI */
-	  [stcb]	"S" (this),				/* %2 RSI */
-	  [stack]	"i" (OFS_TCB_STACK),			/* %3 IMM */
-	  [space]	"i" (OFS_TCB_SPACE),			/* %4 IMM */
-	  [pdir]	"i" (OFS_TCB_PDIR_CACHE),		/* %5 IMM */
-	  [dpdir]	"0" (dest->pdir_cache),			/* %6 RAX */
-	  [spdir]	"c" (this->pdir_cache),			/* %7 RCX */
-	  [utcb]	"b" (dest->get_local_id().get_raw())	/* %8 RBX */
+	  [dtcb]	"D" (dest),				/* %2 RDI */
+	  [stcb]	"S" (this),				/* %3 RSI */
+	  [stack]	"i" (OFS_TCB_STACK),			/* %4 IMM */
+	  [space]	"i" (OFS_TCB_SPACE),			/* %5 IMM */
+	  [pdir]	"i" (OFS_TCB_PDIR_CACHE),		/* %6 IMM */
+	  [dpdir]	"0" (dest->pdir_cache),			/* %7 RAX */
+	  [spdir]	"1" (this->pdir_cache),			/* %8 RCX */
+	  [utcb]	"b" (dest->get_local_id().get_raw())	/* %9 RBX */
 
 	: /* clobber - trash global registers */ 
 	  "memory", "rdx", "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
@@ -278,17 +278,16 @@ INLINE void tcb_t::notify (void (*func)(word_t, word_t), word_t arg1, word_t arg
  * return execution to the instruction directly following the IPC
  * system call.
  */
-INLINE void tcb_t::return_from_ipc (void)
+INLINE void NORETURN tcb_t::return_from_ipc (void)
 {
 
-    register word_t utcb asm("r12") = get_local_id ().get_raw ();
-
     asm("movq %0, %%rsp\n"
+	"movq %1, %%r11\n"
 	"retq\n"
 	:
 	:
 	"r" (&get_stack_top ()[KSTACK_RET_IPC]),
-	"r" (utcb),
+	"r" (this),
 	"d" (get_tag ().raw)
 	);	
     
