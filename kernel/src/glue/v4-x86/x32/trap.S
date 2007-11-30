@@ -281,9 +281,14 @@ fp_save_resources_done:
 
 fp_ipc_done:	
 	/* reactivation after IPC:
+	* on success:	
 	 *  ESI = current
 	 *  EDI = UTCB
+	* on error:	
+	 *  ESI = mr0
+	 *  EDI = UTCB
 	 */
+	CURRENT_TCB	%esi
 	cmpl	$0, OFS_TCB_RESOURCE_BITS(%esi)
 	jne	fp_load_resources
 fp_load_resources_done:
