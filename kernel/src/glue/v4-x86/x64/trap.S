@@ -56,12 +56,29 @@
 
 #define UTCB_MR(x)	(OFS_UTCB_MR + ((x) * 8))
 
-/* JS:	TODO
- * 1) Actually we'd have to dispatch, perhaps by xlat or jump table
- * 2) As soon as we have a fastpath, we cannot use callee saved registers 
- *    for UTCB, UIP, USP, UFLAGS anymore
- * 3) As soon as we have a working tcb_layout.h, we can calculate
- *    the address of user_ipc at compile time and avoid lea
+.macro SAVE_UTCB1 reg
+	movq	%rax,  UTCB_MR(1)(\reg)
+	movq	%rbx,  UTCB_MR(2)(\reg)
+	movq	%r10,  UTCB_MR(3)(\reg)
+	movq	%r12,  UTCB_MR(4)(\reg)
+	movq	%r13,  UTCB_MR(5)(\reg)
+	movq	%r14,  UTCB_MR(6)(\reg)	
+	movq	%r15,  UTCB_MR(7)(\reg)	
+.endm
+
+.macro RESTORE_UTCB1 reg
+	movq UTCB_MR(1)(\reg), %rax 		
+	movq UTCB_MR(2)(\reg), %rbx 		
+	movq UTCB_MR(3)(\reg), %r10 		
+	movq UTCB_MR(4)(\reg), %r12 		
+	movq UTCB_MR(5)(\reg), %r13 		
+	movq UTCB_MR(6)(\reg), %r14 		
+    	movq UTCB_MR(7)(\reg), %r15	
+.endm
+
+/* jsXXX:
+ * - dispatch by xlat or jump table
+ * - calculate the address of user_ipc at compile time and avoid lea
  */
 BEGIN_PROC(syscall_entry)
 	movq %rsp, %rbp			// save USP 
@@ -70,7 +87,6 @@ BEGIN_PROC(syscall_entry)
 	subq $40, %rsp			// load KSP (tss->rsp0)
 	movq %rbp, 24(%rsp)		// save USP 
 	movq %r11, 16(%rsp)		// save UFLAGS
-	movq $0,    8(%rsp)		// set CS to SYSCALL marker (0)
 	leaq user_ipc_entry(%rip), %rbp	// load user_ipc
 	cmpq %rcx, %rbp			// coming from user_ipc ?
 	jne   no_ipc			// no -> catch it 
@@ -90,7 +106,6 @@ BEGIN_PROC(syscall_entry)
 	/* has send phase? (catch no receive later) */
 	test	%rsi, %rsi
 	je	slowpath
-
 	
 	/* calculate TCB pointers of current and dest */
 	mov	%rsi,   %rbp
@@ -114,17 +129,16 @@ BEGIN_PROC(syscall_entry)
 	CURRENT_TCB	%rcx
 
 
-	
-	/* check for resources of current and destination
-	 * also check if dest is doing a fastpath-ipc  */
-	movq    OFS_TCB_RESOURCE_BITS(%rcx), %r11 
-	orq	OFS_TCB_RESOURCE_BITS(%rbp), %r11
-	orq	(KTCB_SIZE + KSTACK_CS * 8)(%rbp), %r11
+#ifdef CONFIG_SMP
+	/* check that both threads are on the same CPU */	
+	mov	OFS_TCB_CPU(%rbp), %r11 /* %ebp, %ecx */
+	cmp	%r11, OFS_TCB_CPU(%rcx) /* %ebx */
 	jne	slowpath
-	
+#endif
+
 	/* get myself */
 	movq	OFS_TCB_MYSELF_GLOBAL(%rcx), %r11
-
+	
 	/* check that dest thread is waiting for current or any */
 	cmpq	$TSTATE_WAITING_FOREVER, OFS_TCB_THREAD_STATE(%rbp)
 	jne	slowpath
@@ -133,32 +147,24 @@ BEGIN_PROC(syscall_entry)
 	je	1f
 	cmpq	$-1, OFS_TCB_PARTNER(%rbp)
 	jnc	slowpath
-
-
 1:	
-#ifdef CONFIG_SMP
-	/* check that both threads are on the same CPU */	
-	mov	OFS_TCB_CPU(%rbp), %r11 /* %ebp, %ecx */
-	cmp	%r11, OFS_TCB_CPU(%rcx) /* %ebx */
-	jne	slowpath
-#endif
 	/* make sure that current really blocks
 	 * (FromSpec == To) || (SendHead == NULL) */
 	cmpq	%rsi, %rdx
 	je	2f
 
+	
 	/* FromSpec == any && current->sendhead == 0 */
 	cmpq	$-1, %rdx
 	jne	slowpath
-	cmpl	$0, OFS_TCB_SEND_HEAD(%rbp)
+	cmpq	$0, OFS_TCB_SEND_HEAD(%rbp)
 	jne	slowpath
-
 2:	
 	/**************************************************
 	 * if we reach this point the transfer can 
 	 * take place
 	 **************************************************/
-
+	
 	/* set current thread state to waiting */
 	movq	%rdx, OFS_TCB_PARTNER(%rcx)
 	movq	$TSTATE_WAITING_FOREVER, OFS_TCB_THREAD_STATE(%rcx)
@@ -171,46 +177,152 @@ BEGIN_PROC(syscall_entry)
 	 *    rcx = current TCB
 	 *    rdx = from specifier (free)
 	 *    rsi = to specifier (free)
-	 *    rdi = UTCB (free)
+	 *    rdi = UIP (free)
 	 *    rbp = destination TCB
 	 *    r8  = timeout (free)
-	 *    r11 = current->myself_global
+	 *    r11 = current->myself_global 
 	 */
 
-	/* set partner field */
-	/* movq	%r11, OFS_TCB_PARTNER(%rbp) */
-
-	/* calculate number of untyped words */ 
+	/* calculate number of untyped words */
 	movq    %r9, %rdx
 	testb	$~0x7, %dl
 	jnz	fp_copy_loop
 fp_copy_loop_done:
-
+	cmpq	$0, OFS_TCB_RESOURCE_BITS(%rcx)		// any resources?
+	jnz	fp_save_resources
+fp_save_resources_done:
 	
-5:	movq	%rbp, %rsi
-	
-	pushq	$fp_slow_ipc_done
-	movq	OFS_TCB_MYSELF_LOCAL(%rsi), %rdi	// local id
-	movq	OFS_TCB_PDIR_CACHE(%rsi), %rbp		// new PDIR
+	movq	%r11, %rsi				// from tid = current tid
+	movq	%rbp, %r11				// current = to
+	subq	$16, %rsp					
+	pushq	$fp_ipc_done
+	movq	OFS_TCB_MYSELF_LOCAL(%r11), %rdi	// local id
+	movq	OFS_TCB_PDIR_CACHE(%r11), %rbp		// new PDIR
 	/* jsXXX: set gs via virtual address, without selector */ 
 	movq	%rdi, %gs:0
 	movq	%rsp, OFS_TCB_STACK(%rcx)		// store stack ptr
-	// set tss.esp0
-	lea	KTCB_SIZE(%rsi), %rsp			// load stack ptr
-	movq	%rsp, (tss + 4)				// save stack ptr to tss.esp0
+	movq	OFS_TCB_STACK(%r11), %rsp		// load stack ptr
 
 	cmpq	%rbp, OFS_TCB_PDIR_CACHE(%rcx)
-	je	6f					// same ptab
+	je	3f					// same ptab
 	movq	%rbp, %cr3				// switch ptab
-6:	
-	movq	%r11, %rsi				// from specifier
+3:
+	leaq	KTCB_SIZE(%r11), %rdx
+	movq	%rdx, (tss + 4)				// save stack ptr to tss.esp0
+	popq	%rdx
+	cmpq	$fp_ipc_done, %rdx
+	jne	4f
+	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
+	jnz	fp_load_resources
+	addq	$16, %rsp				// remove from, to
+	movq	(%rsp), %rcx				// restore UIP
+	movq	16(%rsp), %r11				// restore UFLAGS
+	movq	24(%rsp), %rsp				// restore USP
+	sysretq
+4:
+	movq    %rdi, %rbx				// local ID
+	movq    %r11, %rdi				// dest
+	movq	OFS_TCB_UTCB(%r11), %rsi		// load UTCB from TCB
+	movq	%r9,  UTCB_MR(0)(%rsi)			// store MR0 into UTCB
+	SAVE_UTCB1	%rsi
+	jmpq	*%rdx
 
-	
-	movq (KSTACK_UIP * 8)(%rsp), %rcx		// restore UIP
-	movq (KSTACK_UFLAGS * 8)(%rsp), %r11		// restore UFLAGS
-	movq (KSTACK_USP * 8)(%rsp), %rsp		// restore USP
+fp_ipc_done:
+	/* from tcb.h: r11 = dtcb */
+	movq	$TSTATE_RUNNING, OFS_TCB_THREAD_STATE(%r11)
+	movq	OFS_TCB_UTCB(%r11), %rcx		// dst UTCB
+	movq	UTCB_MR(0)(%rcx), %r9			// store MR0 into UTCB
+	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
+	jnz	fp_load_resources
+fp_load_resources_done:
+	jmp	fp_ipc_slow_ret	
+#endif
+
+slowpath:
+	CURRENT_TCB	%rdi
+	movq	OFS_TCB_UTCB(%rdi), %rdi		// load UTCB from TCB
+	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
+	SAVE_UTCB1	%rdi
+	movq	%r8, %rdi				// timeout (1st argument)
+	subq	$16, %rsp				// make room for from and to
+	movq	%rdx,  8(%rsp)				// save from
+	movq	%rsi,   (%rsp)				// save to
+	call	sys_ipc					
+							
+	CURRENT_TCB %r11				
+	movq	%rdx, %r9				// move result to MR0
+	movq	OFS_TCB_UTCB(%r11), %rcx		// dst UTCB
+
+fp_ipc_slow_ret:
+	movq	OFS_TCB_MYSELF_LOCAL(%r11), %rdi	// restore local id from TCB
+	RESTORE_UTCB1 %rcx	
+	addq	$16, %rsp				// remove from, to
+	movq	OFS_TCB_PARTNER(%r11), %rsi		// from specifier
+	movq	(%rsp), %rcx				// restore UIP
+	movq	16(%rsp), %r11				// restore UFLAGS
+	movq	24(%rsp), %rsp				// restore USP
+	sysretq
+	/* Non IPC Stub */
+no_ipc:
+	movq 	%rcx,   (%rsp)				// save UIP (after syscall)
+	leaq 	user_nop_entry(%rip), %rbp		// load user_nop_entry
+ 	cmpq 	%rcx, %rbp				// coming from user_nop ?
+	jne  	no_nop			
+	movq 	24(%rsp),%rsp				// restore USP
+	sysretq						// bye
+no_nop:	
+	pushq	 %r11					// push UFLAGS
+	pushq	 %r10					// push arg7
+	pushq	 %rax					// push arg6
+	call 	syscall_dispatcher
+	addq 	$24, %rsp				// remove arg6, arg7, UFLAGS
+	popq 	%rcx					// restore UIP
+	addq	$8, %rsp				// pop (undef)
+	popq	%r11					// restore UFLAGS
+	popq	%rsp					// restore USP
 	sysretq
 
+
+#ifdef CONFIG_IPC_FASTPATH
+	/* 
+	 * Registers:
+	 *    rcx = current TCB
+	 *    rdx = from specifier (free)
+	 *    rsi = to specifier (free)
+	 *    rdi = UIP (free)
+	 *    rbp = destination TCB
+	 *    r8  = timeout (free)
+	 *    r11 = current->myself_global 
+	 */
+fp_save_resources:
+	int $0x3
+	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
+	SAVE_UTCB1	%rdi
+	movq	%rcx, %rsi				// tcb 
+	movq	%rsi, %rdi				
+	add	$OFS_TCB_RESOURCES, %rdi		// tcb->resources == this 
+	call	tcb_resources_save
+	CURRENT_TCB %rcx				// restore TCB
+	movq	OFS_TCB_UTCB(%rcx), %rdi		// restore UTCB
+	movq	UTCB_MR(0)(%rdi), %r9			// store MR0 into UTCB
+	RESTORE_UTCB1	%rdi
+	jmp	fp_save_resources_done
+
+	/* Registers:
+	 *    r11 = current TCB
+	 */
+
+fp_load_resources:
+	int $0x3
+	movq	%r9,   UTCB_MR(0)(%r11)			// store MR0 into UTCB
+	SAVE_UTCB1	%r11
+	movq	%r11, %rsi				// tcb 
+	movq	%rsi, %rdi				
+	add	$OFS_TCB_RESOURCES, %rdi		// tcb->resources == this 
+	call	tcb_resources_load
+	movq	UTCB_MR(0)(%rdi), %r9			// restore MR0
+	jmp	fp_load_resources_done
+	
 fp_copy_loop:
  	movq	OFS_TCB_UTCB(%rbp), %rdi		// dst UTCB
 	movq	OFS_TCB_UTCB(%rcx), %rsi		// source UTCB
@@ -225,84 +337,9 @@ fp_copy_loop:
 	movq	%rdx, %rcx
 	jmp	fp_copy_loop_done
 
-
-fp_slow_ipc_done:
-	/* 
-	 * see tcb.h: 
-	 *	r12 = dtcb
-	 */ 
+		
+#endif
 	
-	movq	OFS_TCB_UTCB(%r12), %rcx		// dst UTCB
-	/* srXXX: local id is stored in rbx as well. */
-	movq    OFS_TCB_MYSELF_LOCAL(%r12), %rdi	// restore local id from TCB
-	movq	OFS_TCB_PARTNER(%r12), %rsi		// from specifier
-	movq	UTCB_MR(0)(%rcx), %r9			// restore MR0
-	jmp	fp_slow_ipc_ret	
-#endif
-
-slowpath:
-	CURRENT_TCB	%rdi
-	movq	OFS_TCB_UTCB(%rdi), %rdi		// load UTCB from TCB
-	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR into UTCB
-	movq	%rax,  UTCB_MR(1)(%rdi)
-	movq	%rbx,  UTCB_MR(2)(%rdi)
-	movq	%r10,  UTCB_MR(3)(%rdi)
-	movq	%r12,  UTCB_MR(4)(%rdi)
-	movq	%r13,  UTCB_MR(5)(%rdi)
-	movq	%r14,  UTCB_MR(6)(%rdi)	
-	movq	%r15,  UTCB_MR(7)(%rdi)	
-	movq  %r8, %rdi					// timeout (1st argument)
-	subq $16, %rsp					// make room for from and to
-	movq %rdx,  8(%rsp)				// save from
-	movq %rsi,   (%rsp)				// save to
-	call sys_ipc					
-	addq $16, %rsp					// remove from, to
-							
-	movq %rax, %rsi					// move from 
-	movq %rdx, %r9					// move mr0   
-	CURRENT_TCB %rdi				
-	movq OFS_TCB_UTCB(%rdi), %rcx			// restore UTCB from TCB
-	movq OFS_TCB_MYSELF_LOCAL(%rdi), %rdi		// restore local id from TCB
-fp_slow_ipc_ret:
-#if defined(CONFIG_X86_COMPATIBILITY_MODE)
-	CURRENT_TCB %rax				// get current TCB
-	movq OFS_TCB_PARTNER(%rax), %rax		// get partner
-	TID_TO_TCB %rax, %rbx				// get partner TCB
-	testl $4, OFS_TCB_RESOURCE_BITS(%rax)		// test Compatibility Mode resource
-	jz cm_done
-	movl $0, OFS_UTCB_WORD_SIZE_MASK+4(%rcx)	// clear upper word
-cm_done:
-#endif
-	movq UTCB_MR(1)(%rcx), %rax 		
-	movq UTCB_MR(2)(%rcx), %rbx 		
-	movq UTCB_MR(3)(%rcx), %r10 		
-	movq UTCB_MR(4)(%rcx), %r12 		
-	movq UTCB_MR(5)(%rcx), %r13 		
-	movq UTCB_MR(6)(%rcx), %r14 		
-    	movq UTCB_MR(7)(%rcx), %r15	 		// restore MRs from UTCB 
-	movq   (%rsp), %rcx				// restore UIP
-	movq 16(%rsp), %r11				// restore UFLAGS
-	movq 24(%rsp), %rsp				// restore USP
-	sysretq
-	/* Non IPC Stub */
-no_ipc:
-	movq %rcx,   (%rsp)		// save UIP (after syscall)
-	leaq user_nop_entry(%rip), %rbp	// load user_nop_entry
- 	cmpq %rcx, %rbp			// coming from user_nop ?
-	jne  no_nop			
-	movq 24(%rsp),%rsp		// restore USP
-	sysretq				// bye
-no_nop:	
-	pushq %r11			// push UFLAGS
-	pushq %r10			// push arg7
-	pushq %rax			// push arg6
-	call syscall_dispatcher
-	addq $24, %rsp			// remove arg6, arg7, UFLAGS
-	popq %rcx			// restore UIP
-	addq $8, %rsp			// pop (undef)
-	popq %r11			// restore UFLAGS
-	popq %rsp			// restore USP
-	sysretq
 END_PROC(syscall_entry)
 
 .end
