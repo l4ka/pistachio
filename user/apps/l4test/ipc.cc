@@ -306,7 +306,7 @@ static void simple_ipc_t1_l (void)
     L4_Receive (ipc_t2);
 
     // Receive cancel
-    tag = L4_Receive (ipc_t2);
+    tag = L4_Call(ipc_t2);
     ok = true;
     if (L4_IpcSucceeded (tag))
     {
@@ -448,6 +448,7 @@ static void simple_ipc_t2_l (void)
     L4_Send (ipc_t1);
 
     // Receive cancel
+    L4_Receive(ipc_t1);
     L4_Sleep (L4_TimePeriod (1000*1000));
     L4_ExchangeRegisters (ipc_t1, 0x6,
 			  0, 0, 0, 0, L4_nilthread,
