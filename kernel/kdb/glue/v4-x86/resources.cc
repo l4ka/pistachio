@@ -44,6 +44,10 @@ void thread_resources_t::dump (tcb_t * tcb)
 		printf(" %x ", copy_area_pdir_idx(i,j));
 	printf(") ");
     }
+#if defined(CONFIG_SMP)
+    if (tcb->resource_bits.have_resource(SMP_PAGE_TABLE))
+	printf("SMPPGT ");
+#endif
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
     if (tcb->resource_bits.have_resource(COMPATIBILITY_MODE))
 	printf("COMPATIBILITY_MODE ");
