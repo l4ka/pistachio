@@ -347,7 +347,7 @@ static void simple_ipc_t1_l (void)
 	if (w != i + 1)
 	{
 	    printf ("Wrong value in MR[%d]: 0x%lx != 0x%lx\n", (int) i,
-		    (long) w, (long) i);
+		    (long) w, (long) i+1);
 	    ok = false;
 	    break;
 	}
