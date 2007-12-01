@@ -108,6 +108,7 @@ void exc_catch_common_wrapper()
     	"pushq %%r14						\n\t" 
     	"pushq %%r15						\n\t"
 	"pushq %0			    			\n\t"
+	"movq  %%rsp, %%rdi					\n\t"
 	"call exc_catch_common_handler				\n\t"		
 	"addq  $8, %%rsp					\n\t"		
     	"popq  %%r15						\n\t"		
