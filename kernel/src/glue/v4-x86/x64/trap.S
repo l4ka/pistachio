@@ -128,36 +128,36 @@ BEGIN_PROC(syscall_entry)
 	
 	CURRENT_TCB	%rcx
 
-
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	/* check that both threads are on the same CPU */	
-	mov	OFS_TCB_CPU(%rbp), %r11 /* %ebp, %ecx */
-	cmp	%r11, OFS_TCB_CPU(%rcx) /* %ebx */
+	mov	OFS_TCB_CPU(%rbp), %r11 
+	cmp	%r11, OFS_TCB_CPU(%rcx) 
 	jne	slowpath
 #endif
 
 	/* get myself */
 	movq	OFS_TCB_MYSELF_GLOBAL(%rcx), %r11
 	
+
 	/* check that dest thread is waiting for current or any */
 	cmpq	$TSTATE_WAITING_FOREVER, OFS_TCB_THREAD_STATE(%rbp)
 	jne	slowpath
-	/* jsXXX: try to use a register for partner */
+	
 	cmpq	OFS_TCB_PARTNER(%rbp), %r11
 	je	1f
 	cmpq	$-1, OFS_TCB_PARTNER(%rbp)
 	jnc	slowpath
+
 1:	
 	/* make sure that current really blocks
 	 * (FromSpec == To) || (SendHead == NULL) */
 	cmpq	%rsi, %rdx
 	je	2f
 
-	
 	/* FromSpec == any && current->sendhead == 0 */
 	cmpq	$-1, %rdx
 	jne	slowpath
-	cmpq	$0, OFS_TCB_SEND_HEAD(%rbp)
+	cmpq	$0, OFS_TCB_SEND_HEAD(%rcx)
 	jne	slowpath
 2:	
 	/**************************************************
@@ -220,11 +220,15 @@ fp_save_resources_done:
 	movq	24(%rsp), %rsp				// restore USP
 	sysretq
 4:
+	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
+	jnz	fp_load_resources
 	movq    %rdi, %rbx				// local ID
 	movq    %r11, %rdi				// dest
 	movq	OFS_TCB_UTCB(%r11), %rsi		// load UTCB from TCB
 	movq	%r9,  UTCB_MR(0)(%rsi)			// store MR0 into UTCB
-	SAVE_UTCB1	%rsi
+	testq	$0x7, %r9
+	jnz	fp_reg_copy_loop
+fp_reg_copy_loop_done:
 	jmpq	*%rdx
 
 fp_ipc_done:
@@ -258,6 +262,12 @@ fp_ipc_slow_ret:
 	RESTORE_UTCB1 %rcx	
 	addq	$16, %rsp				// remove from, to
 	movq	OFS_TCB_PARTNER(%r11), %rsi		// from specifier
+#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
+	testl $4, OFS_TCB_RESOURCE_BITS(%rsi)		// test Compatibility Mode resource
+	jz cm_done
+	movl $0, OFS_UTCB_WORD_SIZE_MASK+4(%rcx)	// clear upper word
+cm_done:
+#endif
 	movq	(%rsp), %rcx				// restore UIP
 	movq	16(%rsp), %r11				// restore UFLAGS
 	movq	24(%rsp), %rsp				// restore USP
@@ -295,7 +305,7 @@ no_nop:
 	 *    r11 = current->myself_global 
 	 */
 fp_save_resources:
-	int $0x3
+	int	$0x3	
 	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
 	SAVE_UTCB1	%rdi
 	movq	%rcx, %rsi				// tcb 
@@ -337,7 +347,36 @@ fp_copy_loop:
 	movq	%rdx, %rcx
 	jmp	fp_copy_loop_done
 
-		
+	/* Registers:
+	 *    rcx = UTCB
+	 *    r9  = tag
+	 */
+
+fp_reg_copy_loop:
+	mov	%r9,	%r8
+	and	$0x7,	%r8
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%rax,  UTCB_MR(1)(%rcx)
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%rbx,  UTCB_MR(2)(%rcx)
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%r10,  UTCB_MR(3)(%rcx)
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%r12,  UTCB_MR(4)(%rcx)
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%r13,  UTCB_MR(5)(%rcx)
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%r14,  UTCB_MR(6)(%rcx)	
+	sub	$1,	%r8
+	jz	fp_reg_copy_loop_done	
+	movq	%r15,  UTCB_MR(7)(%rcx)	
+	jmp	fp_reg_copy_loop_done	
 #endif
 	
 END_PROC(syscall_entry)
