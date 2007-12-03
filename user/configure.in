@@ -256,6 +256,12 @@ LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR $LDFLAGS"
 CFLAGS="-nostdinc $CFLAGS"
 CXXFLAGS="-fno-exceptions $CXXFLAGS"
 
+CC_VERSION=`echo __GNUC__ | $CC -E  - | grep -v "\#"`
+CC_SUBVERSION=`echo __GNUC_MINOR__ | $CC -E  - | grep -v "\#"`
+if test "$CC_VERSION" = "4" -a "$CC_SUBVERSION" -ge "1"; then
+CFLAGS="-fno-stack-protector $CFLAGS"
+fi
+
 
 dnl Architecture dependent settings.
 case $ARCH in
