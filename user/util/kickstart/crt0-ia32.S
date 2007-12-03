@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2004,  Karlsruhe University
+ * Copyright (C) 1999-2004, 2007,  Karlsruhe University
  *                
  * File path:     crt0-ia32.S
  * Description:   Startup code for x86 family processors.
@@ -71,8 +71,8 @@ _mini_stack:
 	.align 16, 0x90
 __mb_header:
 	.long   0x1BADB002;
-	.long   0x00010000;
-	.long   - 0x00010000 - 0x1BADB002;
+	.long   0x00000000;
+	.long   - 0x00000000 - 0x1BADB002;
 	.long   __mb_header;
 	.long   _start;
 	.long   _edata;
