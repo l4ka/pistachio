@@ -191,7 +191,6 @@ fp_copy_loop_done:
 	cmpq	$0, OFS_TCB_RESOURCE_BITS(%rcx)		// any resources?
 	jnz	fp_save_resources
 fp_save_resources_done:
-	
 	movq	%r11, %rsi				// from tid = current tid
 	movq	%rbp, %r11				// current = to
 	subq	$16, %rsp					
@@ -213,15 +212,9 @@ fp_save_resources_done:
 	cmpq	$fp_ipc_done, %rdx
 	jne	4f
 	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
-	jnz	fp_load_resources
-	addq	$16, %rsp				// remove from, to
-	movq	(%rsp), %rcx				// restore UIP
-	movq	16(%rsp), %r11				// restore UFLAGS
-	movq	24(%rsp), %rsp				// restore USP
-	sysretq
+  	jnz	fp_load_resources
+	jmp	fp_ipc_ret
 4:
-	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
-	jnz	fp_load_resources
 	movq    %rdi, %rbx				// local ID
 	movq    %r11, %rdi				// dest
 	movq	OFS_TCB_UTCB(%r11), %rsi		// load UTCB from TCB
@@ -234,11 +227,11 @@ fp_reg_copy_loop_done:
 fp_ipc_done:
 	/* from tcb.h: r11 = dtcb */
 	movq	$TSTATE_RUNNING, OFS_TCB_THREAD_STATE(%r11)
-	movq	OFS_TCB_UTCB(%r11), %rcx		// dst UTCB
-	movq	UTCB_MR(0)(%rcx), %r9			// store MR0 into UTCB
 	cmpq	$0, OFS_TCB_RESOURCE_BITS(%r11)
 	jnz	fp_load_resources
 fp_load_resources_done:
+	movq	OFS_TCB_UTCB(%r11), %rcx		// current UTCB
+	movq	UTCB_MR(0)(%rcx), %r9			// restore MR0 from UTCB
 	jmp	fp_ipc_slow_ret	
 #endif
 
@@ -246,7 +239,7 @@ slowpath:
 	CURRENT_TCB	%rdi
 	movq	OFS_TCB_UTCB(%rdi), %rdi		// load UTCB from TCB
 	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
-	SAVE_UTCB1	%rdi
+	SAVE_UTCB1	%rdi				// store MRs into UTCB
 	movq	%r8, %rdi				// timeout (1st argument)
 	subq	$16, %rsp				// make room for from and to
 	movq	%rdx,  8(%rsp)				// save from
@@ -254,19 +247,21 @@ slowpath:
 	call	sys_ipc					
 							
 	CURRENT_TCB %r11				
-	movq	%rdx, %r9				// move result to MR0
+	movq	%rdx, %r9				// restore MR0 from result
 	movq	OFS_TCB_UTCB(%r11), %rcx		// dst UTCB
-
 fp_ipc_slow_ret:
 	movq	OFS_TCB_MYSELF_LOCAL(%r11), %rdi	// restore local id from TCB
-	RESTORE_UTCB1 %rcx	
+	RESTORE_UTCB1 %rcx				// restore MRs from UTCB
+fp_ipc_ret:	
 	addq	$16, %rsp				// remove from, to
 	movq	OFS_TCB_PARTNER(%r11), %rsi		// from specifier
-#if defined(CONFIG_AMD64_COMPATIBILITY_MODE)
-	testl $4, OFS_TCB_RESOURCE_BITS(%rsi)		// test Compatibility Mode resource
-	jz cm_done
-	movl $0, OFS_UTCB_WORD_SIZE_MASK+4(%rcx)	// clear upper word
-cm_done:
+#if defined(CONFIG_X86_COMPATIBILITY_MODE)
+	movq	%rsi, %rdx
+	TID_TO_TCB %rdx, %rcx
+	testl	$4, OFS_TCB_RESOURCE_BITS(%rdx)		// test Compatibility Mode resource
+	jz	5f
+	movl	$0, OFS_UTCB_WORD_SIZE_MASK+4(%r11)	// clear upper word
+5:	
 #endif
 	movq	(%rsp), %rcx				// restore UIP
 	movq	16(%rsp), %r11				// restore UFLAGS
@@ -305,17 +300,21 @@ no_nop:
 	 *    r11 = current->myself_global 
 	 */
 fp_save_resources:
-	int	$0x3	
+	movq	OFS_TCB_UTCB(%rcx), %rdi		// load UTCB from TCB
 	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
-	SAVE_UTCB1	%rdi
+	SAVE_UTCB1	%rdi				// store MRs into UTCB
 	movq	%rcx, %rsi				// tcb 
-	movq	%rsi, %rdi				
-	add	$OFS_TCB_RESOURCES, %rdi		// tcb->resources == this 
+	leaq	OFS_TCB_RESOURCES(%rcx), %rdi		// tcb->resources == this
+	movq	%rcx, %r12				// save current
+	movq	%rbp, %r13				// save dest
+	movq	%r11, %r14				// save current_tid
 	call	tcb_resources_save
-	CURRENT_TCB %rcx				// restore TCB
+	movq	%r14, %r11				// restore current_tid
+	movq	%r13, %rbp				// restore dest
+	movq	%r12, %rcx				// restore current
 	movq	OFS_TCB_UTCB(%rcx), %rdi		// restore UTCB
 	movq	UTCB_MR(0)(%rdi), %r9			// store MR0 into UTCB
-	RESTORE_UTCB1	%rdi
+	RESTORE_UTCB1 %rdi				// restore MRs from UTCB
 	jmp	fp_save_resources_done
 
 	/* Registers:
@@ -323,16 +322,20 @@ fp_save_resources:
 	 */
 
 fp_load_resources:
-	int $0x3
-	movq	%r9,   UTCB_MR(0)(%r11)			// store MR0 into UTCB
-	SAVE_UTCB1	%r11
-	movq	%r11, %rsi				// tcb 
-	movq	%rsi, %rdi				
-	add	$OFS_TCB_RESOURCES, %rdi		// tcb->resources == this 
+	movq	OFS_TCB_UTCB(%rcx), %rdi		// load UTCB from TCB
+	movq	%r9,   UTCB_MR(0)(%rdi)			// store MR0 into UTCB
+	movq	%rcx, %rsi				// tcb 
+	leaq	OFS_TCB_RESOURCES(%rcx), %rdi		// tcb->resources == this
+	movq	%r11, %r14				// save current
 	call	tcb_resources_load
-	movq	UTCB_MR(0)(%rdi), %r9			// restore MR0
+	movq	%r14, %r11				// restore current
 	jmp	fp_load_resources_done
-	
+
+	/* Registers:
+	 *    rcx = current TCB
+	 *    rbp = dest    TCB
+	 */
+
 fp_copy_loop:
  	movq	OFS_TCB_UTCB(%rbp), %rdi		// dst UTCB
 	movq	OFS_TCB_UTCB(%rcx), %rsi		// source UTCB
