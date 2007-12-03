@@ -81,6 +81,7 @@ ifeq "$(origin CC)" "default"
 CC=		$(CCACHE) $(TOOLPREFIX)gcc
 endif
 CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
+CC_SUBVERSION	= $(shell echo __GNUC_MINOR__ | $(CC) -E  - | grep -v "\#")
 
 
 GCCINSTALLDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
@@ -161,6 +162,12 @@ VFLAGS =
 CCFLAGS += -fno-rtti -fno-builtin  -fomit-frame-pointer -fno-exceptions \
 	  -Wall -Wno-non-virtual-dtor -Wno-format -Wconversion \
 	  $(CFLAGS_$(ARCH)) $(CFLAGS_$(CPU)) $(CFLAGS_$(PLATFORM)) 
+
+ifeq ("$(CC_VERSION)", "4")
+ifneq ("$(CC_SUBVERSION)", "0")
+CCFLAGS += -fno-stack-protector
+endif
+endif
 
 ifeq ("$(CONFIG_DEBUG_SYMBOLS)","y")
 CCFLAGS  += -g
