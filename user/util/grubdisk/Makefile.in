@@ -34,25 +34,29 @@ srcdir=		@srcdir@
 top_srcdir=	@top_srcdir@
 top_builddir=	@top_builddir@
 
+APP=${top_builddir}/apps/bench/pingpong/pingpong
+
 include $(top_srcdir)/Mk/l4.base.mk
 
 do-all:	bootdisk.img
 
-bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0 ${top_builddir}/apps/bench/pingpong/pingpong ${kerneldir}/${KERNEL}
+bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0  \
+		${APP} ${kerneldir}/${KERNEL}
 	@# Create a disk image
 	/sbin/mkdosfs -C bootdisk.img 1440
 	@# Make it a GRUB disk
 	dd if=grub.img of=bootdisk.img conv=notrunc > /dev/null
 	#@ Strip binaries
 	strip ${top_builddir}/*/*/{kickstart,sigma0} 
-	strip ${top_builddir}/apps/bench/pingpong/pingpong	
+	strip ${APP}
 	cp ${kerneldir}/${KERNEL} ${kerneldir}/${KERNEL}.stripped
 	strip ${kerneldir}/${KERNEL}.stripped 
+	cat ${srcdir}/menu.lst | sed -e "s/APP/`basename ${APP}`/" > menu.lst
 	@# Copy the binaries to it
 	export MTOOLSRC=mtoolsrc ; \
-	 mcopy -m ${srcdir}/menu.lst y:boot/grub ; \
+	 mcopy -m menu.lst y:boot/grub ; \
 	 mcopy -m ${top_builddir}/*/*/{kickstart,sigma0} y: ; \
-	 mcopy -m ${top_builddir}/apps/bench/pingpong/pingpong y: ; \
+	 mcopy -m ${APP} y: ; \
 	 mcopy -m ${kerneldir}/${KERNEL}.stripped y:kernel
 
 grub.img:
