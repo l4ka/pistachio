@@ -168,6 +168,27 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
             *space->pgent(idx(), cpu) = *space->pgent(idx(), current_cpu);
         }
 }
+
+word_t pgent_t::smp_reference_bits(space_t * space, pgsize_e pgsize, addr_t vaddr)
+{
+    ASSERT(pgsize == size_4m);
+    
+    word_t rwx = 0;
+    
+    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+        if (space->data.cpu_ptab[cpu].top_pdir)
+        {
+            TRACEF("smp refbits %d / %x\n",  cpu, space->pgent(idx(), cpu)->raw);
+	    if (space->pgent(idx(), cpu)->pgent.is_accessed ()) { rwx |= 5; }
+	    if (space->pgent(idx(), cpu)->pgent.is_dirty ()) { rwx |= 6; }
+        }
+    
+    return rwx;
+
+    
+}
+
+
 #endif
 
 /**********************************************************************
