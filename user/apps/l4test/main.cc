@@ -55,6 +55,8 @@ extern void exreg_test(void);
 extern void tcontrol_test(void);
 extern void schedule_test(void);
 
+static bool bailout_fail = true;
+
 /* where to start allocating RAM */
 static char *free_page = (char*) SCRATCHMEM_START;
 
@@ -114,7 +116,7 @@ print_result (const char * str, bool test)
     for (int __i = 60 - strlen (str); __i > 0; __i--)
 	putc (' ');
     printf ("  %s\n", (test) ? STR_OK : STR_FAILED);
-    if (! test)
+    if (! test && bailout_fail)
 	L4_KDB_Enter ("test failed");
 }
 
@@ -150,7 +152,11 @@ get_pages( L4_Word_t count, int touch )
 		for( i = 0; i < count; i++ )
 		{
 			safe_mem_touch( (void*) addr );
+			for (int j=0; j<PAGE_SIZE; j++)
+			    addr[j] = 0;
+				
 			addr += PAGE_SIZE;
+			
 		}
 	}
 
