@@ -77,10 +77,11 @@ CMD(cmd_dump_ptab, cg)
     space = get_space ("Space");
     size = pgent_t::size_max;
     
-    word_t cpuid = get_dec("CPU id", get_current_cpu(), NULL);
+    word_t cpu = get_dec("CPU id", get_current_cpu(), NULL);
+    if (cpu >= CONFIG_SMP_MAX_CPUS) cpu = get_current_cpu();
     
     get_ptab_dump_ranges (&vaddr, &num, &max_size);
-    pg = space->pgent (page_table_index (pgent_t::size_max, vaddr), cpuid);
+    pg = space->pgent (page_table_index (pgent_t::size_max, vaddr), cpu);
 
     if (!pg)
     {
