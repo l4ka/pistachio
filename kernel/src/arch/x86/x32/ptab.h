@@ -100,7 +100,7 @@ public:
 	{ return pg.global == 1; }
     
     bool is_cpulocal ()
-	{ return false; }
+	{ return pg.cpulocal == 1; }
 
     // retrieval
     addr_t get_address(pagesize_e size)
@@ -163,7 +163,12 @@ public:
 	    this->pg.global = global;
 	}
 
-    void set_cpulocal (bool local) { }
+
+    void set_cpulocal (bool local)
+    {
+	this->pg.cpulocal = local;
+    }
+
 
 	      
 private:
@@ -180,7 +185,8 @@ private:
 	    unsigned size		:1;
 
 	    unsigned global		:1;
-	    unsigned avail		:3;
+	    unsigned cpulocal		:1;
+	    unsigned avail		:2;
 
 	    unsigned base		:20;
 	} pg;
@@ -197,7 +203,8 @@ private:
 	    unsigned size		:1;
 
 	    unsigned global		:1;
-	    unsigned avail		:3;
+	    unsigned cpulocal		:1;
+	    unsigned avail		:2;
 
 	    unsigned pat		:1;
 	    unsigned reserved		:9;
