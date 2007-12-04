@@ -66,7 +66,8 @@ space_t SECTION(SEC_KDEBUG) * get_space (const char * prompt)
 	tcb_t * tcb = addr_to_tcb (val);
 	space = tcb->get_space ();
     }
-    else if (tidtcb->myself_global == threadid ((word_t) val))
+    else if (dummy->is_tcb_area(tidtcb) && 
+	     tidtcb->myself_global == threadid ((word_t) val))
     {
 	// A valid thread ID
 	space = tidtcb->get_space ();
