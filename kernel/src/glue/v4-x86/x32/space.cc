@@ -178,7 +178,7 @@ word_t pgent_t::smp_reference_bits(space_t * space, pgsize_e pgsize, addr_t vadd
     for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
         if (space->data.cpu_ptab[cpu].top_pdir)
         {
-            TRACEF("smp refbits %d / %x\n",  cpu, space->pgent(idx(), cpu)->raw);
+            //TRACEF("smp refbits %d / %x\n",  cpu, space->pgent(idx(), cpu)->raw);
 	    if (space->pgent(idx(), cpu)->pgent.is_accessed ()) { rwx |= 5; }
 	    if (space->pgent(idx(), cpu)->pgent.is_dirty ()) { rwx |= 6; }
         }
