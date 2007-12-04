@@ -56,6 +56,7 @@ private:
 	}
 public:
     void sync (space_t * s, pgsize_e pgsize) { }
+    word_t smp_reference_bits(space_t * s, pgsize_e pgsize, addr_t vaddr) { }
 
 #else /* CONFIG_SMP */
 
@@ -73,6 +74,7 @@ private:
 	}
 
     void smp_sync(space_t * s, pgsize_e pgsize);
+    word_t smp_reference_bits(space_t * s, pgsize_e pgsize, addr_t vaddr);
 
 public:
 
@@ -163,25 +165,15 @@ public:
 		  (pgent.is_executable() ? (1<<0) : 0));
 	}
 
-    word_t smp_reference_bits(space_t * s, pgsize_e pgsize, addr_t vaddr)
-	{
-	    ASSERT(pgsize == size_max);
-	    UNIMPLEMENTED();
-	    return 0;
-	}
-
     word_t reference_bits (space_t * s, pgsize_e pgsize, addr_t vaddr)
 	{
-	    word_t rwx = 0;
 #if defined(CONFIG_SMP)
-	    if (pgsize == size_max)
+	    if (pgsize == size_superpage && !pgent.is_cpulocal()) 
 		return smp_reference_bits(s, pgsize, vaddr);
-	    else
 #endif
-	    {
-		if (pgent.is_accessed ()) { rwx |= 5; }
-		if (pgent.is_dirty ()) { rwx |= 6; }
-	    }
+	    word_t rwx = 0;
+	    if (pgent.is_accessed ()) { rwx |= 5; }
+	    if (pgent.is_dirty ()) { rwx |= 6; }
 	    return rwx;
 	}
 
