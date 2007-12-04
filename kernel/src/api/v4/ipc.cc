@@ -32,9 +32,7 @@
 #include <debug.h>
 #include <kdb/tracepoints.h>
 
-#if defined(CONFIG_ARCH_IA64) || defined(CONFIG_ARCH_POWERPC)
 #define HANDLE_LOCAL_IDS
-#endif
 
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
