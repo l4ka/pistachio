@@ -68,8 +68,9 @@ void arch_test(void)
 	volatile L4_Word_t q;
 	q = *(volatile L4_Word_t*) x;
     }
-    
-    L4_ThreadControl (exc_tid, L4_Myself (), L4_Myself (), L4_Myself (), (void*)exc_utcb);
+
+    exc_tid = create_thread();
+
     
     L4_Start (exc_tid, (L4_Word_t) exc_stack + sizeof(exc_stack) - 32,
 	      START_ADDR (exc));
@@ -84,5 +85,7 @@ void arch_test(void)
 	    (void *) L4_Get (&exc_msg, 0), (void *) L4_Get (&exc_msg, 1),
 	    (void *) L4_Get (&exc_msg, 2), (void *) L4_Get (&exc_msg, 3));;
     
+
+    kill_thread( exc_tid );
 
 }
