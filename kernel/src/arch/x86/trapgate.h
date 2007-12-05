@@ -51,7 +51,7 @@ public:
 	    
 	    for (word_t r=0; r < num_dbgregs; r++)
 	    {
-		printf("\t%s: "WORDSIZE_FORMAT, name[dbgreg[r]], regs[dbgreg[r]]);
+		printf("\t%s: %wx", name[dbgreg[r]], regs[dbgreg[r]]);
 		
 		if (dbgreg[r] == freg)
 		{ 
