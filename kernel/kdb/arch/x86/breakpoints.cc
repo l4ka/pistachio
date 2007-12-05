@@ -100,17 +100,17 @@ CMD(cmd_breakpoint, cg)
     case '?':
     default:
         __asm__ ("mov %%db7,%0": "=r"(db7));
-	printf("\nDR7: "WORDSIZE_FORMAT"\n", db7);
+	printf("\nDR7: %wx\n", db7);
 	__asm__ ("mov %%db6,%0": "=r"(db7));
-	printf("DR6: "WORDSIZE_FORMAT"\n", db7); addr=db7;
+	printf("DR6: %wx\n", db7); addr=db7;
 	__asm__ ("mov %%db3,%0": "=r"(db7));
-	printf("DR3: "WORDSIZE_FORMAT" %c\n", db7, addr & 8 ? '*' : ' ');
+	printf("DR3: %wx %c\n", db7, addr & 8 ? '*' : ' ');
 	__asm__ ("mov %%db2,%0": "=r"(db7));
-	printf("DR2: "WORDSIZE_FORMAT" %c\n", db7, addr & 4 ? '*' : ' ');
+	printf("DR2: %wx %c\n", db7, addr & 4 ? '*' : ' ');
 	__asm__ ("mov %%db1,%0": "=r"(db7));
-	printf("DR1: "WORDSIZE_FORMAT" %c\n", db7, addr & 2 ? '*' : ' ');
+	printf("DR1: %wx %c\n", db7, addr & 2 ? '*' : ' ');
 	__asm__ ("mov %%db0,%0": "=r"(db7));
-	printf("DR0: "WORDSIZE_FORMAT" %c\n", db7, addr & 1 ? '*' : ' ');
+	printf("DR0: %wx %c\n", db7, addr & 1 ? '*' : ' ');
 	return CMD_NOQUIT; break;
     }
     /* read debug control register */
