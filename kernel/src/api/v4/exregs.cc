@@ -321,7 +321,7 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
     
     TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS,
 		"SYS_EXCHANGE_REGISTERS: current %t, dest=%t [%s], control=0x%x [%s]"
-		"usp=%p, uip=%p, uflags=%p, pager=%t, uhandle=%x\n", 
+		", usp=%p, uip=%p, uflags=%p, pager=%t, uhandle=%x\n", 
 		current, TID(dest_tid), is_local ? "local" : "global",
 		ctrl.raw, ctrl.string(), usp, uip, uflags, TID(pager_tid), uhandle);
 
@@ -338,10 +338,6 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
     //  - in the same address space
     //  - with a valid thread ID.
 
-    // Only allow exregs on:
-    //  - active threads
-    //  - in the same address space
-    //  - with a valid thread ID.
     if ((! dest->is_activated ()) || (! has_exregs_perms(dest, dest_tid)) )
     {
     
