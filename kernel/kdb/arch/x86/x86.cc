@@ -30,12 +30,6 @@
 #include INC_GLUE(cpu.h)
 #endif
 
-#if defined(CONFIG_SUBARCH_X32)
-#define DR_FORMAT	"%08x"
-#else
-#define DR_FORMAT	"%16x"
-#endif
-
 DECLARE_CMD (cmd_reset, root, '6', "reset", "Reset system");
 
 CMD(cmd_reset, cg)
@@ -61,10 +55,10 @@ CMD(cmd_show_ctrlregs, cg)
 	"mov	%%cr4, %3	\n"
 	: "=r"(cr0), "=r"(cr2), "=r"(cr3), "=r"(cr4));
     
-    printf("CR0: "WORDSIZE_FORMAT"\n", cr0);
-    printf("CR2: "WORDSIZE_FORMAT"\n", cr2);
-    printf("CR3: "WORDSIZE_FORMAT"\n", cr3);
-    printf("CR4: "WORDSIZE_FORMAT"\n", cr4);
+    printf("CR0: %wx\n", cr0);
+    printf("CR2: %wx\n", cr2);
+    printf("CR3: %wx\n", cr3);
+    printf("CR4: %wx\n", cr4);
     
     return CMD_NOQUIT;
 }
