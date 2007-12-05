@@ -177,11 +177,4 @@
 #define SHUFFLE7(a,b,c,d,e,f,g)		a,b,c,d,e,f,g
 #endif
 
-#if defined(CONFIG_IS_64_BIT)
-#define WORDSIZE_FORMAT	"%08x"
-#else
-#define WORDSIZE_FORMAT	"%16x"
-#endif
-
-
 #endif /* !__MACROS_H__ */
