@@ -56,7 +56,6 @@ private:
 	}
 public:
     void sync (space_t * s, pgsize_e pgsize) { }
-    word_t smp_reference_bits(space_t * s, pgsize_e pgsize, addr_t vaddr) { }
 
 #else /* CONFIG_SMP */
 
