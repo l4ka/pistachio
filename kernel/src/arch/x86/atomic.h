@@ -34,6 +34,12 @@ public:
 	    return val;
 	}
 
+    int operator = (word_t val) 
+	{ return this->val = val; }
+
+    int operator = (int val) 
+	{ return this->val = val; }
+
     bool operator == (word_t val) 
 	{ return (this->val == val); }
     
@@ -46,15 +52,23 @@ public:
     bool operator != (int val) 
 	{ return (this->val != (word_t) val); }
 
-    int operator = (word_t val) 
-	{ return this->val = val; }
-
-    int operator = (int val) 
-	{ return this->val = (word_t) val; }
-
     operator word_t (void) 
 	{ return val; }
 
+    
+    bool cmpxchg( word_t old_val, word_t new_val )
+	{
+	    bool result;
+	    __asm__ __volatile__ (
+		X86_LOCK "cmpxchg %1, %2	\n\t"
+		"setz %0		\n\t"
+
+		: "=a" (result)
+		: "r" (new_val), "m"(val), "0" (old_val)
+		: "memory"
+		);
+	    return (result);
+	}
 
 private:
     word_t val;
