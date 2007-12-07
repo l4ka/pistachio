@@ -373,7 +373,9 @@ void scheduler_t::end_of_timeslice (tcb_t * tcb)
 void scheduler_t::handle_timer_interrupt()
 {
     spin(77, get_current_cpu());
-    kdebug_check_breakin();
+
+    if (kdebug_check_interrupt())
+	return;
 
     if (get_current_cpu() == 0)
     {
