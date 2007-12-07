@@ -41,62 +41,21 @@
 #include INC_API(smp.h)
 
 
-
-//#define TRACE_IRQ TRACEF
-#define TRACE_IRQ(x...)
+#define DEBUG_IRQ
+#if defined(DEBUG_IRQ)
+DECLARE_TRACEPOINT(INTERRUPT_DETAILS);
+#define TRACE_IRQ_DETAILS(x...)  TRACEPOINT(INTERRUPT_DETAILS, x);
+#else
+#define TRACE_IRQ_DETAILS(x...)  
+#endif
 
 DECLARE_TRACEPOINT(INTERRUPT);
 DECLARE_TRACEPOINT(SYSCALL_THREAD_CONTROL_IRQ);
 
-static utcb_t irq_utcb;
+static utcb_t *irq_utcb;
+static word_t irq_utcb_count;
 
-// handler for dedicated irq threads
-static void irq_thread()
-{
-     tcb_t * current = get_current_tcb();
-     int irq = current->get_global_id().get_irqno();
-
-     while(1)
-     {
-         tcb_t * handler_tcb = 
-	     get_current_space()->get_tcb(current->get_irq_handler());
-
-         /* VU: when we are in the send queue the IRQ thread was busy
-          * and the IRQ could not be delivered. Hence, we actually
-          * have to send the IPC. Otherwise, the message was delivered
-          * on the fast path and we got activated by an ack IPC */
-         if (current->queue_state.is_set(queue_state_t::send))
-         {
-             // got activated -- do send operation
-             ASSERT(handler_tcb->is_local_cpu());
-             ASSERT(current->is_local_cpu());
-             TRACE_IRQ("deliver IRQ message\n");
-
-             handler_tcb->lock();
-             current->dequeue_send(handler_tcb);
-             handler_tcb->set_tag(msg_tag_t::irq_tag());
-             handler_tcb->set_partner(current->get_global_id());
-	     handler_tcb->unlock();
-	     
-	     current->set_partner(current->get_irq_handler());
-             current->set_state(thread_state_t::waiting_forever);
-             current->switch_to(handler_tcb);
-         }
-
-         // got re-activated due to send operation to IRQ thread...
-         TRACE_IRQ("got activated\n");
-
-         current->set_state(thread_state_t::halted);
-	 
-	 // if an interrupt was already pending deliver it
-         if (get_interrupt_ctrl()->unmask(irq))
-	     handle_interrupt(irq);
-
-	 current->switch_to_idle();
-     }
-}
-
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
 {
     tcb_t * handler_tcb = entry->tcb;
@@ -106,7 +65,12 @@ static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
 	
     
     if (!handler_tcb->is_local_cpu())
-	UNIMPLEMENTED();
+    {
+	TRACEF("xcpu-IRQ forward (%d->%t %d)\n", irq, handler_tcb, handler_tcb->get_cpu());
+	enter_kdebug("Untested");
+	xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, handler_tcb, irq);
+	return;
+    }
 
     if ((handler_tcb->get_state().is_waiting() || 
 	 handler_tcb->get_state().is_locked_waiting()) &&  
@@ -114,7 +78,7 @@ static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
 	 handler_tcb->get_partner() == threadid_t::irqthread(irq)))
     {
 	// ok, thread is waiting -- deliver IRQ
-	TRACE_IRQ(irq, ("xcpu-IRQ delivery (%d->%t)", irq, handler_tcb));
+	TRACE_IRQ_DETAILS("irq %d xcpu delivery (%d->%t)", irq, handler_tcb);
 	handler_tcb->set_tag(msg_tag_t::irq_tag());
 	handler_tcb->set_partner(threadid_t::irqthread(irq));
 	handler_tcb->set_state(thread_state_t::running);
@@ -122,7 +86,7 @@ static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
     }
     else
     {
-	TRACEF("xcpu-IRQ %d handler not ready %t s=%s\n", 
+	TRACEF("irq %d xcpu handler not ready %t s=%s\n", 
 	       irq, handler_tcb, handler_tcb->get_state().string());
 	enter_kdebug("UNTESTED");
 	irq_tcb->set_tag(msg_tag_t::irq_tag());
@@ -142,6 +106,65 @@ static void do_xcpu_interrupt(cpu_mb_entry_t * entry)
 }
 #endif
 
+
+// handler for dedicated irq threads
+static void irq_thread()
+{
+    tcb_t * current = get_current_tcb();
+    int irq = current->get_global_id().get_irqno();
+
+    while(1)
+    {
+	tcb_t * handler_tcb = 
+	    get_current_space()->get_tcb(current->get_irq_handler());
+
+	/* VU: when we are in the send queue the IRQ thread was busy
+	 * and the IRQ could not be delivered. Hence, we actually
+	 * have to send the IPC. Otherwise, the message was delivered
+	 * on the fast path and we got activated by an ack IPC */
+	if (current->queue_state.is_set(queue_state_t::send))
+	{
+	    // got activated -- do send operation
+	    ASSERT(handler_tcb->is_local_cpu());
+	    ASSERT(current->is_local_cpu());
+	    TRACE_IRQ_DETAILS("irq %d deliver message", irq);
+
+	    handler_tcb->lock();
+	    current->dequeue_send(handler_tcb);
+	    handler_tcb->set_tag(msg_tag_t::irq_tag());
+	    handler_tcb->set_partner(current->get_global_id());
+	    handler_tcb->unlock();
+	     
+#if defined(CONFIG_SMP)
+	    if (!handler_tcb->is_local_cpu())
+	    {
+		TRACE_IRQ_DETAILS("irq %d xcpu deliver IRQ message", irq);
+		xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, handler_tcb, irq);
+		current->switch_to_idle();
+	    }
+	    else 
+#endif
+	    {
+		current->set_partner(current->get_irq_handler());
+		current->set_state(thread_state_t::waiting_forever);
+		current->switch_to(handler_tcb);
+	    }
+	}
+
+	// got re-activated due to send operation to IRQ thread...
+	TRACE_IRQ_DETAILS("irq %d ACK handler %t", irq, handler_tcb);
+
+	current->set_state(thread_state_t::halted);
+	 
+	// if an interrupt was already pending deliver it
+	if (get_interrupt_ctrl()->unmask(irq))
+	    handle_interrupt(irq);
+
+	current->switch_to_idle();
+    }
+}
+
+
 /**
  * interrupt handler, delivers interrupt IPC if thread is waiting
  * @param irq interrupt number
@@ -153,7 +176,7 @@ void handle_interrupt(word_t irq)
     spin(76, get_current_cpu());
 
     tcb_t * current = get_current_tcb();
-    TRACE_IRQ("IRQ%d (curr=%t)\n", irq, current);
+    TRACE_IRQ_DETAILS("IRQ%d (curr=%t)\n", irq, current);
 
     threadid_t irq_tid = threadid_t::irqthread(irq);
     tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
@@ -194,8 +217,10 @@ void handle_interrupt(word_t irq)
 	return;
     }
 
-    //TRACE_IRQ("handler_tcb: %t, state=%x\n", handler_tcb, (word_t)handler_tcb->get_state());
-    //enter_kdebug("irq");
+    TRACE_IRQ_DETAILS("irq %d current %t handler %t (s=%s)",  
+	      irq, current, handler_tcb, 
+	      (handler_tcb ? handler_tcb->get_state().string() : "UNDEF"));
+
 
     if (EXPECT_TRUE( handler_tcb->get_state().is_waiting() ))
     {
@@ -211,6 +236,7 @@ void handle_interrupt(word_t irq)
 #ifdef CONFIG_SMP
 	    if (!handler_tcb->is_local_cpu())
 	    {
+		TRACE_IRQ_DETAILS("irq %d xcpu forward IRQ tcb creation", irq);
 		xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, 
 			      handler_tcb, irq);
 		return;
@@ -227,7 +253,8 @@ void handle_interrupt(word_t irq)
 		current->switch_to(handler_tcb);
 	    else if (get_current_scheduler()->check_dispatch_thread(current, handler_tcb))
 	    {
-		TRACE_IRQ("deliver IRQ to %t\n", handler_tcb);
+		ASSERT(current != get_kdebug_tcb());
+		TRACE_IRQ_DETAILS("irq %d deliver to %t current %t", irq, handler_tcb, current);
 
 		// make sure we are in the ready queue
 		get_current_scheduler()->preempt_thread (current, handler_tcb);
@@ -238,7 +265,7 @@ void handle_interrupt(word_t irq)
 		/* according to the scheduler should the current
 		 * thread remain active so simply activate the other
 		 * guy and return */
-		TRACE_IRQ("enqueue IRQ handler %t (curr=%t)\n", handler_tcb, current);
+		TRACE_IRQ_DETAILS("irq %d enqueue %t current %t", irq, handler_tcb, current);
 		handler_tcb->set_state(thread_state_t::running);
 		get_current_scheduler()->enqueue_ready(handler_tcb);
 	    }
@@ -246,7 +273,7 @@ void handle_interrupt(word_t irq)
 	}
     }
 
-    TRACE_IRQ("IRQ%d not delivered -- enqueue\n", irq);
+    TRACE_IRQ_DETAILS("irq %d not delivered, enqueue irq_tcb %t current %t", irq, irq_tcb, current);
 
     /* the thread is not waiting for IPC -- so generate nice msg and
      * enqueue into send queue */
@@ -282,6 +309,11 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, "SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)\n",
 		irq, TID(irq_tid), TID(handler_tid));
 
+    // check for valid handler tid
+    tcb_t * handler_tcb = get_current_space()->get_tcb(handler_tid);
+    if ( handler_tcb->get_global_id() != handler_tid )
+	return false;
+
     // check whether this is a valid/available IRQ
     if (!irq_tid.is_interrupt() || !get_interrupt_ctrl()->is_irq_available(irq))
 	return false;
@@ -316,7 +348,12 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     }
     else
     {
-	irq_tcb->create_kernel_thread(irq_tid, &irq_utcb);
+	if (irq_utcb_count++ % (KMEM_CHUNKSIZE / sizeof(utcb_t)) == 0)
+	    irq_utcb = (utcb_t *) kmem.alloc(kmem_utcb, KMEM_CHUNKSIZE);
+	else 
+	    irq_utcb++;
+	irq_tcb->create_kernel_thread(irq_tid, irq_utcb);
+
 	/*
 	 * Set the priority of the kernel interrupt thread to the
 	 * maximum priority.  Note that this is not related to the
@@ -334,7 +371,6 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     // at this point we must be on the local CPU
     ASSERT(irq_tcb->is_local_cpu());
 
-#warning VU: check for handler tid to be valid!
     irq_tcb->set_irq_handler(handler_tid);
 
     if (irq_tid == handler_tid)
@@ -359,6 +395,7 @@ void migrate_interrupt_start (tcb_t * tcb)
 {
     ASSERT(tcb->is_interrupt_thread());
     word_t irq = tcb->get_global_id().get_irqno();
+    TRACE_IRQ_DETAILS("migrate irq %d start", irq);
 
     if (tcb->get_state().is_halted())
 	get_interrupt_ctrl()->mask(irq);
@@ -368,10 +405,18 @@ void migrate_interrupt_end (tcb_t * tcb)
 {
     ASSERT(tcb->is_interrupt_thread());
     word_t irq = tcb->get_global_id().get_irqno();
+    TRACE_IRQ_DETAILS("migrate irq %d end", irq);
     
     get_interrupt_ctrl()->set_cpu(irq, get_current_cpu());
     
-    if (tcb->get_state().is_halted())
+    /*
+     * js: If we got an interrupt during migration, it will be forwarded from
+     * the old CPU; in this case, the irq mask must stay masked, since we
+     * otherwise may get a second interrupt before having processed the
+     * forwarded one. We check that case with the pending flag
+     */
+    if (!get_interrupt_ctrl()->is_pending(irq) &&
+	tcb->get_state().is_halted())
 	get_interrupt_ctrl()->unmask(irq);
 }
 #endif
