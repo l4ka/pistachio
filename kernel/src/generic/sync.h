@@ -33,6 +33,12 @@
 #ifndef __SYNC_H__
 #define __SYNC_H__
 
+
+INLINE void memory_barrier()
+{
+    __asm__ __volatile__ ("" ::: "memory");
+}
+
 #ifndef CONFIG_SMP
 
 #define DEFINE_SPINLOCK(name) spinlock_t name
