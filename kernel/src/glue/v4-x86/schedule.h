@@ -44,13 +44,10 @@ INLINE u32_t get_timer_tick_length()
 #ifndef CONFIG_SMP_IDLE_POLL
 INLINE void processor_sleep()
 {
-    asm("sti	\n"
-	"hlt	\n"
-	"cli	\n");
+    x86_sleep();
 }
 #else
 extern void processor_sleep();
 #endif
-
 
 #endif /* !__GLUE__V4_X86__SCHEDULE_H__ */
