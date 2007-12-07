@@ -66,7 +66,7 @@ class cmd_group_t;
 /**
  * cmd_ret_t: Value returned from every command.  NOQUIT means that
  * more commands should be executed from the command group, ABORT
- * means that one shoul back up to the previous command group, and
+ * means that one should back up to the previous command group, and
  * QUIT means that one should back up to the root and exit the kernel
  * debugger.
  */
