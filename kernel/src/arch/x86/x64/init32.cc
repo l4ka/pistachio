@@ -255,7 +255,7 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
      */ 
     u8_t *startup64;
     
-    asm("	call 1f			\n\t"     /* retrive ip of next instruction */
+    asm("	call 1f			\n\t"     /* retrieve ip of next instruction */
 	"1:	popl %0 		\n\t"     /* save in addr  */
 	: "=r" (startup64)
 	);
