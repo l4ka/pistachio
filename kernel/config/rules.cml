@@ -124,6 +124,10 @@ KDB_ON_STARTUP	'Enter kernel debugger on startup'
 KDB_BREAKIN	'Kernel Debugger breakin'
 KDB_BREAKIN_BREAK	'  > Breakin via the break signal'
 KDB_BREAKIN_ESCAPE	'  > Breakin via the escape key'
+KDB_INPUT_HLT	'Use hlt while waiting for console input' text
+Use interruptible hlt while waiting for console input in the debugger,
+to reduce CPU load and power. Note that interrupts are enabled while waiting.
+.
 DEBUG_SYMBOLS	'Include debugging symbols in binary'
 
 KDB_DISAS	'Enable Disassembler [GPL license]' text
@@ -312,6 +316,7 @@ menu debugger
 	KDB_BREAKIN
 	KDB_BREAKIN_BREAK
 	KDB_BREAKIN_ESCAPE
+	KDB_INPUT_HLT
         KDB_NO_ASSERTS
 	trace
 
@@ -321,6 +326,7 @@ default KDB_COMPORT from 0x3f8
 default KDB_COMSPEED from 115200 range 115200 57600 38400 19200 9600 4800 2400 1200 300
 unless KDB_CONS_COM suppress KDB_COMPORT KDB_COMSPEED
 unless KDB suppress dependent kdb_console KDB_COMPORT KDB_COMSPEED KDB_DISAS KDB_ON_STARTUP KDB_BREAKIN trace ppc_debug_consoles
+unless ARCH_X86 suppress KDB_INPUT_HLT
 when ARCH_POWERPC suppress kdb_console KDB_COMPORT KDB_COMSPEED KDB_BREAKIN
 when ARCH_POWERPC64 suppress KDB_COMPORT KDB_COMSPEED
 unless ARCH_POWERPC suppress ppc_debug_consoles
