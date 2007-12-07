@@ -93,6 +93,25 @@
 #define CPUID_APM_HAS_VID		(1 << 2)        /* voltage id control */
 #define CPUID_APM_HAS_TT		(1 << 3)        /* thermal trip */
 
+INLINE void x86_iret_self()
+{
+    __asm__ __volatile__(
+	"push	%[kds]		\n\t"
+	"push	%%rsp		\n\t"
+	"pushf			\n\t"
+	"push	%[kcs]		\n\t"
+	"pushq	$1f		\n\t"
+	"iretq			\n\t"
+	"1:			\n\t"	
+	"add	$8, %%rsp	\n\t"
+	: /* No output */
+	: [kds]	  "r" ((word_t) X86_KDS),
+	  [kcs]	  "r" ((word_t) X86_KCS)
+	: "memory"
+	);
+}	
+
+
 
 typedef union {
     u32_t raw[2];
@@ -138,6 +157,7 @@ typedef union {
 	} dcache;
     }d;
 } amd64_cache_info_t;
+
 
 
 class amd64_cpu_features_t{
