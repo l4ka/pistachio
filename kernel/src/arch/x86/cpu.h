@@ -235,6 +235,16 @@ INLINE void x86_sleep(void)
             :);
 }
 
+INLINE void x86_sleep_uninterruptible(void)
+{
+    __asm__ __volatile__(
+	"pushf			\n\t"
+	"cli			\n\t"
+	"hlt			\n\t"
+	"popf			\n\t"
+	::: "memory"
+	);
+}
 
 INLINE void x86_invlpg (word_t addr)
 {
