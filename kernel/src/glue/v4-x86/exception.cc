@@ -333,7 +333,8 @@ extern "C" void reenter_sysexit (void);
 
 X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
 {
-    kdebug_check_breakin();
+    if (kdebug_check_interrupt())
+	return;
 
     
     TRACEPOINT (X86_GP, "general protection fault @ %p, error: %x\n", 
