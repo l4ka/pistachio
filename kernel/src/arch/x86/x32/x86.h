@@ -119,7 +119,8 @@
 # define IA32_CACHE_LINE_SIZE_L2        16
 
 /* P1, PII, PIII */
-#elif defined(CONFIG_CPU_X86_I586) || defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_C3)
+#elif defined(CONFIG_CPU_X86_I586) || defined(CONFIG_CPU_X86_I686) ||\
+      defined(CONFIG_CPU_X86_C3)   || defined(CONFIG_CPU_X86_SIMICS)
 # define IA32_CACHE_LINE_SIZE_L1	32
 # define IA32_CACHE_LINE_SIZE_L2	32
 
@@ -132,6 +133,7 @@
 #elif defined(CONFIG_CPU_X86_K8)
 # define IA32_CACHE_LINE_SIZE_L1	64
 # define IA32_CACHE_LINE_SIZE_L2	64
+
 
 #else
 # error unknown architecture - specify cache line size
