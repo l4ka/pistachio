@@ -13,10 +13,14 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 #include <kdb/input.h>
+#include INC_API(tcb.h)
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(ioport.h)
 #include INC_ARCH(segdesc.h)
+#include INC_GLUE(config.h)
+#include INC_GLUE(schedule.h)
+
 /* K8 flush filter support  */
 #if defined(CONFIG_CPU_X86_K8)
 #include INC_ARCH(amdhwcr.h)
@@ -32,15 +36,41 @@
 
 DECLARE_CMD (cmd_reset, root, '6', "reset", "Reset system");
 
-CMD(cmd_reset, cg)
+
+#if defined(CONFIG_SUBARCH_X32)
+#define __BITS_WORD	32	
+#else
+#define __BITS_WORD	64
+#endif
+
+bool x86_reboot_scheduled;
+
+extern void x86_reset();
+void x86_reset_wrapper()
 {
     asm volatile (
-	"	movb	$0xFE, %al	\n"
-	"	outb	%al, $0x64	\n");
-
+	".global x86_reset				\n\t"			
+	".type x86_reset,@function			\n\t"			
+	".section .init					\n\t"			
+  	"x86_reset:					\n\t"
+	"movb	$0xFE, %al	        		\n\t"
+	"outb	%al, $0x64	        		\n\t"
+	".previous					\n\t"			
+	);	
+}
+CMD(cmd_reset, cg)
+{  
+#if defined(CONFIG_IOAPIC)
+    local_apic_t<APIC_MAPPINGS_START> local_apic;
+    local_apic.disable();
+#endif
+    x86_reboot_scheduled = true;
+    x86_reset();
     /* NOTREACHED */
+    ASSERT(false);
     return CMD_NOQUIT;
 }
+
 
 DECLARE_CMD(cmd_show_ctrlregs, arch, 'c', "ctrlregs",
 	    "show X86 control registers");
@@ -63,27 +93,27 @@ CMD(cmd_show_ctrlregs, cg)
     return CMD_NOQUIT;
 }
 
-DECLARE_CMD (cmd_dump_msrs, arch, 'm', "dumpmsrs",
-	     "dump model specific registers");
+    DECLARE_CMD (cmd_dump_msrs, arch, 'm', "dumpmsrs",
+		 "dump model specific registers");
 
 CMD (cmd_dump_msrs, cg)
 {
 #if defined(CONFIG_CPU_X86_I686)
-	printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_LASTBRANCHFROMIP_MSR));
-	printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_LASTBRANCHTOIP_MSR));
-	printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_LASTINTFROMIP_MSR));
-	printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_LASTINTTOIP_MSR));
+    printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_LASTBRANCHFROMIP_MSR));
+    printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_LASTBRANCHTOIP_MSR));
+    printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_LASTINTFROMIP_MSR));
+    printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_LASTINTTOIP_MSR));
 #endif
 
 #if defined(CONFIG_CPU_X86_P4)
-	for (int i = 0; i < 18; i++) {
-	    u64_t pmc = x86_rdmsr (X86_COUNTER_BASE_MSR + i);
-	    u64_t cccr = x86_rdmsr (X86_CCCR_BASE_MSR + i);
-	    printf("PMC/CCCR %02u: 0x%08x%08x/0x%08x%08x\n",
-		   i,
-		   (u32_t)(pmc >> 32), (u32_t)pmc,
-		   (u32_t)(cccr >> 32), (u32_t)cccr);
-	}
+    for (int i = 0; i < 18; i++) {
+	u64_t pmc = x86_rdmsr (X86_COUNTER_BASE_MSR + i);
+	u64_t cccr = x86_rdmsr (X86_CCCR_BASE_MSR + i);
+	printf("PMC/CCCR %02u: 0x%08x%08x/0x%08x%08x\n",
+	       i,
+	       (u32_t)(pmc >> 32), (u32_t)pmc,
+	       (u32_t)(cccr >> 32), (u32_t)cccr);
+    }
 #endif
 
     return CMD_NOQUIT;
@@ -160,7 +190,7 @@ CMD(cmd_enable_nmi, cg)
 /**
  * send NMI via IPI to (remote) processors
  */
-DECLARE_CMD (cmd_send_nmi, arch, 'N', "send_nmi", "send nmi via IPI");
+DECLARE_CMD (cmd_send_nmi, arch, 'N', "send_nmi", "send NMI to CPU");
 
 CMD(cmd_send_nmi, cg)
 {
@@ -173,7 +203,39 @@ CMD(cmd_send_nmi, cg)
     local_apic.send_nmi(cpu->get_apic_id());
     return CMD_QUIT;
 }
-#endif
+
+DECLARE_CMD (cmd_switch_cpus, arch, 'S', "switch_cpu", "switch CPU");
+
+extern atomic_t kdb_current_cpu;
+extern void kdb_wait_for_cpu();
+
+CMD(cmd_switch_cpus, cg)
+{
+    cpuid_t cpu = get_current_cpu();
+    word_t dst_cpu = get_dec("CPU id", 0, NULL);
+    if (dst_cpu >= CONFIG_SMP_MAX_CPUS ||
+	!cpu_t::get(dst_cpu)->is_valid())
+	return CMD_NOQUIT;
+
+    kdb_current_cpu = dst_cpu;
+    local_apic_t<APIC_MAPPINGS_START> local_apic;
+    local_apic.send_nmi(dst_cpu);
+    /* Execute a dummy iret to receive NMIs again, then sleep */
+    x86_iret_self();
+    x86_sleep_uninterruptible();
+    
+    if (kdb_current_cpu == cpu)
+    {
+	printf("--- Switched to CPU %d ---\n", cpu);
+	return CMD_ABORT;
+    }
+    
+    return CMD_QUIT;
+    
+}
+
+
+#endif /* defined(CONFIG_SMP) */
 
 #if defined(CONFIG_IOAPIC)
 DECLARE_CMD(cmd_show_lvt, arch, 'l', "lvt",
