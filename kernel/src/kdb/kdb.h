@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
  *                
  * File path:     kdb/kdb.h
  * Description:   
@@ -44,9 +44,9 @@ class vrt_table_t;
 class kdb_t {
 
 public:
-    cmd_mode_t	kdb_cmd_mode;
-    void *	kdb_param;
-    tcb_t *	kdb_current;
+    static cmd_mode_t	kdb_cmd_mode;
+    void *		kdb_param;
+    tcb_t *		kdb_current;
 
 
     friend class cmd_group_t;
@@ -60,7 +60,6 @@ public:
 #undef STATIC
 #define STATIC
 };
-
 
 extern kdb_t kdb;
 
