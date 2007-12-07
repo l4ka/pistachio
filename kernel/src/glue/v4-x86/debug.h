@@ -33,8 +33,8 @@
 #define __GLUE__X86__DEBUG_H__
 
 #include INC_ARCH(trapgate.h)
+#include INC_ARCH(atomic.h)
 #include INC_GLUE(config.h)
-#include INC_GLUE_SA(debug.h)
 
 #if defined(CONFIG_DEBUG)
 
@@ -97,6 +97,8 @@ enum x86_breakpoint_type_e {
 
 extern void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb);
 
+extern "C" void x86_reset(void);
+extern bool x86_reboot_scheduled;
 
 
 #else
