@@ -67,6 +67,7 @@
 
 void init_console (void);
 extern "C" int printf (const char * format, ...);
+tcb_t *get_kdebug_tcb();
 
 # define UNIMPLEMENTED()				\
 do {							\
@@ -113,7 +114,6 @@ do {								\
 /* From kdb/generic/entry.cc */
 void kdebug_entry (void *);
 
-
 #else /* !CONFIG_DEBUG */
 
 /*
@@ -121,15 +121,15 @@ void kdebug_entry (void *);
  */
 
 # define init_console(...)
-# define printf(fmt, args...)	do { } while (false)
-# define enter_kdebug(x)	do { } while (true)
-# define UNIMPLEMENTED()	do { } while (true)
-# define ASSERT(x)		do { } while (false)
-# define WARNING(fmt, args...)	do { } while (false)
-# define TRACE(x...)		do { } while (false)
-# define TRACEF(x...)		do { } while (false)
-# define spin_forever(x...)	do { } while (true)
-# define spin(x...)		do { } while (false)
+# define printf(fmt, args...)		do { } while (false)
+# define enter_kdebug(x)		do { } while (true)
+# define UNIMPLEMENTED()		do { } while (true)
+# define ASSERT(x)			do { } while (false)
+# define WARNING(fmt, args...)		do { } while (false)
+# define TRACE(x...)			do { } while (false)
+# define TRACEF(x...)			do { } while (false)
+# define spin_forever(x...)		do { } while (true)
+# define spin(x...)			do { } while (false)
 
 #endif /* CONFIG_DEBUG */
 
@@ -162,6 +162,8 @@ void kdebug_check_breakin();
 # else
 #  define kdebug_check_breakin()
 # endif /* CONFIG_DEBUG_BREAKIN */
+
+bool kdebug_check_interrupt();
 
 
 #endif /* !__DEBUG_H__ */
