@@ -298,6 +298,7 @@ public:
     void send_nmi(u8_t apic_id);
     void send_ipi(u8_t apic_id, u8_t vector);
     void broadcast_ipi(u8_t vector, bool self = false);
+    void broadcast_nmi(bool self = false);
 };
 
 
@@ -416,6 +417,21 @@ INLINE void local_apic_t<base>::broadcast_ipi(u8_t vector, bool self)
     reg.raw = 0;
     reg.x.destination = 2 | (self ? 0 : 1);
     reg.x.vector = vector;
+    write_reg(APIC_INTR_CMD1, reg.raw);
+}
+
+
+template <word_t base>
+INLINE void local_apic_t<base>::broadcast_nmi(bool self)
+{
+    command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    reg.x.vector = 0;
+    reg.x.delivery_mode = nmi;
+    reg.x.destination = 2 | (self ? 0 : 1);
+    reg.x.destination_mode = 0;
+    reg.x.level = 1;
+    reg.x.trigger_mode = 1;
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
 
