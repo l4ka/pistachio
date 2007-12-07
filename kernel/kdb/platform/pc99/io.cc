@@ -31,6 +31,7 @@
  ********************************************************************/
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(ioport.h)
+#include INC_GLUE(schedule.h)
 #include INC_API(tcb.h)
 #include <kdb/kdb.h>
 #include <kdb/init.h>
@@ -327,6 +328,7 @@ static void putc_serial (const char c)
     if (c == '\n')
 	putc_serial('\r');
 }
+bool getc_blocked = false;
 
 static char getc_serial (bool block)
 {
@@ -334,29 +336,47 @@ static char getc_serial (bool block)
     {
 	if (!block)
 	    return -1;
-	while ((in_u8(COMPORT+5) & 0x01) == 0);
+	
+	getc_blocked = true;
+	while ((in_u8(COMPORT+5) & 0x01) == 0)
+	{
+#if defined(CONFIG_KDB_INPUT_HLT)
+	    processor_sleep();
+	    memory_barrier();
+#endif
+	}
+	getc_blocked = false;
+	
     }
     return in_u8(COMPORT);
 }
 
-#if defined(CONFIG_KDB_BREAKIN)
+#if defined(CONFIG_KDB_BREAKIN) 
 void kdebug_check_breakin (void)
 {
+    if (getc_blocked)
+	return;
+    
+#if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
+    u8_t c = in_u8(COMPORT+5);
+#endif
+
 #if defined(CONFIG_KDB_BREAKIN_BREAK)
     // Check for a break interrupt, or for breaks pending in the FIFO.
     // This also catches parity and framing errors contained in the FIFO.
-    if (in_u8(COMPORT+5) & 0x90)
-	    enter_kdebug("break");
+    if (c & 0x90)
+    {
+	enter_kdebug("break");
+	return;
+    } 
 #endif
 #if defined(CONFIG_KDB_BREAKIN_ESCAPE)
-    if ((in_u8(COMPORT+5) & 0x01))
-	if (in_u8(COMPORT) == 0x1b)
+    if ((c & 0x01) && (in_u8(COMPORT) == 0x1b))
 	    enter_kdebug("breakin");
 #endif
+    return;
 }
 #endif
-
-
 
 DECLARE_CMD (cmd_dumpvga, arch, 'V', "screendump", "dump VGA screen contents");
 
