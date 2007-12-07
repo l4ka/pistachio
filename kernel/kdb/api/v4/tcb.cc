@@ -52,6 +52,20 @@ word_t dbg_get_current_tcb()
     return (word_t) get_current_tcb();
 }
 
+bool kdebug_check_interrupt()
+{
+#if defined(CONFIG_KDB_INPUT_HLT)
+    if (get_current_tcb() == get_kdebug_tcb())
+	return true;
+#endif
+
+# if defined(CONFIG_KDB_BREAKIN)
+    kdebug_check_breakin();
+#endif
+    return false;
+
+}
+
 
 DECLARE_CMD(cmd_show_tcb, root, 't', "showtcb",  "show thread control block");
 DECLARE_CMD(cmd_show_tcbext, root, 'T', "showtcbext", "shows thread control block (extended)");
