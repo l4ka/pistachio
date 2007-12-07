@@ -123,7 +123,14 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
     /* modify stack in tss */
     tss.set_esp0((u32_t)dest->get_stack_top());
 
-    tbuf_record_event (1, 0, "switch %t => %t", (word_t)this, (word_t)dest);
+#if 0
+    TRACEF("\ncurr=%t (sp=%p, pdc=%p, spc=%p)\ndest=%t (sp=%p, pdc=%p, spc=%p)\n",
+	   this, this->stack, this->pdir_cache, this->space,
+	   dest, dest->stack, dest->pdir_cache, dest->space);
+#endif
+
+    if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
+	tbuf_record_event (1, 0, "switch %t => %t", (word_t)this, (word_t)dest);
 
 #ifdef CONFIG_SMP
     active_cpu_space.set(get_cpu(), dest->space);
