@@ -156,7 +156,7 @@ INLINE bool x86_mmu_t::has_long_mode()
 /**
  * Enables long mode
  * Note: This doesn't mean that long mode is actually activated,
- *       'cause physical address extensions have to be enabled, too
+ *       physical address extensions have to be enabled, too
  *       
  */
 INLINE void x86_mmu_t::enable_long_mode()
