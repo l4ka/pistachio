@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  National ICT Australia (NICTA)
+ * Copyright (C) 2003, 2007,  National ICT Australia (NICTA)
  *                
  * File path:     kdb/arch/powerpc64/prepost.cc
  * Description:   
@@ -32,6 +32,7 @@
 
 #include <kdb/kdb.h>
 
-bool kdb_t::pre() { return true; }
-void kdb_t::post() { }
+static spinlock_t powerpc64_kdb_lock;
 
+bool kdb_t::pre() { powerpc64_kdb_lock.lock(); return true; }
+void kdb_t::post() { powerpc64_kdb_lock.unlock(); }
