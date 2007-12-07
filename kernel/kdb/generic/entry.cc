@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
  *                
  * File path:     kdb/generic/entry.cc
  * Description:   The kernel debugger entry point.
@@ -67,9 +67,6 @@ void SECTION(SEC_KDEBUG) kdebug_entry (void * param) { kdb.entry(param); }
  */
 void kdb_t::entry (void * param)
 {
-    static DEFINE_SPINLOCK(kdb_lock);
-    kdb_lock.lock();
-
     cmd_ret_t r;
 
     kdb_param = param;
@@ -85,7 +82,6 @@ void kdb_t::entry (void * param)
     post();
     
     kdb_param = NULL;
-    kdb_lock.unlock();
 }
 
 
