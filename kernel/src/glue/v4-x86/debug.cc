@@ -31,60 +31,21 @@
  ********************************************************************/
 
 #include <debug.h>
+#include <ctors.h>
 #include <kdb/tracepoints.h>
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
-
 #include INC_ARCH(traps.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(apic.h)
-
-#include INC_GLUE_SA(debug.h)
+#include INC_GLUE(cpu.h)
+#include INC_GLUE(debug.h)
+#include INC_PLAT(nmi.h)
 
 #if defined(CONFIG_DEBUG)
-#define KDB_STACK_SIZE	KTCB_SIZE
-static char kdb_stack[KDB_STACK_SIZE] UNIT("cpulocal")
-    __attribute__ ((aligned (KDB_STACK_SIZE) ));
-#endif
 
-X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
-{
-    do_enter_kdebug(frame, X86_EXC_BREAKPOINT);
-}
-
-X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
-{
-    do_enter_kdebug(frame, X86_EXC_DEBUG);
-}
-
-X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
-{
-#ifdef CONFIG_DEBUG 
-#if defined CONFIG_SMP
-   local_apic_t<APIC_MAPPINGS_START> local_apic;
-    local_apic.EOI();
-    printf("Current Frame:\n");
-    frame->dump(); 
-    printf("Current TCB:\n");
-    dump_tcb(get_current_tcb());
-    printf("CPU Mailbox:\n");
-    get_cpu_mailbox (get_current_cpu())->dump_mailbox();
-#else
-    do_enter_kdebug(frame, X86_EXC_NMI);
-#endif
-    
-#endif /* CONFIG_DEBUG */
-}
- 
-
-#ifdef CONFIG_SMP
-X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
-{
-    
-}
-#endif
-
+static void do_return_from_kdb(void);
 
 #if defined(DEBUG_LOCK)
 DECLARE_SPINLOCK(printf_spin_lock);
@@ -99,7 +60,7 @@ extern "C" void sync_debug (word_t address)
     if (!sync_dbg_enter)
     {
 	sync_dbg_enter = true;
-	TRACEPOINT(DEBUG_LOCK, "CPU %d, tcb %t, spinlock BUG (lock %x) @ %x\n", 
+ 	TRACEPOINT(DEBUG_LOCK, "CPU %d, tcb %t, spinlock BUG (lock %x) @ %x\n", 
 		   get_current_cpu(), get_current_tcb(), 
 		   address, __builtin_return_address((0)));
 	enter_kdebug("spinlock BUG");
@@ -107,3 +68,92 @@ extern "C" void sync_debug (word_t address)
     sync_dbg_enter = false;
 }
 #endif
+
+class cpu_kdb_t
+{
+private:
+    whole_tcb_t __kdb_tcb;
+    utcb_t	__kdb_utcb;
+    
+    debug_param_t param;    
+    tcb_t *user_tcb, *kdb_tcb;
+    
+public:
+    tcb_t *get_kdb_tcb()  { return kdb_tcb; }
+    tcb_t *get_user_tcb() { return user_tcb; }
+    
+    cpu_kdb_t()
+	{
+	    user_tcb = NULL;
+	    kdb_tcb = (tcb_t *) &__kdb_tcb;
+	    get_idle_tcb()->create_kernel_thread(NILTHREAD, &__kdb_utcb);
+	    kdb_tcb->priority = MAX_PRIO;
+	    kdb_tcb->set_cpu(get_current_cpu());
+	    kdb_tcb->set_space(get_kernel_space());
+	}
+
+    void do_enter_kdebug(x86_exceptionframe_t *frame, const word_t exception) 
+	{
+	    if (get_current_tcb() == get_kdebug_tcb())
+		return;
+	    
+	    void (*entry)(word_t) = (void (*)(word_t)) get_kip()->kdebug_entry;
+	    void (*exit)(void) = do_return_from_kdb;
+	    kdb_tcb->stack = kdb_tcb->get_stack_top();
+	    kdb_tcb->notify(exit);
+	    kdb_tcb->notify(entry, (word_t) &param);
+	    
+	    param.exception = exception;
+	    param.frame = frame;
+	    param.space = (get_current_space() ? get_current_space() : get_kernel_space());
+	    param.tcb = get_current_tcb();
+	    
+	    user_tcb = get_current_tcb();
+	    
+	    get_current_tcb()->switch_to(kdb_tcb);
+	}
+};
+
+cpu_kdb_t cpu_kdb UNIT("cpulocal") CTORPRIO(CTORPRIO_CPU, 1);
+
+tcb_t *get_kdebug_tcb() { return cpu_kdb.get_kdb_tcb(); }
+
+
+void do_return_from_kdb(void)
+{
+    ASSERT(get_current_tcb() == get_kdebug_tcb());
+    get_current_tcb()->switch_to(cpu_kdb.get_user_tcb());
+}
+
+X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
+{
+    cpu_kdb.do_enter_kdebug(frame, X86_EXC_BREAKPOINT);
+}
+
+X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
+{
+    cpu_kdb.do_enter_kdebug(frame, X86_EXC_DEBUG);
+}
+
+DECLARE_TRACEPOINT(X86_NMI);
+X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
+{
+    TRACEPOINT(X86_NMI, "NMI frame %x eip %x efl %x", 
+	       frame, 
+	       frame->regs[x86_exceptionframe_t::ipreg], 
+	       frame->regs[x86_exceptionframe_t::freg]);
+
+    nmi_t().unmask();
+    cpu_kdb.do_enter_kdebug(frame, X86_EXC_NMI);
+}    
+
+#ifdef CONFIG_SMP
+X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
+{
+    
+}
+#endif
+
+#endif /* CONFIG_DEBUG */
+
+
