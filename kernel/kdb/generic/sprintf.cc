@@ -254,9 +254,6 @@ extern "C" int SECTION(SEC_KDEBUG) sprintf(char* obuf, const char* format, ...)
     va_start(args, format);
     printed = do_sprintf(&buf, format, args);
     va_end(args);
-
-    obuf[printed] = '\0';
-
     return printed;
 };
 
