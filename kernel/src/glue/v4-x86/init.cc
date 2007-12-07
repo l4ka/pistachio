@@ -136,6 +136,11 @@ static void smp_bp_commence (void)
  */
 extern "C" void SECTION(SEC_INIT) startup_processor (void)
 {
+#if defined(CONFIG_DEBUG)
+    if (x86_reboot_scheduled)
+	x86_reset();
+#endif
+
     TRACE_INIT("\tAP processor is alive\n");
     x86_mmu_t::set_active_pagetable((word_t) get_kernel_space()->get_top_pdir_phys());
     TRACE_INIT("\tAP switched to kernel ptab\n");
@@ -286,11 +291,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     if (cpuid > CONFIG_SMP_MAX_CPUS)
 	panic("unconfigured CPU started (LAPIC id %d)\n", apicid);
 #endif
-
-
-
-    call_cpu_ctors();
-
+    
     TRACE_INIT("\tActivating TSS (CPU %d)se\n", cpuid);
     tss.setup(X86_KDS);
 
@@ -343,6 +344,8 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
 
     /* CPU specific mappings */
     get_kernel_space()->init_cpu_mappings(cpuid);
+
+    call_cpu_ctors();
 
     return cpuid;
 }
