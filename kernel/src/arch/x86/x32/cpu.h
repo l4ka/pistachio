@@ -32,6 +32,20 @@
 #ifndef __ARCH__X86__X32__CPU_H__
 #define __ARCH__X86__X32__CPU_H__
 
+INLINE void x86_iret_self()
+{
+    __asm__ __volatile__(
+	"pushf			\n\t"
+	"push	%[kcs]		\n\t"
+	"pushl	$1f		\n\t"
+	"iret			\n\t"
+	"1:			\n\t"	
+	: /* No ooutput */
+	: [kds]	  "r" ((word_t) X86_KDS),
+	  [kcs]	  "r" ((word_t) X86_KCS)
+	);
+}	
+
 
 INLINE bool ia32_has_cpuid()
 {
