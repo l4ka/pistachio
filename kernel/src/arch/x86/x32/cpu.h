@@ -40,9 +40,8 @@ INLINE void x86_iret_self()
 	"pushl	$1f		\n\t"
 	"iret			\n\t"
 	"1:			\n\t"	
-	: /* No ooutput */
-	: [kds]	  "r" ((word_t) X86_KDS),
-	  [kcs]	  "r" ((word_t) X86_KCS)
+	: /* No output */
+	: [kcs]	  "r" ((word_t) X86_KCS)
 	);
 }	
 
