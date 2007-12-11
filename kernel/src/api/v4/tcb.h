@@ -191,11 +191,7 @@ public:
 
     /* utcb access functions */
     utcb_t * get_utcb()
-#ifdef CONFIG_ARCH_ARM
-        ;
-#else
         const { return this->utcb; }
-#endif
 
 public:
     void set_scheduler(const threadid_t tid);
