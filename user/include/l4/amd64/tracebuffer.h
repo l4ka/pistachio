@@ -42,6 +42,8 @@
 # define __PLUS32
 #endif
 
+#define L4_TRACEBUFFER_MAGIC		(0x1464b123acebf)
+#define L4_TRACEBUFFER_NUM_ARGS		(9)
 
 /*
  * A tracebuffer record indicates the type of event, the time of the
@@ -54,7 +56,7 @@ typedef struct
 	L4_Word_t	utype	: 16;
 	L4_Word_t	__pad0	: 16 __PLUS32;
 	L4_Word_t	cpu	: 16;
-	L4_Word_t	__pad1	: 16 __PLUS32;
+	L4_Word_t	id	: 16 __PLUS32;
     } X;
     
     L4_Word_t	tsc;
@@ -103,7 +105,7 @@ typedef struct
 # define __L4_TBUF_PMC_SEL_0 "	xor	%3, %3			\n"
 # define __L4_TBUF_PMC_SEL_1
 # define __L4_TBUF_RDPMC_0   "	mov	%3, %%fs:4*%c9(%0)	\n"
-# define __L4_TBUF_RDPMC_1   "	mov	%3, %%fs:5$c9(%9)\n"
+# define __L4_TBUF_RDPMC_1   "	mov	%3, %%fs:5*%c9(%0)	\n"
 #endif
 
 
@@ -133,16 +135,15 @@ do {								\
 	"i" (sizeof(L4_Word_t)));				\
 } while (0)
 
-
-#define __L4_TBUF_GET_NEXT_RECORD(tid, event)				\
+#define __L4_TBUF_GET_NEXT_RECORD(type, id)				\
     ({									\
 	L4_Word_t _dummy, _addr;					\
 	asm volatile (							\
 	    /* Check wheter to filter the event */			\
 	    "	mov	%%fs:2*%c9, %3			\n"		\
 	    "	and	%1, %3				\n"		\
-	    "	xor	%%fs:3*%c9, %3			\n"		\
-	    "	jnz	2f				\n"		\
+	    "	jz	2f				\n"		\
+	    "	or	%2, %1				\n"		\
 									\
 	    /* Get record offset into EDI */				\
 	    "1:	mov	%%fs:1*%c9, %3			\n"		\
@@ -155,13 +156,16 @@ do {								\
 	    "	cmpxchg	%0, %%fs:1*%c9			\n"		\
 	    "	jnz	1b				\n"		\
 									\
-	    /* Store type, cpu, thread, counters */			\
-	    "	movl	%%ecx, %%fs:(%0)		\n"		\
+ 									\
+	    /* Store type, cpu, id, thread, counters */			\
+	    "	mov	%1, %2			        \n"		\
+	    "	movzx	%%cx, %%ecx			\n"		\
+	    "	movl	%%ecx, %%fs:(%0)	        \n"		\
 	    "	mov	%%gs:0, %1			\n"		\
-	    "	mov 	"MKSTR(4 *__L4_TCR_PROCESSOR_NO)"(%1), %2\n"	\
-	    "	movl 	%%edx, %%fs:4(%0)		\n"		\
-	    "	mov 	"MKSTR(4 *__L4_TCR_MY_GLOBAL_ID)"(%1), %2\n"	\
-	    "	movl 	%%edx, %%fs:3*%c9(%0)		\n"		\
+	    "	movw 	"MKSTR(__L4_TCR_PROCESSOR_NO)"*%c9(%1), %%dx\n"	\
+	    "	movl	%%edx, %%fs:1*%c9(%0)		\n"		\
+	    "	mov 	"MKSTR(__L4_TCR_MY_GLOBAL_ID)"*%c9(%1), %2\n"	\
+	    "	mov 	%2, %%fs:3*%c9(%0)		\n"		\
 	    __L4_TBUF_RDTSC						\
 	    __L4_TBUF_PMC_SEL_0						\
 	    __L4_TBUF_RDPMC_0						\
@@ -175,14 +179,15 @@ do {								\
 		"=a" (_dummy)				/* 3  */	\
 	    :								\
 		"0" (0),				/* 4  */	\
-		"1" (event & 0xffff),			/* 5  */	\
-		"2" (0),				/* 6  */	\
+		"1" (type & 0xffff),			/* 5  */	\
+		"2" ((id & 0xffff)<<16),		/* 6  */	\
 		"3" (0),				/* 7  */	\
 		"i" (sizeof (L4_TraceRecord_t)),	/* 8  */	\
 		"i" (sizeof(L4_Word_t))			/* 9  */	\
 	    );								\
 	_addr;								\
     })
+
 
 
 /**
@@ -221,6 +226,27 @@ do {								\
 	"0" (addr + (7 + offset) * sizeof(L4_Word_t)),		\
 	"r" (item));						\
 } while (0)
+
+/**
+ * Record arguments into event buffer at indicated location.
+ *
+ * @param addr		offset of event record
+ * @param offset	offset within event record
+ * @param item		value to be recorded
+ */
+#define L4_TBUF_SET_TYPEMASK(mask)				\
+    do {							\
+	L4_Word_t _dummy;					\
+	asm volatile (						\
+	    "mov  %0, %%fs:2*%c2			\n"	\
+	    :							\
+	    "=D" (_dummy)					\
+	    :							\
+	    "0" (mask),						\
+	    "i" (sizeof(L4_Word_t)));				\
+    } while (0)
+
+#undef __PLUS32
 
 #undef __PLUS32
 

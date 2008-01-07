@@ -52,6 +52,7 @@ HEADER_FILES=	l4io.h \
 		l4/space.h \
 		l4/thread.h \
 		l4/types.h \
+		l4/tracebuffer.h \
 		l4/amd64/kdebug.h \
 		l4/amd64/specials.h \
 		l4/amd64/syscalls.h \

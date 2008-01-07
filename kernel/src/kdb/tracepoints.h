@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/tracepoints.h
  * Description:   Tracepoint interface
@@ -36,6 +36,8 @@
 #include <kdb/linker_set.h>
 #include <kdb/tracebuffer.h>
 
+#define TP_DEFAULT				(1 << 1)
+#define TP_DETAIL				(1 << 2)
 
 // avoid including api/smp.h for non-SMP case
 #if !defined(CONFIG_SMP)
@@ -53,6 +55,7 @@ class tracepoint_t
 public:
     const char	*name;
     word_t	id;
+    word_t	type;
     word_t	enabled;
     word_t	enter_kdb;
     word_t	counter[CONFIG_SMP_MAX_CPUS];
@@ -93,14 +96,18 @@ extern tracepoint_list_t tp_list;
 
 #if defined(CONFIG_TRACEPOINTS)
 
-#define DECLARE_TRACEPOINT(tp)					\
-    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, 0, { 0, } };	\
+#define DECLARE_TRACEPOINT(tp)							\
+    tracepoint_t __tracepoint_##tp = { #tp, 0, TP_DEFAULT, 0, 0, { 0, } };	\
+    PUT_SET (tracepoint_set, __tracepoint_##tp)
+
+#define DECLARE_TRACEPOINT_DETAIL(tp)						\
+    tracepoint_t __tracepoint_##tp = { #tp, 0, TP_DETAIL, 0, 0, { 0, } };	\
     PUT_SET (tracepoint_set, __tracepoint_##tp)
 
 #define TRACEPOINT(tp, str, args...)				\
 do {								\
     tracepoint_t *_tp = &__tracepoint_##tp;			\
-    TBUF_REC_TRACEPOINT (_tp->id, str, ##args);			\
+    TBUF_REC_TRACEPOINT (_tp->type, _tp->id, str, ##args);	\
     _tp->counter[TP_CPU]++;					\
     if (_tp->enabled & (1UL << TP_CPU))				\
     {								\
@@ -137,11 +144,15 @@ do {						\
 #else /* !CONFIG_TRACEPOINTS */
 
 #define DECLARE_TRACEPOINT(tp)		        \
-    tracepoint_t __tracepoint_##tp = { #tp, 0, 0, 0, { 0, } };	
+    tracepoint_t __tracepoint_##tp = { #tp, 0, TP_DEFAULT, 0, 0, { 0, } };	
+
+#define DECLARE_TRACEPOINT_DETAIL(tp)		\
+    tracepoint_t __tracepoint_##tp = { #tp, 0, TP_DETAIL, 0, 0, { 0, } };	
+
 
 #define TRACEPOINT(tp, str, args...)				\
     do {							\
-	TBUF_REC_TRACEPOINT (__tracepoint_##tp.id, str, ##args);\
+	TBUF_REC_TRACEPOINT (__tracepoint_##tp.type, __tracepoint_##tp.id, str, ##args); \
 } while (0)
 
 #define TRACEPOINT_NOTB(tp, code...)

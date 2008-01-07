@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/tracebuffer.h
  * Description:   IA32 specific tracebuffer
@@ -48,7 +48,7 @@ public:
 	word_t		ktype	: 16;
 	word_t			: BITS_WORD-32;
 	word_t		cpu	: 16;
-	word_t		tpid	: 16;
+	word_t		id	: 16;
 	word_t			: BITS_WORD-32;
     };
     word_t		tsc;
@@ -78,8 +78,7 @@ class tracebuffer_t
     word_t	magic;
     word_t	current;
     word_t	mask;
-    word_t	eventsel;
-    word_t	__pad[4];
+    word_t	__pad[5];
     word_t	counters[8];
     tracerecord_t tracerecords[];
 
@@ -94,12 +93,13 @@ public:
 	{
 	    magic = TRACEBUFFER_MAGIC;
 	    current = 0;
-	    mask = eventsel = 0;
+	    mask = TBUF_DEFAULT_MASK;
 	}
 
     bool is_valid (void) { return magic == TRACEBUFFER_MAGIC; }
 
     friend class kdb_t;
+    friend class tbuf_dumper_t;
 };
 
 INLINE tracebuffer_t * get_tracebuffer (void)
@@ -154,15 +154,14 @@ INLINE tracebuffer_t * get_tracebuffer (void)
  */
 
 
-#define TBUF_GET_NEXT_RECORD(event, tpid)				\
+#define TBUF_GET_NEXT_RECORD(type, id)					\
     ({									\
 	word_t dummy, addr;						\
 	asm volatile (							\
 	    /* Check wheter to filter the event */			\
 	    "	mov	%%fs:2*%c9, %3			\n"		\
 	    "	and	%1, %3				\n"		\
-	    "	xor	%%fs:3*%c9, %3			\n"		\
-	    "	jnz	2f				\n"		\
+	    "	jz	2f				\n"		\
 	    "	or	%2, %1				\n"		\
 									\
 	    /* Get record offset into EDI */				\
@@ -175,8 +174,8 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 	    TBUF_LOCK							\
 	    "	cmpxchg	%0, %%fs:1*%c9			\n"		\
 	    "	jnz	1b				\n"		\
-									\
-	    /* Store type, cpu, tpid, thread, counters */		\
+ 									\
+	    /* Store type, cpu, id, thread, counters */			\
 	    "	mov	%1, %2			        \n"		\
 	    "	xorw	%%cx, %%cx			\n"		\
 	    "	movl	%%ecx, %%fs:(%0)		\n"		\
@@ -198,8 +197,8 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 		"=a" (dummy)				/* 3  */	\
 	    :								\
 		"0" (0),				/* 4  */	\
-		"1" ((event & 0xffff)<<16),		/* 5  */	\
-		"2" (tpid & 0xffff),			/* 6  */	\
+		"1" ((type & 0xffff)<<16),		/* 5  */	\
+		"2" (id & 0xffff),			/* 6  */	\
 		"3" (0),				/* 7  */	\
 		"i" (sizeof (tracerecord_t)),		/* 8  */	\
 		"i" (sizeof(word_t))			/* 9  */	\

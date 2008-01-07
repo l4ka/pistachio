@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/tcb.h
  * Description:   TCB related functions for Version 4, AMD64
@@ -129,8 +129,8 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	   dest, dest->stack, dest->pdir_cache, dest->space);
     //enter_kdebug("hmm");
 #endif
-   if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
-   tbuf_record_event (1, 0, "switch %t => %t", (word_t)this, (word_t)dest);
+    if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
+	tbuf_record_event (TB_DEFAULT, 0, "switch %t => %t", (word_t)this, (word_t)dest);
 
 #ifdef CONFIG_SMP
     active_cpu_space.set(get_cpu(), dest->space);

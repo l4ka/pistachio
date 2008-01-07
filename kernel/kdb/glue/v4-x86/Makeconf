@@ -12,3 +12,7 @@
 ######################################################################
 SOURCES+=	kdb/glue/v4-x86/thread.cc kdb/glue/v4-x86/prepost.cc \
 		kdb/glue/v4-x86/readmem.cc kdb/glue/v4-x86/resources.cc
+
+ifeq ("$(CONFIG_TRACEBUFFER)","y")
+SOURCES+=	kdb/glue/v4-x86/tracebuffer.cc
+endif

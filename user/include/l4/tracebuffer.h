@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     l4/tracebuffer.h
  * Description:   Access to L4 kernel tracebuffer
@@ -34,6 +34,7 @@
 #define __L4__TRACEBUFFER_H__
 #if defined(L4_TRACEBUFFER)
 
+#include <l4/thread.h>
 #include __L4_INC_ARCH(tracebuffer.h)
 
 L4_INLINE void L4_Tbuf_IncCounter (L4_Word_t counter)
@@ -41,31 +42,28 @@ L4_INLINE void L4_Tbuf_IncCounter (L4_Word_t counter)
     __L4_TBUF_INCREASE_COUNTER (counter);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_t0 (L4_ThreadId_t tid,
-				       L4_Word_t event, const char * str)
-{
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (tid, event);
+L4_INLINE void L4_Tbuf_RecordEvent_t0 (L4_Word_t id, const char * str)
+{ 
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR (addr, str);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_t1 (L4_ThreadId_t tid,
-				       L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_t1 (L4_Word_t id, const char * str,
 				       L4_Word_t p0)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (tid, event);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
     __L4_TBUF_STORE_DATA (addr, 0, p0);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_t2 (L4_ThreadId_t tid,
-				       L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_t2 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (tid, event);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -73,12 +71,11 @@ L4_INLINE void L4_Tbuf_RecordEvent_t2 (L4_ThreadId_t tid,
     __L4_TBUF_STORE_DATA (addr, 1, p1);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_t3 (L4_ThreadId_t tid,
-				       L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_t3 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1,
 				       L4_Word_t p2)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (tid, event);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -87,12 +84,11 @@ L4_INLINE void L4_Tbuf_RecordEvent_t3 (L4_ThreadId_t tid,
     __L4_TBUF_STORE_DATA (addr, 2, p2);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_t4 (L4_ThreadId_t tid,
-				       L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_t4 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1,
 				       L4_Word_t p2, L4_Word_t p3)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (tid, event);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -102,104 +98,69 @@ L4_INLINE void L4_Tbuf_RecordEvent_t4 (L4_ThreadId_t tid,
     __L4_TBUF_STORE_DATA (addr, 3, p3);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_0 (L4_Word_t event, const char * str)
+L4_INLINE void L4_Tbuf_RecordEvent_0 (L4_Word_t id, const char * str)
 {
-    L4_Tbuf_RecordEvent_t0 (L4_MyGlobalId (), event, str);
+    L4_Tbuf_RecordEvent_t0 (id, str);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_1 (L4_Word_t event, const char * str,
-				      L4_Word_t p0)
+L4_INLINE void L4_Tbuf_RecordEvent_1 (L4_Word_t id, const char * str,
+  L4_Word_t p0)
 {
-    L4_Tbuf_RecordEvent_t1 (L4_MyGlobalId (), event, str, p0);
+    L4_Tbuf_RecordEvent_t1 (id, str, p0);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_2 (L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_2 (L4_Word_t id, const char * str,
 				      L4_Word_t p0, L4_Word_t p1)
 {
-    L4_Tbuf_RecordEvent_t2 (L4_MyGlobalId (), event, str, p0, p1);
+    L4_Tbuf_RecordEvent_t2 (id, str, p0, p1);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_3 (L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_3 (L4_Word_t id, const char * str,
 				      L4_Word_t p0, L4_Word_t p1,
 				      L4_Word_t p2)
 {
-    L4_Tbuf_RecordEvent_t3 (L4_MyGlobalId (), event, str, p0, p1, p2);
+    L4_Tbuf_RecordEvent_t3 (id, str, p0, p1, p2);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent_4 (L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent_4 (L4_Word_t id, const char * str,
 				      L4_Word_t p0, L4_Word_t p1,
 				      L4_Word_t p2, L4_Word_t p3)
 {
-    L4_Tbuf_RecordEvent_t4 (L4_MyGlobalId (), event, str, p0, p1, p2, p3);
+    L4_Tbuf_RecordEvent_t4 (id, str, p0, p1, p2, p3);
 }
 
 #if defined(__cplusplus)
-L4_INLINE void L4_Tbuf_RecordEvent (L4_ThreadId_t tid,
-				    L4_Word_t event, const char * str)
+L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t id, const char * str)
 {
-    L4_Tbuf_RecordEvent_0 (event, str);
+    L4_Tbuf_RecordEvent_0 (id, str);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent (L4_ThreadId_t tid,
-				    L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t id, const char * str,
 				    L4_Word_t p0)
 {
-    L4_Tbuf_RecordEvent_1 (event, str, p0);
+    L4_Tbuf_RecordEvent_1 (id, str, p0);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent (L4_ThreadId_t tid,
-				    L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t id, const char * str,
 				    L4_Word_t p0, L4_Word_t p1)
 {
-    L4_Tbuf_RecordEvent_2 (event, str, p0, p1);
+    L4_Tbuf_RecordEvent_2 (id, str, p0, p1);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent (L4_ThreadId_t tid,
-				    L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t id, const char * str,
 				    L4_Word_t p0, L4_Word_t p1,
 				    L4_Word_t p2)
 {
-    L4_Tbuf_RecordEvent_3 (event, str, p0, p1, p2);
+    L4_Tbuf_RecordEvent_3 (id, str, p0, p1, p2);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent (L4_ThreadId_t tid,
-				    L4_Word_t event, const char * str,
+L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t id, const char * str,
 				    L4_Word_t p0, L4_Word_t p1,
 				    L4_Word_t p2, L4_Word_t p3)
 {
-    L4_Tbuf_RecordEvent_4 (event, str, p0, p1, p2, p3);
+    L4_Tbuf_RecordEvent_4 (id, str, p0, p1, p2, p3);
 }
 
-L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t event, const char * str)
-{
-    L4_Tbuf_RecordEvent_t0 (L4_MyGlobalId (), event, str);
-}
-
-L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t event, const char * str,
-				    L4_Word_t p0)
-{
-    L4_Tbuf_RecordEvent_t1 (L4_MyGlobalId (), event, str, p0);
-}
-
-L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t event, const char * str,
-				    L4_Word_t p0, L4_Word_t p1)
-{
-    L4_Tbuf_RecordEvent_t2 (L4_MyGlobalId (), event, str, p0, p1);
-}
-
-L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t event, const char * str,
-				    L4_Word_t p0, L4_Word_t p1,
-				    L4_Word_t p2)
-{
-    L4_Tbuf_RecordEvent_t3 (L4_MyGlobalId (), event, str, p0, p1, p2);
-}
-
-L4_INLINE void L4_Tbuf_RecordEvent (L4_Word_t event, const char * str,
-				    L4_Word_t p0, L4_Word_t p1,
-				    L4_Word_t p2, L4_Word_t p3)
-{
-    L4_Tbuf_RecordEvent_t4 (L4_MyGlobalId (), event, str, p0, p1, p2, p3);
-}
 #endif /* __cplusplus */
 
 #else /* !TRACEBUFFER */

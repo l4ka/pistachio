@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/tracebuffer.h
  * Description:   Kernel tracebuffer facility
@@ -31,8 +31,22 @@
  ********************************************************************/
 #ifndef __KDB__TRACEBUFFER_H__
 #define __KDB__TRACEBUFFER_H__
+
 #if defined(CONFIG_TRACEBUFFER)
 
+#define TB_DEFAULT				(1 << 0)
+
+/*
+ * Wrap tracepoint events with event type arguments
+ */
+
+
+#define DEBUG_KERNEL_DETAILS
+#if defined(DEBUG_KERNEL_DETAILS)
+#define TBUF_DEFAULT_MASK			(0xFFFFFFFF)
+#else
+#define TBUF_DEFAULT_MASK			(0xFFFFFFFF & ~(TP_DETAIL << 16))
+#endif
 
 #include INC_ARCH(tracebuffer.h)
 #include <stdarg.h>	/* for va_list, ... comes with gcc */
@@ -42,16 +56,16 @@ INLINE void tbuf_inc_counter (word_t counter)
     TBUF_INCREASE_COUNTER (counter);
 }
 
-#define tbuf_record_event(event, tpid, str, args...)			\
-    __tbuf_record_event(event, tpid, str, ##args, TRACEBUFFER_MAGIC);
+#define tbuf_record_event(type, tpid, str, args...)			\
+    __tbuf_record_event(type, tpid, str, ##args, TRACEBUFFER_MAGIC);
 
-INLINE void __tbuf_record_event(word_t event, word_t tpid, const char *str, ...)
+INLINE void __tbuf_record_event(word_t type, word_t tpid, const char *str, ...)
 {
 
     va_list args;
     word_t arg;
     
-    word_t addr = TBUF_GET_NEXT_RECORD (event, tpid);
+    word_t addr = TBUF_GET_NEXT_RECORD (type, tpid);
     
     if (addr == 0)
 	return;
@@ -80,19 +94,12 @@ INLINE void __tbuf_record_event(word_t event, word_t tpid, const char *str, ...)
 #endif
 
 
-/*
- * Wrap tracepoint events with event type arguments
- */
-
-#define TBUF_EV_TRACEPOINT		(1 << 15)
-#define TBUF_EV_TRACEPOINT_TB		(1 << 14)
-
 #if defined(CONFIG_TBUF_LIGHT)
-# define TBUF_REC_TRACEPOINT(tpid, str, args...)
+# define TBUF_REC_TRACEPOINT(tptype, tpid, str, args...)
 #else
 
-# define TBUF_REC_TRACEPOINT(tpid, str, args...)		\
-    tbuf_record_event (TBUF_EV_TRACEPOINT, tpid, str, ##args)
+# define TBUF_REC_TRACEPOINT(tptype, tpid, str, args...)	\
+    tbuf_record_event (tptype, tpid, str, ##args)
 #endif
 
 #endif /* !__KDB__TRACEBUFFER_H__ */
