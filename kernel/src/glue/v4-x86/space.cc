@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.cc
  * Description:   
@@ -25,6 +25,7 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 
+#include INC_GLUE(cpu.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(space.h)
 
@@ -103,9 +104,11 @@ void space_t::allocate_tcb(addr_t addr)
     //TRACEF("tcb=%p, page=%p\n", addr, page);
 
     // map tcb kernel-writable, global 
-    x86_mmu_t::flush_tlbent ((word_t)addr);
     get_kernel_space()->add_mapping(addr, virt_to_phys(page), PGSIZE_KTCB, 
 			      true, true, true);
+    
+    flush_tlbent (this, addr, page_shift(PGSIZE_KTCB));
+
     sync_kernel_space(addr);
 }
 
@@ -314,7 +317,9 @@ void space_t::map_dummy_tcb(addr_t addr)
     //TRACEF("%p\n", addr);
     //enter_kdebug("map dummy");
     get_kernel_space()->add_mapping(addr, (addr_t)get_dummy_tcb(), PGSIZE_KTCB, 
-				    false, true, false);
+				    false, true, false); 
+    
+    flush_tlbent (this, addr, page_shift(PGSIZE_KTCB));
     sync_kernel_space(addr);
 }
 
@@ -988,20 +993,36 @@ active_cpu_space_t active_cpu_space;
 #endif
 
 
+
 static void do_xcpu_flush_tlb(cpu_mb_entry_t * entry)
 {
     spin(60, get_current_cpu());
+    //TRACEF("remote flush %x %d\n", get_current_space(), get_current_cpu());
     x86_mmu_t::flush_tlb (__FLUSH_GLOBAL__);
 }
 
-INLINE void tag_flush_remote (space_t * curspace)
+static void flush_tlb_remote()
 {
-    for (int cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
+	if (cpu_remote_flush & (1 << cpu))
+	    sync_xcpu_request(cpu, do_xcpu_flush_tlb, NULL,
+			      cpu_remote_flush_global & (1 << cpu));
+    cpu_remote_flush = 0;
+    cpu_remote_flush_global = 0;
+}
+
+INLINE void tag_flush_remote (space_t * curspace, bool force=false)
+{
+    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
     {
 	if (cpu == get_current_cpu())
 	    continue;
-	if (active_cpu_space.get(cpu) == curspace)
+	
+	if (active_cpu_space.get(cpu) == curspace || force)
+	{
+	    //TRACEF("tag remote flush %x %d\n", curspace, cpu);
 	    cpu_remote_flush |= (1 << cpu);
+	}
 
 #if defined(CONFIG_X86_SMALL_SPACES)
 	// For small spaces we must also do TLB shootdown if current
@@ -1028,26 +1049,27 @@ void space_t::flush_tlb (space_t * curspace)
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
     tag_flush_remote (this);
+   
 }
 
 void space_t::flush_tlbent (space_t * curspace, addr_t addr, word_t log2size)
 {
+    /* js: for kernel addresses, we force an immediate remote flush */
+    bool force = !is_user_area(addr);
+    
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlbent ((word_t) addr);
-    tag_flush_remote (this);
+    
+    tag_flush_remote (this, force);
+    if (force)
+	flush_tlb_remote();
+
 }
-
-
 
 
 void space_t::end_update ()
 {
-    for (int cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
-	if (cpu_remote_flush & (1 << cpu))
-	    sync_xcpu_request(cpu, do_xcpu_flush_tlb, NULL,
-			      cpu_remote_flush_global & (1 << cpu));
-    cpu_remote_flush = 0;
-    cpu_remote_flush_global = 0;
+    flush_tlb_remote();
 }
 
 
