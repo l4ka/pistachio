@@ -43,6 +43,7 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 
+#include INC_GLUE(cpu.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(space.h)
 
@@ -70,13 +71,13 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
     {
     case size_512g: 
 	for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
-	    if (cpu != current_cpu && space->get_top_pdir(cpu))
+	    if (cpu != space->data.reference_ptab && space->get_top_pdir(cpu))
 
 	    {
 		//TRACEF("smp sync pml4 %d / %x -> %d / %x\n",
-		//     current_cpu, space->pgent(idx(), current_cpu),
+		//     space->data.reference_ptab, space->pgent(idx(), space->data.reference_ptab),
 		//     cpu, space->pgent(idx(), cpu));
-		*space->pgent(idx(), cpu) = *space->pgent(idx(), current_cpu);
+		*space->pgent(idx(), cpu) = *space->pgent(idx(), space->data.reference_ptab);
 	    }
 	break;
     case size_1g: 
@@ -84,16 +85,17 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
 	if (!is_cpulocal(space, size_1g) && 
 	    (this - idx() == space->get_top_pdir()->get_kernel_pdp_pgent()))
 	{
-	    ASSERT(space->get_top_pdir(current_cpu)->get_kernel_pdp());
+	    ASSERT(space->get_top_pdir(space->data.reference_ptab)->get_kernel_pdp());
 	    
 	    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
-		if (cpu != current_cpu && space->get_top_pdir(cpu) && space->get_top_pdir(cpu)->get_kernel_pdp_pgent())
+		if (cpu != space->data.reference_ptab && space->get_top_pdir(cpu) &&
+		    space->get_top_pdir(cpu)->get_kernel_pdp_pgent())
 		{
 		    //TRACEF("smp sync kernel pdp %x idx %d cpu %d cpulocal = %s\n", 
 		    //   this - idx(), idx(), cpu,
 		    //   (is_cpulocal(s, size_2m) ? "cpulocal" : "global"));
 		    *space->get_top_pdir(cpu)->get_kernel_pdp_pgent()->next(space, size_2m, idx()) =
-			*space->get_top_pdir(current_cpu)->get_kernel_pdp_pgent()->next(space, size_2m, idx());
+			*space->get_top_pdir(space->data.reference_ptab)->get_kernel_pdp_pgent()->next(space, size_2m, idx());
 		}
 	    break;
 	}

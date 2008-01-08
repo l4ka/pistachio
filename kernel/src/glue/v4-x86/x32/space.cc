@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/space.cc
  * Description:   address space management
@@ -42,6 +42,7 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 
+#include INC_GLUE(cpu.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(space.h)
 #include INC_API(kernelinterface.h)
@@ -159,13 +160,13 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
 {
     if (pgsize != size_4m) return;
     
-    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
-        if (cpu != current_cpu && space->data.cpu_ptab[cpu].top_pdir)
+    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
+        if (cpu != space->data.reference_ptab && space->data.cpu_ptab[cpu].top_pdir)
         {
-            //TRACEF("smp sync %d / %x -> %d / %x\n",
-	    //     current_cpu, space->pgent(idx(), current_cpu),
-	    //     cpu, space->pgent(idx(), cpu));
-            *space->pgent(idx(), cpu) = *space->pgent(idx(), current_cpu);
+            TRACE("smp sync %d / %x -> %d / %x\n",
+		  space->data.reference_ptab, space->pgent(idx(), space->data.reference_ptab),
+		  cpu, space->pgent(idx(), cpu));
+            *space->pgent(idx(), cpu) = *space->pgent(idx(), space->data.reference_ptab);
         }
 }
 
