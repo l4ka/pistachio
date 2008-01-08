@@ -389,13 +389,9 @@ void space_t::populate_copy_area (word_t n, tcb_t *tcb, space_t *partner, cpuid_
     {
 	pgent_t::pgsize_e pgsize = pgent_t::size_max;
 		    
-	pgent_t *src_pgent = partner->pgent(tcb->resources.copy_area_pdir_idx(n,0), 
-					    data.reference_ptab);
-	    
-	pgent_t *dst_pgent = pgent(page_table_index(pgsize, 
-						    (addr_t) (COPY_AREA_START + n * COPY_AREA_SIZE)),
-				   cpu);
-	    
+	pgent_t *src_pgent = partner->pgent(tcb->resources.copy_area_pdir_idx(n,0));
+	pgent_t *dst_pgent = pgent(page_table_index(pgsize, (addr_t) (COPY_AREA_START + n * COPY_AREA_SIZE)));
+	
 	    
 	for (word_t i=1; i < COPY_AREA_PDIRS; i++)
 	{

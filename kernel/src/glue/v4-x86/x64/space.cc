@@ -70,30 +70,30 @@ void pgent_t::smp_sync(space_t * space, pgsize_e pgsize)
     switch (pgsize)
     {
     case size_512g: 
-	for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+	for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
 	    if (cpu != space->data.reference_ptab && space->get_top_pdir(cpu))
 
 	    {
 		//TRACEF("smp sync pml4 %d / %x -> %d / %x\n",
-		//     space->data.reference_ptab, space->pgent(idx(), space->data.reference_ptab),
+		//     space->data.reference_ptab, space->pgent(idx()),
 		//     cpu, space->pgent(idx(), cpu));
-		*space->pgent(idx(), cpu) = *space->pgent(idx(), space->data.reference_ptab);
+		*space->pgent(idx(), cpu) = *space->pgent(idx());
 	    }
 	break;
     case size_1g: 
 	ASSERT(space->get_top_pdir()->get_kernel_pdp());
 	if (!is_cpulocal(space, size_1g) && 
-	    (this - idx() == space->get_top_pdir()->get_kernel_pdp_pgent()))
+	    (this - idx() == space->get_top_pdir(space->data.reference_ptab)->get_kernel_pdp_pgent()))
 	{
 	    ASSERT(space->get_top_pdir(space->data.reference_ptab)->get_kernel_pdp());
 	    
-	    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+	    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
 		if (cpu != space->data.reference_ptab && space->get_top_pdir(cpu) &&
 		    space->get_top_pdir(cpu)->get_kernel_pdp_pgent())
 		{
 		    //TRACEF("smp sync kernel pdp %x idx %d cpu %d cpulocal = %s\n", 
-		    //   this - idx(), idx(), cpu,
-		    //   (is_cpulocal(s, size_2m) ? "cpulocal" : "global"));
+		    // this - idx(), idx(), cpu, (is_cpulocal(space, size_2m) ? "cpulocal" : "global"));
+		    
 		    *space->get_top_pdir(cpu)->get_kernel_pdp_pgent()->next(space, size_2m, idx()) =
 			*space->get_top_pdir(space->data.reference_ptab)->get_kernel_pdp_pgent()->next(space, size_2m, idx());
 		}

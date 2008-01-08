@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     api/v4/ipcx.cc
  * Description:   Extended transfer of IPC
@@ -220,9 +220,9 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    dst_ptridx = 1;
 
 	    TRACEPOINT (IPC_STRING_ITEM, 
-			"IPC string item:  src_item=%p  dst_item=%p\n"
-			"  src: substrings=%d (idx=%d)  len=%p %s\n"
-			"  dst: substrings=%d (idx=%d)  len=%p %s\n",
+			"IPC string item:  src_item=%p  dst_item=%p"
+			"  src: substrings=%d (idx=%d)  len=%p %s"
+			"  dst: substrings=%d (idx=%d)  len=%p %s",
 			src_item.raw, dst_item.raw,
 			src_item.get_string_ptr_count (),
 			src_ptridx, src_len,
@@ -245,8 +245,8 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    while (! end_of_send_string)
 	    {
 		TRACEPOINT (IPC_STRING_ITEM, 
-			    "  src: addr=%p len=%p (idx=%d)\n"
-			    "  dst: addr=%p len=%p (idx=%d)\n",
+			    "  src: addr=%p len=%p (idx=%d)"
+			    "  dst: addr=%p len=%p (idx=%d)",
 			    src_addr, src_len, src_ptridx,
 			    dst_addr, dst_len, dst_ptridx);
 
