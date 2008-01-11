@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2008,  Karlsruhe University
  *                
  * File path:     api/v4/smp.cc
  * Description:   Multiprocessor handling for cross-processor 
@@ -75,6 +75,11 @@ void sync_entry_t::handle_sync_requests()
 void sync_xcpu_request(cpuid_t dstcpu, xcpu_handler_t handler, tcb_t * tcb, 
 		       word_t param0, word_t param1, word_t param2)
 {
+#if defined(CONFIG_DEBUG)
+    if (get_current_tcb() == get_kdebug_tcb())
+	// Avoid KDB deadlock
+	return;
+#endif
     sync_entry_t * entry = &sync_xcpu_entry[get_current_cpu()];
 
     entry->ack_mask = 0;
