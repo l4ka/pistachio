@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     generic/linear_ptab_walker.cc
  * Description:   Linear page table manipulation
@@ -1052,6 +1052,8 @@ bool space_t::lookup_mapping (addr_t vaddr, pgent_t ** r_pg,
 
     for (;;)
     {
+	if (!pg) 
+	    return false;
 	if (pg->is_valid (this, pgsize))
 	{
 	    if (pg->is_subtree (this, pgsize))
