@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.h
  * Description:   
@@ -84,18 +84,6 @@ public:
     void free_cpu_top_pdir(cpuid_t cpu = current_cpu);
     bool has_cpu_top_pdir(cpuid_t cpu = current_cpu);
     
-    bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg,
-			 pgent_t::pgsize_e *r_size, cpuid_t cpu = current_cpu);
-    bool readmem (addr_t vaddr, word_t * contents);
-    static word_t readmem_phys (addr_t paddr);
-
-    void release_kernel_mapping (addr_t vaddr, addr_t paddr, word_t log2size);
-
-    void flush_tlb (space_t * curspace);
-    void flush_tlbent (space_t * curspace, addr_t vaddr, word_t log2size);
-    static bool does_tlbflush_pay (word_t log2size)
-	{ return log2size >= 28; }
-
     /* user space access */
     u8_t get_from_user(addr_t);
 
@@ -110,6 +98,19 @@ public:
 		     bool writable, bool kernel, bool global, bool cacheable = true);
     void remap_area(addr_t vaddr, addr_t paddr, pgent_t::pgsize_e pgsize, 
 		    word_t len, bool writable, bool kernel, bool global);
+    bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg, pgent_t::pgsize_e *r_size, cpuid_t cpu);
+    bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg, pgent_t::pgsize_e *r_size)
+	{ return lookup_mapping(vaddr, r_pg, r_size, data.reference_ptab); }
+    void release_kernel_mapping (addr_t vaddr, addr_t paddr, word_t log2size);
+    
+    void flush_tlb (space_t * curspace);
+    void flush_tlbent (space_t * curspace, addr_t vaddr, word_t log2size);
+    static bool does_tlbflush_pay (word_t log2size)
+	{ return log2size >= 28; }
+    
+    bool readmem (addr_t vaddr, word_t * contents);
+    static word_t readmem_phys (addr_t paddr);
+
 
     /* kip and utcb handling */
     fpage_t get_kip_page_area()
