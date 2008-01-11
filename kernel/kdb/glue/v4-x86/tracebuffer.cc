@@ -186,8 +186,7 @@ public:
 	    for (word_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
 		old[cpu].tsc = old[cpu].pmc0 = old[cpu].pmc1 = 0;
 
-
-    
+   
 	    for (num = 0, index = start; count--; index++)
 	    {
 		if (index >= size) index = 0;
@@ -263,6 +262,7 @@ public:
 		static char tb_str[256];
 		word_t idx = 0;
 		char *src = (char*) rec->str, *dst = tb_str;
+		bool mapped = true;
 		
 		if (rec->is_kernel_event ())
 		{
@@ -313,8 +313,7 @@ public:
 		    char c;
 
 		    // Safely copy string into kernel
-
-		    while (readmem (space, p, &c) && (c != 0) && idx++ < (sizeof (tb_str) - 1))
+		    while ((mapped = readmem (space, p, &c)) && (c != 0) && idx++ < (sizeof (tb_str) - 1))
 		    {
 			*dst++ = c;
 			p = addr_offset (p, 1);
@@ -329,19 +328,19 @@ public:
 			    idx+=8;
 			    if (fid) *dst++ = '%';
 			}
-		    }
-		    // Turn '%s' into '%p' (i.e., avoid printing arbitrary
-		    // user strings).
-		    while (*dst != 0)
-			if (*dst++ == '%')
-			{
-			    while ((*dst >= '0' && *dst <= '9') || *dst == 'w' || *dst == 'l' || *dst == '.')
-				dst++;
-			    if (*dst == 's')
-				*dst = 'p';
-			}	
+			// Turn '%s' into '%p' (i.e., avoid printing arbitrary
+			// user strings).
+			if (( *dst == 's') &&
+			    ( *(dst-1) == '%' || 	
+			      ( *(dst-2) == '%' &&		      
+				((*(dst-1) >= '0' && *(dst-1) <= '9') 
+				 || *(dst-1) == 'w' || *(dst-1) == 'l' || *(dst-1) == '.'))))
+			    *dst = 'p';
 		    
-	    
+		    }
+		    
+		    if (!mapped) *dst++ = 0;
+		    
 		}	    
 		
 		tb_str[idx] = 0;
@@ -351,6 +350,9 @@ public:
 			rec->arg[3], rec->arg[4], 
 			rec->arg[5], rec->arg[6], 
 			rec->arg[7], rec->arg[8]);	
+
+		if (!mapped)
+		    printf("[###]");
 
 		// Append a newline and zero if needed and possible
 		idx = strlen(tb_str);
