@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/segdesc.h
  * Description:   
@@ -73,7 +73,7 @@ public:
 		asm("sgdt %0\n" : "=m"(descriptor));
 		break;
 	    case idtr:
-		asm("lidt %0\n" : "=m"(descriptor));
+		asm("sidt %0\n" : "=m"(descriptor));
 		break;
 	    default:
 		break;
