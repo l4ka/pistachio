@@ -425,14 +425,14 @@ template <word_t base>
 INLINE void local_apic_t<base>::broadcast_nmi(bool self)
 {
     command_reg_t reg;
-    reg.raw = read_reg(APIC_INTR_CMD1);
+    reg.raw = 0;
     reg.x.vector = 0;
     reg.x.delivery_mode = nmi;
+    reg.x.destination_mode = 1;
     reg.x.destination = 2 | (self ? 0 : 1);
-    reg.x.destination_mode = 0;
     reg.x.level = 1;
-    reg.x.trigger_mode = 1;
     write_reg(APIC_INTR_CMD1, reg.raw);
 }
+
 
 #endif /* !__ARCH__X86__APIC_H__ */
