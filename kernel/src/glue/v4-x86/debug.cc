@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/debug.cc
  * Description:   Debugging support
@@ -143,7 +143,6 @@ X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 	       frame->regs[x86_exceptionframe_t::ipreg], 
 	       frame->regs[x86_exceptionframe_t::freg]);
 
-    nmi_t().unmask();
     cpu_kdb.do_enter_kdebug(frame, X86_EXC_NMI);
 }    
 
