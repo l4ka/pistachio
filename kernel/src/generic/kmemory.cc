@@ -34,9 +34,6 @@
 #include <init.h>
 #include <kdb/tracepoints.h>
 #include <sync.h>
-#ifdef CONFIG_ARCH_MIPS64
-#include INC_PLAT(cache.h)
-#endif
 
 //#define DEBUG_KMEM
 
@@ -225,9 +222,6 @@ void * kmem_t::alloc(word_t size)
 
 #endif
 
-#ifdef CONFIG_ARCH_MIPS64
-		cache_t::flush_cache_all();
-#endif
 		spinlock.unlock();
 
 		return curr;
@@ -317,9 +311,6 @@ void * kmem_t::alloc_aligned(word_t size, word_t alignment, word_t mask)
 					    curr));
 #endif
 
-#ifdef CONFIG_ARCH_MIPS64
-		cache_t::flush_cache_all();
-#endif
 		spinlock.unlock();
 
 		return curr;
