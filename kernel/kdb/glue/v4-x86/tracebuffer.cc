@@ -39,6 +39,8 @@
 
 #if defined(CONFIG_TRACEBUFFER)
 
+FEATURESTRING ("tracebuffer");
+
 #define TB_WRAP	50
 extern void list_tp_choices (void);
 
@@ -186,6 +188,9 @@ public:
 	    for (word_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
 		old[cpu].tsc = old[cpu].pmc0 = old[cpu].pmc1 = 0;
 
+	    printf ("\nRecord P Type    TP %ws   TSC " IF_PERFMON (" PMC0  PMC1 ") "  Event\n", 
+		    "Thread");
+
    
 	    for (num = 0, index = start; count--; index++)
 	    {
@@ -198,6 +203,10 @@ public:
 		word_t cpu = rec->cpu;
 	
 		num++;
+		
+		if (((num % 4000) == 0) && get_choice ("Continue", "y/n", 'y') == 'n')
+		    break;
+
 
 		if (! old[cpu].tsc)
 		{
@@ -222,7 +231,9 @@ public:
 		printf ("%6d %01d %04x %c %3d %wt ", index, rec->cpu, rec->get_type 
 			(), rec->is_kernel_event () ? 'k' : 'u', rec->id, tid.get_raw ());
 
-		word_t tscdelta = rec->tsc - old[cpu].tsc;
+#define DELTA(cur, old)	((cur >= old) ? (cur - old) : cur + (~0UL - old))
+		
+		word_t tscdelta = DELTA(rec->tsc, old[cpu].tsc);
 		
 		if (tscdelta > 1000000)
 		    printf("%-4uM ", tscdelta / 1000000);
@@ -232,8 +243,8 @@ public:
 		    printf("%-5u ", tscdelta);
 		
 #if defined(CONFIG_TBUF_PERFMON)
-		word_t pmcdelta0 = rec->pmc0-old[cpu].pmc0;
-		word_t pmcdelta1 = rec->pmc1-old[cpu].pmc1;
+		word_t pmcdelta0 = DELTA(rec->pmc0, old[cpu].pmc0);
+		word_t pmcdelta1 = DELTA(rec->pmc1, old[cpu].pmc1);
 		
 		if (pmcdelta0 > 1000000)
 		    printf("%-4uM ", pmcdelta0 / 1000000);
@@ -249,15 +260,17 @@ public:
 		else
 		    printf("%-5u   ", pmcdelta1);
 
+		sum.pmc0 += pmcdelta0;
+		sum.pmc1 += pmcdelta1;
+		
+		old[cpu].pmc0 = rec->pmc0;
+		old[cpu].pmc1 = rec->pmc1;
+
 #endif
 		
 		sum.tsc  += (rec->tsc - old[cpu].tsc);
-		IF_PERFMON (sum.pmc0 += (rec->pmc0 - old[cpu].pmc0));
-		IF_PERFMON (sum.pmc1 += (rec->pmc1 - old[cpu].pmc1));
 
 		old[cpu].tsc = rec->tsc;
-		IF_PERFMON (old[cpu].pmc0 = rec->pmc0);
-		IF_PERFMON (old[cpu].pmc1 = rec->pmc1);
 
 		static char tb_str[256];
 		word_t idx = 0;
@@ -543,10 +556,7 @@ CMD (cmd_tb_dump, cg)
 	break;
     } 
 
-    printf ("\nRecord P  Type  TP   %ws Cyclecount "
-	    IF_PERFMON (" Perfctr0  Perfctr1 ")
-	    " Event\n", "Thread");
-    
+   
     tbuf_dumper.dump(start, count, size);
 	
     return CMD_NOQUIT;

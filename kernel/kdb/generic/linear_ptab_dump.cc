@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/generic/linear_ptab_dump.cc
  * Description:   Linear page table dump
@@ -65,7 +65,7 @@ CMD(cmd_dump_ptab, cg)
 
     space_t * space;
     addr_t vaddr;
-    word_t num;
+    word_t num, count;
     pgent_t * pg;
     pgent_t::pgsize_e size, max_size;
 
@@ -100,8 +100,13 @@ CMD(cmd_dump_ptab, cg)
 	pg = pg->next (space, size, page_table_index (size, vaddr));
    }
 
+    
     while (num > 0)
     {
+	
+	if (((++count % 4000) == 0) && get_choice ("Continue", "y/n", 'y') == 'n')
+	    break;
+
 	if (pg->is_valid (space, size))
 	{
 	    if (pg->is_subtree (space, size))
