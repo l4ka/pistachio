@@ -423,7 +423,7 @@ INLINE void local_apic_t<base>::send_nmi(u8_t apic_id)
 {
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-    ASSERT(reg.x.delivery_status == 0);
+    if (reg.x.delivery_status != 0) return;
 
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
@@ -444,7 +444,7 @@ INLINE void local_apic_t<base>::send_ipi(u8_t apic_id, u8_t vector)
 {
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-    ASSERT(reg.x.delivery_status == 0);
+    if (reg.x.delivery_status != 0) return;
 
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
@@ -459,7 +459,7 @@ INLINE void local_apic_t<base>::broadcast_ipi(u8_t vector, bool self)
 {
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-    ASSERT(reg.x.delivery_status == 0);
+    if (reg.x.delivery_status != 0) return;
     
     reg.raw = 0;
     reg.x.destination_mode = 1;
@@ -474,7 +474,7 @@ INLINE void local_apic_t<base>::broadcast_nmi(bool self)
 {
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-    ASSERT(reg.x.delivery_status == 0);
+    if (reg.x.delivery_status != 0) return;
     
     reg.raw = 0;
     reg.x.vector = 0;
