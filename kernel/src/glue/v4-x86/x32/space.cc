@@ -132,7 +132,7 @@ addr_t acpi_remap(addr_t addr)
     get_kernel_space()->add_mapping(
         addr_mask (vaddr, ~page_mask (ACPI_PGENTSZ)),
 	addr_mask (paddr, ~page_mask (ACPI_PGENTSZ)),
-	ACPI_PGENTSZ, true, true, false);
+	ACPI_PGENTSZ, true, true, false, false);
 
     vaddr = addr_offset(vaddr, page_size(ACPI_PGENTSZ));
     paddr = addr_offset(paddr, page_size(ACPI_PGENTSZ));
@@ -140,7 +140,7 @@ addr_t acpi_remap(addr_t addr)
     get_kernel_space()->add_mapping( 
 	addr_mask (vaddr, ~page_mask (ACPI_PGENTSZ)),
 	addr_mask (paddr, ~page_mask (ACPI_PGENTSZ)),
-	ACPI_PGENTSZ, true, true, false);
+	ACPI_PGENTSZ, true, true, false, false);
     
     x86_mmu_t::flush_tlb();
     

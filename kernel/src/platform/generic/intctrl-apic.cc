@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007, Karlsruhe University
+ * Copyright (C) 2002-2008, Karlsruhe University
  *                
  * File path:     platform/generic/intctrl-apic.cc
  * Description:   Implementation of APIC+IOAPIC intctrl (with ACPI)
@@ -80,6 +80,13 @@ EXC_INTERRUPT(spurious_interrupt_ioapic)
     printf("IO-APIC: spurious interrupt\n");
 }
 
+EXC_INTERRUPT(lapic_error_interrupt)
+{
+    printf("APIC: error interrupt, error %x\n", 
+	   intctrl_t::local_apic.read_error());
+    enter_kdebug("APIC error");
+
+}   
 
 typedef void(*hwirqfunc_t)();
 INLINE hwirqfunc_t get_interrupt_entry(word_t irq)
@@ -158,7 +165,7 @@ void intctrl_t::init_arch()
 	TRACE_INIT("\tAssuming local APIC defaults");
 	get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS_START),
 					addr_t(0xFEE00000),
-					APIC_PGENTSZ, true, true, true);
+					APIC_PGENTSZ, true, true, true, false);
 	
 	if (local_apic.version() >= 0x20)
 	    panic("no local APIC found--system unusable");
@@ -222,12 +229,13 @@ void intctrl_t::init_arch()
 	       _madt->local_apic_addr, APIC_MAPPINGS_START);
     get_kernel_space()->add_mapping(addr_t(APIC_MAPPINGS_START),
 				    addr_t(_madt->local_apic_addr),
-				    APIC_PGENTSZ, true, true, true);
+				    APIC_PGENTSZ, true, true, true, false);
 
     // reserve in KIP
     get_kip()->memory_info.insert(memdesc_t::reserved, 0, false,
 	addr_t(APIC_MAPPINGS_START), addr_t(APIC_MAPPINGS_START + X86_PAGE_SIZE));
 
+    x86_mmu_t::flush_tlb();
 
     /* local apic */
     {
@@ -443,6 +451,11 @@ void intctrl_t::init_local_apic()
 #if defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_C2)
     local_apic.mask(local_apic_t<APIC_MAPPINGS_START>::lvt_thermal_monitor);
 #endif
+    
+    TRACE_INIT("\tlocal APIC error trap gate %d \n", IDT_LAPIC_ERROR);
+    idt.add_int_gate(IDT_LAPIC_ERROR, lapic_error_interrupt);
+    local_apic.error_setup(IDT_LAPIC_ERROR);
+
     
 
 }

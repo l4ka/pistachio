@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/config.h
  * Description:   configuration of IA32 architecture
@@ -183,8 +183,9 @@
 #define IDT_LAPIC_TIMER		0x40
 #define IDT_LAPIC_THERMAL	0x41
 #define IDT_LAPIC_XCPU_IPI	0x42
+#define IDT_LAPIC_ERROR		0x43
 #define IDT_IOAPIC_SPURIOUS	0xfb
-#define IDT_IOAPIC_BASE		0x40
+#define IDT_IOAPIC_BASE		0x44
 #define IDT_IOAPIC_MAX		0xf0
 
 /* Page size for APIC and ACPI mappings */

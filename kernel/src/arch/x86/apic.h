@@ -169,6 +169,24 @@ private:
 	    } x;
 	};
     };
+    
+    class esr_reg_t
+    {
+    public:
+	union {
+	    u32_t raw;
+	    struct {
+		u32_t tx_csum		: 1;
+		u32_t rx_csum		: 1;
+		u32_t tx_accept		: 1;
+		u32_t rx_accept		: 1;
+		u32_t tx_illegal_vector	: 1;
+		u32_t rx_illegal_vector : 1;
+		u32_t illegal_reg	: 1;
+		u32_t reserved		: 25;
+	    } x;
+	};
+    };
 
     void set_prio(regno_t reg, u8_t prio, u8_t subprio)
 	{
@@ -233,7 +251,8 @@ public:
     bool set_vector(lvt_t lvt, delivery_mode_t del_mode,
 		    pin_polarity_t polarity,
 		    trigger_mode_t trigger_mode);
-
+    
+    
 public:
     /* Timer handling */
     u32_t timer_get() {
@@ -299,6 +318,22 @@ public:
     void send_ipi(u8_t apic_id, u8_t vector);
     void broadcast_ipi(u8_t vector, bool self = false);
     void broadcast_nmi(bool self = false);
+    
+
+public:
+    /* Error handling */
+    void error_setup(u8_t irq) 
+	{
+	    write_reg((regno_t) APIC_LVT_ERROR,  irq);
+	    write_reg((regno_t) APIC_ERR_STATUS, 0);
+	    write_reg((regno_t) APIC_ERR_STATUS, 0);
+	}
+    
+    word_t read_error()
+	{
+	    write_reg((regno_t) APIC_ERR_STATUS, 0);
+	    return read_reg((regno_t) APIC_ERR_STATUS);  
+	}
 };
 
 
@@ -339,7 +374,7 @@ INLINE bool local_apic_t<base>::disable()
     spurious_int_vector_reg_t svr;
     svr.raw = read_reg(APIC_SVR);
     bool enabled = svr.x.enabled;
-    svr.x.enabled = 0;
+    svr.x.enabled = 0; 
     write_reg(APIC_SVR, svr.raw);
     return enabled;
 }
@@ -347,15 +382,12 @@ INLINE bool local_apic_t<base>::disable()
 template <word_t base>
 INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_func)(void))
 {
-    //ASSERT(((word_t)startup & ~X86_PAGE_MASK) == 0);
-    //ASSERT(((word_t)startup >> (X86_PAGE_BITS + 8)) == 0);
-
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
-	// the startup-address of the receiving processor is
-	// 0x000VV000, where VV is sent with the SIPI.
+    // the startup-address of the receiving processor is
+    // 0x000VV000, where VV is sent with the SIPI.
     word_t startup_vector = (word_t) startup_func;
     reg.x.vector = ((u32_t)startup_vector) >> 12 & 0xff; ;
     reg.x.delivery_mode = startup;
@@ -364,30 +396,37 @@ INLINE void local_apic_t<base>::send_startup_ipi(u8_t apic_id, void(*startup_fun
     reg.x.level = 0;
     reg.x.trigger_mode = 0;
     write_reg(APIC_INTR_CMD1, reg.raw);
+    
 }
 
 template <word_t base>
 INLINE void local_apic_t<base>::send_init_ipi(u8_t apic_id, bool assert)
 {
+
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
     command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
+    
     reg.x.vector = 0;
     reg.x.delivery_mode = init;
     reg.x.destination_mode = 0;
     reg.x.destination = 0;
     reg.x.level = assert ? 1 : 0;
     reg.x.trigger_mode = 1;
-    write_reg(APIC_INTR_CMD1, reg.raw);
+    write_reg((regno_t) (APIC_INTR_CMD1), reg.raw);
+
 }
 
 template <word_t base>
 INLINE void local_apic_t<base>::send_nmi(u8_t apic_id)
 {
+    command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    ASSERT(reg.x.delivery_status == 0);
+
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
-    command_reg_t reg;
     reg.raw = read_reg(APIC_INTR_CMD1);
     reg.x.vector = 0;
     reg.x.delivery_mode = nmi;
@@ -396,25 +435,34 @@ INLINE void local_apic_t<base>::send_nmi(u8_t apic_id)
     reg.x.level = 1;
     reg.x.trigger_mode = 1;
     write_reg(APIC_INTR_CMD1, reg.raw);
+    
 }
 
 
 template <word_t base>
 INLINE void local_apic_t<base>::send_ipi(u8_t apic_id, u8_t vector)
 {
+    command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    ASSERT(reg.x.delivery_status == 0);
+
     // destination
     write_reg(APIC_INTR_CMD2, ((word_t)apic_id) << (56 - 32));
-    command_reg_t reg;
     reg.raw = 0;
     reg.x.vector = vector;
     write_reg(APIC_INTR_CMD1, reg.raw);
+ 
 }
 
 template <word_t base>
 INLINE void local_apic_t<base>::broadcast_ipi(u8_t vector, bool self)
 {
     command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    ASSERT(reg.x.delivery_status == 0);
+    
     reg.raw = 0;
+    reg.x.destination_mode = 1;
     reg.x.destination = 2 | (self ? 0 : 1);
     reg.x.vector = vector;
     write_reg(APIC_INTR_CMD1, reg.raw);
@@ -425,6 +473,9 @@ template <word_t base>
 INLINE void local_apic_t<base>::broadcast_nmi(bool self)
 {
     command_reg_t reg;
+    reg.raw = read_reg(APIC_INTR_CMD1);
+    ASSERT(reg.x.delivery_status == 0);
+    
     reg.raw = 0;
     reg.x.vector = 0;
     reg.x.delivery_mode = nmi;
@@ -432,7 +483,7 @@ INLINE void local_apic_t<base>::broadcast_nmi(bool self)
     reg.x.destination = 2 | (self ? 0 : 1);
     reg.x.level = 1;
     write_reg(APIC_INTR_CMD1, reg.raw);
+   
 }
-
 
 #endif /* !__ARCH__X86__APIC_H__ */

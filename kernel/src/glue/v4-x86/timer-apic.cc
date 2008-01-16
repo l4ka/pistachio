@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/timer-apic.cc
  * Description:   implementation of apic timer
@@ -43,11 +43,7 @@ timer_t timer UNIT("cpulocal");
 static local_apic_t<APIC_MAPPINGS_START> local_apic;
 
 extern "C" void timer_interrupt(void);
-#if defined(CONFIG_IS_64BIT)
 X86_EXCNO_ERRORCODE(timer_interrupt, 0)
-#else
-X86_EXCNO_ERRORCODE(timer_interrupt, 0)
-#endif
 {
     local_apic.EOI();
 
