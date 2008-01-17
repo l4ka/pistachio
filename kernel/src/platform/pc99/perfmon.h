@@ -3,7 +3,7 @@
  * Copyright (C) 2006-2008,  Karlsruhe University
  *                
  * File path:     platform/pc99/perfmon.h
- * Description:   Performance monitoring counter macros for IA32/AMD64 CPUS.
+ * Description:   Performance monitoring counter macros for x86 CPUS.
  *                
  * @LICENSE@
  *                
@@ -37,7 +37,7 @@
 #define X86_MSR_PMC_EVTSEL0		       0xC0010000      /* Performance EVT0 */
 #define X86_MSR_PMC_EVTSEL1		       0xC0010001      /* Performance EVT1 */
 #define X86_MSR_PMC_EVTSEL2		       0xC0010002      /* Performance EVT2 */
-#define X86_MSR_PMC_EVTSEL3                0xC0010003      /* Performance EVT3 */
+#define X86_MSR_PMC_EVTSEL3		       0xC0010003      /* Performance EVT3 */
 
 #define X86_MSR_PMC_CTR0		       0xC0010004      /* Performance CTR0 */
 #define X86_MSR_PMC_CTR1		       0xC0010005      /* Performance CTR1 */
@@ -51,83 +51,65 @@
 #elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
 
 #define X86_MSR_PMC_BASE			0x300
-#define X86_MSR_PMC_CTR_NO(addr)		(addr - AMD64_MRS_PMC_BASE) 
+#define X86_MSR_PMC_CTR_NO(addr)		(addr - X86_X64_MRS_PMC_BASE) 
 
 #define X86_MSR_PMC_BPU_COUNTER(x)		(0x300 + x) 
 #define X86_MSR_PMC_MS_COUNTER(x)		(0x304 + x) 
-#define X86_MSR_PMC_FLAME_COUNTER(x)	(0x308 + x) 
+#define X86_MSR_PMC_FLAME_COUNTER(x)		(0x308 + x) 
 #define X86_MSR_PMC_IQ_COUNTER(x)		(0x30C + x) 
 
-#define X86_MSR_PMC_BPU_CCCR(x)		(0x360 + x) 
-#define X86_MSR_PMC_MS_CCCR(x)		(0x364 + x) 
+#define X86_MSR_PMC_BPU_CCCR(x)			(0x360 + x) 
+#define X86_MSR_PMC_MS_CCCR(x)		        (0x364 + x) 
 #define X86_MSR_PMC_FLAME_CCCR(x)		(0x368 + x) 
-#define X86_MSR_PMC_IQ_CCCR(x)		(0x36C + x) 
+#define X86_MSR_PMC_IQ_CCCR(x)			(0x36C + x) 
 
-#define X86_MSR_PMC_BSU_ESCR0    		0x3A0 
-#define X86_MSR_PMC_BSU_ESCR1    		0x3A1 
-#define X86_MSR_PMC_FSB_ESCR0    		0x3A2 
-#define X86_MSR_PMC_FSB_ESCR1    		0x3A3 
-#define X86_MSR_PMC_FIRM_ESCR0   		0x3A4 
-#define X86_MSR_PMC_FIRM_ESCR1   		0x3A5 
-#define X86_MSR_PMC_FLAME_ESCR0  		0x3A6 
-#define X86_MSR_PMC_FLAME_ESCR1  		0x3A7 
-#define X86_MSR_PMC_DAC_ESCR0    		0x3A8 
-#define X86_MSR_PMC_DAC_ESCR1    		0x3A9 
-#define X86_MSR_PMC_MOB_ESCR0    		0x3AA 
-#define X86_MSR_PMC_MOB_ESCR1    		0x3AB 
-#define X86_MSR_PMC_PMH_ESCR0    		0x3AC 
-#define X86_MSR_PMC_PMH_ESCR1    		0x3AD 
-#define X86_MSR_PMC_SAAT_ESCR0   		0x3AE 
-#define X86_MSR_PMC_SAAT_ESCR1   		0x3AF 
-#define X86_MSR_PMC_U2L_ESCR0    		0x3B0 
-#define X86_MSR_PMC_U2L_ESCR1    		0x3B1 
-#define X86_MSR_PMC_BPU_ESCR0    		0x3B2 
-#define X86_MSR_PMC_BPU_ESCR1     		0x3B3
-#define X86_MSR_PMC_IS_ESCR0   		0x3B4
-#define X86_MSR_PMC_IS_ESCR1   		0x3B5
-#define X86_MSR_PMC_ITLB_ESCR0    		0x3B6
-#define X86_MSR_PMC_ITLB_ESCR1    		0x3B7
-#define X86_MSR_PMC_CRU_ESCR0 		0x3B8
-#define X86_MSR_PMC_CRU_ESCR1 	  	0x3B9
-#define X86_MSR_PMC_IQ_ESCR0	  	0x3BA
-#define X86_MSR_PMC_IQ_ESCR1	  	0x3BB
-#define X86_MSR_PMC_RAT_ESCR0 	  	0x3BC
-#define X86_MSR_PMC_RAT_ESCR1 	  	0x3BD
-#define X86_MSR_PMC_SSU_ESCR0 	  	0x3BE
-#define X86_MSR_PMC_MS_ESCR0 	  	0x3C0
-#define X86_MSR_PMC_MS_ESCR1 	  	0x3C1
-#define X86_MSR_PMC_TBPU_ESCR0    		0x3C2
-#define X86_MSR_PMC_TBPU_ESCR1    		0x3C3
-#define X86_MSR_PMC_TC_ESCR0 	  	0x3C4
-#define X86_MSR_PMC_TC_ESCR1            	0x3C5
-#define X86_MSR_PMC_IX_ESCR0 		0x3C8
-#define X86_MSR_PMC_IX_ESCR1 		0x3C9
-#define X86_MSR_PMC_ALF_ESCR0 		0x3CA
-#define X86_MSR_PMC_ALF_ESCR1 		0x3CB
-#define X86_MSR_PMC_CRU_ESCR2 		0x3CC
-#define X86_MSR_PMC_CRU_ESCR3 	 	0x3CD
-#define X86_MSR_PMC_CRU_ESCR4 	 	0x3E0
-#define X86_MSR_PMC_CRU_ESCR5 	 	0x3E1
-#define X86_MSR_PMC_TC_PRECISE_EVENT 	0x3FO
+#define X86_MSR_PMC_BSU_ESCR(x)    		(0x3A0 + x) 
+#define X86_MSR_PMC_FSB_ESCR(x)    		(0x3A2 + x)
+#define X86_MSR_PMC_FIRM_ESCR(x)   		(0x3A4 + x) 
+#define X86_MSR_PMC_FLAME_ESCR(x)  		(0x3A6 + x) 
+#define X86_MSR_PMC_DAC_ESCR(x)    		(0x3A8 + x) 
+#define X86_MSR_PMC_MOB_ESCR(x)    		(0x3AA + x) 
+#define X86_MSR_PMC_PMH_ESCR(x)    		(0x3AC + x) 
+#define X86_MSR_PMC_SAAT_ESCR(x)   		(0x3AE + x) 
+#define X86_MSR_PMC_U2L_ESCR(x)    		(0x3B0 + x) 
+#define X86_MSR_PMC_BPU_ESCR(x)    		(0x3B2 + x) 
+#define X86_MSR_PMC_IS_ESCR(x)   		(0x3B4 + x)
+#define X86_MSR_PMC_ITLB_ESCR(x)    		(0x3B6 + x)
+#define X86_MSR_PMC_IQ_ESCR(x)			(0x3BA + x)
+#define X86_MSR_PMC_RAT_ESCR(x) 	  	(0x3BC + x)
+#define X86_MSR_PMC_SSU_ESCR(x) 	  	(0x3BE + x)
+#define X86_MSR_PMC_MS_ESCR(x)			(0x3C0 + x)
+#define X86_MSR_PMC_TBPU_ESCR(x)    		(0x3C2 + x)
+#define X86_MSR_PMC_TC_ESCR(x)			(0x3C4 + x)
+#define X86_MSR_PMC_IX_ESCR(x)			(0x3C8 + x)
+#define X86_MSR_PMC_ALF_ESCR(x) 		(0x3CA + x)
 
-#define X86_MSR_PMC_BPU_CTR_BSU_ESCR	7
-#define X86_MSR_PMC_BPU_CTR_FSB_ESCR	6
-#define X86_MSR_PMC_BPU_CTR_MOB_ESCR	2
-#define X86_MSR_PMC_BPU_CTR_PMH_ESCR	4
-#define X86_MSR_PMC_BPU_CTR_BPU_ESCR	0
+#define X86_MSR_PMC_CRU_ESCR0			0x3B8
+#define X86_MSR_PMC_CRU_ESCR1			0x3B9
+#define X86_MSR_PMC_CRU_ESCR2			0x3CC
+#define X86_MSR_PMC_CRU_ESCR3			0x3CD
+#define X86_MSR_PMC_CRU_ESCR4			0x3E0
+#define X86_MSR_PMC_CRU_ESCR5			0x3E1
+#define X86_MSR_PMC_TC_PRECISE_EVENT		0x3F0
+
+#define X86_MSR_PMC_BPU_CTR_BSU_ESCR		7
+#define X86_MSR_PMC_BPU_CTR_FSB_ESCR		6
+#define X86_MSR_PMC_BPU_CTR_MOB_ESCR		2
+#define X86_MSR_PMC_BPU_CTR_PMH_ESCR		4
+#define X86_MSR_PMC_BPU_CTR_BPU_ESCR		0
 #define X86_MSR_PMC_BPU_CTR_IS_ESCR		1
-#define X86_MSR_PMC_BPU_CTR_ITLB_ESCR	3
+#define X86_MSR_PMC_BPU_CTR_ITLB_ESCR		3
 #define X86_MSR_PMC_BPU_CTR_IX_ESCR		5
 
 #define X86_MSR_PMC_MS_CTR_MS_ESCR		0
-#define X86_MSR_PMC_MS_CTR_TBPU_ESCR	2
+#define X86_MSR_PMC_MS_CTR_TBPU_ESCR		2
 #define X86_MSR_PMC_MS_CTR_TC_ESCR		1
 
-#define X86_MSR_PMC_FLAME_CTR_FIRM_ESCR	1
+#define X86_MSR_PMC_FLAME_CTR_FIRM_ESCR		1
 #define X86_MSR_PMC_FLAME_CTR_FLAME_ESCR	0
-#define X86_MSR_PMC_FLAME_CTR_DAC_ESCR	5
-#define X86_MSR_PMC_FLAME_CTR_SAAT_ESCR	2
-#define X86_MSR_PMC_FLAME_CTR_U2L_ESCR	3
+#define X86_MSR_PMC_FLAME_CTR_DAC_ESCR		5
+#define X86_MSR_PMC_FLAME_CTR_SAAT_ESCR		2
+#define X86_MSR_PMC_FLAME_CTR_U2L_ESCR		3
 
 #define X86_MSR_PMC_IQ_CTR_CRU_ESCR01	4
 #define X86_MSR_PMC_IQ_CTR_CRU_ESCR23	5
@@ -193,7 +175,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
 
      x86_cr4_set(X86_CR4_PCE); // allow rdpmc in user mode
      
-#endif
+#endif /* CONFIG_CPU_X86_P4 */
  
 }
 
