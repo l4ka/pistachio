@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006-2007,  Karlsruhe University
+ * Copyright (C) 2006-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/x32comp/thread.h
  * Description:   thread ids for Compatibility Mode
@@ -29,8 +29,8 @@
  * $Id: thread.h,v 1.2 2006/10/20 14:46:44 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_X86__X64__IA32__THREAD_H__
-#define __GLUE__V4_X86__X64__IA32__THREAD_H__
+#ifndef __GLUE__V4_X86__X64__X32COMP__THREAD_H__
+#define __GLUE__V4_X86__X64__X32COMP__THREAD_H__
 
 #include <debug.h>
 
@@ -92,4 +92,5 @@ INLINE threadid_t threadid(x32::threadid_t id)
 #undef TID_LOCAL_ID_BITS
 
 
-#endif /* !__GLUE__V4_X86__X64__IA32__THREAD_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__THREAD_H__ */

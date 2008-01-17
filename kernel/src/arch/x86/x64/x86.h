@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/x86.h
  * Description:   X86-64 CPU Specific constants
@@ -40,38 +40,38 @@
  **********************************************************************/
 
 /* Sign extend 63..48 */
-#define AMD64_SIGN_EXTEND_BITS   48
-#define AMD64_SIGN_EXTEND_SIZE   (X86_64BIT_ONE << AMD64_SIGN_EXTEND_BITS)
-#define AMD64_SIGN_EXTEND_MASK   (~(AMD64_SIGN_EXTEND_SIZE - 1))
-#define AMD64_SIGN_EXTENSION	 (~(AMD64_SIGN_EXTEND_SIZE - 1))
+#define X86_X64_SIGN_EXTEND_BITS	48
+#define X86_X64_SIGN_EXTEND_SIZE	(X86_64BIT_ONE << X86_X64_SIGN_EXTEND_BITS)
+#define X86_X64_SIGN_EXTEND_MASK	(~(X86_X64_SIGN_EXTEND_SIZE - 1))
+#define X86_X64_SIGN_EXTENSION		(~(X86_X64_SIGN_EXTEND_SIZE - 1))
 
 /* Page map 47.. 39 */
-#define AMD64_PML4_BITS		39
-#define AMD64_PML4_SIZE         (X86_64BIT_ONE << AMD64_PML4_BITS)
-#define AMD64_PML4_MASK         ((~(AMD64_PML4_SIZE - 1)) ^ (~(AMD64_SIGN_EXTEND_SIZE - 1)))
-#define AMD64_PML4_IDX(x)	((x & AMD64_PML4_MASK) >> AMD64_PML4_BITS)
+#define X86_X64_PML4_BITS		39
+#define X86_X64_PML4_SIZE		(X86_64BIT_ONE << X86_X64_PML4_BITS)
+#define X86_X64_PML4_MASK		((~(X86_X64_PML4_SIZE - 1)) ^ (~(X86_X64_SIGN_EXTEND_SIZE - 1)))
+#define X86_X64_PML4_IDX(x)		((x & X86_X64_PML4_MASK) >> X86_X64_PML4_BITS)
 
 /* Page directory pointer 38..30 */
-#define AMD64_PDP_BITS           30
-#define AMD64_PDP_SIZE           (X86_64BIT_ONE << AMD64_PDP_BITS)
-#define AMD64_PDP_MASK           ((~(AMD64_PDP_SIZE - 1))  ^ (~(AMD64_PML4_SIZE - 1)))
-#define AMD64_PDP_IDX(x)	 ((x & AMD64_PDP_MASK) >> AMD64_PDP_BITS)
+#define X86_X64_PDP_BITS		30
+#define X86_X64_PDP_SIZE		(X86_64BIT_ONE << X86_X64_PDP_BITS)
+#define X86_X64_PDP_MASK		((~(X86_X64_PDP_SIZE - 1))  ^ (~(X86_X64_PML4_SIZE - 1)))
+#define X86_X64_PDP_IDX(x)		((x & X86_X64_PDP_MASK) >> X86_X64_PDP_BITS)
 
 /* Page directory 29..21 */
-#define AMD64_PDIR_BITS         21
-#define AMD64_PDIR_SIZE         (X86_64BIT_ONE << AMD64_PDIR_BITS)
-#define AMD64_PDIR_MASK         ((~(AMD64_PDIR_SIZE - 1))  ^ (~(AMD64_PDP_SIZE - 1)))
-#define AMD64_PDIR_IDX(x)	((x & AMD64_PDIR_MASK) >> AMD64_PDIR_BITS)
+#define X86_X64_PDIR_BITS		21
+#define X86_X64_PDIR_SIZE		(X86_64BIT_ONE << X86_X64_PDIR_BITS)
+#define X86_X64_PDIR_MASK		((~(X86_X64_PDIR_SIZE - 1))  ^ (~(X86_X64_PDP_SIZE - 1)))
+#define X86_X64_PDIR_IDX(x)		((x & X86_X64_PDIR_MASK) >> X86_X64_PDIR_BITS)
 
 /* Pagetable 20..12  */
-#define AMD64_PTAB_BITS          12
-#define AMD64_PTAB_SIZE          (X86_64BIT_ONE << AMD64_PTAB_BITS)
-#define AMD64_PTAB_MASK          ((~(AMD64_PTAB_SIZE - 1))  ^ (~(AMD64_PTAB_SIZE - 1)))
-#define AMD64_PTAB_IDX(x)        ((x & AMD64_PTAB_MASK) >> AMD64_PTAB_BITS)
+#define X86_X64_PTAB_BITS		12
+#define X86_X64_PTAB_SIZE		(X86_64BIT_ONE << X86_X64_PTAB_BITS)
+#define X86_X64_PTAB_MASK		((~(X86_X64_PTAB_SIZE - 1))  ^ (~(X86_X64_PTAB_SIZE - 1)))
+#define X86_X64_PTAB_IDX(x)		((x & X86_X64_PTAB_MASK) >> X86_X64_PTAB_BITS)
 
 
-#define X86_PAGE_CPULOCAL       (1<<9)
-#define X86_PAGE_NX		(1<<63)
+#define X86_PAGE_CPULOCAL		(1<<9)
+#define X86_PAGE_NX			(1<<63)
 
 /**
  * 
@@ -79,15 +79,10 @@
  */
 
 /* Normal pagetable entry 11..0  */
-#define AMD64_PTE_BITS			12
-#define AMD64_PTE_SIZE			(X86_64BIT_ONE << AMD64_PTE_BITS) 
-#define AMD64_PTE_MASK			(~(AMD64_PTE_SIZE - 1))
-#define AMD64_PTE_FLAGS_MASK		(0x0e3f)
-
-/* pagefault error code bits */
-#define AMD64_PF_RW	(1 << 1)	/* Pagefault on read/write	*/
-#define AMD64_PF_US	(1 << 2)	/* Pagefault in user/kernel	*/
-#define AMD64_PF_ID	(1 << 4)	/* Pagefault on insn./data	*/
+#define X86_X64_PTE_BITS			12
+#define X86_X64_PTE_SIZE			(X86_64BIT_ONE << X86_X64_PTE_BITS) 
+#define X86_X64_PTE_MASK			(~(X86_X64_PTE_SIZE - 1))
+#define X86_X64_PTE_FLAGS_MASK		(0x0e3f)
 
 /* 2 MByte (Super-) Pages 20..0  */
 #define X86_SUPERPAGE_BITS		21
@@ -97,67 +92,42 @@
 
 #define X86_PAGE_FLAGS_MASK		(0x0fff)
 
-#define X86_PAGEFAULT_BITS		(AMD64_PF_RW | AMD64_PF_ID)
+#define X86_TOP_PDIR_BITS		X86_X64_PML4_BITS
+#define X86_TOP_PDIR_SIZE		X86_X64_PML4_SIZE
+#define X86_TOP_PDIR_IDX(x)		X86_X64_PML4_IDX(x)
 
-#define X86_TOP_PDIR_BITS		AMD64_PML4_BITS
-#define X86_TOP_PDIR_SIZE		AMD64_PML4_SIZE
-#define X86_TOP_PDIR_IDX(x)		AMD64_PML4_IDX(x)
-
-
-/**********************************************************************
- *    CPU features (CPUID)  
- **********************************************************************/
-
-/* extended feature register (EFER) bits */
-#define AMD64_EFER_SCE  (1 <<  0)       /* system call extensions       */
-#define AMD64_EFER_LME  (1 <<  8)       /* long mode enabled            */
-#define AMD64_EFER_LMA  (1 << 10)       /* long mode active             */
-#define AMD64_EFER_NXE  (1 << 11)       /* nx bit enable                */
+#define X86_PAGEFAULT_BITS		(X86_PFAULT_RW | X86_PFAULT_ID)
 
 /**********************************************************************
  * Model specific register locations.
  **********************************************************************/
 
-#define AMD64_MCG_CAP_MSR               0x0179  /* Machine Check Global Capabilities */
-#define AMD64_MCG_STATUS_MSR            0x0179  /* Machine Check Global Status  */
-#define AMD64_MCG_CTL_MSR               0x0179  /* Machine Check Global Control  */
+#define X86_X64_MSR_MCG_CAP			0x0179  /* Machine Check Global Capabilities */
+#define X86_X64_MSR_MCG_STATUS			0x0179  /* Machine Check Global Status  */
+#define X86_X64_MSR_MCG_CTL			0x0179  /* Machine Check Global Control  */
 
-#define AMD64_DEBUGCTL_MSR              0x01d9  /* Debug-Control  */
+#define X86_X64_MSR_MC0_MISC			0x0403  /* Machine Check Error Information */
+#define X86_X64_MSR_MC1_MISC			0x0407  /* Machine Check Error Information */
+#define X86_X64_MSR_MC2_MISC			0x040b  /* Machine Check Error Information */
+#define X86_X64_MSR_MC3_MISC			0x040f  /* Machine Check Error Information */
 
-#define AMD64_MC0_MISC_MSR              0x0403  /* Machine Check Error Information */
-#define AMD64_MC1_MISC_MSR              0x0407  /* Machine Check Error Information */
-#define AMD64_MC2_MISC_MSR              0x040b  /* Machine Check Error Information */
-#define AMD64_MC3_MISC_MSR              0x040f  /* Machine Check Error Information */
-
-
-#define AMD64_EFER_MSR                  0xC0000080      /* Extended Features */
-#define AMD64_STAR_MSR                  0xC0000081      /* SYSCALL/RET CS,
+#define X86_X64_MSR_STAR			0xC0000081      /* SYSCALL/RET CS,
 							 * SYSCALL EIP (legacy) */
-#define AMD64_LSTAR_MSR                 0xC0000082      /* SYSCALL RIP (long) */
-#define AMD64_CSTAR_MSR                 0xC0000083      /* SYSCALL RIP (comp) */
-#define AMD64_SFMASK_MSR                0xC0000084      /* SYSCALL flag mask */
+#define X86_X64_MSR_LSTAR			0xC0000082      /* SYSCALL RIP (long) */
+#define X86_X64_MSR_CSTAR			0xC0000083      /* SYSCALL RIP (comp) */
+#define X86_X64_MSR_SFMASK			0xC0000084      /* SYSCALL flag mask */
 
-#define AMD64_FS_MSR                    0xC0000100      /* FS Register */
-#define AMD64_GS_MSR                    0xC0000101      /* GS Register */
-#define AMD64_KRNL_GS_MSR               0xC0000102      /* Kernel GS Swap  */
-#define KERNEL_VERSION_VER              KERNEL_VERSION_CPU_AMD64
 
-#define AMD64_PERFCTR0                  0x0c1
-#define AMD64_PERFCTR1                  0x0c2
-#define AMD64_EVENTSEL0                 0x186
-#define AMD64_EVENTSEL1                 0x187
-#define AMD64_LASTBRANCHFROMIP          0x1db
-#define AMD64_LASTBRANCHTOIP            0x1dc
-#define AMD64_LASTINTFROMIP             0x1dd
-#define AMD64_LASTINTTOIP               0x1de
-#define AMD64_MTRRBASE(x)               (0x200 + 2*(x) + 0)
-#define AMD64_MTRRMASK(x)               (0x200 + 2*(x) + 1)
+#define X86_X64_MSR_FS				0xC0000100      /* FS Register */
+#define X86_X64_MSR_GS				0xC0000101      /* GS Register */
+#define X86_X64_MSR_KRNL_GS			0xC0000102      /* Kernel GS Swap  */
+
 
 /**********************************************************************
  *   Cache line configurations
  **********************************************************************/
 
-#define AMD64_CACHE_LINE_SIZE          64
+#define X86_X64_CACHE_LINE_SIZE          64
 
 
 #endif /* !__ARCH__X86__X64__X86_H__ */

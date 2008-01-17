@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/ia32/types.h
+ * File path:     glue/v4-x86/x64/x32comp/types.h
  * Description:   types for Compatibility Mode
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
  * $Id: types.h,v 1.2 2006/10/20 16:18:38 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE_V4_X86__X64__IA32__TYPES_H__
-#define __GLUE_V4_X86__X64__IA32__TYPES_H__
+#ifndef __GLUE__V4_X86__X64__X32COMP__TYPES_H__
+#define __GLUE__V4_X86__X64__X32COMP__TYPES_H__
 
 #include INC_API(types.h)
 
@@ -77,4 +77,5 @@ INLINE timeout_t timeout(x32::timeout_t t)
 
 #undef TIME_BITS_WORD
 
-#endif /* !__GLUE_V4_X86__X64__IA32__TYPES_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__TYPES_H__ */

@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2006, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/ia32/user.h
+ * File path:     glue/v4-x86/x64/x32comp/user.h
  * Description:   user system calls for Compatibility Mode
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,8 @@
  * $Id: user.h,v 1.1 2006/10/20 17:32:57 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __API__GLUE_V4_X86__X64__IA32__USER_H__
-#define __API__GLUE_V4_X86__X64__IA32__USER_H__
+#ifndef __GLUE__V4_X86__X64__X32COMP__USER_H__
+#define __GLUE__V4_X86__X64__X32COMP__USER_H__
 
 extern "C" void SECTION(".user.syscall_32.ipc") user_ipc_32();
 extern "C" void SECTION(".user.syscall_32.lipc") user_lipc_32();
@@ -44,4 +44,4 @@ extern "C" void SECTION(".user.syscall_32.spacectrl") user_space_control_32();
 extern "C" void SECTION(".user.syscall_32.procctrl") user_processor_control_32();
 extern "C" void SECTION(".user.syscall_32.memctrl") user_memory_control_32();
 
-#endif /* !__API__GLUE_V4_X86__X64__IA32__USER_H__ */
+#endif /* !__GLUE__V4_X86__X64__X32COMP__USER_H__ */

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/space.h
  * Description:   ia32-specific space implementation
@@ -80,10 +80,10 @@ public:
 	union {
 	    pgent_t pgent[1024];
 	    struct {
-		x86_pgent_t user[USER_AREA_END >> IA32_PDIR_BITS];
-		x86_pgent_t small[SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS];
-		x86_pgent_t copy_area[COPY_AREA_COUNT][COPY_AREA_SIZE >> IA32_PDIR_BITS];
-		x86_pgent_t readmem_area[MEMREAD_AREA_SIZE >> IA32_PDIR_BITS];
+		x86_pgent_t user[USER_AREA_END >> X86_X32_PDIR_BITS];
+		x86_pgent_t small[SMALLSPACE_AREA_SIZE >> X86_X32_PDIR_BITS];
+		x86_pgent_t copy_area[COPY_AREA_COUNT][COPY_AREA_SIZE >> X86_X32_PDIR_BITS];
+		x86_pgent_t readmem_area[MEMREAD_AREA_SIZE >> X86_X32_PDIR_BITS];
 		space_t * space; /* back link ptr, "automagically" invalid */
 		/* the rest, e.g., TSS, APIC_MAPPINGS, ... */
 	    };
@@ -92,7 +92,7 @@ public:
 
 public:
     /* Shadow pagetable */
-    pgent_t user_pgent[USER_AREA_END >> IA32_PDIR_BITS];
+    pgent_t user_pgent[USER_AREA_END >> X86_X32_PDIR_BITS];
 
     struct {
 	/* CPU-specific ptabs */

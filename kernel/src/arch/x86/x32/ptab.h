@@ -130,7 +130,7 @@ public:
 	{
 	    raw = ((u32_t)(addr) & X86_PAGE_MASK) | 
 		X86_PAGE_VALID |
-		(attrib & IA32_PTAB_FLAGS_MASK);
+		(attrib & X86_X32_PTAB_FLAGS_MASK);
 	}
 		
     // attributes

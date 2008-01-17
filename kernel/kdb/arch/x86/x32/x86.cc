@@ -179,7 +179,7 @@ CMD(cmd_cpu, cg)
     word_t id[4][4];
     word_t i;
     for (i = 0; i < 4; i++)
-	ia32_cpuid(i, &id[i][0], &id[i][1], &id[i][2], &id[i][3]);
+	x86_x32_cpuid(i, &id[i][0], &id[i][1], &id[i][2], &id[i][3]);
     for (i = 0; i <= id[0][0]; i++)
 	printf("cpuid(%d):%x:%x:%x:%x\n", i,
 	       id[i][0], id[i][1], id[i][2], id[i][3]);

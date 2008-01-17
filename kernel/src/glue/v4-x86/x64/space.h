@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/space.h
  * Description:   AMD64 space_t implementation
@@ -76,9 +76,9 @@ protected:
 	    x86_pgent_t pdpe[512];
 	    struct {	
 		/* Copy area */
-		x86_pgent_t copy_area[COPY_AREA_COUNT][COPY_AREA_SIZE >> AMD64_PDP_BITS];
+		x86_pgent_t copy_area[COPY_AREA_COUNT][COPY_AREA_SIZE >> X86_X64_PDP_BITS];
 		/* Kernel area */
-		x86_pgent_t reserved[512 - 6 - COPY_AREA_COUNT * ((COPY_AREA_SIZE >> AMD64_PDP_BITS))];
+		x86_pgent_t reserved[512 - 6 - COPY_AREA_COUNT * ((COPY_AREA_SIZE >> X86_X64_PDP_BITS))];
 		x86_pgent_t ktcb;
 		x86_pgent_t remap32[4];
 		x86_pgent_t kernel_area;
@@ -91,7 +91,7 @@ protected:
 	union {
 	    pgent_t pgent[512];
 	    struct {
-		pgent_t user_area[AMD64_PML4_IDX(USER_AREA_END)];
+		pgent_t user_area[X86_X64_PML4_IDX(USER_AREA_END)];
 		space_t * space; /* space backlink */
 		pgent_t kernel_pdp;
 	    } __attribute__((aligned(X86_PTAB_BYTES)));
@@ -125,7 +125,7 @@ protected:
 public:
 
     static const addr_t sign_extend(addr_t addr) 
-	{ return (addr_t) ((word_t) addr | AMD64_SIGN_EXTENSION); }
+	{ return (addr_t) ((word_t) addr | X86_X64_SIGN_EXTENSION); }
     
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
     /* Compatibility Mode specific functions */

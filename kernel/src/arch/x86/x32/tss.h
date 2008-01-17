@@ -34,17 +34,17 @@
 
 
 #if defined(CONFIG_X86_IO_FLEXPAGES)
-#define IA32_IOPERMBITMAP_BITS          (1 << 16)
-#define IA32_IOPERMBITMAP_ALIGNMENT     __attribute__((aligned(4096)));
+#define X86_X32_IOPERMBITMAP_BITS          (1 << 16)
+#define X86_X32_IOPERMBITMAP_ALIGNMENT     __attribute__((aligned(4096)));
 #else
-#define IA32_IOPERMBITMAP_BITS 0
-#define IA32_IOPERMBITMAP_ALIGNMENT
+#define X86_X32_IOPERMBITMAP_BITS 0
+#define X86_X32_IOPERMBITMAP_ALIGNMENT
 #endif
 
-#define IOPERMBITMAP_SIZE		(IA32_IOPERMBITMAP_BITS / 8)
+#define IOPERMBITMAP_SIZE		(X86_X32_IOPERMBITMAP_BITS / 8)
 
 
-class ia32_tss_t 
+class x86_x32_tss_t 
 {
 public:
     void setup(u16_t ss0);
@@ -64,21 +64,21 @@ private:
     u32_t	ldt;
     u16_t	trace;
     u16_t	iopbm_offset;
-    u8_t	io_bitmap[IOPERMBITMAP_SIZE+1] IA32_IOPERMBITMAP_ALIGNMENT;
+    u8_t	io_bitmap[IOPERMBITMAP_SIZE+1] X86_X32_IOPERMBITMAP_ALIGNMENT;
     u8_t	stopper;
 };
 
-INLINE void ia32_tss_t::set_esp0(u32_t esp)
+INLINE void x86_x32_tss_t::set_esp0(u32_t esp)
 {
     esp0 = esp;
 }
 
-INLINE u32_t ia32_tss_t::get_esp0()
+INLINE u32_t x86_x32_tss_t::get_esp0()
 {
     return esp0;
 }
 
-INLINE void ia32_tss_t::setup(u16_t ss0)
+INLINE void x86_x32_tss_t::setup(u16_t ss0)
 {
     this->ss0 = ss0;
     iopbm_offset = (u16_t)((u32_t)io_bitmap - (u32_t)this);
@@ -86,17 +86,17 @@ INLINE void ia32_tss_t::setup(u16_t ss0)
 }
     
  
-INLINE addr_t ia32_tss_t::get_io_bitmap()
+INLINE addr_t x86_x32_tss_t::get_io_bitmap()
 {
     return (addr_t) io_bitmap;
 }
 
 
-extern ia32_tss_t tss;
+extern x86_x32_tss_t tss;
 
 
 #if defined(CONFIG_IS_32BIT)
-typedef ia32_tss_t x86_tss_t;
+typedef x86_x32_tss_t x86_tss_t;
 #endif
 
 #endif /* !__ARCH__X86__X32__TSS_H__ */

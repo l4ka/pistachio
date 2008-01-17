@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/ptab.h
  * Description:   X86-64 pagetable management (4KByte long mode)
@@ -101,7 +101,7 @@ public:
 	}
 
     x86_pgent_t * get_ptab()
-	{ return (x86_pgent_t*)(raw & AMD64_PTE_MASK); }
+	{ return (x86_pgent_t*)(raw & X86_X64_PTE_MASK); }
 
     u64_t get_raw()
 	{ return raw; }
@@ -157,7 +157,7 @@ public:
     /* used to set an entry pointing to the next table in hierarchy */
     void set_ptab_entry(addr_t addr, u32_t attrib)
 	{
-	    raw = ((u64_t)(addr) & AMD64_PTE_MASK) | X86_PAGE_VALID | (attrib & AMD64_PTE_FLAGS_MASK);
+	    raw = ((u64_t)(addr) & X86_X64_PTE_MASK) | X86_PAGE_VALID | (attrib & X86_X64_PTE_FLAGS_MASK);
 	}
 		
 private:

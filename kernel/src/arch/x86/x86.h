@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x86.h
  * Description:   X86-64 CPU Specific constants
@@ -57,6 +57,12 @@
 #define X86_SUPERPAGE_PAT  	(1<<12)
 
 
+/* pagefault error code bits */
+#define X86_PFAULT_RW	(1 << 1)	/* Pagefault on read/write	*/
+#define X86_PFAULT_US	(1 << 2)	/* Pagefault in user/kernel	*/
+#define X86_PFAULT_ID	(1 << 4)	/* Pagefault on insn./data	*/
+
+
 #define X86_PTAB_BYTES		4096
 
 /**********************************************************************
@@ -94,6 +100,7 @@
 #define X86_CR0_NE 	(__UL(1) <<  5)   /* numeric error reporting mode     */
 #define X86_CR0_WP 	(__UL(1) << 16)   /* force write protection on user
                                     read only pages for kernel       */
+#define X86_CR0_AM	(__UL(1) << 3)	  /* alignment mask		      */
 #define X86_CR0_NW 	(__UL(1) << 29)   /* not write through                */
 #define X86_CR0_CD 	(__UL(1) << 30)   /* cache disabled                   */
 #define X86_CR0_PG 	(__UL(1) << 31)   /* enable paging                    */
@@ -119,90 +126,89 @@
 /**********************************************************************
  *    Model Specific Registers (MSRs)
  **********************************************************************/
-#define X86_DEBUGCTL			0x1d9
+#define X86_MSR_DEBUGCTL			0x1d9
 
+#define X86_MSR_EFER                		0xC0000080
 /* Processor features in the EFER MSR. */
-#define X86_EFER_MSR                0xC0000080
+#define X86_MSR_EFER_SCE			(1 <<  0)       /* system call extensions       */
+#define X86_MSR_EFER_LME			(1 <<  8)       /* long mode enabled            */
+#define X86_MSR_EFER_LMA			(1 << 10)       /* long mode active             */
+#define X86_MSR_EFER_NXE			(1 << 11)       /* nx bit enable                */
+#define X86_MSR_EFER_SVME			(1 << 12)       /* svm extensions               */
 
-#define X86_EFER_SCE  (1 <<  0)       /* system call extensions       */
-#define X86_EFER_LME  (1 <<  8)       /* long mode enabled            */
-#define X86_EFER_LMA  (1 << 10)       /* long mode active             */
-#define X86_EFER_NXE  (1 << 11)       /* nx bit enable                */
-#define X86_EFER_SVME (1 << 12)       /* svm extensions               */
+#define X86_MSR_SYSENTER_CS         		0x00000174
+#define X86_MSR_SYSENTER_EIP        		0x00000176
+#define X86_MSR_SYSENTER_ESP        		0x00000175
 
-#define X86_FEATURE_CONTROL_MSR     0x0000003a
-#define X86_FEAT_CTR_LOCK           (1 << 0)
 
-#define X86_SYSENTER_CS_MSR         0x00000174
-#define X86_SYSENTER_EIP_MSR        0x00000176
-#define X86_SYSENTER_ESP_MSR        0x00000175
-#define X86_DEBUGCTL_MSR            0x000001d9
+#define X86_MSR_FEATURE_CONTROL     		0x0000003a
+#define X86_MSR_FEAT_CTR_LOCK			(1 << 0)
 
-# define X86_LASTBRANCHFROMIP_MSR   0x000001db
-# define X86_LASTBRANCHTOIP_MSR     0x000001dc
-# define X86_LASTINTFROMIP_MSR      0x000001dd
-# define X86_LASTINTTOIP_MSR        0x000001de
-# define X86_MTRRBASE_MSR(x)        (0x200 + 2*(x) + 0)
-# define X86_MTRRMASK_MSR(x)        (0x200 + 2*(x) + 1)
+# define X86_MSR_LASTBRANCHFROMIP   		0x000001db
+# define X86_MSR_LASTBRANCHTOIP     		0x000001dc
+# define X86_MSR_LASTINTFROMIP      		0x000001dd
+# define X86_MSR_LASTINTTOIP        		0x000001de
+# define X86_MSR_MTRRBASE(x)			(0x200 + 2*(x) + 0)
+# define X86_MSR_MTRRMASK(x)			(0x200 + 2*(x) + 1)
 
-# define X86_MISC_ENABLE_MSR        0x000001a0
-# define X86_COUNTER_BASE_MSR       0x00000300
-# define X86_CCCR_BASE_MSR          0x00000360
-# define X86_TC_PRECISE_EVENT_MSR   0x000003f0
-# define X86_PEBS_ENABLE_MSR        0x000003f1
-# define X86_PEBS_MATRIX_VERT_MSR   0x000003f2
-# define X86_DS_AREA_MSR            0x00000600
-# define X86_LER_FROM_LIP_MSR       0x000001d7
-# define X86_LER_TO_LIP_MSR         0x000001d8
-# define X86_LASTBRANCH_TOS_MSR     0x000001da
-# define X86_LASTBRANCH_0_MSR       0x000001db
-# define X86_LASTBRANCH_1_MSR       0x000001dc
-# define X86_LASTBRANCH_2_MSR       0x000001dd
-# define X86_LASTBRANCH_3_MSR       0x000001de
+# define X86_MSR_MISC_ENABLE        		0x000001a0
+# define X86_MSR_COUNTER_BASE       		0x00000300
+# define X86_MSR_CCCR_BASE          		0x00000360
+# define X86_MSR_TC_PRECISE_EVENT   		0x000003f0
+# define X86_MSR_PEBS_ENABLE        		0x000003f1
+# define X86_MSR_PEBS_MATRIX_VERT   		0x000003f2
+# define X86_MSR_DS_AREA            		0x00000600
+# define X86_MSR_LER_FROM_LIP       		0x000001d7
+# define X86_MSR_LER_TO_LIP         		0x000001d8
+# define X86_MSR_LASTBRANCH_TOS     		0x000001da
+# define X86_MSR_LASTBRANCH_0       		0x000001db
+# define X86_MSR_LASTBRANCH_1       		0x000001dc
+# define X86_MSR_LASTBRANCH_2       		0x000001dd
+# define X86_MSR_LASTBRANCH_3       		0x000001de
 
 /* Processor features in the MISC_ENABLE MSR. */
-# define X86_ENABLE_FAST_STRINGS            (1 << 0)
-# define X86_ENABLE_X87_FPU                 (1 << 2)
-# define X86_ENABLE_THERMAL_MONITOR         (1 << 3)
-# define X86_ENABLE_SPLIT_LOCK_DISABLE      (1 << 4)
-# define X86_ENABLE_PERFMON                 (1 << 7)
-# define X86_ENABLE_BRANCH_TRACE            (1 << 11)
-# define X86_ENABLE_PEBS                    (1 << 12)
+# define X86_MSR_ENABLE_FAST_STRINGS            (1 << 0)
+# define X86_MSR_ENABLE_X87_FPU                 (1 << 2)
+# define X86_MSR_ENABLE_THERMAL_MONITOR         (1 << 3)
+# define X86_MSR_ENABLE_SPLIT_LOCK_DISABLE      (1 << 4)
+# define X86_MSR_ENABLE_PERFMON                 (1 << 7)
+# define X86_MSR_ENABLE_BRANCH_TRACE            (1 << 11)
+# define X86_MSR_ENABLE_PEBS                    (1 << 12)
 
 /* Preceise Event-Based Sampling (PEBS) support. */
-# define X86_PEBS_REPLAY_TAG_MASK           ((__UL(1) << 12)-1)
-# define X86_PEBS_UOP_TAG                   (__UL(1) << 24)
-# define X86_PEBS_ENABLE_PEBS               (__UL(1) << 25)
+# define X86_MSR_PEBS_REPLAY_TAG_MASK           ((__UL(1) << 12)-1)
+# define X86_MSR_PEBS_UOP_TAG                   (__UL(1) << 24)
+# define X86_MSR_PEBS_ENABLE_PEBS               (__UL(1) << 25)
 
 /* Page Attribute Table (PAT) */
-# define X86_CR_PAT_MSR             0x00000277
-# define X86_PAT_UC         0x00
-# define X86_PAT_WC         0x01
-# define X86_PAT_WT         0x04
-# define X86_PAT_WP         0x05
-# define X86_PAT_WB         0x06
-# define X86_PAT_UM         0x07
+# define X86_MSR_CR_PAT             		0x00000277
+# define X86_MSR_PAT_UC         		0x00
+# define X86_MSR_PAT_WC         		0x01
+# define X86_MSR_PAT_WT         		0x04
+# define X86_MSR_PAT_WP         		0x05
+# define X86_MSR_PAT_WB         		0x06
+# define X86_MSR_PAT_UM         		0x07
 
 /* Virtual Machine Extensions (VMX) */
-#if defined(CONFIG_VMX)
-# define X86_FEAT_CTR_ENABLE_VMXON (1 << 2)
+#if defined(CONFIG_X_X86_VMX)
+# define X86_MSR_FEAT_CTR_ENABLE_VMXON (1 << 2)
 
-# define X86_VMX_BASIC_MSR         0x480
-# define X86_VMX_PINBASED_CTLS_MSR 0x481
-# define X86_VMX_CPUBASED_CTLS_MSR 0x482
-# define X86_VMX_EXIT_CTLS_MSR     0x483
-# define X86_VMX_ENTRY_CTLS_MSR    0x484
-# define X86_VMX_MISC_MSR          0x485
-# define X86_VMX_CR0_FIXED0_MSR    0x486
-# define X86_VMX_CR0_FIXED1_MSR    0x487
-# define X86_VMX_CR4_FIXED0_MSR    0x488
-# define X86_VMX_CR4_FIXED1_MSR    0x489
+# define X86_MSR_VMX_BASIC         		0x480
+# define X86_MSR_VMX_PINBASED_CTLS 		0x481
+# define X86_MSR_VMX_CPUBASED_CTLS 		0x482
+# define X86_MSR_VMX_EXIT_CTLS     		0x483
+# define X86_MSR_VMX_ENTRY_CTLS    		0x484
+# define X86_MSR_VMX_MISC          		0x485
+# define X86_MSR_VMX_CR0_FIXED0    		0x486
+# define X86_MSR_VMX_CR0_FIXED1    		0x487
+# define X86_MSR_VMX_CR4_FIXED0    		0x488
+# define X86_MSR_VMX_CR4_FIXED1    		0x489
 #endif
 
 /* Secure Virtual Machine Extensions (SVM) */
 #if defined(CONFIG_SVM)
-# define X86_SVM_VMCR_MSR          0xC0010114
-# define X86_SVM_HSAVE_PA_MSR      0xC0010117
+# define X86_MSR_SVM_VMCR          		0xC0010114
+# define X86_MSR_SVM_HSAVE_PA      		0xC0010117
 #endif
 
 #endif /* !__ARCH__X86__X86_H__ */

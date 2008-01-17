@@ -37,10 +37,10 @@
 #include INC_GLUE(space.h)
 
 
-extern space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS];
+extern space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> X86_X32_PDIR_BITS];
 
 
-DECLARE_CMD_GROUP (ia32_smallspaces);
+DECLARE_CMD_GROUP (x86_x32_smallspaces);
 
 /**
  * Small address spaces managment.
@@ -50,19 +50,19 @@ DECLARE_CMD (cmd_smallspaces, arch, 's', "smallspaces",
 
 CMD (cmd_smallspaces, cg)
 {
-    return ia32_smallspaces.interact (cg, "smallspaces");
+    return x86_x32_smallspaces.interact (cg, "smallspaces");
 }
 
 
 /**
  * Dump small address spaces.
  */
-DECLARE_CMD (cmd_smallspaces_dump, ia32_smallspaces, 'd', "dump",
+DECLARE_CMD (cmd_smallspaces_dump, x86_x32_smallspaces, 'd', "dump",
 	     "Dump small spaces");
 
 CMD (cmd_smallspaces_dump, cg)
 {
-    const word_t max_idx = SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS;
+    const word_t max_idx = SMALLSPACE_AREA_SIZE >> X86_X32_PDIR_BITS;
 
     printf ("Small address space allocation:\n");
 
@@ -75,8 +75,8 @@ CMD (cmd_smallspaces_dump, cg)
 		    "%5d-%d MB\t<%p-%p>  space: %p\n" :
 		    "%5d-%d MB\t<%p-%p>  (free)\n",
 		    b*4, i*4,
-		    SMALLSPACE_AREA_START + (b * IA32_PDIR_SIZE),
-		    SMALLSPACE_AREA_START + (i * IA32_PDIR_SIZE),
+		    SMALLSPACE_AREA_START + (b * X86_X32_PDIR_SIZE),
+		    SMALLSPACE_AREA_START + (i * X86_X32_PDIR_SIZE),
 		    small_space_owner[b]);
 	    b = i;
 	}
@@ -85,8 +85,8 @@ CMD (cmd_smallspaces_dump, cg)
 	    "%5d-%d MB\t<%p-%p>  space: %p\n" :
 	    "%5d-%d MB\t<%p-%p>  (free)\n",
 	    b*4, i*4,
-	    SMALLSPACE_AREA_START + (b * IA32_PDIR_SIZE),
-	    SMALLSPACE_AREA_START + (i * IA32_PDIR_SIZE),
+	    SMALLSPACE_AREA_START + (b * X86_X32_PDIR_SIZE),
+	    SMALLSPACE_AREA_START + (i * X86_X32_PDIR_SIZE),
 	    small_space_owner[b]);
 
     return CMD_NOQUIT;
@@ -96,7 +96,7 @@ CMD (cmd_smallspaces_dump, cg)
 /**
  * Turn address space into small space.
  */
-DECLARE_CMD (cmd_smallspaces_mksmall, ia32_smallspaces, 's', "mksmall",
+DECLARE_CMD (cmd_smallspaces_mksmall, x86_x32_smallspaces, 's', "mksmall",
 	     "Make space small");
 
 CMD (cmd_smallspaces_mksmall, cg)
@@ -116,7 +116,7 @@ CMD (cmd_smallspaces_mksmall, cg)
 
 	idx *= size;
 
-	if (((idx + size) >> 2) * IA32_PDIR_SIZE <= SMALLSPACE_AREA_SIZE)
+	if (((idx + size) >> 2) * X86_X32_PDIR_SIZE <= SMALLSPACE_AREA_SIZE)
 	    break;
 
 	printf ("Invalid parameters.\n");
@@ -134,7 +134,7 @@ CMD (cmd_smallspaces_mksmall, cg)
 /**
  * Turn address space into large space.
  */
-DECLARE_CMD (cmd_smallspaces_mklarge, ia32_smallspaces, 'l', "mklarge",
+DECLARE_CMD (cmd_smallspaces_mklarge, x86_x32_smallspaces, 'l', "mklarge",
 	     "Make space large");
 
 CMD (cmd_smallspaces_mklarge, cg)

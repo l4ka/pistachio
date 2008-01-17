@@ -42,7 +42,7 @@
 typedef struct {
     word_t rax;
     word_t rdx;
-} amd64_sysret_t;
+} x86_x64_sysret_t;
 
 
 //
@@ -58,17 +58,17 @@ typedef struct {
 //
 
 #define SYS_IPC(to, from, timeout)		\
-    amd64_sysret_t SYSCALL_ATTR ("ipc")		\
+    x86_x64_sysret_t SYSCALL_ATTR ("ipc")		\
 	sys_ipc (timeout, to, from)		
 
 
 #define return_ipc(from)			\
 {						\
-	amd64_sysret_t amd64_ret;		\
-	amd64_ret.rax = (from).get_raw();	\
-	amd64_ret.rdx = current->get_tag().raw;	\
+	x86_x64_sysret_t x86_x64_ret;		\
+	x86_x64_ret.rax = (from).get_raw();	\
+	x86_x64_ret.rdx = current->get_tag().raw;	\
 	current->set_partner(from);		\
-	return amd64_ret;			\
+	return x86_x64_ret;			\
 } 
 
 
@@ -76,15 +76,15 @@ typedef struct {
 //	ThreadControl ()
 //
 #define SYS_THREAD_CONTROL(dest, space, scheduler, pager, utcb_location)	\
-  amd64_sysret_t SYSCALL_ATTR ("thread_control")				\
+  x86_x64_sysret_t SYSCALL_ATTR ("thread_control")				\
   sys_thread_control (dest, space, scheduler, pager, utcb_location)
 
 #define return_thread_control(result)		\
 {						\
-	amd64_sysret_t amd64_ret;		\
-	amd64_ret.rax = result;			\
-	amd64_ret.rdx = 0;			\
-	return amd64_ret;			\
+	x86_x64_sysret_t x86_x64_ret;		\
+	x86_x64_ret.rax = result;			\
+	x86_x64_ret.rdx = 0;			\
+	return x86_x64_ret;			\
 }
 
 
@@ -93,16 +93,16 @@ typedef struct {
 //
 #define SYS_SPACE_CONTROL(space, control, kip_area, utcb_area,	\
 			  redirector)				\
-  amd64_sysret_t SYSCALL_ATTR ("space_control")			\
+  x86_x64_sysret_t SYSCALL_ATTR ("space_control")			\
   sys_space_control (space, control, kip_area, utcb_area,	\
 		     redirector)
 
 #define return_space_control(result, control)	\
 {						\
-	amd64_sysret_t amd64_ret;		\
-	amd64_ret.rax = result;			\
-	amd64_ret.rdx = control;		\
-	return amd64_ret;			\
+	x86_x64_sysret_t x86_x64_ret;		\
+	x86_x64_ret.rax = result;			\
+	x86_x64_ret.rdx = control;		\
+	return x86_x64_ret;			\
 } 
 
 
@@ -111,16 +111,16 @@ typedef struct {
 //
 #define SYS_SCHEDULE(dest, time_control, processor_control,	\
 		     prio, preemption_control)			\
-  amd64_sysret_t SYSCALL_ATTR ("schedule")			\
+  x86_x64_sysret_t SYSCALL_ATTR ("schedule")			\
   sys_schedule (dest, time_control, processor_control,		\
 		prio, preemption_control)
 
 #define return_schedule(result, time_control)	\
 {						\
-	amd64_sysret_t amd64_ret;		\
-	amd64_ret.rax = result;			\
-	amd64_ret.rdx = time_control;		\
-	return amd64_ret;			\
+	x86_x64_sysret_t x86_x64_ret;		\
+	x86_x64_ret.rax = result;			\
+	x86_x64_ret.rdx = time_control;		\
+	return x86_x64_ret;			\
 } 
 
 
@@ -139,9 +139,9 @@ typedef struct {
 #define return_exchange_registers(result,					\
     cntrl, sp, ip, flags, pager, handle)					\
 {										\
-    word_t amd64_dummy, amd64_uip;						\
-    tcb_t *amd64_current = get_current_tcb();					\
-    utcb_t *utcb = amd64_current->get_utcb();					\
+    word_t x86_x64_dummy, x86_x64_uip;						\
+    tcb_t *x86_x64_current = get_current_tcb();					\
+    utcb_t *utcb = x86_x64_current->get_utcb();					\
     struct {									\
 	word_t       rdi;							\
 	word_t       r8;							\
@@ -149,14 +149,14 @@ typedef struct {
 	word_t       r10;							\
 	word_t       r11;							\
 	word_t       rsp;							\
-    } amd64_ret;								\
-    amd64_ret.rdi = pager.get_raw();						\
-    amd64_ret.r8 = ip;								\
-    amd64_ret.r9 = flags;							\
-    amd64_ret.r10 = handle;							\
-    amd64_ret.r11 = (word_t) amd64_current->get_user_flags();			\
-    amd64_ret.rsp = (word_t) amd64_current->get_user_sp();			\
-    amd64_uip = (word_t) amd64_current->get_user_ip();				\
+    } x86_x64_ret;								\
+    x86_x64_ret.rdi = pager.get_raw();						\
+    x86_x64_ret.r8 = ip;								\
+    x86_x64_ret.r9 = flags;							\
+    x86_x64_ret.r10 = handle;							\
+    x86_x64_ret.r11 = (word_t) x86_x64_current->get_user_flags();			\
+    x86_x64_ret.rsp = (word_t) x86_x64_current->get_user_sp();			\
+    x86_x64_uip = (word_t) x86_x64_current->get_user_ip();				\
     if (utcb->is_compatibility_mode())						\
     {										\
 	utcb->exreg32.control = cntrl;						\
@@ -168,14 +168,14 @@ typedef struct {
 			     "movq  8(%[ret]), %%rsi	\n"			\
 			     "sysretl"						\
 			     : /* outputs */					\
-			     "=a" (amd64_dummy),	/* %0 RAX */		\
-			     "=S" (amd64_dummy),	/* %1 RSI */		\
-			     "=c" (amd64_dummy),	/* %2 RCX */		\
-			     "=d" (amd64_dummy)		/* %3 RDX */		\
+			     "=a" (x86_x64_dummy),	/* %0 RAX */		\
+			     "=S" (x86_x64_dummy),	/* %1 RSI */		\
+			     "=c" (x86_x64_dummy),	/* %2 RCX */		\
+			     "=d" (x86_x64_dummy)		/* %3 RDX */		\
 			     : /* inputs */					\
 				    "0" (threadid_32(result)), /* %4 RAX */	\
-			     [ret]  "1" (&amd64_ret),	/* %5 RSI */		\
-				    "2" (amd64_uip),	/* %6 RCX */		\
+			     [ret]  "1" (&x86_x64_ret),	/* %5 RSI */		\
+				    "2" (x86_x64_uip),	/* %6 RCX */		\
 				    "3" (sp)		/* %7 RDX */		\
 			     /* no clobbers */					\
 	);									\
@@ -188,15 +188,15 @@ typedef struct {
 			 "movq 40(%[ret]), %%rsp	\n"			\
 			 "sysretq"						\
 			 : /* outputs */					\
-			 "=a" (amd64_dummy),		/* %0 RAX */		\
-			 "=b" (amd64_dummy),		/* %1 RBX */		\
-			 "=c" (amd64_dummy),		/* %2 RCX */		\
-			 "=d" (amd64_dummy),		/* %3 RDX */		\
-			 "=S" (amd64_dummy)		/* %4 RSI */		\
+			 "=a" (x86_x64_dummy),		/* %0 RAX */		\
+			 "=b" (x86_x64_dummy),		/* %1 RBX */		\
+			 "=c" (x86_x64_dummy),		/* %2 RCX */		\
+			 "=d" (x86_x64_dummy),		/* %3 RDX */		\
+			 "=S" (x86_x64_dummy)		/* %4 RSI */		\
 			 : /* inputs */						\
 				"0" (result),		/* %5 RAX */		\
-			 [ret]	"1" (&amd64_ret),	/* %6 RBX */		\
-				"2" (amd64_uip),	/* %7 RCX */		\
+			 [ret]	"1" (&x86_x64_ret),	/* %6 RBX */		\
+				"2" (x86_x64_uip),	/* %7 RCX */		\
 				"3" (sp),		/* %8 RDX */		\
 				"4" (cntrl)		/* %9 RSI */		\
 			 /* no clobbers */					\
@@ -207,8 +207,8 @@ typedef struct {
 #define return_exchange_registers(result, cntrl, sp, ip,			\
 				  flags, pager, handle)				\
 {										\
-    word_t amd64_dummy, amd64_uip;						\
-    tcb_t *amd64_current = get_current_tcb();					\
+    word_t x86_x64_dummy, x86_x64_uip;						\
+    tcb_t *x86_x64_current = get_current_tcb();					\
     struct {									\
 	word_t       rdi;							\
 	word_t       r8;							\
@@ -216,14 +216,14 @@ typedef struct {
 	word_t       r10;							\
 	word_t       r11;							\
 	word_t       rsp;							\
-    } amd64_ret;								\
-    amd64_ret.rdi = pager.get_raw();						\
-    amd64_ret.r8 = ip;								\
-    amd64_ret.r9 = flags;							\
-    amd64_ret.r10 = handle;							\
-    amd64_ret.r11 = (word_t) amd64_current->get_user_flags();			\
-    amd64_ret.rsp = (word_t) amd64_current->get_user_sp();			\
-    amd64_uip = (word_t) amd64_current->get_user_ip();				\
+    } x86_x64_ret;								\
+    x86_x64_ret.rdi = pager.get_raw();						\
+    x86_x64_ret.r8 = ip;								\
+    x86_x64_ret.r9 = flags;							\
+    x86_x64_ret.r10 = handle;							\
+    x86_x64_ret.r11 = (word_t) x86_x64_current->get_user_flags();			\
+    x86_x64_ret.rsp = (word_t) x86_x64_current->get_user_sp();			\
+    x86_x64_uip = (word_t) x86_x64_current->get_user_ip();				\
     __asm__ __volatile__("movq   (%[ret]), %%rdi	\n"			\
 			 "movq  8(%[ret]), %%r8		\n"			\
 			 "movq 16(%[ret]), %%r9		\n"			\
@@ -232,15 +232,15 @@ typedef struct {
 			 "movq 40(%[ret]), %%rsp	\n"			\
 			 "sysretq"						\
 			 : /* outputs */					\
-			 "=a" (amd64_dummy),		/* %0 RAX */		\
-			 "=b" (amd64_dummy),		/* %1 RBX */		\
-			 "=c" (amd64_dummy),		/* %2 RCX */		\
-			 "=d" (amd64_dummy),		/* %3 RDX */		\
-			 "=S" (amd64_dummy)		/* %4 RSI */		\
+			 "=a" (x86_x64_dummy),		/* %0 RAX */		\
+			 "=b" (x86_x64_dummy),		/* %1 RBX */		\
+			 "=c" (x86_x64_dummy),		/* %2 RCX */		\
+			 "=d" (x86_x64_dummy),		/* %3 RDX */		\
+			 "=S" (x86_x64_dummy)		/* %4 RSI */		\
 			 : /* inputs */						\
 				"0" (result),		/* %5 RAX */		\
-			 [ret]	"1" (&amd64_ret),	/* %6 RBX */		\
-				"2" (amd64_uip),	/* %7 RCX */		\
+			 [ret]	"1" (&x86_x64_ret),	/* %6 RBX */		\
+				"2" (x86_x64_uip),	/* %7 RCX */		\
 				"3" (sp),		/* %8 RDX */		\
 				"4" (cntrl)		/* %9 RSI */		\
 			 /* no clobbers */					\

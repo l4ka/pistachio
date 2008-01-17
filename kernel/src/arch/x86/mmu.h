@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2003-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/mmu.h
  * Description:   X86 specific MMU Stuff
@@ -137,17 +137,17 @@ INLINE void x86_mmu_t::enable_pae_mode()
  */
 INLINE bool x86_mmu_t::has_long_mode()
 {
-    if (!(amd64_cpu_features_t::has_cpuid()))
+    if (!(x86_x64_cpu_features_t::has_cpuid()))
         return false;
     
     u32_t features, lfn, dummy;
     
-    amd64_cpu_features_t::cpuid(CPUID_MAX_EXT_FN_NR, &lfn, &dummy, &dummy, &dummy);
+    x86_x64_cpu_features_t::cpuid(CPUID_MAX_EXT_FN_NR, &lfn, &dummy, &dummy, &dummy);
     
     if (lfn < CPUID_AMD_FEATURES) 
         return false;
     
-    amd64_cpu_features_t::cpuid(CPUID_AMD_FEATURES, &dummy, &dummy, &dummy, &features);
+    x86_x64_cpu_features_t::cpuid(CPUID_AMD_FEATURES, &dummy, &dummy, &dummy, &features);
     
     return (features & CPUID_AMD_HAS_LONGMODE);
 }
@@ -161,9 +161,9 @@ INLINE bool x86_mmu_t::has_long_mode()
  */
 INLINE void x86_mmu_t::enable_long_mode()
 {
-    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
-    efer |= AMD64_EFER_LME;
-    x86_wrmsr(AMD64_EFER_MSR, efer);
+    word_t efer = x86_rdmsr(X86_MSR_EFER);
+    efer |= X86_MSR_EFER_LME;
+    x86_wrmsr(X86_MSR_EFER, efer);
 }
 
 
@@ -173,8 +173,8 @@ INLINE void x86_mmu_t::enable_long_mode()
  */
 INLINE bool x86_mmu_t::long_mode_active()
 {
-    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
-    return (efer & AMD64_EFER_LMA);
+    word_t efer = x86_rdmsr(X86_MSR_EFER);
+    return (efer & X86_MSR_EFER_LMA);
 }
 #endif /* defined(CONFIG_IS_64BIT) */
 

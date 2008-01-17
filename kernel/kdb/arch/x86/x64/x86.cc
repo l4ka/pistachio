@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     kdb/arch/x86/x64/x86.cc
  * Description:   
@@ -126,7 +126,7 @@ CMD(cmd_gdt, cg)
     printf("dpl=%d 64-bit ", tss->x.d.dpl);
     printf("tss\n");
 
-    printf("FS_MSR = %16x\nGS_MSR = %16x\n", x86_rdmsr(AMD64_FS_MSR), x86_rdmsr(AMD64_GS_MSR));
+    printf("FS_MSR = %16x\nGS_MSR = %16x\n", x86_rdmsr(X86_X64_MSR_FS), x86_rdmsr(X86_X64_MSR_GS));
 
     return CMD_NOQUIT;
 }

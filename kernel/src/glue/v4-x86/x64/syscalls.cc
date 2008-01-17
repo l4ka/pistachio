@@ -42,7 +42,7 @@
 DECLARE_TRACEPOINT(SYSCALL_MEMORY_CONTROL);
 
 
-extern "C" amd64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
+extern "C" x86_x64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
 					     word_t arg2,  /* RSI */
 					     word_t arg3,  /* RDX */
 					     word_t uip,   /* RCX */
@@ -66,7 +66,7 @@ extern "C" amd64_sysret_t syscall_dispatcher(word_t arg1,  /* RDI */
 
     /* Calculate address of user-mode system call stub from uip. */
     addr_t syscall = (addr_t) (uip & ~(SYSCALL_ALIGN - 1));
-    amd64_sysret_t ret;
+    x86_x64_sysret_t ret;
 
     if (syscall == user_exchange_registers)
     {

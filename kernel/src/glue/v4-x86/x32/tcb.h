@@ -396,8 +396,8 @@ INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
     ASSERT (space->is_copy_area (addr));
 
     word_t copyarea_num = 
-	(((word_t) addr - COPY_AREA_START) >> IA32_PDIR_BITS) /
-	(COPY_AREA_SIZE >> IA32_PDIR_BITS);
+	(((word_t) addr - COPY_AREA_START) >> X86_X32_PDIR_BITS) /
+	(COPY_AREA_SIZE >> X86_X32_PDIR_BITS);
 
     return addr_offset (resources.copy_area_real_address (copyarea_num),
 			(word_t) addr & (COPY_AREA_SIZE-1));

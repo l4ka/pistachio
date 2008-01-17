@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/ia32/init.h
+ * File path:     glue/v4-x86/x64/x32comp/init.h
  * Description:   System initialization for Compatibility Mode
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,12 @@
  * $Id: init.h,v 1.1 2006/10/20 18:07:32 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE_V4_X86__X64__IA32__INIT_H__
-#define __GLUE_V4_X86__X64__IA32__INIT_H__
+#ifndef __GLUE__V4_X86__X64__X32COMP__INIT_H__
+#define __GLUE__V4_X86__X64__X32COMP__INIT_H__
 
 #include <init.h>
 
 void SECTION(SEC_INIT) init_kip_32();
 
-#endif /* !__GLUE_V4_X86__X64__IA32__INIT_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__INIT_H__ */

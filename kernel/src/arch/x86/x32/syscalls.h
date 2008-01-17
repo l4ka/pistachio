@@ -30,8 +30,8 @@
  *                
  ********************************************************************/
 
-#ifndef __ARCH_IA32_SYSCALL_H__
-#define __ARCH_IA32_SYSCALL_H__
+#ifndef __ARCH_X86_X32_SYSCALL_H__
+#define __ARCH_X86_X32_SYSCALL_H__
 
 #include INC_API(ipc.h)
 
@@ -58,4 +58,4 @@
 }
 
 
-#endif /*__ARCH_IA32_SYSCALL_H__*/
+#endif /*__ARCH_X86_X32_SYSCALL_H__*/

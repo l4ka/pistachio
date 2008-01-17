@@ -45,7 +45,7 @@
 #define IOPERMBITMAP_SIZE		(AMD64_IOPERMBITMAP_BITS / 8)
 
 
-class amd64_tss_t 
+class x86_x64_tss_t 
 {
 public:
     void setup(u16_t ss0=0);
@@ -65,33 +65,33 @@ private:
     u8_t	stopper;
 } __attribute__((packed));
 
-INLINE void amd64_tss_t::setup(u16_t ss0)
+INLINE void x86_x64_tss_t::setup(u16_t ss0)
 {
     iopbm_offset = (u16_t)((u64_t)io_bitmap - (u64_t)this);
     stopper = 0xff;
 }
 
-INLINE void amd64_tss_t::set_rsp0(u64_t rsp0)
+INLINE void x86_x64_tss_t::set_rsp0(u64_t rsp0)
 {
     rsp[0] = rsp0;
 }
 
-INLINE u64_t amd64_tss_t::get_rsp0()
+INLINE u64_t x86_x64_tss_t::get_rsp0()
 {
     return rsp[0];
 }
 
 
-INLINE addr_t amd64_tss_t::get_io_bitmap()
+INLINE addr_t x86_x64_tss_t::get_io_bitmap()
 {
     return (addr_t) io_bitmap;
 }
 
 
-extern amd64_tss_t tss;
+extern x86_x64_tss_t tss;
 
 #if defined(CONFIG_IS_64BIT)
-typedef amd64_tss_t x86_tss_t;
+typedef x86_x64_tss_t x86_tss_t;
 #endif
 
 #endif /* !__ARCH__X86__X64__TSS_H__ */

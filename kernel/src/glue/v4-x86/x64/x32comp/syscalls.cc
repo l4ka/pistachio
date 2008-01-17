@@ -42,7 +42,7 @@ FEATURESTRING ("compatibility_mode");
 
 #include INC_GLUE_SA(x32comp/kernelinterface.h)
 
-extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
+extern "C" x86_x64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
 					        word_t arg2,  /* RSI */
 					        word_t arg3,  /* RDX */
 					        word_t uip,   /* RCX */
@@ -62,7 +62,7 @@ extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
     printf("uip: %x\n", uip);
 #endif
 
-    amd64_sysret_t ret;
+    x86_x64_sysret_t ret;
     addr_t syscall = (addr_t) ((uip & (SYSCALL_ALIGN * 0xf)) | (addr_word_t) x32::get_kip());
 
     if (syscall == user_ipc_32)

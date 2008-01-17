@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/init.cc
  * Description:   System initialization
@@ -64,7 +64,7 @@
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
 
-amd64_cpu_features_t boot_cpu_ft UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
+x86_x64_cpu_features_t boot_cpu_ft UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 1);
 x86_tss_t tss UNIT("x86.cpulocal") CTORPRIO(CTORPRIO_GLOBAL, 2);
 bool tracebuffer_initialized UNIT("x86.cpulocal");
 
@@ -74,7 +74,7 @@ struct gdt_struct {
     x86_tssdesc_t tssdsc;		/* 1 entries a 16 byte */
 } gdt UNIT("x86.cpulocal");
 
-u8_t amd64_cache_line_size;
+u8_t x86_x64_cache_line_size;
 
 
 // from glue/v4-x86/
@@ -116,7 +116,7 @@ void SECTION(SEC_INIT) check_cpu_features()
 #if 0
     boot_cpu_ft.dump_features();
 #endif
-    amd64_cache_line_size = boot_cpu_ft.get_l1_cache().d.dcache.l_size;
+    x86_x64_cache_line_size = boot_cpu_ft.get_l1_cache().d.dcache.l_size;
 }
 
 void SECTION(SEC_INIT) init_meminfo (void)
@@ -182,7 +182,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 {
 
     /* Initialize GDT */
-    gdt.segdsc[GDT_IDX(AMD64_INVS)].set_seg((u64_t) 0, x86_segdesc_t::inv, 0, x86_segdesc_t::m_long);
+    gdt.segdsc[GDT_IDX(X86_X64_INVS)].set_seg((u64_t) 0, x86_segdesc_t::inv, 0, x86_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(X86_KCS)].set_seg((u64_t) 0, x86_segdesc_t::code, 0, x86_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(X86_KDS)].set_seg((u64_t) 0, x86_segdesc_t::data, 0, x86_segdesc_t::m_long);
     gdt.segdsc[GDT_IDX(X86_UCS)].set_seg((u64_t) 0, x86_segdesc_t::code, 3, x86_segdesc_t::m_long);
@@ -193,10 +193,10 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
     /* TODO: Assertion correct ? */
-    ASSERT(unsigned(cpuid * AMD64_CACHE_LINE_SIZE) < X86_SUPERPAGE_SIZE);
+    ASSERT(unsigned(cpuid * X86_X64_CACHE_LINE_SIZE) < X86_SUPERPAGE_SIZE);
     
     /* Set TSS */
-    gdt.tssdsc.set_seg((u64_t) &tss, sizeof(amd64_tss_t) - 1);
+    gdt.tssdsc.set_seg((u64_t) &tss, sizeof(x86_x64_tss_t) - 1);
 
     /* Load descriptor registers */
     x86_descreg_t gdtr((word_t) &gdt, sizeof(gdt));
@@ -213,7 +213,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
      * registers 
      */ 
 	
-    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
+    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * X86_X64_CACHE_LINE_SIZE),
 				           x86_segdesc_t::data,
 				           3,
 				           x86_segdesc_t::m_long,
@@ -247,7 +247,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 	);
     
     
-    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * AMD64_CACHE_LINE_SIZE),
+    gdt.segdsc[GDT_IDX(X86_UTCBS)].set_seg(UTCB_MAPPING + (cpuid * X86_X64_CACHE_LINE_SIZE),
 					   x86_segdesc_t::data,
 					   3,
 					   x86_segdesc_t::m_long,
@@ -273,30 +273,30 @@ void setup_msrs (void)
 #endif
 
     /* sysret (63..48) / syscall (47..32)  CS/SS MSR */
-    x86_wrmsr(AMD64_STAR_MSR, ((X86_SYSRETCS << 48) | (X86_SYSCALLCS << 32)));
+    x86_wrmsr(X86_X64_MSR_STAR, ((X86_SYSRETCS << 48) | (X86_SYSCALLCS << 32)));
     
     /* long mode syscalls MSR */
-    x86_wrmsr(AMD64_LSTAR_MSR, (u64_t)(syscall_entry));
+    x86_wrmsr(X86_X64_MSR_LSTAR, (u64_t)(syscall_entry));
 
     /* compatibility mode syscalls MSR */
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 #if defined(CONFIG_X86_EM64T)
-    x86_wrmsr(X86_SYSENTER_CS_MSR, X86_SYSCALLCS);
-    x86_wrmsr(X86_SYSENTER_EIP_MSR, (u64_t)(sysenter_entry_32));
-    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u64_t)(&tss) + 4);
+    x86_wrmsr(X86_MSR_SYSENTER_CS, X86_SYSCALLCS);
+    x86_wrmsr(X86_MSR_SYSENTER_EIP, (u64_t)(sysenter_entry_32));
+    x86_wrmsr(X86_MSR_SYSENTER_ESP, (u64_t)(&tss) + 4);
     
 #else /* !defined(CONFIG_X86_EM64T) */
-    x86_wrmsr(AMD64_CSTAR_MSR, (u64_t)(syscall_entry_32));
+    x86_wrmsr(X86_X64_MSR_CSTAR, (u64_t)(syscall_entry_32));
 #endif /* !defined(CONFIG_X86_EM64T) */
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
     /* long mode syscall RFLAGS MASK  */
-    x86_wrmsr(AMD64_SFMASK_MSR, (u64_t)(AMD64_SYSCALL_FLAGMASK));
+    x86_wrmsr(X86_X64_MSR_SFMASK, (u64_t)(X86_X64_SYSCALL_FLAGMASK));
 
     /* enable syscall/sysret in EFER */
-    word_t efer = x86_rdmsr(AMD64_EFER_MSR);
-    efer |= AMD64_EFER_SCE;
-    x86_wrmsr(AMD64_EFER_MSR, efer);
+    word_t efer = x86_rdmsr(X86_MSR_EFER);
+    efer |= X86_MSR_EFER_SCE;
+    x86_wrmsr(X86_MSR_EFER, efer);
     
 }
 

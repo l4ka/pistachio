@@ -32,7 +32,7 @@
 #ifndef __GLUE_V4_X86__X64__TCB_H__
 #define __GLUE_V4_X86__X64__TCB_H__
 
-#include INC_ARCH_SA(tss.h)			/* for amd64_tss_t */
+#include INC_ARCH_SA(tss.h)			/* for x86_x64_tss_t */
 
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 #include INC_GLUE_SA(x32comp/tcb.h)
@@ -327,8 +327,8 @@ INLINE void tcb_t::return_from_user_interruption (void)
 INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
 {
   word_t copyarea_num = 
-      (((word_t) addr - COPY_AREA_START) >> AMD64_PDP_BITS) /
-      (COPY_AREA_SIZE >> AMD64_PDP_BITS);
+      (((word_t) addr - COPY_AREA_START) >> X86_X64_PDP_BITS) /
+      (COPY_AREA_SIZE >> X86_X64_PDP_BITS);
  
      return addr_offset (resources.copy_area_real_address (copyarea_num),
                          (word_t) addr & (COPY_AREA_SIZE-1));

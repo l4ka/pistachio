@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006,  Karlsruhe University
+ * Copyright (C) 2006, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/ia32/syscalls.h
+ * File path:     glue/v4-x86/x64/x32comp/syscalls.h
  * Description:   syscall dispatcher for 32-bit programs
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,11 @@
  * $Id: syscalls.h,v 1.1 2006/10/20 19:50:54 reichelt Exp $
  *                
  ********************************************************************/
-#ifndef __API__GLUE_V4_X86__X64__IA32__SYSCALLS_H__
-#define __API__GLUE_V4_X86__X64__IA32__SYSCALLS_H__
+#ifndef __GLUE__V4_X86__X64__X32COMP__SYSCALLS_H__
+#define __GLUE__V4_X86__X64__X32COMP__SYSCALLS_H__
 
-extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
+
+extern "C" x86_x64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
 					        word_t arg2,  /* RSI */
 					        word_t arg3,  /* RDX */
 					        word_t uip,   /* RCX */
@@ -41,4 +42,5 @@ extern "C" amd64_sysret_t syscall_dispatcher_32(word_t arg1,  /* RDI */
 					        word_t arg6,  /* stack (RAX) */
 					        word_t arg7   /* stack (RBX) */);
 
-#endif /* !__API__GLUE_V4_X86__X64__IA32__SYSCALLS_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__SYSCALLS_H__ */

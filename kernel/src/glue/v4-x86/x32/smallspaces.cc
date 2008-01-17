@@ -49,7 +49,7 @@ DECLARE_TRACEPOINT (SMALLSPACE_SYNC);
 /**
  * Array containing the owners of small space slots.
  */
-x86_space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS];
+x86_space_t * small_space_owner[SMALLSPACE_AREA_SIZE >> X86_X32_PDIR_BITS];
 
 
 /**
@@ -77,7 +77,7 @@ DEFINE_SPINLOCK (polluted_spaces_lock);
 word_t __is_small UNIT ("cpulocal");
 
 
-#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_X86_X32_SMALL_SPACES_GLOBAL)
 /**
  * Modify global bits in the page tables of indicated space.
  *
@@ -114,14 +114,14 @@ static void modify_global_bits (space_t * space, pgent_t * pg,
 	pg = pg->next (space, pgsize, 1);
     }
 }
-#endif /* CONFIG_IA32_SMALL_SPACES_GLOBAL */
+#endif /* CONFIG_X86_X32_SMALL_SPACES_GLOBAL */
 
 
 /*
  * When global small spaces is enabled we must do a global TLB flush
  * to get rid of the small space TLB entries.
  */
-#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_X86_X32_SMALL_SPACES_GLOBAL)
 #define FLUSH_GLOBAL true
 #else
 #define FLUSH_GLOBAL false
@@ -149,7 +149,7 @@ static void do_xcpu_flush_tlb(cpu_mb_entry_t * entry)
  */
 bool x86_space_t::make_small (smallspace_id_t id)
 {
-    const word_t max_idx = SMALLSPACE_AREA_SIZE >> IA32_PDIR_BITS;
+    const word_t max_idx = SMALLSPACE_AREA_SIZE >> X86_X32_PDIR_BITS;
 
     word_t size = id.size () >> 22;
     word_t offset = id.offset () >> 22;
@@ -209,7 +209,7 @@ bool x86_space_t::make_small (smallspace_id_t id)
 
     small_space_owner_lock.unlock ();
 
-#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_X86_X32_SMALL_SPACES_GLOBAL)
     // Set global bits for all pages in small space area.
     modify_global_bits (this, pgent (0), smallspace_size (), true);
 #endif
@@ -266,7 +266,7 @@ void x86_space_t::make_large (void)
 
     smallid ()->set_large ();
 
-#if defined(CONFIG_IA32_SMALL_SPACES_GLOBAL)
+#if defined(CONFIG_X86_X32_SMALL_SPACES_GLOBAL)
     // Clear global bits for all pages in small space area.
     modify_global_bits (this, pgent (0), id.size (), false);
 #endif

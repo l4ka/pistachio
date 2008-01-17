@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-x86/prepost.cc
  * Description:   IA-32 specific handlers for KDB entry and exit
@@ -125,15 +125,15 @@ bool kdb_t::pre()
 	    if (x86_single_step_on_branches)
 	    {
 		addr_t last_branch_ip;
-		x86_wrmsr (X86_DEBUGCTL, 0);
+		x86_wrmsr (X86_MSR_DEBUGCTL, 0);
 		x86_single_step_on_branches = false;
 #if defined(CONFIG_CPU_X86_I686)
 		last_branch_ip = (addr_t) (word_t)
-		    x86_rdmsr (X86_LASTBRANCHFROMIP_MSR);
+		    x86_rdmsr (X86_MSR_LASTBRANCHFROMIP);
 #else
 		last_branch_ip = (addr_t) (word_t)
-		    (x86_rdmsr (X86_LASTBRANCH_0_MSR +
-				x86_rdmsr (X86_LASTBRANCH_TOS_MSR)) >> 32);
+		    (x86_rdmsr (X86_MSR_LASTBRANCH_0 +
+				x86_rdmsr (X86_MSR_LASTBRANCH_TOS)) >> 32);
 #endif
 		disas_addr (last_branch_ip, "branch to");
 		x86_last_ip = f->regs[x86_exceptionframe_t::ipreg];

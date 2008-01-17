@@ -32,7 +32,7 @@
 #include <debug.h>
 #include INC_ARCH(cpu.h)
 
-amd64_cpu_features_t::amd64_cpu_features_t(){
+x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     
     /* Check out if CPUID available */
     if (!has_cpuid()){
@@ -156,7 +156,7 @@ amd64_cpu_features_t::amd64_cpu_features_t(){
     vaddr_bits = ( (eax >> 8) & 0xFF);
 }
 
-void amd64_cpu_features_t::dump_features(){
+void x86_x64_cpu_features_t::dump_features(){
     printf("CPU features:\n");
 
     const char* std_feature_list[] = {

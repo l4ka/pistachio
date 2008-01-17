@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/init32.cc
  * Description:   Switch to 64bit long mode
@@ -192,14 +192,14 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
      * outside the pdir
      */
     
-    if  (AMD64_PDIR_IDX(KERNEL_OFFSET_TYPED) != 0 && 
-	 (AMD64_PDIR_IDX(KERNEL_OFFSET_TYPED) < INIT32_PDIR_ENTRIES ||
-	  AMD64_PDIR_IDX(KERNEL_OFFSET_TYPED) + INIT32_PDIR_ENTRIES > 512ULL))
+    if  (X86_X64_PDIR_IDX(KERNEL_OFFSET_TYPED) != 0 && 
+	 (X86_X64_PDIR_IDX(KERNEL_OFFSET_TYPED) < INIT32_PDIR_ENTRIES ||
+	  X86_X64_PDIR_IDX(KERNEL_OFFSET_TYPED) + INIT32_PDIR_ENTRIES > 512ULL))
 	init32_spin(2);
     
     for (int i=0; i< INIT32_PDIR_ENTRIES; i++){
     	/* the pdir (used twice!) maps 1 GByte */
-	init_pdir[i] = init_pdir[i + AMD64_PDIR_IDX(KERNEL_OFFSET_TYPED)] =
+	init_pdir[i] = init_pdir[i + X86_X64_PDIR_IDX(KERNEL_OFFSET_TYPED)] =
 	    ((i << X86_SUPERPAGE_BITS) | (INIT32_PDIR_ATTRIBS & X86_SUPERPAGE_FLAGS_MASK));
     }
 
@@ -210,7 +210,7 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
      */
    
     
-    init_pdp[0] = init_pdp[AMD64_PDP_IDX(KERNEL_OFFSET_TYPED) ] =\
+    init_pdp[0] = init_pdp[X86_X64_PDP_IDX(KERNEL_OFFSET_TYPED) ] =\
 	(u64_t) ( ( (u32_t) (init_pdir)) | INIT32_PTAB_ATTRIBS);
 
     
@@ -219,7 +219,7 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
      * one for the first 512 GByte, one for the last 512 GByte
      */
    
-    init_pml4[0] = init_pml4[AMD64_PML4_IDX(KERNEL_OFFSET_TYPED) ] =\
+    init_pml4[0] = init_pml4[X86_X64_PML4_IDX(KERNEL_OFFSET_TYPED) ] =\
 	(u64_t) ( ( (u32_t) (init_pdp)) | INIT32_PTAB_ATTRIBS);
 
 

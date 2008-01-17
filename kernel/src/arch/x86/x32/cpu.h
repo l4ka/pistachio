@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/cpu.h
  * Description:   IA32 helper functions to access special registers
@@ -46,7 +46,7 @@ INLINE void x86_iret_self()
 }	
 
 
-INLINE bool ia32_has_cpuid()
+INLINE bool x86_x32_has_cpuid()
 {
     /* Iff bit 21 in EFLAGS can be set the CPU supports the CPUID
      * instruction */
@@ -69,7 +69,7 @@ INLINE bool ia32_has_cpuid()
     return (eflags & X86_FLAGS_ID);
 }
 
-INLINE void ia32_cpuid(word_t index,
+INLINE void x86_x32_cpuid(word_t index,
 		       word_t* eax, word_t* ebx, word_t* ecx, word_t* edx)
 {
     __asm__ (
@@ -80,18 +80,18 @@ INLINE void ia32_cpuid(word_t index,
 }
 
 
-INLINE u32_t ia32_get_cpu_features()
+INLINE u32_t x86_x32_get_cpu_features()
 {
-    if (ia32_has_cpuid ())
+    if (x86_x32_has_cpuid ())
     {
 	u32_t features, dummy;
-	ia32_cpuid(1, &dummy, &dummy, &dummy, &features);
+	x86_x32_cpuid(1, &dummy, &dummy, &dummy, &features);
 	return features;
     } else {
 	/* If there is no CPUID instruction we just fabricate the
          * appropriate feature word.  Currently we only support
          * i486DX+ and therefore assume the FPU to be present */
-	return IA32_FEAT_FPU;
+	return X86_X32_FEAT_FPU;
     }
 }
 

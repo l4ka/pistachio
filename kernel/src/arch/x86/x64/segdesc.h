@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2003, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/segdesc.h
  * Description:   paste ia32/segdesc.h, s/ia32/amd64
@@ -65,7 +65,7 @@ public:
 	    /* If we set FS or GS, we have to set MSR's for a 64bit base */ 
 	    if (msr != msr_none && (base >> 32))
 	    {
-		u32_t reg = (msr == msr_fs) ? AMD64_FS_MSR : AMD64_GS_MSR;
+		u32_t reg = (msr == msr_fs) ? X86_X64_MSR_FS : X86_X64_MSR_GS;
 		x86_wrmsr(reg, base);
 	    }
     

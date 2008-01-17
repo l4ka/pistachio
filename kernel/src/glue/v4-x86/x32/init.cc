@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                 
 * File path:     glue/v4-x86/x32/init.cc
  * Description:   ia32-specific initialization
@@ -116,7 +116,7 @@ void setup_smp_boot_gdt (void)
 
 /* processor local data */
 x86_segdesc_t	gdt[GDT_SIZE] UNIT("x86.cpulocal");
-ia32_tss_t	tss UNIT("x86.cpulocal");
+x86_x32_tss_t	tss UNIT("x86.cpulocal");
 
 
 
@@ -139,11 +139,11 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 				    3, x86_segdesc_t::data);
 
     /* the TSS
-     * The last byte in ia32_tss_t is a stopper for the IO permission bitmap.
+     * The last byte in x86_x32_tss_t is a stopper for the IO permission bitmap.
      * That's why we set the limit in the GDT to one byte less than the actual
      * size of the structure. (IA32-RefMan, Part 1, Chapter Input/Output) */
-    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(IA32_TSS), &tss, sizeof(ia32_tss_t)-1);
-    gdt[gdt_idx(X86_TSS)].set_sys((u32_t) &tss, sizeof(ia32_tss_t)-1, 
+    //TRACEF("gdt @ %d = %x (size %x)\n", gdt_idx(X86_X32_TSS), &tss, sizeof(x86_x32_tss_t)-1);
+    gdt[gdt_idx(X86_TSS)].set_sys((u32_t) &tss, sizeof(x86_x32_tss_t)-1, 
 				   0, x86_segdesc_t::tss);
     
 #ifdef CONFIG_TRACEBUFFER
@@ -200,9 +200,9 @@ void setup_msrs (void)
 {
 #ifdef CONFIG_X86_SYSENTER
     /* here we also setup the model specific registers for the syscalls */
-    x86_wrmsr(X86_SYSENTER_CS_MSR, (u32_t)(X86_KCS));
-    x86_wrmsr(X86_SYSENTER_EIP_MSR, (u32_t)(exc_user_sysipc));
-    x86_wrmsr(X86_SYSENTER_ESP_MSR, (u32_t)(&tss) + 4);
+    x86_wrmsr(X86_MSR_SYSENTER_CS, (u32_t)(X86_KCS));
+    x86_wrmsr(X86_MSR_SYSENTER_EIP, (u32_t)(exc_user_sysipc));
+    x86_wrmsr(X86_MSR_SYSENTER_ESP, (u32_t)(&tss) + 4);
 #endif
 
 #if defined(CONFIG_X86_FXSR)
@@ -220,12 +220,12 @@ void setup_msrs (void)
     // for the PCD and PWT bits if the PAT bit is not set.
 
     u64_t pats =
-	((u64_t) X86_PAT_WB << (8*0)) | ((u64_t) X86_PAT_WT << (8*1)) |
-	((u64_t) X86_PAT_UM << (8*2)) | ((u64_t) X86_PAT_UC << (8*3)) |
-	((u64_t) X86_PAT_WC << (8*4)) | ((u64_t) X86_PAT_WT << (8*5)) |
-	((u64_t) X86_PAT_UM << (8*6)) | ((u64_t) X86_PAT_WP << (8*7));
+	((u64_t) X86_MSR_PAT_WB << (8*0)) | ((u64_t) X86_MSR_PAT_WT << (8*1)) |
+	((u64_t) X86_MSR_PAT_UM << (8*2)) | ((u64_t) X86_MSR_PAT_UC << (8*3)) |
+	((u64_t) X86_MSR_PAT_WC << (8*4)) | ((u64_t) X86_MSR_PAT_WT << (8*5)) |
+	((u64_t) X86_MSR_PAT_UM << (8*6)) | ((u64_t) X86_MSR_PAT_WP << (8*7));
 
-    x86_wrmsr (X86_CR_PAT_MSR, pats);
+    x86_wrmsr (X86_MSR_CR_PAT, pats);
 #endif
 }
 
@@ -234,36 +234,36 @@ void setup_msrs (void)
  * has all necessary features */
 void SECTION(".init.cpu") check_cpu_features()
 {
-    u32_t req_features = IA32_FEAT_FPU;
+    u32_t req_features = X86_X32_FEAT_FPU;
 #ifdef CONFIG_X86_PSE
-    req_features |= IA32_FEAT_PSE;
+    req_features |= X86_X32_FEAT_PSE;
 #endif
 #ifdef CONFIG_X86_PGE
-    req_features |= IA32_FEAT_PGE;
+    req_features |= X86_X32_FEAT_PGE;
 #endif
 #ifdef CONFIG_X86_FXSR
-    req_features |= IA32_FEAT_FXSR;
+    req_features |= X86_X32_FEAT_FXSR;
 #endif
 #ifdef CONFIG_X86_SYSENTER
-    req_features |= IA32_FEAT_SEP;
+    req_features |= X86_X32_FEAT_SEP;
 #endif
 #ifdef CONFIG_IOAPIC
-    req_features |= IA32_FEAT_APIC;
+    req_features |= X86_X32_FEAT_APIC;
 #endif
-    u32_t avail_features = ia32_get_cpu_features();
+    u32_t avail_features = x86_x32_get_cpu_features();
 
     if ((req_features & avail_features) != req_features)
     {
 	printf("CPU does not support all features (%x) -- halting\n", req_features);
 #if defined(CONFIG_VERBOSE_INIT)
-	const char* ia32_features[] = {
+	const char* x86_x32_features[] = {
 	    "fpu",  "vme",    "de",   "pse",   "tsc",  "msr", "pae",  "mce",
 	    "cx8",  "apic",   "?",    "sep",   "mtrr", "pge", "mca",  "cmov",
 	    "pat",  "pse-36", "psn",  "cflsh", "?",    "ds",  "acpi", "mmx",
 	    "fxsr", "sse",    "sse2", "ss",    "ht",   "tm",  "ia64", "pbe" };
 	for (int i = 0; i < 32; i++)
 	    if ((req_features & 1 << i) && (!(avail_features & 1 << i)))
-		printf("%s ", ia32_features[i]);
+		printf("%s ", x86_x32_features[i]);
 	printf("missing\n");
 #endif
 	spin_forever();
@@ -366,19 +366,19 @@ extern "C" void SECTION(SEC_INIT) init_paging()
 #if defined(CONFIG_X86_PSE)
     for (int i = 0; i < MAX_KERNEL_MAPPINGS; i++)
 	init_pdir[i] = 
-	    init_pdir[(KERNEL_OFFSET >> IA32_PDIR_BITS) + i] = 
-	    (i << IA32_PDIR_BITS) | PAGE_ATTRIB_INIT;
+	    init_pdir[(KERNEL_OFFSET >> X86_X32_PDIR_BITS) + i] = 
+	    (i << X86_X32_PDIR_BITS) | PAGE_ATTRIB_INIT;
 #else
     for (int i = 0; i < MAX_KERNEL_MAPPINGS; i++)
     {
         // Fill 2nd-level page table
 	for (int j = 0; j<1024; j++) 
-	    init_ptable[i][j] = ((i << IA32_PDIR_BITS) |
+	    init_ptable[i][j] = ((i << X86_X32_PDIR_BITS) |
                                  (j << X86_PAGE_BITS) |
                                  PAGE_ATTRIB_INIT);
         // Install page table in page directory
 	init_pdir[i] = 
-	    init_pdir[(KERNEL_OFFSET >> IA32_PDIR_BITS) + i] = 
+	    init_pdir[(KERNEL_OFFSET >> X86_X32_PDIR_BITS) + i] = 
 	    (word_t)(init_ptable[i]) | PAGE_ATTRIB_INIT;
     }
 #endif /* CONFIG_X86_PSE */

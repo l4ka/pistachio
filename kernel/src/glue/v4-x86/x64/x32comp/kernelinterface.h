@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006-2007,  Karlsruhe University
+ * Copyright (C) 2006-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/x32comp/kernelinterface.h
  * Description:   Version 4 kernel-interface page for Compatibility Mode
@@ -30,8 +30,9 @@
  *                
  ********************************************************************/
 
-#ifndef __GLUE__V4_X86__X64__IA32__KERNELINTERFACE_H__
-#define __GLUE__V4_X86__X64__IA32__KERNELINTERFACE_H__
+
+#ifndef __GLUE__V4_X86__X64__X32COMP__KERNELINTERFACE_H__
+#define __GLUE__V4_X86__X64__X32COMP__KERNELINTERFACE_H__
 
 #include INC_GLUE_SA(x32comp/types.h)
 
@@ -62,4 +63,5 @@ namespace x32 {
 #undef KIP_PROC_DESC_LOG2SIZE
 #endif
 
-#endif /* !__GLUE__V4_X86__X64__IA32__KERNELINTERFACE_H__ */
+
+#endif /* !__GLUE__V4_X86__X64__X32COMP__KERNELINTERFACE_H__ */

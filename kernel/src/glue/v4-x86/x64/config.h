@@ -103,9 +103,9 @@
  */
 
 #define KERNEL_AREA_END		(~0UL)
-#define APIC_MAPPINGS_START	(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(510) << AMD64_PDIR_BITS)
-#define UTCB_MAPPING		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS | __UL(509) << AMD64_PDIR_BITS)
-/*      KERNEL_OFFSET           (AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS) */
+#define APIC_MAPPINGS_START	(X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS | __UL(511) << X86_X64_PDP_BITS | __UL(510) << X86_X64_PDIR_BITS)
+#define UTCB_MAPPING		(X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS | __UL(511) << X86_X64_PDP_BITS | __UL(509) << X86_X64_PDIR_BITS)
+/*      KERNEL_OFFSET           (X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS | __UL(511) << X86_X64_PDP_BITS) */
 
 #define VIDEO_MAPPING		(0xB8000)
 #define IOAPIC_MAPPING(x)	(APIC_MAPPINGS_START + ((x)+1)*X86_PAGE_SIZE)
@@ -124,8 +124,8 @@
  * pml[511] pdp[510]  ... pml[511] pdp[507] 
  * 
  */
-#define REMAP_32BIT_END		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(511) << AMD64_PDP_BITS)
-#define REMAP_32BIT_START	(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS | __UL(507) << AMD64_PDP_BITS)		 
+#define REMAP_32BIT_END		(X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS | __UL(511) << X86_X64_PDP_BITS)
+#define REMAP_32BIT_START	(X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS | __UL(507) << X86_X64_PDP_BITS)		 
 #define REMAP_32BIT_SIZE	(REMAP_32BIT_END - REMAP_32BIT_START)		 
 
 /**
@@ -136,7 +136,7 @@
  * 
  */
 #define KTCB_AREA_SIZE		(KTCB_SIZE << VALID_THREADNO_BITS)
-#define KTCB_AREA_START		((REMAP_32BIT_START - KTCB_AREA_SIZE) & (AMD64_SIGN_EXTEND_MASK | AMD64_PML4_MASK | AMD64_PDP_MASK) )
+#define KTCB_AREA_START		((REMAP_32BIT_START - KTCB_AREA_SIZE) & (X86_X64_SIGN_EXTEND_MASK | X86_X64_PML4_MASK | X86_X64_PDP_MASK) )
 #define KTCB_AREA_END		(KTCB_AREA_START + KTCB_AREA_SIZE)
 
 
@@ -151,11 +151,11 @@
 
 #define COPY_AREA_COUNT		1
 #define COPY_AREA_PDIRS		2
-#define COPY_AREA_SIZE		(__UL(2) * AMD64_PDP_SIZE)
-#define COPY_AREA_START		(AMD64_SIGN_EXTENSION | __UL(511) << AMD64_PML4_BITS)
+#define COPY_AREA_SIZE		(__UL(2) * X86_X64_PDP_SIZE)
+#define COPY_AREA_START		(X86_X64_SIGN_EXTENSION | __UL(511) << X86_X64_PML4_BITS)
 #define COPY_AREA_END		(COPY_AREA_START + (COPY_AREA_COUNT * COPY_AREA_SIZE))
 
-#define SPACE_BACKLINK		(AMD64_SIGN_EXTENSION | __UL(510) << AMD64_PML4_BITS)
+#define SPACE_BACKLINK		(X86_X64_SIGN_EXTENSION | __UL(510) << X86_X64_PML4_BITS)
 #define KERNEL_AREA_START	(SPACE_BACKLINK)
 #define KERNEL_AREA_SIZE	(KERNEL_AREA_END - KERNEL_AREA_START + 1)
 
@@ -205,14 +205,14 @@
  * 
  * TSS descriptor is 16 bytes long, therefore we place it at the end
  */
-#define AMD64_INVS	         0x0		/* 0		*/
+#define X86_X64_INVS	         0x0		/* 0		*/
 #define X86_KCS                  0x8		/* 1, RPL = 0	*/
 #define X86_KDS                  0x10		/* 2, RPL = 0	*/
 #define X86_UCS32                0x1b		/* 3, RPL = 3	*/
 #define X86_UDS                  0x23		/* 4, RPL = 3	*/
 #define X86_UCS                  0x2b		/* 5, RPL = 3	*/
 #define X86_UTCBS                0x33		/* 6, RPL = 3	*/
-#define AMD64_KDBS               0x38		/* 7, RPL = 0	*/
+#define X86_X64_KDBS               0x38		/* 7, RPL = 0	*/
 #define X86_TBS                  0x43		/* 8, RPL = 0	*/
 #define X86_TSS			 0x48		/* 9, RPL = 0	*/
 
@@ -236,22 +236,22 @@
 /* Syscall/Sysret code and stack segment
  * 
  * On syscall : 
- *		CS <- AMD64_SYSCALLCS
- *		SS <- AMD64_SYSCALLCS + 8
+ *		CS <- X86_X64_SYSCALLCS
+ *		SS <- X86_X64_SYSCALLCS + 8
  * 
  * On sysret into compatibility mode:  
- *		CS <- AMD64_SYSRETCS
- *		SS <- AMD64_SYSRETCS + 8
+ *		CS <- X86_X64_SYSRETCS
+ *		SS <- X86_X64_SYSRETCS + 8
  * On sysret into long mode:  
- *		CS <- AMD64_SYSRETCS + 16
- *		SS <- AMD64_SYSRETCS + 8
+ *		CS <- X86_X64_SYSRETCS + 16
+ *		SS <- X86_X64_SYSRETCS + 8
  */
 
 #define X86_SYSCALLCS		((u64_t) X86_KCS)
 #define X86_SYSRETCS		((u64_t) X86_UCS32)
 
 /* Syscall/Sysret RFLAGS MASK register value */
-#define AMD64_SYSCALL_FLAGMASK	(X86_FLAGS_IF | X86_FLAGS_RF | X86_FLAGS_VM)
+#define X86_X64_SYSCALL_FLAGMASK	(X86_FLAGS_IF | X86_FLAGS_RF | X86_FLAGS_VM)
 
 /* global IDT entries */
 #define IDT_LAPIC_TIMER         0x40
@@ -297,7 +297,7 @@
 #define KSTACK_UIP              (-5)
 #define KSTACK_RET_IPC          (-8)
 
-#define CACHE_LINE_SIZE		(AMD64_CACHE_LINE_SIZE)
+#define CACHE_LINE_SIZE		(X86_X64_CACHE_LINE_SIZE)
 #define SMP_STARTUP_ADDRESS	(0x4000) 
 
 #define CONFIG_SMP_SYNC_REQUEST

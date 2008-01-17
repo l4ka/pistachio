@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/arch/x86/x86.cc
  * Description:   
@@ -99,16 +99,16 @@ CMD(cmd_show_ctrlregs, cg)
 CMD (cmd_dump_msrs, cg)
 {
 #if defined(CONFIG_CPU_X86_I686)
-    printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_LASTBRANCHFROMIP_MSR));
-    printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_LASTBRANCHTOIP_MSR));
-    printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_LASTINTFROMIP_MSR));
-    printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_LASTINTTOIP_MSR));
+    printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_MSR_LASTBRANCHFROMIP));
+    printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_MSR_LASTBRANCHTOIP));
+    printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_MSR_LASTINTFROMIP));
+    printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_MSR_LASTINTTOIP));
 #endif
 
 #if defined(CONFIG_CPU_X86_P4)
     for (int i = 0; i < 18; i++) {
-	u64_t pmc = x86_rdmsr (X86_COUNTER_BASE_MSR + i);
-	u64_t cccr = x86_rdmsr (X86_CCCR_BASE_MSR + i);
+	u64_t pmc = x86_rdmsr (X86_MSR_COUNTER_BASE + i);
+	u64_t cccr = x86_rdmsr (X86_MSR_CCCR_BASE + i);
 	printf("PMC/CCCR %02u: 0x%08x%08x/0x%08x%08x\n",
 	       i,
 	       (u32_t)(pmc >> 32), (u32_t)pmc,

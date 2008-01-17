@@ -137,7 +137,7 @@ typedef union {
 	    u32_t assoc		:8;
 	} dtlb_4k;
     }d;
-} amd64_tlb_info_t;
+} x86_x64_tlb_info_t;
 
 
 typedef union {
@@ -156,11 +156,11 @@ typedef union {
 	    u32_t size		:8;
 	} dcache;
     }d;
-} amd64_cache_info_t;
+} x86_x64_cache_info_t;
 
 
 
-class amd64_cpu_features_t{
+class x86_x64_cpu_features_t{
 
 private:
     char cpu_vendor[13];
@@ -179,11 +179,11 @@ private:
     u32_t amd_features;
     u32_t apm_features;
     
-    amd64_tlb_info_t l1_tlb;
-    amd64_cache_info_t l1_cache;
+    x86_x64_tlb_info_t l1_tlb;
+    x86_x64_cache_info_t l1_cache;
 
-    amd64_tlb_info_t l2_tlb;
-    amd64_cache_info_t l2_cache;
+    x86_x64_tlb_info_t l2_tlb;
+    x86_x64_cache_info_t l2_cache;
 
     bool l2_2m_tlb_unified;
     bool l2_4k_tlb_unified;
@@ -193,7 +193,7 @@ private:
     u8_t vaddr_bits;
     
 public:
-    amd64_cpu_features_t() SECTION(SEC_INIT);
+    x86_x64_cpu_features_t() SECTION(SEC_INIT);
     void dump_features();
 
     char *get_cpu_vendor() { return cpu_vendor; }
@@ -210,11 +210,11 @@ public:
     u32_t get_amd_features() { return amd_features; }
     u32_t get_apm_features() { return apm_features; }
 
-    amd64_tlb_info_t get_l1_tlb() { return l1_tlb; }
-    amd64_cache_info_t get_l1_cache() { return l1_cache; }
+    x86_x64_tlb_info_t get_l1_tlb() { return l1_tlb; }
+    x86_x64_cache_info_t get_l1_cache() { return l1_cache; }
     
-    amd64_tlb_info_t get_l2_tlb() { return l2_tlb; } 
-    amd64_cache_info_t get_l2_cache() { return l2_cache; }
+    x86_x64_tlb_info_t get_l2_tlb() { return l2_tlb; } 
+    x86_x64_cache_info_t get_l2_cache() { return l2_cache; }
 
     bool l2_2m_tlb_is_unified() { return l2_2m_tlb_unified; }
     bool l2_4k_tlb_is_unified() { return l2_4k_tlb_unified; }
@@ -228,7 +228,7 @@ public:
 		      u32_t *eax, u32_t *ebx, u32_t *ecx, u32_t *edx);
 };
 
-INLINE bool amd64_cpu_features_t::has_cpuid() {
+INLINE bool x86_x64_cpu_features_t::has_cpuid() {
 
     /* 
      * According to the IA-32 Intel Architecture Software Developer's
@@ -269,7 +269,7 @@ INLINE bool amd64_cpu_features_t::has_cpuid() {
 
 }
 
-INLINE void amd64_cpu_features_t::cpuid(word_t fn_idx,
+INLINE void x86_x64_cpu_features_t::cpuid(word_t fn_idx,
 		       u32_t *eax, u32_t *ebx, u32_t *ecx, u32_t *edx )
 {
     __asm__ (
@@ -280,6 +280,6 @@ INLINE void amd64_cpu_features_t::cpuid(word_t fn_idx,
 }
 
 /* from init.cc */
-extern amd64_cpu_features_t boot_cpu_ft;
+extern x86_x64_cpu_features_t boot_cpu_ft;
 
 #endif /* !__ARCH__X86__X64__CPU_H__ */
