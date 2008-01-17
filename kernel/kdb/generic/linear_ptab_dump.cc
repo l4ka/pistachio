@@ -65,7 +65,7 @@ CMD(cmd_dump_ptab, cg)
 
     space_t * space;
     addr_t vaddr;
-    word_t num, count;
+    word_t num, count = 0;
     pgent_t * pg;
     pgent_t::pgsize_e size, max_size;
 
