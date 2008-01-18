@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/tracebuffer.h
  * Description:   Functions for accessing the tracebuffer
@@ -33,9 +33,7 @@
 #include <tcb_layout.h>
 
 #define TRACEBUFFER_MAGIC 	0x1464b123acebf
-#define TRACEBUFFER_SIZE	(4 * 1024 * 1024)
-
-#define TRACEBUFFER_PGENTSZ        pgent_t::size_2m
+#define TRACEBUFFER_PGENTSZ     pgent_t::size_2m
 
 /*
  * Access to stack pointer, timestamp, and performance monitoring counters

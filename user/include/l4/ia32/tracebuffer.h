@@ -31,18 +31,49 @@
 #define __L4__IA32__TRACEBUFFER_H__
 
 #include <l4/types.h>
-#define __L4_TRACEBUFFER_SIZE	(4 * 1024 * 1024)
+
+
+#if !defined(__L4__AMD64__TRACEBUFFER_H__)
+
+/*
+ * Access to stack pointer, timestamp, and performance monitoring counters
+ */
+
+#define __L4_TBUF_RDTSC  "	rdtsc					\n" \
+			 "	mov	%3, %%fs:2*%c9(%0)		\n"	
+    
+#if defined(L4_PERFMON)
+
+# define __L4_TBUF_RDPMC_0   "	rdpmc				\n"	\
+			     "	mov	%3, %%fs:4*%c9(%0)	\n"
+# define __L4_TBUF_RDPMC_1   "	rdpmc				\n"	\
+			"	mov	%3, %%fs:5*%c9(%0)	\n"
+
+# if !defined(L4_CONFIG_CPU_IA32_P4)
+#  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
+# elif defined(L4_CONFIG_CPU_IA32_P4)
+#  define __L4_TBUF_PMC_SEL_0 "	movl	$12, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	addl	 $2, %%ecx		\n"
+# endif
+
+#else /* L4_PERFMON */
+
+# define __L4_TBUF_PMC_SEL_0
+# define __L4_TBUF_PMC_SEL_1
+# define __L4_TBUF_RDPMC_0
+# define __L4_TBUF_RDPMC_1
+
+#endif /* L4_PERFMON */
+
+# define __PLUS32
+
+#endif /* !defined(__L4__AMD64__TRACEBUFFER_H__) */
+
 
 /* Turn preprocessor symbol definition into string */
 #define	MKSTR(sym)	MKSTR2(sym)
 #define	MKSTR2(sym)	#sym
-
-#if defined(L4_64BIT)
-# define __PLUS32	+ 32
-#else
-# define __PLUS32
-#endif
-
 
 #define L4_TRACEBUFFER_MAGIC		(0x143acebf)
 #define L4_TRACEBUFFER_NUM_ARGS		(9)
@@ -69,37 +100,6 @@ typedef struct
     L4_Word_t	data[9];
 } L4_TraceRecord_t;
 
-
-/*
- * Access to performance monitoring counters
- */
-
-/*
- * Access to stack pointer, timestamp, and performance monitoring counters
- */
-#define __L4_TBUF_RDTSC  "	rdtsc					\n" \
-			 "	mov	%3, %%fs:2*%c9(%0)		\n"	
-    
-
-#if defined(L4_PERFMON)
-# define __L4_TBUF_RDPMC_0   "	rdpmc				\n"	\
-			     "	mov	%3, %%fs:4*%c9(%0)	\n"
-# define __L4_TBUF_RDPMC_1   "	rdpmc				\n"	\
-			"	mov	%3, %%fs:5*%c9(%0)	\n"
-
-# if !defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
-#  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
-# elif defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_TBUF_PMC_SEL_0 "	movl	$12, %%ecx		\n"
-#  define __L4_TBUF_PMC_SEL_1 "	add	$2, %%ecx		\n"
-# endif
-#else
-# define __L4_TBUF_PMC_SEL_0 "	xor	%3, %3			\n"
-# define __L4_TBUF_PMC_SEL_1
-# define __L4_TBUF_RDPMC_0   "	mov	%3, %%fs:4*%c9(%0)	\n"
-# define __L4_TBUF_RDPMC_1   "	mov	%3, %%fs:5*%c9(%0)	\n"
-#endif
 
 
 /*
@@ -144,7 +144,8 @@ do {								\
 	    "	mov	%8, %0				\n"		\
 	    "	mov	%0, %2				\n"		\
 	    "	add	%3, %0				\n"		\
-	    "	and	$"MKSTR(__L4_TRACEBUFFER_SIZE-1)", %0	\n"	\
+	    "	mov	%%fs:3*%c9, %2			\n"		\
+	    "	and	%%fs:3*%c9, %0			\n"		\
 	    "	cmovz	%2, %0			      	\n"		\
 	    __L4_TBUF_LOCK						\
 	    "	cmpxchg	%0, %%fs:1*%c9			\n"		\

@@ -33,6 +33,8 @@
 
 #include INC_ARCH_SA(tracebuffer.h)
 
+#define TRACEBUFFER_SIZE	(4 * 1024 * 1024)
+
 /**
  * A tracebuffer record indicates the type of event, the time of the
  * event, the current thread, a number of event specific parameters,
@@ -78,7 +80,8 @@ class tracebuffer_t
     word_t	magic;
     word_t	current;
     word_t	mask;
-    word_t	__pad[5];
+    word_t	sizemask;
+    word_t	__pad[4];
     word_t	counters[8];
     tracerecord_t tracerecords[];
 
@@ -94,12 +97,12 @@ public:
 	    magic = TRACEBUFFER_MAGIC;
 	    current = 0;
 	    mask = TBUF_DEFAULT_MASK;
+	    sizemask = TRACEBUFFER_SIZE-1;
 	}
 
     bool is_valid (void) { return magic == TRACEBUFFER_MAGIC; }
 
-    friend class kdb_t;
-    friend class tbuf_dumper_t;
+    friend class tbuf_handler_t;
 };
 
 INLINE tracebuffer_t * get_tracebuffer (void)
@@ -121,7 +124,7 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 # elif defined(CONFIG_CPU_X86_P4) 
 /* PMC_MSR_IQ_COUNTER 0 and 2 */
 #  define TBUF_PMC_SEL_0	"	mov	$12, %1		\n"
-#  define TBUF_PMC_SEL_1	"	add	$2, %1		\n"
+#  define TBUF_PMC_SEL_1	"	add	$ 2, %1		\n"
 # endif
 
 #else
@@ -152,7 +155,6 @@ INLINE tracebuffer_t * get_tracebuffer (void)
  *
  * @returns index to current event record
  */
-
 
 #define TBUF_GET_NEXT_RECORD(type, id)					\
     ({									\

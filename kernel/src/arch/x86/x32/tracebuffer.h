@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
- * File path:     arch/ia32/tracebuffer.h
+ * File path:     arch/x86/x32/tracebuffer.h
  * Description:   IA32 specific tracebuffer
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,8 @@
 #include <tcb_layout.h>
 
 #define TRACEBUFFER_MAGIC 	0x143acebf
-#define TRACEBUFFER_SIZE	(4 * 1024 * 1024)
 
 #define TRACEBUFFER_PGENTSZ        pgent_t::size_4m
-
-#include INC_ARCH(tracebuffer.h)
 
 /*
  * Access to stack pointer, timestamp, and performance monitoring counters

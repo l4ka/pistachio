@@ -37,6 +37,9 @@
 #include <l4/thread.h>
 #include __L4_INC_ARCH(tracebuffer.h)
 
+#define L4_TRACEBUFFER_USERID_START	(100)
+#define L4_TRACEBUFFER_DEFAULT_TYPE	(0x1)
+
 L4_INLINE void L4_Tbuf_IncCounter (L4_Word_t counter)
 {
     __L4_TBUF_INCREASE_COUNTER (counter);
@@ -44,7 +47,7 @@ L4_INLINE void L4_Tbuf_IncCounter (L4_Word_t counter)
 
 L4_INLINE void L4_Tbuf_RecordEvent_t0 (L4_Word_t id, const char * str)
 { 
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (L4_TRACEBUFFER_DEFAULT_TYPE, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR (addr, str);
@@ -53,7 +56,7 @@ L4_INLINE void L4_Tbuf_RecordEvent_t0 (L4_Word_t id, const char * str)
 L4_INLINE void L4_Tbuf_RecordEvent_t1 (L4_Word_t id, const char * str,
 				       L4_Word_t p0)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (L4_TRACEBUFFER_DEFAULT_TYPE, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -63,7 +66,7 @@ L4_INLINE void L4_Tbuf_RecordEvent_t1 (L4_Word_t id, const char * str,
 L4_INLINE void L4_Tbuf_RecordEvent_t2 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (L4_TRACEBUFFER_DEFAULT_TYPE, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -75,7 +78,7 @@ L4_INLINE void L4_Tbuf_RecordEvent_t3 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1,
 				       L4_Word_t p2)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (L4_TRACEBUFFER_DEFAULT_TYPE, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
@@ -88,7 +91,7 @@ L4_INLINE void L4_Tbuf_RecordEvent_t4 (L4_Word_t id, const char * str,
 				       L4_Word_t p0, L4_Word_t p1,
 				       L4_Word_t p2, L4_Word_t p3)
 {
-    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (0, id);
+    L4_Word_t addr = __L4_TBUF_GET_NEXT_RECORD (L4_TRACEBUFFER_DEFAULT_TYPE, id);
     if (addr == 0)
 	return;
     __L4_TBUF_STORE_STR  (addr, str);
