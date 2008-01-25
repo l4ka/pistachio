@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2007-2008,  Karlsruhe University
  *                
- * File path:     pistachio/user/util/kickstart/mbi-ia32.cc
+ * File path:     mbi-ia32.cc
  * Description:   IA32 specific multiboot info stuff
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include "kickstart.h"
 #include "mbi.h"
+#include "lib.h"
 #include "kipmgr.h"
 
 extern unsigned int max_phys_mem;
@@ -71,7 +72,7 @@ void install_memory(mbi_t * mbi, kip_manager_t* kip)
     // Mark all physical memory as shared by default to allow for
     // device access
     kip->dedicate_memory(0x0, ~0UL, L4_SharedMemoryType, 0);
-
+    
     // Does the MBI contain a reference to the BIOS memory map?
     if (mbi->flags.mmap)
     {
@@ -90,7 +91,7 @@ void install_memory(mbi_t * mbi, kip_manager_t* kip)
             /* Mark "usable" memory (type=1) as conventional physical
                memory, everything else as architecture specific with
                the BIOS memory map type as subtype */
-            kip->dedicate_memory(m->base, m->base + m->size - 1,
+	    kip->dedicate_memory(m->base, m->base + m->size - 1,
                                  (m->type == 1)
                                  ? L4_ConventionalMemoryType
                                  : L4_ArchitectureSpecificMemoryType,
@@ -103,6 +104,9 @@ void install_memory(mbi_t * mbi, kip_manager_t* kip)
 
         if (additional_kmem_size)
         {
+	    if (additional_kmem_size >= MAX_KMEM_END)
+		additional_kmem_size = MAX_KMEM_END - (8 * 1024 * 1024);
+	    
             // Second round: Find a suitable KMEM area
             m = (mmap_t*) mbi->mmap_addr;
             // Iterate over all entries
@@ -117,7 +121,35 @@ void install_memory(mbi_t * mbi, kip_manager_t* kip)
                     // Make sure the end is within kernel's reach
                     end = m->base+m->size < MAX_KMEM_END ? m->base+m->size : MAX_KMEM_END ;
                     base = end - additional_kmem_size;
+		    
+		    L4_Word_t mod_base = end, total_mod_size = 0;
+		    
+		    for (L4_Word_t i = 0; i < mbi->modcount; i++)
+		    {
+			if (is_intersection (base, end, mbi->mods[i].start, mbi->mods[i].end))
+			{
+			    L4_Word_t mod_size = mbi->mods[i].end - mbi->mods[i].start;
+			    total_mod_size += mod_size;
+			    
+			    // Move modules that are in the way, if possible
+			    if (m->size > additional_kmem_size + total_mod_size)
+			    {
+				printf(" relocate mod %d %x -> %x size %d\n", i, 
+				       mbi->mods[i].start, mod_base, mod_size);
 
+				memcopy(mod_base, mbi->mods[i].start, mod_size);
+				
+				mbi->mods[i].start = mod_base;
+				mbi->mods[i].end   = mod_base + mod_size;
+				
+
+				mod_base += ROUND_UP(mod_size, 4096);
+			    }
+			    else
+				
+				base = ROUND_UP(mbi->mods[i].end, (4 * 1024 * 1024));
+			}
+		    }
                     // Mark the memory block as in use by the kernel
                     kip->dedicate_memory(base, end - 1, 
                                          L4_ReservedMemoryType, 0);

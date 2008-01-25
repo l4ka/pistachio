@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006, 2008,  Karlsruhe University
  *                
  * File path:     mbi-amd64.cc
  * Description:   
@@ -138,9 +138,6 @@ void install_memory(mbi_t* mbi, kip_manager_t * kip)
 			 * We want that the chunk be 2 MByte aligned
 			 */ 
 
-#define MB(x)			(x*1024*1024)
-#define ROUND_DOWN(x, size)	(x & ~(size-1))
-#define ROUND_UP(x, size)	(ROUND_DOWN(x, size) == x ? x : ROUND_DOWN(x, size) + size)
 			
 			L4_Word_t useable_base = ROUND_UP(m->base, MB(2));
 			L4_Word_t useable_size = 

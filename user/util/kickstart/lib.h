@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006, 2008,  Karlsruhe University
  *                
  * File path:     lib.h
  * Description:   
@@ -78,3 +78,6 @@ extern inline bool is_intersection(
 	|| ((start1 <= start2) && (end1 >= end2));
 }
 
+#define MB(x)			(x*1024*1024)
+#define ROUND_DOWN(x, size)	(x & ~(size-1))
+#define ROUND_UP(x, size)	(ROUND_DOWN(x, size) == x ? x : ROUND_DOWN(x, size) + size)
