@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/exception.cc
  * Description:   
@@ -21,7 +21,7 @@
 #include INC_API(kernelinterface.h)
 #include INC_GLUE(traphandler.h)
 
-DECLARE_TRACEPOINT (EXCEPTION_IPC);
+DECLARE_TRACEPOINT_DETAIL (EXCEPTION_IPC);
 DECLARE_TRACEPOINT (X86_NOMATH);
 DECLARE_TRACEPOINT (X86_GP);
 DECLARE_TRACEPOINT (X86_SEGRELOAD);

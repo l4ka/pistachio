@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     api/v4/schedule.cc
  * Description:   Scheduling functions
@@ -62,9 +62,7 @@ DECLARE_TRACEPOINT(PREEMPTION_DELAY_REFRESH);
 DECLARE_TRACEPOINT(WAKEUP_TIMEOUT);
 
 DECLARE_TRACEPOINT(SYSCALL_SCHEDULE);
-#if defined(DEBUG_SCHEDULE)
-DECLARE_TRACEPOINT(SCHEDULE_DETAILS);
-#endif
+DECLARE_TRACEPOINT_DETAIL(SCHEDULE_DETAILS);
 
 
 #ifdef CONFIG_SMP

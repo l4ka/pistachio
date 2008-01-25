@@ -116,11 +116,11 @@ INLINE tracebuffer_t * get_tracebuffer (void)
  * Access to performance monitoring counters
  */
 
-#if defined(CONFIG_TBUF_PERFMON)
+#if defined(CONFIG_TBUF_PERFMON) 
 
 # if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
 # define TBUF_PMC_SEL_0		"       xor  %1, %1		\n"
-# define TBUF_PMC_SEL_1		"	inc  %1			\n"
+# define TBUF_PMC_SEL_1		"	mov  $1, %1		\n"
 # elif defined(CONFIG_CPU_X86_P4) 
 /* PMC_MSR_IQ_COUNTER 0 and 2 */
 #  define TBUF_PMC_SEL_0	"	mov	$12, %1		\n"
@@ -155,7 +155,6 @@ INLINE tracebuffer_t * get_tracebuffer (void)
  *
  * @returns index to current event record
  */
-
 #define TBUF_GET_NEXT_RECORD(type, id)					\
     ({									\
 	word_t dummy, addr;						\
@@ -185,12 +184,12 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 	    "	lea	__idle_tcb, %3			\n"		\
 	    "	movw 	"MKSTR(OFS_TCB_CPU)"(%3), %%dx	\n"		\
 	    "	movl	%%edx, %%fs:1*%c9(%0)		\n"		\
-	    TBUF_RDTSC							\
-	    TBUF_SP							\
 	    TBUF_PMC_SEL_0						\
 	    TBUF_RDPMC_0						\
 	    TBUF_PMC_SEL_1						\
 	    TBUF_RDPMC_1						\
+	    TBUF_RDTSC							\
+	    TBUF_SP							\
 	    "2:						\n"		\
 	    :								\
 		"=D" (addr),				/* 0  */	\

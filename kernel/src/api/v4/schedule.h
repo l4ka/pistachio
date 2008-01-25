@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     api/v4/schedule.h
  * Description:   scheduling declarations
@@ -38,13 +38,7 @@
 #include <kdb/tracepoints.h>
 
 
-#define DEBUG_SCHEDULE
-#if defined(DEBUG_SCHEDULE)
 EXTERN_TRACEPOINT(SCHEDULE_DETAILS);
-#define TRACE_SCHEDULE_DETAILS(x...)	TRACEPOINT(SCHEDULE_DETAILS, x);
-#else
-#define TRACE_SCHEDULE_DETAILS(x...)			
-#endif
 
 class prio_queue_t 
 {

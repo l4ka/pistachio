@@ -32,48 +32,16 @@
 
 #include <l4/types.h>
 
-
-#if !defined(__L4__AMD64__TRACEBUFFER_H__)
-
-/*
- * Access to stack pointer, timestamp, and performance monitoring counters
- */
-
-#define __L4_TBUF_RDTSC  "	rdtsc					\n" \
-			 "	mov	%3, %%fs:2*%c9(%0)		\n"	
-    
-#if defined(L4_PERFMON)
-
-# define __L4_TBUF_RDPMC_0   "	rdpmc				\n"	\
-			     "	mov	%3, %%fs:4*%c9(%0)	\n"
-# define __L4_TBUF_RDPMC_1   "	rdpmc				\n"	\
-			"	mov	%3, %%fs:5*%c9(%0)	\n"
-
-# if !defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
-#  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
-# elif defined(L4_CONFIG_CPU_IA32_P4)
-#  define __L4_TBUF_PMC_SEL_0 "	movl	$12, %%ecx		\n"
-#  define __L4_TBUF_PMC_SEL_1 "	addl	 $2, %%ecx		\n"
-# endif
-
-#else /* L4_PERFMON */
-
-# define __L4_TBUF_PMC_SEL_0
-# define __L4_TBUF_PMC_SEL_1
-# define __L4_TBUF_RDPMC_0
-# define __L4_TBUF_RDPMC_1
-
-#endif /* L4_PERFMON */
-
-# define __PLUS32
-
-#endif /* !defined(__L4__AMD64__TRACEBUFFER_H__) */
-
-
 /* Turn preprocessor symbol definition into string */
 #define	MKSTR(sym)	MKSTR2(sym)
 #define	MKSTR2(sym)	#sym
+
+#if defined(L4_64BIT)
+# define __PLUS32	+ 32
+#else
+# define __PLUS32
+#endif
+
 
 #define L4_TRACEBUFFER_MAGIC		(0x143acebf)
 #define L4_TRACEBUFFER_NUM_ARGS		(9)
@@ -101,7 +69,43 @@ typedef struct
 } L4_TraceRecord_t;
 
 
+/*
+ * Access to performance monitoring counters
+ */
 
+
+#if defined(L4_PERFMON)
+
+# define __L4_TBUF_RDPMC_0   "	rdpmc				\n"	\
+			     "	mov	%3, %%fs:4*%c9(%0)	\n"
+# define __L4_TBUF_RDPMC_1   "	rdpmc				\n"	\
+			"	mov	%3, %%fs:5*%c9(%0)	\n"
+
+#if defined(L4_CONFIG_CPU_X86_P4)
+#  define __L4_TBUF_PMC_SEL_0 "	movl	$12, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	addl	 $2, %%ecx		\n"
+#elif defined(L4_CONFIG_CPU_X86_K8)
+#  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
+#  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
+#else 
+#  error define CPU type for energy tracing
+#endif
+
+#else /* L4_PERFMON */
+
+# define __L4_TBUF_PMC_SEL_0
+# define __L4_TBUF_PMC_SEL_1
+# define __L4_TBUF_RDPMC_0
+# define __L4_TBUF_RDPMC_1
+
+#endif /* L4_PERFMON */
+
+
+#if !defined(L4_PERFMON_ENERGY)
+#define __L4_TBUF_RDTSC  "	rdtsc					     \n"	\
+			 "	mov	%3, %%fs:2*%c9(%0)		     \n"	
+
+#endif
 /*
  * Make sure cmpxchg is atomic
  */
@@ -144,7 +148,6 @@ do {								\
 	    "	mov	%8, %0				\n"		\
 	    "	mov	%0, %2				\n"		\
 	    "	add	%3, %0				\n"		\
-	    "	mov	%%fs:3*%c9, %2			\n"		\
 	    "	and	%%fs:3*%c9, %0			\n"		\
 	    "	cmovz	%2, %0			      	\n"		\
 	    __L4_TBUF_LOCK						\
@@ -161,11 +164,11 @@ do {								\
 	    "	movl	%%edx, %%fs:1*%c9(%0)		\n"		\
 	    "	mov 	"MKSTR(__L4_TCR_MY_GLOBAL_ID)"*%c9(%1), %2\n"	\
 	    "	mov 	%2, %%fs:3*%c9(%0)		\n"		\
-	    __L4_TBUF_RDTSC						\
 	    __L4_TBUF_PMC_SEL_0						\
 	    __L4_TBUF_RDPMC_0						\
 	    __L4_TBUF_PMC_SEL_1						\
 	    __L4_TBUF_RDPMC_1						\
+	    __L4_TBUF_RDTSC						\
 	    "2:						\n"		\
 	    :								\
 		"=D" (_addr),				/* 0  */	\

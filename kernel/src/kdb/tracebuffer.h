@@ -32,14 +32,17 @@
 #ifndef __KDB__TRACEBUFFER_H__
 #define __KDB__TRACEBUFFER_H__
 
+
+
 #if defined(CONFIG_TRACEBUFFER)
 
 #define TB_DEFAULT				(1 << 0)
-
+#define TB_USERID_START				(100)
 /*
  * Wrap tracepoint events with event type arguments
  */
 
+extern void tbuf_dump (word_t count, word_t usec, word_t tp_id = 0, word_t cpumask=~0UL);
 
 #define DEBUG_KERNEL_DETAILS
 #if defined(DEBUG_KERNEL_DETAILS)

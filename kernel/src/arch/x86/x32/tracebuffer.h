@@ -33,23 +33,39 @@
 #include <tcb_layout.h>
 
 #define TRACEBUFFER_MAGIC 	0x143acebf
-
 #define TRACEBUFFER_PGENTSZ        pgent_t::size_4m
+
 
 /*
  * Access to stack pointer, timestamp, and performance monitoring counters
  */
-#define TBUF_RDTSC  "	rdtsc					\n"	\
-		    "	mov	%%eax, %%fs:2*%c9(%0)		\n"	
     
 #define TBUF_SP     "	mov	%%esp, %%fs:3*%c9(%0)		\n"	\
 
 
 #if defined(CONFIG_TBUF_PERFMON)
-#define TBUF_RDPMC_0	"	rdpmc					\n"	\
+
+/* Registers:
+ *	EAX unused
+ *	EBX unused, not preserved
+ *	ECX unused
+ *	EDX unused
+ *	ESI unused, not preserved
+ *	EDI TB record address
+ *	EBP unused, not preserved 
+ */
+
+
+#define TBUF_RDPMC_0	"	rdpmc					\n" \
 			"	movl	%%eax, %%fs:4*%c9(%0)		\n"
-#define TBUF_RDPMC_1	"	rdpmc					\n"	\
+#define TBUF_RDPMC_1	"	rdpmc					\n" \
 			"	movl	%%eax, %%fs:5*%c9(%0)		\n"
-#endif
+
+
+#endif /* CONFIG_TBUF_PERFMON */
+
+
+#define TBUF_RDTSC      "	rdtsc					\n" \
+		        "	mov	%%eax, %%fs:2*%c9(%0)		\n"	
 
 #endif /* !__ARCH__X86__X32__TRACEBUFFER_H__ */
