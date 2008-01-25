@@ -112,25 +112,24 @@ INLINE void NORETURN initial_switch_to (tcb_t * tcb)
 INLINE void tcb_t::switch_to(tcb_t * dest)
 {
     word_t dummy;
-
-    ASSERT(dest->stack);
-    ASSERT(dest != this);
-    ASSERT(get_cpu() == dest->get_cpu());
-
+    
     if ( EXPECT_FALSE(resource_bits) )
 	resources.save(this);
 
     /* modify stack in tss */
-    tss.set_esp0((u32_t)dest->get_stack_top());
-
-#if 0
-    TRACEF("\ncurr=%t (sp=%p, pdc=%p, spc=%p)\ndest=%t (sp=%p, pdc=%p, spc=%p)\n",
-	   this, this->stack, this->pdir_cache, this->space,
-	   dest, dest->stack, dest->pdir_cache, dest->space);
-#endif
-
     if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
-	tbuf_record_event (TB_DEFAULT, 0, "switch %t => %t", (word_t)this, (word_t)dest);
+    {
+
+	ASSERT(dest->stack);
+	ASSERT(dest != this);
+	ASSERT(get_cpu() == dest->get_cpu());
+	
+	tss.set_esp0((u32_t)dest->get_stack_top());
+	tbuf_record_event(TP_DEFAULT, 0, "switch %wt (pdir=%p) ->  %wt (pdir=%p)\n",
+			  this, this->pdir_cache, dest, dest->pdir_cache);
+	
+    }
+
 
 #ifdef CONFIG_SMP
     active_cpu_space.set(get_cpu(), dest->space);
