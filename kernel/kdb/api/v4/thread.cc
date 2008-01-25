@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004, 2007,  Karlsruhe University
+ * Copyright (C) 2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/thread.cc
  * Description:   Kdebug stuff for V4 threads
@@ -67,7 +67,7 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 #endif
 
     // If val is within TCB area, treat it as a tcb address.  If not,
-    // treat it as a thrad ID.
+    // treat it as a thread ID.
 
     if (dummy->is_tcb_area ((addr_t) val) || 
 	addr_to_tcb((addr_t) val) == get_idle_tcb() || 
@@ -85,6 +85,12 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
     if (kdb_tid_format.X.human)
     {
 	// Convert special thread IDs to human readable form
+	if (tcb == get_idle_tcb ())
+	    return print_string ("IDLETHRD", width, precision);
+
+	if (tcb == get_kdebug_tcb())
+	    return print_string ("KDBTHRD", width, precision);
+
 	if (tid.is_nilthread ())
 	    return print_string ("NIL_THRD", width, precision);
 
@@ -96,12 +102,6 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 	    print_string ("IRQ_");
 	    return 4 + print_dec (tid.get_irqno(), width - 4, '0');
 	}
-
-	if (tid == get_kdebug_tcb ()->get_global_id())
-	    return print_string ("KDB", width, precision);
-
-	if (tcb == get_idle_tcb ())
-	    return print_string ("IDLETHRD", width, precision);
 
 	word_t base_id = tid.get_threadno () -
 	    get_kip()->thread_info.get_user_base ();
