@@ -221,7 +221,9 @@ void SECTION(SEC_INIT) add_more_kmem (void)
             (md->type() == memdesc_t::reserved) &&
             (word_t) md->high() <= KERNEL_AREA_END)
 	{	    
-	    TRACE_INIT("\tfound kmem %x %x %d\n", md->low(), md->high(), md->size());
+	    TRACE_INIT("\tfound  %dM kmem (%x-%x) -> (%x-%x)\n", 
+		       md->size() / (1024*1024), md->low(), md->high(), 
+		       phys_to_virt(md->low()), phys_to_virt(md->high()));
 	    
 	    // Align to kernel page size
 	    mem_region_t alloc = { addr_align_up(md->low(), KERNEL_PAGE_SIZE),
