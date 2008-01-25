@@ -369,7 +369,8 @@ bool kdb_t::pre()
     break;
     default:
     {
-	printf("--- KD# unknown reason  ---\n", f->reason);
+	printf("--- KD# unknown reason %d ip %x ---\n", 
+	       f->reason, f->regs[x86_exceptionframe_t::ipreg]);
 	break;
     } /* switch */
     }
