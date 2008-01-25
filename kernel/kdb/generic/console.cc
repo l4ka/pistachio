@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/generic/console.cc
  * Description:   Generic console functionality
@@ -30,13 +30,12 @@
  *                
  ********************************************************************/
 #include <debug.h>
+#include <sync.h>
 #include <kdb/kdb.h>
 #include <kdb/cmd.h>
 #include <kdb/console.h>
 
-#if defined(CONFIG_SMP) && defined(CONFIG_ARCH_IA64)
-#define CONFIG_SMP_OUTPUTPREFIX 1
-#endif
+//#define CONFIG_SMP_OUTPUTPREFIX 1
 
 void init_console (void)
 {
@@ -46,7 +45,7 @@ void init_console (void)
 
 
 #if defined(CONFIG_SMP_OUTPUTPREFIX)
-static bool use_cpuprefix = true;
+static bool use_cpuprefix = false;
 
 DECLARE_CMD (cmd_toggle_cpuprefix, config, 'p', "cpuprefix",
 	     "Toggle CPU prefix");
@@ -59,30 +58,31 @@ CMD (cmd_toggle_cpuprefix, cg)
 }
 #endif
 
-void putc (char c)
+void SECTION(SEC_KDEBUG) putc (char c)
 {
-#if defined(CONFIG_SMP_OUTPUTPREFIX)
-    word_t smp_get_cpuid (void);
-    static bool beginning_of_line = true;
-
     kdb_console_t * cons = &kdb_consoles[kdb_current_console];
-    word_t cpuid = smp_get_cpuid ();
 
-    if (beginning_of_line && use_cpuprefix)
+
+#if defined(CONFIG_SMP_OUTPUTPREFIX)
+    static bool beginning_of_line = true;
+    if (beginning_of_line)
     {
-	cons->putc ('['); cons->putc ('C'); cons->putc ('P');
-	cons->putc ('U'); cons->putc (' ');
-	if (cpuid >= 10)
-	    cons->putc ('0' + ((cpuid / 10) % 10));
-	cons->putc ('0' + (cpuid % 10));
-	cons->putc (']'); cons->putc (' ');
+	if (use_cpuprefix)
+	{
+	    word_t cpuid = dbg_get_current_cpu ();
+	    u16_t dbg_get_current_cpu();
+	    cons->putc ('['); cons->putc ('C'); cons->putc ('P');
+	    cons->putc ('U'); cons->putc (' ');
+	    if (cpuid >= 10)
+		cons->putc ('0' + ((cpuid / 10) % 10));
+	    cons->putc ('0' + (cpuid % 10));
+	    cons->putc (']'); cons->putc (' ');
+	}
     }
+#endif
+    
     cons->putc (c);
 
-    beginning_of_line = (c == '\n' || c == '\r');
-#else
-    kdb_consoles[kdb_current_console].putc (c);
-#endif
 }
 
 char getc (bool block)
