@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     generic/bitmask.h
  * Description:   Generic bitmask class
@@ -39,53 +39,76 @@
 template <typename T> class bitmask_t
 {
     T	maskvalue;
-
+    static const word_t masksize = sizeof(T) * 8;
+    
 public:
 
     // Constructors
-
-    inline bitmask_t (void) { }
-    inline bitmask_t (T initvalue) { maskvalue = initvalue; }
-
-    // Modification
-
-    inline bitmask_t operator + (int n)
+    bitmask_t (void) { maskvalue = 0; }
+    bitmask_t (T initvalue) 
+	{ maskvalue = initvalue; }    
+    
+    // Modification 
+    inline bitmask_t operator = (const int &n) 
+	{
+	    maskvalue = (1UL << n);
+	    return (bitmask_t) maskvalue;
+	}
+    
+    inline bitmask_t operator + (const int &n) const
 	{
 	    bitmask_t m (maskvalue | (1UL << n));
 	    return m;
 	}
-   
-    inline bitmask_t operator - (int n)
+
+    inline bitmask_t operator - (const int &n) const
 	{
 	    bitmask_t m (maskvalue & ~(1UL << n));
 	    return m;
 	}
 
-    inline bitmask_t operator += (int n)
+    inline bitmask_t operator += (const int &n)
 	{
 	    maskvalue = maskvalue | (1UL << n);
 	    return (bitmask_t) maskvalue;
 	}
    
-    inline bitmask_t operator -= (int n)
+    inline bitmask_t operator -= (const int &n)
 	{
 	    maskvalue = maskvalue & ~(1UL << n);
 	    return (bitmask_t) maskvalue;
 	}
 
     // Predicates
-
-    inline bool is_set (int n)
+    inline bitmask_t operator == (bitmask_t &m2) const
 	{
+	    return maskvalue == m2.maskvalue;
+	}
+
+
+    inline bool is_set (const int &n) const
+	{ 
 	    return (maskvalue & (1UL << n)) != 0;
 	}
 
     // Conversion
 
-    inline operator T (void)
-	{
+    inline operator T (void) const
+	{ 
 	    return maskvalue;
 	}
+
+#if defined(CONFIG_DEBUG)
+    char *string()
+	{
+	    static const char *d = "0123456789";
+	    static char s[3+masksize];
+	    s[0] = '['; s[1+masksize]=']'; s[2+masksize]=0;
+	    for (word_t i=0; i< masksize; i++)
+		s[masksize-i] = is_set(i) ? d[i%10] : '~';
+	    return s;
+	}
+#endif    
 };
 
 
