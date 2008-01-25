@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/trapgate.h
  * Description:   defines macros for implementation of trap and 
@@ -109,6 +109,39 @@ public:
 #endif
 
 
+#if defined(X86_EXC_KDB)
+
+/* js: in rare cases, we might get a NMI (or breakpoint exception) just
+ * after sys_ipc has been invoked, but _before_ esp has been set to tss.esp0
+ * in that case, we need to switch stacks manually and preserve the
+ * processor-saved frame. We make sure that, before tss there is enough scratch
+ * space to cover EFLAGS, CS, and EIP saved by the processor; this way, we can
+ * get along without having to establish a interrupt task xgate for KDB
+ */
+#define kdb_check_stack()					\
+	"push	%%ebp			\n"			\
+	"lea	(tss - 12), %%ebp	\n"			\
+	"cmpl	%%esp, %%ebp		\n"			\
+	"pop	%%ebp			\n"			\
+	"jne	1f			\n"			\
+	"addl	$12, %%esp		\n"			\
+	"movl	(%%esp), %%esp		\n"			\
+	"subl	$12, %%esp		\n"			\
+	"push	%%ebp			\n"			\
+	"mov	(tss    ), %%ebp	\n"			\
+	"mov	%%ebp, 12(%%esp)	\n"			\
+	"mov	(tss - 4), %%ebp	\n"			\
+	"mov	%%ebp,  8(%%esp)	\n"			\
+	"mov	(tss -  8), %%ebp	\n"			\
+	"add    $3, %%ebp		\n"			\
+	"mov	%%ebp,   4(%%esp)	\n"			\
+	"pop	%%ebp			\n"			\
+	"1:				\n"			
+#else
+#define kdb_check_stack()					
+#endif
+
+
 /**
  * X86_EXCWITH_ERRORCODE: allows C implementation of 
  *   exception handlers and trap/interrupt gates with error 
@@ -148,7 +181,6 @@ static void name##handler(x86_exceptionframe_t * frame)
 
 
 
-
 #define X86_EXCNO_ERRORCODE(name, reason)			\
 extern "C" void name (void);					\
 static void name##handler(x86_exceptionframe_t * frame);	\
@@ -158,6 +190,7 @@ void name##_wrapper()						\
         ".global "#name "		\n"			\
 	"\t.type "#name",@function	\n"			\
 	#name":				\n"			\
+	kdb_check_stack()					\
 	"subl	$4, %%esp		\n"			\
 	"pusha				\n"			\
 	"push	%%ds			\n"			\
@@ -181,4 +214,7 @@ void name##_wrapper()						\
 static void name##handler(x86_exceptionframe_t * frame)
 
 
+
 #endif /* !__ARCH__X86__X32__TRAPGATE_H__ */
+
+

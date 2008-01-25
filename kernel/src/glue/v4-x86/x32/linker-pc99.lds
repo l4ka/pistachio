@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2005, 2007,  Karlsruhe University
+ * Copyright (C) 1999-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/linker-pc99.lds
  * Description:   Generic linkser script for x86.
@@ -78,6 +78,11 @@ SECTIONS
 	{
 		*(.data.cpulocal)
 		*(.data.x86.cpulocal)
+#if defined(CONFIG_DEBUG)
+		. = . + 8;
+#endif
+		*(.data.x86.cpulocal.tss)
+
 	}
 	_end_cpu_local = .;
 

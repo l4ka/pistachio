@@ -30,6 +30,10 @@
  *                
  ********************************************************************/
 
+#if defined(CONFIG_DEBUG)
+
+#define X86_EXC_KDB
+
 #include <debug.h>
 #include <ctors.h>
 #include <kdb/tracepoints.h>
@@ -43,7 +47,6 @@
 #include INC_GLUE(debug.h)
 #include INC_PLAT(nmi.h)
 
-#if defined(CONFIG_DEBUG)
 
 static void do_return_from_kdb(void);
 
@@ -54,11 +57,13 @@ static bool sync_dbg_enter = false;
 
 extern "C" void sync_debug (word_t address)
 {
-    printf_spin_lock.unlock();
-    //ENABLE_TRACEPOINT(DEBUG_LOCK, ~0, 0);
+   
+    if (get_current_tcb() == get_kdebug_tcb())
+	ENABLE_TRACEPOINT(DEBUG_LOCK, ~0, 0);
     
     if (!sync_dbg_enter)
     {
+	printf_spin_lock.unlock();
 	sync_dbg_enter = true;
  	TRACEPOINT(DEBUG_LOCK, "CPU %d, tcb %t, spinlock BUG (lock %x) @ %x\n", 
 		   get_current_cpu(), get_current_tcb(), 
@@ -68,6 +73,7 @@ extern "C" void sync_debug (word_t address)
     sync_dbg_enter = false;
 }
 #endif
+
 
 class cpu_kdb_t
 {
@@ -96,9 +102,10 @@ public:
 	{
 	    if (get_current_tcb() == get_kdebug_tcb())
 		return;
-	    
+
 	    void (*entry)(word_t) = (void (*)(word_t)) get_kip()->kdebug_entry;
 	    void (*exit)(void) = do_return_from_kdb;
+	    
 	    kdb_tcb->stack = kdb_tcb->get_stack_top();
 	    kdb_tcb->notify(exit);
 	    kdb_tcb->notify(entry, (word_t) &param);
@@ -119,6 +126,11 @@ cpu_kdb_t cpu_kdb UNIT("cpulocal") CTORPRIO(CTORPRIO_CPU, 1);
 tcb_t *get_kdebug_tcb() { return cpu_kdb.get_kdb_tcb(); }
 
 
+void do_enter_kdebug(x86_exceptionframe_t *frame, const word_t exception)
+{
+    cpu_kdb.do_enter_kdebug(frame, X86_EXC_DEBUG);
+}
+
 void do_return_from_kdb(void)
 {
     ASSERT(get_current_tcb() == get_kdebug_tcb());
@@ -127,7 +139,7 @@ void do_return_from_kdb(void)
 
 X86_EXCNO_ERRORCODE(exc_breakpoint, X86_EXC_BREAKPOINT)
 {
-    cpu_kdb.do_enter_kdebug(frame, X86_EXC_BREAKPOINT);
+     cpu_kdb.do_enter_kdebug(frame, X86_EXC_BREAKPOINT);
 }
 
 X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
@@ -135,23 +147,18 @@ X86_EXCNO_ERRORCODE(exc_debug, X86_EXC_DEBUG)
     cpu_kdb.do_enter_kdebug(frame, X86_EXC_DEBUG);
 }
 
-DECLARE_TRACEPOINT(X86_NMI);
 X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
-    TRACEPOINT(X86_NMI, "NMI frame %x eip %x efl %x", 
-	       frame, 
-	       frame->regs[x86_exceptionframe_t::ipreg], 
-	       frame->regs[x86_exceptionframe_t::freg]);
-
     cpu_kdb.do_enter_kdebug(frame, X86_EXC_NMI);
 }    
-
 #ifdef CONFIG_SMP
 X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
 {
     
 }
 #endif
+
+#undef X86_EXC_KDB
 
 #endif /* CONFIG_DEBUG */
 

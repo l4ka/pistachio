@@ -116,7 +116,7 @@ void setup_smp_boot_gdt (void)
 
 /* processor local data */
 x86_segdesc_t	gdt[GDT_SIZE] UNIT("x86.cpulocal");
-x86_x32_tss_t	tss UNIT("x86.cpulocal");
+x86_x32_tss_t	tss UNIT("x86.cpulocal.tss");
 
 
 
