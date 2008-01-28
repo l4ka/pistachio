@@ -329,7 +329,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     x86_amdhwcr_t::enable_flushfilter();
 #else
     TRACE_INIT("\tDisabling K8 Flush Filter\n");
-    //x86_amdhwcr_t::disable_flushfilter();
+    x86_amdhwcr_t::disable_flushfilter();
 #endif
 #endif
 
