@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     generic/debug.h
  * Description:   Debug functions
@@ -114,6 +114,8 @@ do {								\
 /* From kdb/generic/entry.cc */
 void kdebug_entry (void *);
 
+bool kdebug_check_interrupt();
+
 #else /* !CONFIG_DEBUG */
 
 /*
@@ -123,6 +125,8 @@ void kdebug_entry (void *);
 # define init_console(...)
 # define printf(fmt, args...)		do { } while (false)
 # define enter_kdebug(x)		do { } while (true)
+# define get_kdebug_tcb()		(NULL)
+# define kdebug_check_interrupt()	(false)
 # define UNIMPLEMENTED()		do { } while (true)
 # define ASSERT(x)			do { } while (false)
 # define WARNING(fmt, args...)		do { } while (false)
@@ -162,8 +166,6 @@ void kdebug_check_breakin();
 # else
 #  define kdebug_check_breakin()
 # endif /* CONFIG_DEBUG_BREAKIN */
-
-bool kdebug_check_interrupt();
 
 
 #endif /* !__DEBUG_H__ */

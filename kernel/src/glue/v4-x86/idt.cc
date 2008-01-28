@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/idt.cc
  * Description:   v4 specific idt implementation
@@ -98,9 +98,11 @@ idt_t::idt_t()
     }
     
     /* setup the exception gates */
+#if defined(CONFIG_DEBUG)
     add_int_gate(X86_EXC_DEBUG, exc_debug);
     add_int_gate(X86_EXC_NMI, exc_nmi);
     add_syscall_gate(X86_EXC_BREAKPOINT, exc_breakpoint);
+#endif
     add_int_gate(X86_EXC_INVALIDOPCODE, exc_invalid_opcode);
     add_int_gate(X86_EXC_NOMATH_COPROC, exc_nomath_coproc);
     add_int_gate(X86_EXC_GENERAL_PROTECTION, exc_gp);
