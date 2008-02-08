@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006, 2008,  Karlsruhe University
  *                
  * File path:     l4/thread.h
  * Description:   Thread handling interfaces
@@ -172,7 +172,7 @@ L4_INLINE L4_Word_t L4_WordSizeMask (void)
 #endif
 }
 
-L4_INLINE void L4_Reset_WordSizeMask ()
+L4_INLINE void L4_Reset_WordSizeMask (void)
 {
 #if defined(__L4_TCR_WORD_SIZE_MASK)
     __L4_TCR_Set_WordSizeMask (~((L4_Word_t) 0));
