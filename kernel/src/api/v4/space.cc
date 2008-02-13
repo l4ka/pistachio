@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     api/v4/space.cc
  * Description:   architecture independent parts of space_t
@@ -406,7 +406,7 @@ SYSCALL_ATTR("unmap") void sys_unmap(word_t control)
 /**
  * allocate_space: allocates a new space_t
  */
-#if !defined(CONFIG_ARCH_ALPHA) && !defined(CONFIG_ARCH_ARM) && !defined(CONFIG_ARCH_X86)
+#if !defined(CONFIG_ARCH_X86)
 space_t * allocate_space()
 {
     space_t * space = (space_t*)kmem.alloc(kmem_space, sizeof(space_t));
@@ -422,7 +422,7 @@ void free_space(space_t * space)
     ASSERT(space);
     kmem.free(kmem_space, (addr_t)space, sizeof(space_t));
 }
-#endif /* !defined(CONFIG_ARCH_ALPHA) && !defined(CONFIG_ARCH_ARM) */
+#endif /* !defined(CONFIG_ARCH_X86) */
 
 void space_t::free (void)
 {
