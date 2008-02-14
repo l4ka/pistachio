@@ -88,7 +88,7 @@ typedef struct
 #  define __L4_TBUF_PMC_SEL_0 "	xorl	%%ecx, %%ecx		\n"
 #  define __L4_TBUF_PMC_SEL_1 "	inc	%%ecx			\n"
 #else 
-#  error define CPU type for energy tracing
+#  error define CPU type for tracebuffer PMCs
 #endif
 
 #else /* L4_PERFMON */
