@@ -98,10 +98,11 @@ u8_t intctrl_t::setup_idt_entry(word_t irq, u8_t prio)
 {
     idt_lock.lock();
     u8_t vector = IDT_IOAPIC_BASE + irq;
-    if (vector < IDT_IOAPIC_MAX) {
+    if (vector < IDT_IOAPIC_MAX) 
+    {
 	//TRACEF("IRQ %d, vector=%d, prio=%d, entry=%p\n", 
-	//     irq, vector, prio, get_interrupt_entry(irq));
-	idt.add_int_gate(vector, get_interrupt_entry(irq));
+	//     irq, vector, prio, get_interrupt_entry(irq), &idt_t::add_gate);
+	idt.add_gate(vector, idt_t::interrupt, get_interrupt_entry(irq));
     } else
     {
 	TRACEF("IRQ %d, vector=%d, prio=%d, entry=%p\n", 
@@ -150,8 +151,8 @@ void intctrl_t::init_arch()
     out_u8(0xa1, 0xff);
 
     /* setup spurious interrupt vector */
-    idt.add_int_gate(IDT_LAPIC_SPURIOUS_INT, spurious_interrupt_lapic);
-    idt.add_int_gate(IDT_IOAPIC_SPURIOUS, spurious_interrupt_ioapic);
+    idt.add_gate(IDT_LAPIC_SPURIOUS_INT, idt_t::interrupt, spurious_interrupt_lapic);
+    idt.add_gate(IDT_IOAPIC_SPURIOUS, idt_t::interrupt, spurious_interrupt_ioapic);
 
     /* now walk the ACPI structure */
     addr_t addr = acpi_remap((addr_t)ACPI20_PC99_RSDP_START);
@@ -453,7 +454,7 @@ void intctrl_t::init_local_apic()
 #endif
     
     TRACE_INIT("\tlocal APIC error trap gate %d \n", IDT_LAPIC_ERROR);
-    idt.add_int_gate(IDT_LAPIC_ERROR, lapic_error_interrupt);
+    idt.add_gate(IDT_LAPIC_ERROR, idt_t::interrupt, lapic_error_interrupt);
     local_apic.error_setup(IDT_LAPIC_ERROR);
 
     
@@ -518,11 +519,14 @@ void intctrl_t::enable(word_t irq)
 {
     if (irq >= get_number_irqs())
 	return;
+    
     /* IRQ is unassigned? */
-    if (redir[irq].entry.x.vector == IDT_IOAPIC_SPURIOUS) {
+    if (redir[irq].entry.x.vector == IDT_IOAPIC_SPURIOUS) 
+    {
 	word_t vector = setup_idt_entry(irq, 0);
+
 	if (!vector) {
-	    printf("IRQ %d: association failed, no free vector\n", irq);
+ 	    printf("IRQ %d: association failed, no free vector\n", irq);
 	    return;
 	}
 	redir[irq].entry.x.vector = vector;
@@ -531,6 +535,7 @@ void intctrl_t::enable(word_t irq)
     redir[irq].pending = false;
     redir[irq].entry.unmask_irq();
     sync_redir_entry(&redir[irq], sync_low);
+
 }
 
 void intctrl_t::disable(word_t irq)

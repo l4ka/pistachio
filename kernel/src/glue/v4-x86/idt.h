@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/idt.h
  * Description:   
@@ -39,15 +39,20 @@
 class idt_t
 {
 public:
+    enum type_e 
+    {
+	interrupt = 0,
+	syscall	  = 1,
+	trap	  = 2
+    };
+
     idt_t() SECTION(".init.cpu");
-    void add_int_gate(word_t index, void (*address)());
-    void add_syscall_gate(word_t index, void (*address)());
-    void add_trap_gate(word_t index, void (*address)());
+    x86_idtdesc_t get_descriptor(word_t index);
+    void add_gate(word_t index, type_e type, void (*address)());
     void activate();
 
-    x86_idtdesc_t get_descriptor(word_t index);
-
 private:
+    void init_gate(word_t index, type_e type, void (*address)());
     x86_idtdesc_t descriptors[IDT_SIZE];
 };
 

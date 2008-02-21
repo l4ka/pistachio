@@ -49,32 +49,49 @@ idt_t idt UNIT("x86.idt") CTORPRIO(CTORPRIO_GLOBAL, 3);
 
 
 void SECTION(".init.system") 
-    idt_t::add_int_gate(word_t index, void (*address)())
+    idt_t::init_gate(word_t index, idt_t::type_e type, void (*address)())
 {
     ASSERT(index < IDT_SIZE);
-    descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 0);
+    
+    switch (type)
+    {
+    case interrupt:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 0);
+	break;
+    case syscall:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 3);
+	break;
+    case trap:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::trap, 0);
+	break;
+    }	
+}
+
+void idt_t::add_gate(word_t index, idt_t::type_e type, void (*address)())
+{
+    ASSERT(index < IDT_SIZE);
+    
+    
+    switch (type)
+    {
+    case interrupt:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 0);
+	break;
+    case syscall:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 3);
+	break;
+    case trap:
+	descriptors[index].set(X86_KCS, address, x86_idtdesc_t::trap, 0);
+	break;
+    }	
 }
 
 
-void SECTION(".init.system") 
-    idt_t::add_syscall_gate(word_t index, void (*address)())
-{
-    ASSERT(index < IDT_SIZE);
-    descriptors[index].set(X86_KCS, address, x86_idtdesc_t::interrupt, 3);
-}
-
-void SECTION(".init.system") 
-    idt_t::add_trap_gate(word_t index, void (*address)())
-{
-    ASSERT(index < IDT_SIZE);
-    descriptors[index].set(X86_KCS, address, x86_idtdesc_t::trap, 0);
-}
 
 /**
  * idt_t::activate: activates the previously set up IDT
  */
-void SECTION(".init.cpu") 
-    idt_t::activate()
+void idt_t::activate()
 {
     x86_descreg_t idt((word_t) descriptors, sizeof(descriptors));
     idt.setdescreg(x86_descreg_t::idtr);
@@ -94,24 +111,24 @@ idt_t::idt_t()
 	 * 
 	 */
 	exc_catch_all[i] = ( (sizeof(exc_catch_all) - i * sizeof(u64_t) - 5) << 8) | 0xe8;
-	add_int_gate(i, (func_exc) &exc_catch_all[i]);
+	add_gate(i, interrupt, (func_exc) &exc_catch_all[i]);
     }
     
     /* setup the exception gates */
 #if defined(CONFIG_DEBUG)
-    add_int_gate(X86_EXC_DEBUG, exc_debug);
-    add_int_gate(X86_EXC_NMI, exc_nmi);
-    add_syscall_gate(X86_EXC_BREAKPOINT, exc_breakpoint);
+    init_gate(X86_EXC_DEBUG, interrupt, exc_debug);
+    init_gate(X86_EXC_NMI, interrupt, exc_nmi);
+    init_gate(X86_EXC_BREAKPOINT, syscall,exc_breakpoint);
 #endif
-    add_int_gate(X86_EXC_INVALIDOPCODE, exc_invalid_opcode);
-    add_int_gate(X86_EXC_NOMATH_COPROC, exc_nomath_coproc);
-    add_int_gate(X86_EXC_GENERAL_PROTECTION, exc_gp);
-    add_int_gate(X86_EXC_PAGEFAULT, exc_pagefault);
+    init_gate(X86_EXC_INVALIDOPCODE, interrupt, exc_invalid_opcode);
+    init_gate(X86_EXC_NOMATH_COPROC, interrupt, exc_nomath_coproc);
+    init_gate(X86_EXC_GENERAL_PROTECTION, interrupt, exc_gp);
+    init_gate(X86_EXC_PAGEFAULT, interrupt, exc_pagefault);
     // 15 reserved
 
 #if defined(CONFIG_SUBARCH_X32)
     // syscalls
-    add_syscall_gate(0x30, exc_user_sysipc);
-    add_syscall_gate(0x31, exc_user_syscall);
+    init_gate(0x30, syscall, exc_user_sysipc);
+    init_gate(0x31, syscall, exc_user_syscall);
 #endif
 }
