@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/pgent.h
  * Description:   
@@ -159,8 +159,8 @@ public:
 	{ return (addr_t) (get_linknode(pgsize) ^ (word_t) map); }
 
     word_t rights (space_t * s, pgsize_e pgsize)
-	{ return ((1<<3) | 
-		  (pgent.is_writable() ? (1<<2) : 0) | 
+	{ return ((1<<2) | 
+		  (pgent.is_writable() ? (1<<1) : 0) | 
 		  (pgent.is_executable() ? (1<<0) : 0));
 	}
 
