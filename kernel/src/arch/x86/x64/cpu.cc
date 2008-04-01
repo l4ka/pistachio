@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2008,  Karlsruhe University
  *                
- * File path:     arch/x86/x64/cpuid.cc
+ * File path:     arch/x86/x64/cpu.cc
  * Description:   X86-64 CPUID features 
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -35,14 +35,14 @@
 x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     
     /* Check out if CPUID available */
-    if (!has_cpuid()){
+    if (!x86_x64_has_cpuid()){
 	return;
     }
     
     u32_t eax, ebx, ecx, edx;
     
     /* Get largest std features function & vendor */
-    cpuid(CPUID_MAX_STD_FN_NR,
+    x86_cpuid(CPUID_MAX_STD_FN_NR,
 	  &max_std_fn,
 	  ((u32_t *) (&cpu_vendor[0])),
 	  ((u32_t *) (&cpu_vendor[8])),
@@ -52,7 +52,7 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     
     if (max_std_fn >= CPUID_STD_FEATURES){
 	/* Get signature & std features */
-	cpuid(CPUID_STD_FEATURES,  &eax,  &ebx, &ecx, &edx);
+	x86_cpuid(CPUID_STD_FEATURES,  &eax,  &ebx, &ecx, &edx);
 
 
 	
@@ -69,13 +69,13 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     }
     
     /* Get largest ext function */
-    cpuid(CPUID_MAX_EXT_FN_NR, &max_ext_fn, &ebx, &ecx, &edx );
+    x86_cpuid(CPUID_MAX_EXT_FN_NR, &max_ext_fn, &ebx, &ecx, &edx );
  	
     /* Get amd features */
     if (max_ext_fn < CPUID_AMD_FEATURES)
 	return;
     
-    cpuid(CPUID_AMD_FEATURES,  &eax,  &ebx, &ecx, &edx);
+    x86_cpuid(CPUID_AMD_FEATURES,  &eax,  &ebx, &ecx, &edx);
     
     amd_features = edx;
 
@@ -83,19 +83,19 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
 	return;
 
     /* Get cpu name */
-    cpuid(CPUID_CPU_NAME1,
+    x86_cpuid(CPUID_CPU_NAME1,
 	  ((u32_t *) (&cpu_name[0])),
 	  ((u32_t *) (&cpu_name[4])),
 	  ((u32_t *) (&cpu_name[8])),
 	  ((u32_t *) (&cpu_name[12])));
 
-    cpuid(CPUID_CPU_NAME2,
+    x86_cpuid(CPUID_CPU_NAME2,
 	  ((u32_t *) (&cpu_name[16])),
 	  ((u32_t *) (&cpu_name[20])),
 	  ((u32_t *) (&cpu_name[24])),
 	  ((u32_t *) (&cpu_name[28])));
 
-    cpuid(CPUID_CPU_NAME3,
+    x86_cpuid(CPUID_CPU_NAME3,
 	  ((u32_t *) (&cpu_name[32])),
 	  ((u32_t *) (&cpu_name[36])),
 	  ((u32_t *) (&cpu_name[40])),
@@ -107,7 +107,7 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     if (max_ext_fn < CPUID_CACHE_FEATURES1)
 	return;
 
-    cpuid(CPUID_CACHE_FEATURES1, 
+    x86_cpuid(CPUID_CACHE_FEATURES1, 
 	  &l1_tlb.raw[0], 
 	  &l1_tlb.raw[1], 
 	  &l1_cache.raw[0], 
@@ -118,7 +118,7 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     if (max_ext_fn < CPUID_CACHE_FEATURES2)
 	return;
 
-    cpuid(CPUID_CACHE_FEATURES2, 
+    x86_cpuid(CPUID_CACHE_FEATURES2, 
 	  &l2_tlb.raw[0], 
 	  &l2_tlb.raw[1], 
 	  &l2_cache.raw[0], 
@@ -144,13 +144,13 @@ x86_x64_cpu_features_t::x86_x64_cpu_features_t(){
     if (max_ext_fn < CPUID_APM_FEATURES)
 	return;
 
-    cpuid(CPUID_APM_FEATURES, &eax, &ebx, &ecx, &apm_features);
+    x86_cpuid(CPUID_APM_FEATURES, &eax, &ebx, &ecx, &apm_features);
 
     /* Get address sizes  */
     if (max_ext_fn < CPUID_ADDRESS_SIZES)
 	return;
 
-    cpuid(CPUID_ADDRESS_SIZES, &eax, &ebx, &ecx, &edx);
+    x86_cpuid(CPUID_ADDRESS_SIZES, &eax, &ebx, &ecx, &edx);
     
     paddr_bits = (eax & 0xFF);
     vaddr_bits = ( (eax >> 8) & 0xFF);

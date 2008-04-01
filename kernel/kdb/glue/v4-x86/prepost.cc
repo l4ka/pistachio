@@ -131,9 +131,17 @@ bool kdb_t::pre()
 		last_branch_ip = (addr_t) (word_t)
 		    x86_rdmsr (X86_MSR_LASTBRANCHFROMIP);
 #else
-		last_branch_ip = (addr_t) (word_t)
-		    (x86_rdmsr (X86_MSR_LASTBRANCH_0 +
-				x86_rdmsr (X86_MSR_LASTBRANCH_TOS)) >> 32);
+		word_t last_branch_tos = x86_rdmsr (X86_MSR_LASTBRANCH_TOS);
+		ASSERT(last_branch_tos < 16);
+		word_t lbipmsr;
+		u32_t model, dummy;
+		x86_cpuid(1, &model, &dummy, &dummy, &dummy);
+		if (((model >> 4) & 0xF) > 2)
+		    lbipmsr = X86_MSR_LASTBRANCH_FROM;
+		else
+		    lbipmsr = X86_MSR_LASTBRANCH_FROM_OLD;
+		lbipmsr+= last_branch_tos;
+		last_branch_ip = (addr_t) (word_t) x86_rdmsr(lbipmsr);
 #endif
 		disas_addr (last_branch_ip, "branch to");
 		x86_last_ip = f->regs[x86_exceptionframe_t::ipreg];

@@ -161,10 +161,10 @@
 # define X86_MSR_LER_FROM_LIP       		0x000001d7
 # define X86_MSR_LER_TO_LIP         		0x000001d8
 # define X86_MSR_LASTBRANCH_TOS     		0x000001da
-# define X86_MSR_LASTBRANCH_0       		0x000001db
-# define X86_MSR_LASTBRANCH_1       		0x000001dc
-# define X86_MSR_LASTBRANCH_2       		0x000001dd
-# define X86_MSR_LASTBRANCH_3       		0x000001de
+/* P4 models 0h-02h */
+# define X86_MSR_LASTBRANCH_FROM_OLD  		0x000001db
+/* P4 models else */
+# define X86_MSR_LASTBRANCH_FROM  		0x00000680
 
 /* Processor features in the MISC_ENABLE MSR. */
 # define X86_MSR_ENABLE_FAST_STRINGS            (1 << 0)

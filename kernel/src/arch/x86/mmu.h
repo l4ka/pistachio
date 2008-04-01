@@ -137,17 +137,17 @@ INLINE void x86_mmu_t::enable_pae_mode()
  */
 INLINE bool x86_mmu_t::has_long_mode()
 {
-    if (!(x86_x64_cpu_features_t::has_cpuid()))
+    if (!(x86_x64_has_cpuid()))
         return false;
     
     u32_t features, lfn, dummy;
     
-    x86_x64_cpu_features_t::cpuid(CPUID_MAX_EXT_FN_NR, &lfn, &dummy, &dummy, &dummy);
+    x86_cpuid(CPUID_MAX_EXT_FN_NR, &lfn, &dummy, &dummy, &dummy);
     
     if (lfn < CPUID_AMD_FEATURES) 
         return false;
     
-    x86_x64_cpu_features_t::cpuid(CPUID_AMD_FEATURES, &dummy, &dummy, &dummy, &features);
+    x86_cpuid(CPUID_AMD_FEATURES, &dummy, &dummy, &dummy, &features);
     
     return (features & CPUID_AMD_HAS_LONGMODE);
 }

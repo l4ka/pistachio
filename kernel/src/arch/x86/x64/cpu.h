@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/cpu.h
  * Description:   X86-64 CPUID features 
@@ -223,12 +223,9 @@ public:
     u8_t get_paddr_bits() { return paddr_bits; }
     u8_t get_vaddr_bits() { return vaddr_bits; }
 
-    static bool has_cpuid();
-    static void cpuid(word_t fn_idx, 
-		      u32_t *eax, u32_t *ebx, u32_t *ecx, u32_t *edx);
 };
 
-INLINE bool x86_x64_cpu_features_t::has_cpuid() {
+INLINE bool x86_x64_has_cpuid() {
 
     /* 
      * According to the IA-32 Intel Architecture Software Developer's
@@ -269,15 +266,6 @@ INLINE bool x86_x64_cpu_features_t::has_cpuid() {
 
 }
 
-INLINE void x86_x64_cpu_features_t::cpuid(word_t fn_idx,
-		       u32_t *eax, u32_t *ebx, u32_t *ecx, u32_t *edx )
-{
-    __asm__ (
-	"cpuid"
-	: "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx)
-	: "a" (fn_idx)
-	);
-}
 
 /* from init.cc */
 extern x86_x64_cpu_features_t boot_cpu_ft;

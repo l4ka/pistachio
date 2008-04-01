@@ -69,23 +69,12 @@ INLINE bool x86_x32_has_cpuid()
     return (eflags & X86_FLAGS_ID);
 }
 
-INLINE void x86_x32_cpuid(word_t index,
-		       word_t* eax, word_t* ebx, word_t* ecx, word_t* edx)
-{
-    __asm__ (
-	"cpuid"
-	: "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx)
-	: "a" (index)
-	);
-}
-
-
 INLINE u32_t x86_x32_get_cpu_features()
 {
     if (x86_x32_has_cpuid ())
     {
 	u32_t features, dummy;
-	x86_x32_cpuid(1, &dummy, &dummy, &dummy, &features);
+	x86_cpuid(1, &dummy, &dummy, &dummy, &features);
 	return features;
     } else {
 	/* If there is no CPUID instruction we just fabricate the
