@@ -52,7 +52,7 @@ CMD(cmd_singlestep, cg)
 
 
 #if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_P4)
-DECLARE_CMD (cmd_branchstep, root, 'S', "branchstep",
+DECLARE_CMD (cmd_branchstep, root, 'j', "branchstep",
 	     "execute until next taken branch");
 
 CMD (cmd_branchstep, cg)
