@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2007,  Karlsruhe University
+## Copyright (C) 2007-2008,  Karlsruhe University
 ##                
 ## File path:     glue/v4-x86/Makeconf
 ##                
@@ -38,3 +38,8 @@ SOURCES += src/glue/v4-x86/timer-apic.cc
 else
 SOURCES += src/glue/v4-x86/timer.cc
 endif
+
+ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
+SOURCES += $(addprefix src/glue/v4-x86/, mdb_io.cc vrt_io.cc io_space.cc)
+endif
+

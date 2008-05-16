@@ -48,7 +48,7 @@
 #endif
 
 #if defined(CONFIG_X86_IO_FLEXPAGES)
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(io_space.h)
 #endif
 
 // Even if new MDB is not used we need the mdb_t::ctrl_t

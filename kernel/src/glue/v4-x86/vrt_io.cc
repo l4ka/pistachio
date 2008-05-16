@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2007,  Karlsruhe University
+ * Copyright (C) 2005-2008,  Karlsruhe University
  *                
- * File path:     platform/pc99/vrt_io.cc
+ * File path:     glue/v4-x86/vrt_io.cc
  * Description:   VRT for thread objects
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  *                
  ********************************************************************/
 #include INC_API(tcb.h)
-#include INC_PLAT(vrt_io.h)
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(vrt_io.h)
+#include INC_GLUE(io_space.h)
 
 #include <kdb/tracepoints.h>
 #include <debug.h>

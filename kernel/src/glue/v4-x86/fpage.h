@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/fpage.h
+ * File path:     glue/v4-x86/fpage.h
  * Description:   V4 flexpages
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 #ifndef __GLUE_V4_X86__X32__FPAGE_H__
 #define __GLUE_V4_X86__X32__FPAGE_H__
 
-#include INC_PLAT(io_fpage.h)
+#include INC_GLUE(io_fpage.h)
     
 
 #endif /* !__GLUE_V4_X86__X32__FPAGE_H__ */

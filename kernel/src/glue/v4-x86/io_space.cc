@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2007,  Karlsruhe University
+ * Copyright (C) 2004-2008,  Karlsruhe University
  *                
- * File path:     platform/pc99/io_space.cc
+ * File path:     glue/v4-x86/io_space.cc
  * Description:   IO-Fpage implementation for IA-32
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #include INC_API(tcb.h)
 #include INC_API(thread.h)
 #include INC_GLUE(space.h)
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(io_space.h)
 
 
 DECLARE_TRACEPOINT (X86_IO_PORT_SPACE);

@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2007,  Karlsruhe University
+ * Copyright (C) 2005-2008,  Karlsruhe University
  *                
- * File path:     platform/pc99/vrt_io.h
+ * File path:     glue/v4-x86/vrt_io.h
  * Description:   VRT for IO ports specific declarations
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,9 @@
  * $Id: vrt_io.h,v 1.4 2006/06/08 16:02:02 skoglund Exp $
  *                
  ********************************************************************/
-#ifndef __PLATFORM__PC99__VRT_IO_H__
-#define __PLATFORM__PC99__VRT_IO_H__
+
+#ifndef __GLUE__V4_X86__VRT_IO_H__
+#define __GLUE__V4_X86__VRT_IO_H__
 
 #include <vrt.h>
 #include <debug.h>
@@ -167,5 +168,4 @@ typedef vrt_io_t	io_space_t;
 
 
 
-
-#endif /* !__PLATFORM__PC99__VRT_IO_H__ */
+#endif /* !__GLUE__V4_X86__VRT_IO_H__ */

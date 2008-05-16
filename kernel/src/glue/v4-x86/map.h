@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2005, 2007-2008,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/map.h
+ * File path:     glue/v4-x86/map.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,6 @@
 #ifndef __GLUE_V4_X86__X32__MAP_H__
 #define __GLUE_V4_X86__X32__MAP_H__
 
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(io_space.h)
 
 #endif /* !__GLUE_V4_X86__X32__MAP_H__ */

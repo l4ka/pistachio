@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2005, 2007-2008,  Karlsruhe University
  *                
- * File path:     platform/pc99/io_space.h
- * Description:   IO space specific declarations
+ * File path:     glue/v4-x86/mdb_io.h
+ * Description:   MDB for IO ports specific declarations
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,45 +26,50 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: io_space.h,v 1.3 2005/05/19 08:43:48 stoess Exp $
+ * $Id: mdb_io.h,v 1.3 2007/01/08 14:08:10 skoglund Exp $
  *                
  ********************************************************************/
+#ifndef __GLUE__V4_X86__MDB_IO_H__
+#define __GLUE__V4_X86__MDB_IO_H__
 
-#ifndef __PLATFORM__PC99__IO_SPACE_H__
-#define __PLATFORM__PC99__IO_SPACE_H__
+#include <mdb.h>
+#include INC_GLUE(mdb.h)
+#include INC_GLUE(vrt_io.h)
 
+#define MDB_IO_SIZES		VRT_IO_SIZES
+#define MDB_IO_NUMSIZES		VRT_IO_NUMSIZES
 
-#if !defined(CONFIG_X86_IO_FLEXPAGES)
-
-#include INC_API(generic-archmap.h)
-
-#else
-
-#include <debug.h>
-#include INC_API(config.h)
-#include INC_API(fpage.h)
-#include INC_API(ipc.h)
-#include INC_PLAT(vrt_io.h)
-#include INC_PLAT(mdb_io.h)
-
-#define IPC_MR0_IO_PAGEFAULT                ((-8UL) << 4)
-
-void arch_map_fpage (tcb_t * src, fpage_t snd_fpage, word_t snd_base,
-		     tcb_t * dst, fpage_t rcv_fpage, bool grant);
-
-void arch_unmap_fpage (tcb_t * from, fpage_t fpage, bool flush);
-
-INLINE fpage_t acceptor_t::get_arch_specific_rcvwindow(tcb_t *dest)
+class mdb_io_t : public mdb_t
 {
-    return fpage_t::complete_arch();
-}
+public:
+    static word_t sizes[];
+    static word_t num_sizes;
 
-bool handle_io_pagefault(tcb_t *tcb, u16_t port, u16_t size, addr_t ip);
-void zero_io_bitmap(space_t *space, word_t port, word_t log2size);
-void set_io_bitmap(space_t *space, word_t port, word_t log2size);
+    word_t get_radix (word_t objsize);
+    word_t get_next_objsize (word_t objsize);
+    const char * get_name (void);
 
-#endif /* !defined(CONFIG_X86_IO_FLEXPAGES) */
+    // Node specific operations
+
+    void clear (mdb_node_t * node);
+    word_t get_rights (mdb_node_t * node);
+    void set_rights (mdb_node_t * node, word_t r);
+    void flush_cached_entry (mdb_node_t * node, range_t range);
+    bool allow_attribute_update (mdb_node_t * node);
+    void set_attribute (mdb_node_t * node, word_t attrib);
+    word_t get_phys_address (mdb_node_t * node);
+    word_t get_purged_status (mdb_node_t * node);
+    void reset_purged_status (mdb_node_t * node);
+    void update_purged_status (mdb_node_t * node, word_t status);
+    word_t get_effective_status (mdb_node_t * node);
+    word_t reset_effective_status (mdb_node_t * node);
+    void update_effective_status (mdb_node_t * node, word_t status);
+    void dump (mdb_node_t * node);
+};
+
+extern mdb_io_t mdb_io;
+extern mdb_node_t * sigma0_ionode;
 
 
 
-#endif /* !__PLATFORM__PC99__IO_SPACE_H__ */
+#endif /* !__GLUE__V4_X86__MDB_IO_H__ */

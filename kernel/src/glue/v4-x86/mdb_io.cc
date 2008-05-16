@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2007,  Karlsruhe University
+ * Copyright (C) 2005-2008,  Karlsruhe University
  *                
- * File path:     platform/pc99/mdb_io.cc
+ * File path:     glue/v4-x86/mdb_io.cc
  * Description:   IO port specific generic mappings database functions
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,8 @@
  *                
  ********************************************************************/
 #include <vrt.h>
-#include INC_PLAT(mdb_io.h)
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(mdb_io.h)
+#include INC_GLUE(io_space.h)
 
 
 

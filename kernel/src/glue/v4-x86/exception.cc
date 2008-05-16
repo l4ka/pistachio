@@ -28,7 +28,7 @@ DECLARE_TRACEPOINT (X86_SEGRELOAD);
 DECLARE_TRACEPOINT (X86_UD);
 
 #if defined(CONFIG_X86_IO_FLEXPAGES)
-#include INC_PLAT(io_space.h)
+#include INC_GLUE(io_space.h)
 #endif
 
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
