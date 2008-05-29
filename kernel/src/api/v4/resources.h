@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     api/v4/resources.h
  * Description:   
@@ -69,13 +69,13 @@ public:
      * Intialize resources (i.e., clear all resources).
      */
     inline void init (void)
-	{ resource_bits = 0; }
+	{ resource_bits.clear(); }
 
     /**
      * Clear all resources.
      */
     inline void clear (void)
-	{ resource_bits = 0; }
+	{ resource_bits.clear(); }
 
     /**
      * Add resource to resource bits.

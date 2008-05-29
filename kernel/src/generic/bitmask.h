@@ -49,6 +49,13 @@ public:
 	{ maskvalue = initvalue; }    
     
     // Modification 
+    
+    bitmask_t clear()
+	{
+           maskvalue = 0;
+           return (bitmask_t) maskvalue;
+	}
+  
     inline bitmask_t operator = (const int &n) 
 	{
 	    maskvalue = (1UL << n);
