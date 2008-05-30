@@ -1,7 +1,7 @@
 ## -*- mode: Makefile; -*-
 ######################################################################
 ##                
-## Copyright (C) 2001-2007,  Karlsruhe University
+## Copyright (C) 2001-2008,  Karlsruhe University
 ##                
 ## File path:     Mk/Makeconf
 ## Description:   Make settings for pistachio
@@ -64,7 +64,7 @@ PRINTF=		printf
 # we take the first one reported by type -p <list>
 ifeq "$(SUBARCH)" "x64"
 TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
-		x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc amd64-gcc)))
+		x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc x86_64-gcc)))
 else
 TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p \
 			$(ARCH)-gcc $(ARCH)-linux-gcc \
