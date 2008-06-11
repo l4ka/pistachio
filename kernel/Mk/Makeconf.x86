@@ -1,6 +1,6 @@
 ################ -*- mode: Makefile; -*- #############################
 ##
-## Copyright (C) 2007,  Karlsruhe University
+## Copyright (C) 2007-2008,  Karlsruhe University
 ##
 ## File path:     Mk/Makeconf.x86
 ##
@@ -57,15 +57,16 @@ CFLAGS_i686	+=-march=i686
 endif
 
 ifeq "$(CC_VERSION)" "4"
-ifeq "$(CONFIG_X86_SMALL_SPACES)" "y"
-CFLAGS_x86 += -Wno-invalid-offsetof 
-endif
-
-CFLAGS_p4  +=	-march=nocona
-CFLAGS_k8  +=	-march=k8
+ ifeq "$(CONFIG_X86_SMALL_SPACES)" "y"
+ CFLAGS_x86 += -Wno-invalid-offsetof 
+ endif
+ CFLAGS_p4  +=	-march=nocona
+ CFLAGS_k8  +=	-march=k8
 else
-CFLAGS_p4  +=	-march=pentium4
-CFLAGS_k8  +=   -march=athlon
+ ifeq "$(SUBARCH)" "x32"
+ CFLAGS_p4  +=	-march=pentium4
+ endif
+ CFLAGS_k8  +=   -march=athlon
 endif
 
 LIBS_x86_x32  +=   -lgcc
