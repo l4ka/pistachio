@@ -93,7 +93,7 @@ void idt_t::add_gate(word_t index, idt_t::type_e type, void (*address)())
  */
 void idt_t::activate()
 {
-    x86_descreg_t idt((word_t) descriptors, sizeof(descriptors));
+    x86_descreg_t idt((word_t) descriptors, sizeof(descriptors)-1);
     idt.setdescreg(x86_descreg_t::idtr);
 }
 
