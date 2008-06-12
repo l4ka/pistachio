@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     l4test/exreg.cc
  * Description:   Various ExchangeRegisers() tests
@@ -88,7 +88,8 @@ dumb_exreg_thread( L4_ThreadId_t tid )
 				    &control, &sp, &pc, &flags, &user, 
 				    &pager );
 
-	return ret;
+	/* jsXXX: this is an obnoxious cast to make GCC-4.3.1 happy */
+	return (L4_ThreadId_t) ret;
 }
 
 L4_ThreadId_t

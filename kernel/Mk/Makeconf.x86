@@ -65,8 +65,8 @@ ifeq "$(CC_VERSION)" "4"
 else
  ifeq "$(SUBARCH)" "x32"
  CFLAGS_p4  +=	-march=pentium4
+ CFLAGS_k8  +=  -march=athlon
  endif
- CFLAGS_k8  +=   -march=athlon
 endif
 
 LIBS_x86_x32  +=   -lgcc
