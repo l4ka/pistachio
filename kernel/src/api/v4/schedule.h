@@ -85,7 +85,7 @@ public:
     void init ()
 	{
 	        /* prio queues */
-	    for(int i = 0; i < MAX_PRIO; i++)
+	    for(int i = 0; i <= MAX_PRIO; i++)
 		prio_queue[i] = (tcb_t *)NULL;
 	    max_prio = -1;
 	}
