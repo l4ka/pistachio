@@ -239,11 +239,15 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #else
 	"mov  %0, %%fs		\n\t"	        // no tracebuffer
 #endif  
- 	"pushq  %3	      	\n\t"		// new CS
+	"xor  %%rax, %%rax	\n"		//
+	"lldt %%ax		\n"		// clear LDTR
+	"pushq  %3	      	\n\t"		// new CS
  	"pushq $1f		\n\t"		// new IP		
  	"lretq			\n\t"
  	"1:			\n\t"	
-	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
+	: /* No Output */ 
+	: "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
+	: "rax"
 	);
     
     

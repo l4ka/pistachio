@@ -180,6 +180,8 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #else
 	"mov  %0, %%fs		\n"	/* default without tracebuffer	*/
 #endif
+	"xor %%eax, %%eax	\n"	/*				*/
+	"lldt %%ax		\n"	/* clear LDTR			*/
 	:
 	:
 #if defined(CONFIG_X86_SMALL_SPACES)
@@ -188,6 +190,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 	"r"(X86_UDS),
 #endif
 	"r"(X86_KDS), "r"(X86_UTCBS), "r"(X86_TBS)
+	: "eax"
 	);
 }
 
