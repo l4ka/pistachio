@@ -42,7 +42,7 @@
 
 FEATURESTRING ("tracebuffer");
 
-#define TB_WRAP	60
+#define TB_WRAP	80
 extern void list_tp_choices (void);
 
 #if defined(CONFIG_TBUF_PERFMON)
@@ -161,12 +161,16 @@ private:
 
     bool tcb_pass(tracerecord_t *t)
 	{
-	    if (tcb[0] == NULL || ((word_t) tcb[0] == (t->thread & KTCB_MASK)))
+	    tcb_t *rtcb = t->is_kernel_event() 
+		? addr_to_tcb((addr_t) t->thread)
+		: get_current_space()->get_tcb(threadid (t->thread));
+
+	    if (tcb[0] == NULL || (tcb[0] == rtcb))
 		return true;
-    
+	    
 	    for (word_t i=1; i < max_filters; i++)
 	    {
-		if ((word_t) tcb[i] == (t->thread & KTCB_MASK))
+		if (tcb[i] == rtcb)
 		    return true;
 		if (tcb[i] == NULL)
 		    return false;
@@ -378,6 +382,7 @@ public:
 		printf ("\nRecord P Type     TP %ws   TSC " IF_PERFMON (" PMC0  PMC1 ") "  Event\n", 
 			"Thread");
 	    
+	    bool current_reached = false;
 	    for (num = 1, index = start; count--; index++)
 	    {
 		if (index >= size) index = 0;
@@ -385,14 +390,19 @@ public:
 
 		if (!pass(rec))
 		    continue;
-
-	
+		
 		word_t cpu = rec->cpu;
 		
 		if (((++num % 4000) == 0) && get_choice ("Continue", "y/n", 'y') == 'n')
 		    break;
-
-
+		
+		if (header && !current_reached && (index >= get_tbuf_current() + 1))
+		{
+		    current_reached = true;
+		    printf ("------------------- Current ---------------"
+			    IF_PERFMON ("--------------------") "\n");  
+		}
+		
 		if (!old[cpu].tsc)
 		{
 		    old[cpu].tsc = rec->tsc;
@@ -429,11 +439,6 @@ public:
 
 
 #if defined(CONFIG_TBUF_PERFMON)
-		
-		// User and kernel instructions
-		word_t pmcdelta0 = pmc_delta(rec->pmc0, (word_t) old[cpu].pmc0);
-		word_t pmcdelta1 = pmc_delta(rec->pmc1, (word_t) old[cpu].pmc1);
-		
 		pmc_print(c_delta);
 		pmc_print(pmcdelta0);
 		pmc_print(pmcdelta1);
@@ -459,24 +464,7 @@ public:
 		
 		if (rec->is_kernel_event ())
 		{
-		    // Trust kernel strings to be ok
-		    idx = 0;
-		    while ((*src != 0) && (idx++ < (sizeof (tb_str) - 1)))
-		    {
-			*dst++ = *src++;
-			if (idx % TB_WRAP == 0)
-			{
-			    bool fid = (*(dst-1) == '%');
-			    if (fid) dst-=1;
-			    *dst++ = '\n'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = ' ';
-			    *dst++ = ' ' ; *dst++ = ' ';
-			    idx+=10;
-			    if (fid) *dst++ = '%';
-			}
-		    }
+		    space = get_kernel_space();
 		}
 		else
 		{
@@ -498,38 +486,37 @@ public:
 				rec->arg[8]);
 			continue;
 		    }
-		    
 		    space = tcb->get_space ();
-		    addr_t p = (addr_t) rec->str;
-		    char c;
 
-		    // Safely copy string into kernel
-		    while ((mapped = readmem (space, p, &c)) && (c != 0) && idx++ < (sizeof (tb_str) - 1))
+		}
+		addr_t p = (addr_t) src;
+		char c;
+
+		while ((mapped = readmem (space, p, &c)) && (c != 0) && idx++ < (sizeof (tb_str) - 1))
+		{
+		    *dst++ = c;
+		    p = addr_offset (p, 1);
+		    if (idx % TB_WRAP == 0)
 		    {
-			*dst++ = c;
-			p = addr_offset (p, 1);
-			if (idx % TB_WRAP == 0)
-			{
-			    bool fid = (*(dst-1) == '%');
-			    if (fid) dst-=1;
-			    *dst++ = '\n'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = '\t';
-			    *dst++ = '\t'; *dst++ = ' ';
-			    *dst++ = ' ' ; *dst++ = ' ';
-			    idx+=10;
-			    if (fid) *dst++ = '%';
-			}
-			// Turn '%s' into '%p' (i.e., avoid printing arbitrary
-			// user strings).
-			if (( *dst == 's') &&
-			    ( *(dst-1) == '%' || 	
-			      ( *(dst-2) == '%' &&		      
-				((*(dst-1) >= '0' && *(dst-1) <= '9') 
-				 || *(dst-1) == 'w' || *(dst-1) == 'l' || *(dst-1) == '.'))))
-			    *dst = 'p';
-		    
+			bool fid = (*(dst-1) == '%');
+			if (fid) dst-=1;
+			*dst++ = '\n'; *dst++ = '\t';
+			*dst++ = '\t'; *dst++ = '\t';
+			*dst++ = '\t'; *dst++ = '\t';
+			*dst++ = '\t'; *dst++ = ' ';
+			*dst++ = ' ' ; *dst++ = ' ';
+			idx+=10;
+			if (fid) *dst++ = '%';
 		    }
+			
+		    // Turn '%s' into '%p' (i.e., avoid printing arbitrary
+		    // user strings).
+		    if (!rec->is_kernel_event() &&  *dst == 's' &&
+			( *(dst-1) == '%' || 	
+			  ( *(dst-2) == '%' &&		      
+			    ((*(dst-1) >= '0' && *(dst-1) <= '9') 
+			     || *(dst-1) == 'w' || *(dst-1) == 'l' || *(dst-1) == '.'))))
+			*dst = 'p';
 		    
 		    if (!mapped) *dst++ = 0;
 		    
@@ -551,7 +538,6 @@ public:
 		if( (idx < 1) || (tb_str[idx-1] != '\n' && tb_str[idx-1] != '\r') )
 		    printf("\n"); 
 
-
 	    }
     
 	    if (header)
@@ -566,7 +552,8 @@ public:
 		
 		printf(" %d entries", num-1);
 	    }
-	    if (printed)
+	    
+	    if (header || printed)
 		printf("\n");
 
 	}
@@ -607,6 +594,8 @@ void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
 	count = size;
 	tbuf_handler.set_tsc(tsc);
     }
+    else if (count == 0)
+	count = size;
     
     start = tbuf_handler.find_tbuf_start(end, count, size);
     count = (end >= start) ? end - start : end + size - start;
@@ -751,7 +740,8 @@ CMD (cmd_tb_dump, cg)
     case 't': 
 	count = get_dec ("Record count", count);
 	end = tbuf_handler.find_tbuf_end(start, count, size);
-	if (count > size)  count = size; break;
+	if (count > size)  count = size; 
+	break;
     case 'b':
     default: 
 	count = get_dec ("Record count", count);
