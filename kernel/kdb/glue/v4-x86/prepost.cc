@@ -71,12 +71,15 @@ DECLARE_TRACEPOINT(X86_BREAKPOINT);
 
 #if defined(CONFIG_SMP)
 atomic_t kdb_current_cpu;
+
 KDEBUG_INIT(kdb_prepost_init);
 void kdb_prepost_init()
 {
     kdb_current_cpu = CONFIG_SMP_MAX_CPUS;
 }
 #endif
+
+DECLARE_TRACEPOINT(DEBUG);
 
 
 bool kdb_t::pre() 
@@ -94,6 +97,11 @@ bool kdb_t::pre()
 	x86_iret_self();
 	x86_sleep_uninterruptible();
 	
+	/* 
+	 * if we wanted to enter KDB, we have come here via any other
+	 * exception than NMI. Otherwise we're just any of the unrelated cpus
+	 * having been stopped via broadcast NMI.
+	 */
 	if (param->exception == X86_EXC_NMI)
 	{
 	    if (kdb_current_cpu == cpu)
@@ -106,10 +114,15 @@ bool kdb_t::pre()
 	}
     }
     
-    /* Notify other CPUs */
-    local_apic_t<APIC_MAPPINGS_START> local_apic;
-    local_apic.broadcast_nmi();
-	
+    TRACEPOINT(DEBUG, "enter KDB %d", param->exception);
+    
+    if (param->exception != X86_EXC_NMI)
+    {
+	TRACEPOINT(DEBUG, "enter KDB bc NMI");
+	local_apic_t<APIC_MAPPINGS_START> local_apic;
+	local_apic.broadcast_nmi();
+    }
+    
 #endif
 
     switch (param->exception)
@@ -209,13 +222,21 @@ bool kdb_t::pre()
 	}
     }
     break;
-#if !defined(CONFIG_SMP)
     case X86_EXC_NMI:		/* well, the name says enough	*/
+#if !defined(CONFIG_SMP)
     {
 	printf("--- NMI  ---\n");
     } 
-    break;
+#else
+    /* 
+     * if we wanted to enter KDB, we have come here via any other
+     * exception than NMI. Otherwise we're just any of the unrelated cpus
+     * having been stopped via broadcast NMI. This case here occurs if we have
+     * received a broadcast after a different CPU has exited KDB.
+     */
+    enter_kernel_debugger = false;
 #endif
+    break;
     case X86_EXC_BREAKPOINT: /* int3 */
     {
 	space_t * space = kdb.kdb_current->get_space();
@@ -400,13 +421,18 @@ void kdb_t::post() {
 
     } /* switch */
 
+    TRACEPOINT(DEBUG, "exit KDB %d", param->exception);
+
 #if defined(CONFIG_SMP) 
+
     if (kdb_current_cpu == get_current_cpu())
     {
 	kdb_current_cpu = CONFIG_SMP_MAX_CPUS;
+	
+	TRACEPOINT(DEBUG, "exit KDB bc NMI");
 	local_apic_t<APIC_MAPPINGS_START> local_apic;
 	local_apic.broadcast_nmi();
+	
     }
-    ASSERT(kdb_current_cpu == CONFIG_SMP_MAX_CPUS);
 #endif
 };
