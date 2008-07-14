@@ -439,6 +439,10 @@ public:
 
 
 #if defined(CONFIG_TBUF_PERFMON)
+		// User and kernel instructions
+		word_t pmcdelta0 = pmc_delta(rec->pmc0, (word_t) old[cpu].pmc0);
+		word_t pmcdelta1 = pmc_delta(rec->pmc1, (word_t) old[cpu].pmc1);
+		
 		pmc_print(c_delta);
 		pmc_print(pmcdelta0);
 		pmc_print(pmcdelta1);
