@@ -79,7 +79,6 @@ void kdb_prepost_init()
 }
 #endif
 
-DECLARE_TRACEPOINT(DEBUG);
 
 
 bool kdb_t::pre() 
@@ -114,11 +113,8 @@ bool kdb_t::pre()
 	}
     }
     
-    TRACEPOINT(DEBUG, "enter KDB %d", param->exception);
-    
     if (param->exception != X86_EXC_NMI)
     {
-	TRACEPOINT(DEBUG, "enter KDB bc NMI");
 	local_apic_t<APIC_MAPPINGS_START> local_apic;
 	local_apic.broadcast_nmi();
     }
@@ -421,15 +417,12 @@ void kdb_t::post() {
 
     } /* switch */
 
-    TRACEPOINT(DEBUG, "exit KDB %d", param->exception);
-
 #if defined(CONFIG_SMP) 
 
     if (kdb_current_cpu == get_current_cpu())
     {
 	kdb_current_cpu = CONFIG_SMP_MAX_CPUS;
 	
-	TRACEPOINT(DEBUG, "exit KDB bc NMI");
 	local_apic_t<APIC_MAPPINGS_START> local_apic;
 	local_apic.broadcast_nmi();
 	
