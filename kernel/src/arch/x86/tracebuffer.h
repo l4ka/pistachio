@@ -115,10 +115,15 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 /*
  * Access to performance monitoring counters
  */
+ 
+# define TBUF_PMC_SEL_0
+# define TBUF_PMC_SEL_1
+# define TBUF_RDPMC_0
+# define TBUF_RDPMC_1
 
 #if defined(CONFIG_TBUF_PERFMON) 
 
-# if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
+# if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8)
 # define TBUF_PMC_SEL_0		"       xor  %1, %1		\n"
 # define TBUF_PMC_SEL_1		"	mov  $1, %1		\n"
 # elif defined(CONFIG_CPU_X86_P4) 
@@ -126,13 +131,6 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 #  define TBUF_PMC_SEL_0	"	mov	$12, %1		\n"
 #  define TBUF_PMC_SEL_1	"	add	$ 2, %1		\n"
 # endif
-
-#else
-
-# define TBUF_PMC_SEL_0
-# define TBUF_PMC_SEL_1
-# define TBUF_RDPMC_0
-# define TBUF_RDPMC_1
 
 #endif /* defined(CONFIG_TBUF_PERFMON) */
 
@@ -159,7 +157,7 @@ INLINE tracebuffer_t * get_tracebuffer (void)
     ({									\
 	word_t dummy, addr;						\
 	asm volatile (							\
-	    /* Check wheter to filter the event */			\
+	    /* Check whether to filter the event */			\
 	    "	mov	%%fs:2*%c9, %3			\n"		\
 	    "	and	%1, %3				\n"		\
 	    "	jz	2f				\n"		\
@@ -183,7 +181,7 @@ INLINE tracebuffer_t * get_tracebuffer (void)
 	    "	shl	$16, %%edx			\n"		\
 	    "	lea	__idle_tcb, %3			\n"		\
 	    "	movw 	"MKSTR(OFS_TCB_CPU)"(%3), %%dx	\n"		\
-	    "	movl	%%edx, %%fs:1*%c9(%0)		\n"		\
+	    "	movl	%%edx, %%fs:1*%c9(%0)		\n"		\            
 	    TBUF_PMC_SEL_0						\
 	    TBUF_RDPMC_0						\
 	    TBUF_PMC_SEL_1						\
