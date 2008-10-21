@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/tss.h
  * Description:   AMD64 Task State Segment
@@ -61,7 +61,7 @@ private:
     u64_t	reserved2;
     u16_t	reserved3;
     u16_t	iopbm_offset;    
-    u8_t	io_bitmap[IOPERMBITMAP_SIZE+1] AMD64_IOPERMBITMAP_ALIGNMENT;
+    u8_t	io_bitmap[IOPERMBITMAP_SIZE] AMD64_IOPERMBITMAP_ALIGNMENT;
     u8_t	stopper;
 } __attribute__((packed));
 

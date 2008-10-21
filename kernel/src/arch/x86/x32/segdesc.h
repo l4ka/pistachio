@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/segdesc.h
  * Description:   IA32 Segment Descriptor
@@ -76,8 +76,8 @@ INLINE void x86_segdesc_t::set_seg(u32_t base, u32_t limit,
     }
     else
     {
-	x.d.limit_low  =  limit        & 0xFFFF;
-	x.d.limit_high = (limit >> 16) & 0xFF;
+	x.d.limit_low  = limit & 0xFFFF;
+	x.d.limit_high = limit >> 16;
 	x.d.g = 0;	/* 1B granularity	*/
     }
 
@@ -98,8 +98,8 @@ INLINE void x86_segdesc_t::set_seg(u32_t base, u32_t limit,
 INLINE void x86_segdesc_t::set_sys(u32_t base, u32_t limit, 
 				    int dpl, segtype_e type)
 {
-    x.d.limit_low  =  limit        & 0xFFFF;
-    x.d.limit_high = (limit >> 16) & 0xFF;
+    x.d.limit_low  = limit & 0xFFFF;
+    x.d.limit_high = limit >> 16;
     x.d.base_low   = base        & 0xFFFFFF;
     x.d.base_high  = (base >> 24) &     0xFF;
     x.d.type = type;

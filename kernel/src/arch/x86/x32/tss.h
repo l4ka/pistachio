@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/tss.h
  * Description:   IA32 Task State Segment
@@ -64,7 +64,7 @@ private:
     u32_t	ldt;
     u16_t	trace;
     u16_t	iopbm_offset;
-    u8_t	io_bitmap[IOPERMBITMAP_SIZE+1] X86_X32_IOPERMBITMAP_ALIGNMENT;
+    u8_t	io_bitmap[IOPERMBITMAP_SIZE] X86_X32_IOPERMBITMAP_ALIGNMENT;
     u8_t	stopper;
 };
 

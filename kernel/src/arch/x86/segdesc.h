@@ -27,8 +27,7 @@ public:
     {
 	struct {
 	    u16_t	   size;
-	    word_t	   addr __attribute__((packed));
- 	    u16_t	   pad[sizeof(word_t)-sizeof(u16_t)];
+	    word_t	   addr __attribute__((packed)); 
 	} descriptor;
 	u16_t  selector;
     };
