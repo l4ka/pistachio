@@ -64,6 +64,7 @@ INLINE void x86_mmu_t::flush_tlb(bool global)
 {
     word_t dummy1, dummy2;
 
+#if defined(CONFIG_X86_PGE)
     if (!global)
     {
         __asm__ __volatile__(
@@ -84,6 +85,12 @@ INLINE void x86_mmu_t::flush_tlb(bool global)
                 : "=r"(dummy1), "=r"(dummy2)
                 : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
     }
+#else
+    __asm__ __volatile__(
+            "mov    %%cr3, %0   \n\t"
+            "mov    %0, %%cr3   \n\t"
+            : "=r" (dummy1));
+#endif
 }
 
 
