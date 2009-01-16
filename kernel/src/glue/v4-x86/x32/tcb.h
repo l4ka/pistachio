@@ -301,21 +301,23 @@ INLINE msg_tag_t tcb_t::do_ipc(threadid_t to_tid, threadid_t from_tid, timeout_t
 {
     msg_tag_t tag;
     word_t mr1, mr2, dummy;
-    asm("pushl	%%ebp		\n"
+    asm volatile
+       ("pushl	%%ebp		\n"
 	"pushl	%%ecx		\n"
 	"call	sys_ipc		\n"
 	"addl	$4, %%esp	\n"
 	"movl	%%ebp, %%ecx	\n"
 	"popl	%%ebp		\n"
 	: "=S"(tag.raw),
-	"=b"(mr1),
-	"=c"(mr2),
-	"=a"(dummy),
-	"=d"(dummy)
+	  "=b"(mr1),
+	  "=c"(mr2),
+	  "=a"(dummy),
+	  "=d"(dummy)
 	: "a"(to_tid.get_raw()),
 	  "d"(from_tid.get_raw()),
 	  "c"(timeout.raw)
-	: "edi");
+	: "edi",
+	  "memory");    
     set_mr(1, mr1);
     set_mr(2, mr2);
     return tag;
