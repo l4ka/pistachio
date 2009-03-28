@@ -438,6 +438,7 @@ send_path:
 #endif
 
 	// The partner must be told who the IPC originated from.
+	ASSERT(!tag.is_propagated() || sender_id.is_global());
 	to_tcb->set_partner(sender_id);
 
 	if (EXPECT_FALSE( !transfer_message(current, to_tcb, tag) ))
@@ -728,8 +729,13 @@ send_path:
 	}
 	current->set_state(thread_state_t::running);
 #if defined(HANDLE_LOCAL_IDS)
-	if (current->get_space () == from_tcb->get_space ())
+	// only global TIDs are passed through propagation, hence the test
+	// against from_tcb->get_global_id().
+	if (current->get_space () == from_tcb->get_space ()
+	    && current->get_partner() == from_tcb->get_global_id())
+	{
 	    return_ipc (from_tcb->get_local_id ());
+	}
 #endif
 	return_ipc(current->get_partner());
     }
