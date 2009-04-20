@@ -247,7 +247,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
  	"1:			\n\t"	
 	: /* No Output */ 
 	: "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
-	: "rax"
+	: "rax", "memory"
 	);
     
     
