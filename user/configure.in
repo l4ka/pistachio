@@ -61,6 +61,7 @@ case $HOST in
   ia32|x86|i386*|i486*|i586*|i686*)
 	ARCH=ia32
 	KERNEL=x86-kernel
+	LIBGCCFLAGS=-m32
 	;;
   powerpc64*|ppc64*)
 	ARCH=powerpc64
@@ -288,6 +289,10 @@ esac
 
 dnl Platform dependent settings.
 case $HOST in
+  ia32|x86|i386*|i486*|i586*|i686*)
+        CFLAGS="$CFLAGS -m32"
+        LDFLAGS="$LDFLAGS -melf_i386"
+        ;;
   amd64*)
 	PLAT=amd64-pc99
 	CFLAGS="$CFLAGS -m64 -mno-red-zone"

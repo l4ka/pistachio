@@ -84,9 +84,15 @@ CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
 CC_SUBVERSION	= $(shell echo __GNUC_MINOR__ | $(CC) -E  - | grep -v "\#")
 
 
-GCCINSTALLDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
-LIBGCCINC?= $(GCCINSTALLDIR)include
-LIBGCCDIR?= $(GCCINSTALLDIR)
+# When compiling for 32-bit targets on 64-bit hosts, a 32-bit version
+# of libgcc is needed. Using the -m32 switch (hopefully) finds the correct
+# version.
+LIBGCCINC?= $(dir $(shell $(CC) -print-libgcc-file-name))include
+ifeq "$(SUBARCH)" "x32"
+    LIBGCCDIR?= $(dir $(shell $(CC) -m32 -print-libgcc-file-name))
+else
+    LIBGCCDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
+endif
 
 # Some CCs (e.g., the native FreeBSD gcc) do not follow the regular
 # gcc conventions when it comes to the gcc include files.
