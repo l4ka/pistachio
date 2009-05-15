@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2008,  Karlsruhe University
+ * Copyright (C) 2004-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/io_space.cc
  * Description:   IO-Fpage implementation for IA-32
@@ -43,6 +43,9 @@
 
 DECLARE_TRACEPOINT (X86_IO_PORT_SPACE);
 
+#if defined(CONFIG_X_PAGER_EXREGS)
+FEATURESTRING ("ioflexpages");
+#endif
 
 /* 
  * void zero_io_bitmap()
