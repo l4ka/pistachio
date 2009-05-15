@@ -43,9 +43,7 @@
 
 DECLARE_TRACEPOINT (X86_IO_PORT_SPACE);
 
-#if defined(CONFIG_X_PAGER_EXREGS)
 FEATURESTRING ("ioflexpages");
-#endif
 
 /* 
  * void zero_io_bitmap()
