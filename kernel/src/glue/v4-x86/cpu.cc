@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005-2003, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005-2003, 2006-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/cpu.cc
  * Description:   X86 CPU implementation
@@ -65,5 +65,14 @@ void init_xcpu_handling ()
 {
     idt.add_gate(IDT_LAPIC_XCPU_IPI, idt_t::interrupt, smp_trigger_ipi);
 }
+
+#if defined(CONFIG_SMP_IDLE_POLL)
+void processor_sleep()
+{
+    asm("sti; nop; nop; nop; cli\n");
+    process_xcpu_mailbox();
+}
+#endif
+
 
 #endif /* defined(CONFIG_SMP) */
