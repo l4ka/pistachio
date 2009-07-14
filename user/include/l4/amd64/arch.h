@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003, 2005-2006,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2005-2006, 2009,  Karlsruhe University
  *                
  * File path:     l4/amd64/arch.h
  * Description:   amd64 specific functions and defines
@@ -102,7 +102,7 @@ L4_INLINE L4_Word_t L4_IoFpageSizeLog2 (L4_Fpage_t f)
     return iofp.X.s;
 }
 
-L4_INLINE bool L4_IsIoFpage (L4_Fpage_t f)
+L4_INLINE L4_Bool_t L4_IsIoFpage (L4_Fpage_t f)
 {
     L4_IoFpage_t iofp;
     iofp.raw = f.raw;
