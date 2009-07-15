@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2007, 2009,  Karlsruhe University
  *                
  * File path:     api/v4/thread.cc
  * Description:   thread manipulation
@@ -952,9 +952,10 @@ void handle_ipc_error (void)
 	for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
 	    current->set_mr (i, current->misc.ipc_copy.saved_mr[i]);
 	current->set_br (0, current->misc.ipc_copy.saved_br0);
-	current->set_partner (current->get_saved_partner ());
-	current->set_state (current->get_saved_state ());
-
+        
+	current->set_partner (threadid_t::nilthread ());
+	current->set_state (thread_state_t::running);
+        
 	current->set_saved_partner (threadid_t::nilthread ());
 	current->set_saved_state (thread_state_t::aborted);
 

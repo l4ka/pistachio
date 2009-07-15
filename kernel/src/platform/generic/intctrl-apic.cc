@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008, Karlsruhe University
+ * Copyright (C) 2002-2009, Karlsruhe University
  *                
  * File path:     platform/generic/intctrl-apic.cc
  * Description:   Implementation of APIC+IOAPIC intctrl (with ACPI)
