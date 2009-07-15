@@ -452,7 +452,8 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
 	return;
     }
 
-    if (! tcb->get_saved_partner ().is_nilthread ())
+    if (! tcb->get_saved_partner ().is_nilthread () &&
+        tcb->get_saved_state().is_polling_or_waiting() )
     {
 	// We have a nested IPC operation.  Perform another unwind.
 	tcb->restore_state ();
@@ -505,7 +506,7 @@ redo_unwind:
     set_state (thread_state_t::running);
     partner = get_partner_tcb ();
 
-    if (cstate.is_polling () || cstate.is_waiting ())
+    if (cstate.is_polling_or_waiting ())
     {
 	// IPC operation has not yet started.  I.e., partner is not
 	// yet involved.
@@ -525,7 +526,8 @@ redo_unwind:
 	    tag = tag.error_tag ();
 	}
 
-	if (! get_saved_partner ().is_nilthread ())
+        if (! get_saved_partner ().is_nilthread () &&
+            get_saved_state().is_polling_or_waiting())
 	{
 	    // We're handling a nested IPC.
 	    restore_state ();

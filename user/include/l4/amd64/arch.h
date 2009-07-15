@@ -59,12 +59,13 @@ L4_INLINE L4_Fpage_t L4_Fpage (L4_IoFpage_t f)
 L4_INLINE L4_Fpage_t L4_IoFpage (L4_Word_t BasePort, int FpageSize)
 {
     L4_IoFpage_t fp;
+    L4_Fpage_t out;
     L4_Word_t msb = __L4_Msb (FpageSize);
+    
     fp.X.p = BasePort;
     fp.X.__two = 2;
     fp.X.s = (1UL << msb) < (L4_Word_t) FpageSize ? msb + 1 : msb;
     fp.X.rwx = L4_NoAccess;
-    L4_Fpage_t out;
     out.raw = fp.raw;
     return out;
 }
@@ -72,11 +73,12 @@ L4_INLINE L4_Fpage_t L4_IoFpage (L4_Word_t BasePort, int FpageSize)
 L4_INLINE L4_Fpage_t L4_IoFpageLog2 (L4_Word_t BasePort, int FpageSize)
 {
     L4_IoFpage_t fp;
+    L4_Fpage_t out;
+
     fp.X.p = BasePort;
     fp.X.__two = 2;
     fp.X.s = FpageSize;
     fp.X.rwx = L4_NoAccess;
-    L4_Fpage_t out;
     out.raw = fp.raw;
     return out;
 }

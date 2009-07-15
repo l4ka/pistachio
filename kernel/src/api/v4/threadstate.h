@@ -90,6 +90,8 @@ public:
 	{ return state == waiting_timeout; }
     bool is_polling()
 	{ return state == polling; }
+    bool is_polling_or_waiting()
+	{ return is_polling() || is_waiting(); }
     bool is_locked_running()
 	{ return state == locked_running; }
     bool is_locked_waiting()
