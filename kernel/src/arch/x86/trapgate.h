@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007, 2009,  Karlsruhe University
  *                
  * File path:     arch/x86/trapgate.h
  * Description:   
@@ -46,8 +46,17 @@ public:
 
     void dump ()
 	{
-	    printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
-		   regs[ipreg], regs[spreg], error,  this);
+            if (regs[csreg] == X86_KCS)
+            {
+                printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
+                       regs[ipreg], (word_t) this + sizeof(*this) - 2 * sizeof(word_t), 
+                       error,  this);
+            }
+            else
+            {
+                printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
+                       regs[ipreg], regs[spreg], error,  this);
+            }
 	    
 	    for (word_t r=0; r < num_dbgregs; r++)
 	    {
