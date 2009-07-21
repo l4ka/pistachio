@@ -452,8 +452,7 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
 	return;
     }
 
-    if (! tcb->get_saved_partner ().is_nilthread () &&
-        tcb->get_saved_state().is_polling_or_waiting() )
+    if (! tcb->get_saved_partner ().is_nilthread ())
     {
 	// We have a nested IPC operation.  Perform another unwind.
 	tcb->restore_state ();
@@ -526,8 +525,7 @@ redo_unwind:
 	    tag = tag.error_tag ();
 	}
 
-        if (! get_saved_partner ().is_nilthread () &&
-            get_saved_state().is_polling_or_waiting())
+        if (! get_saved_partner ().is_nilthread ())
 	{
 	    // We're handling a nested IPC.
 	    restore_state ();
@@ -619,8 +617,9 @@ redo_unwind:
 	    }
 	}
 
-	if (! get_saved_partner ().is_nilthread ())
+        if (! get_saved_partner ().is_nilthread ())
 	{
+	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
 	}
@@ -697,8 +696,9 @@ redo_unwind:
 	    }
 	}
 
-	if (! get_saved_partner ().is_nilthread ())
+        if (! get_saved_partner ().is_nilthread ())
 	{
+	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
 	}
@@ -1003,6 +1003,7 @@ void tcb_t::save_state ()
 	misc.ipc_copy.saved_mr[i] = get_mr (i);
     misc.ipc_copy.saved_br0 = get_br (0);
     misc.ipc_copy.saved_error = get_error_code ();
+    
     ASSERT (get_saved_partner () == threadid_t::nilthread ());
     ASSERT (get_saved_state () == thread_state_t::aborted);
     set_saved_partner (get_partner ());
