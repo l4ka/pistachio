@@ -452,7 +452,8 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
 	return;
     }
 
-    if (! tcb->get_saved_partner ().is_nilthread ())
+    if (! tcb->get_saved_partner ().is_nilthread () &&
+        ! tcb->get_saved_state ().is_running () )
     {
 	// We have a nested IPC operation.  Perform another unwind.
 	tcb->restore_state ();
@@ -525,8 +526,9 @@ redo_unwind:
 	    tag = tag.error_tag ();
 	}
 
-        if (! get_saved_partner ().is_nilthread ())
-	{
+        if (! get_saved_partner ().is_nilthread () &&
+            ! get_saved_state ().is_running () )
+        {
 	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
@@ -617,8 +619,9 @@ redo_unwind:
 	    }
 	}
 
-        if (! get_saved_partner ().is_nilthread ())
-	{
+        if (! get_saved_partner ().is_nilthread () &&
+            ! get_saved_state ().is_running () )
+        {
 	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
@@ -696,8 +699,9 @@ redo_unwind:
 	    }
 	}
 
-        if (! get_saved_partner ().is_nilthread ())
-	{
+        if (! get_saved_partner ().is_nilthread () &&
+            ! get_saved_state ().is_running () )
+        {
 	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
