@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2009,  Karlsruhe University
  *                
  * File path:     api/v4/ipc.cc
  * Description:   generic IPC path
@@ -217,7 +217,6 @@ static void do_xcpu_send(cpu_mb_entry_t * entry)
 	// a request packet (do_xcpu_receive) -- so don't bother
 	TRACE_XIPC_DETAILS("ipc xcpu %s %t is locked_waiting for %t", 
 			   __func__, to_tcb, TID(sender_id));
-	enter_kdebug("UNTESTED");
     }
     else
     {
