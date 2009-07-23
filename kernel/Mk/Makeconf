@@ -1,7 +1,7 @@
 ## -*- mode: Makefile; -*-
 ######################################################################
 ##                
-## Copyright (C) 2001-2008,  Karlsruhe University
+## Copyright (C) 2001-2009,  Karlsruhe University
 ##                
 ## File path:     Mk/Makeconf
 ## Description:   Make settings for pistachio
@@ -64,11 +64,15 @@ PRINTF=		printf
 # we take the first one reported by type -p <list>
 ifeq "$(SUBARCH)" "x64"
 TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
-		x86_64-pc-linux-gnu-gcc x86_64-unknown-linux-gnu-gcc x86_64-gcc)))
+		x86_64-gcc x86_64-linux-gcc x86_64-unknown-elf-gcc \
+		x86_64-elf-gcc x86_64-unknown-linux-gnu-gcc \
+		x86_64-pc-linux-gnu-gcc)))
 else
 TOOLPREFIX?=	$(subst gcc,,$(firstword $(shell type -p \
-			$(ARCH)-gcc $(ARCH)-linux-gcc \
-			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc)))
+			$(ARCH)-gcc $(ARCH)-linux-gcc $(ARCH)-unknown-elf-gcc \
+			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc \
+			$(ARCH)-pc-linux-gnu-gcc)))
+
 endif
 
 # Try to use ccache if installed (and NO_CCACHE is not defined)
