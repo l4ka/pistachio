@@ -103,9 +103,10 @@ if test "x$CC" = x -a "x$host_alias" != x; then
   fi
 
   AC_CHECK_PROGS(CROSSCC,
-	[$host_alias-gcc $gcc_prefix-elf-gcc $gcc_prefix-unknown-elf-gcc \
-	$gcc_prefix-linux-gcc $gcc_prefix-unknown-linux-gcc \
-	$gcc_prefix-unknown-linux-gnu-gcc $gcc_prefix-pc-linux-gnu-gcc])
+	[$host_alias-gcc $gcc_prefix-gcc $gcc_prefix-elf-gcc \
+	$gcc_prefix-unknown-elf-gcc $gcc_prefix-linux-gcc \
+	$gcc_prefix-unknown-linux-gcc $gcc_prefix-unknown-linux-gnu-gcc \
+	$gcc_prefix-pc-linux-gnu-gcc])
 fi
 
 if test "x$CROSSCC" != x; then
