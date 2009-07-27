@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2009,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/init32.cc
  * Description:   Switch to 64bit long mode
@@ -88,7 +88,7 @@ static void SECTION(".init.init32") init32_cons (void) {};
 #define INIT32_COMPORT		CONFIG_KDB_COMPORT
 #define INIT32_RATE		CONFIG_KDB_COMSPEED
 
-void inline SECTION(".init.init32") init32_out(const u16_t port, const u8_t val)
+inline void SECTION(".init.init32") init32_out(const u16_t port, const u8_t val)
 {
     /* GCC can optimize here if constant */
     __asm__ __volatile__("outb	%1, %0\n"

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2009,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/cpu.h
  * Description:   X86-64 CPUID features 
@@ -257,7 +257,6 @@ INLINE bool x86_x64_has_cpuid() {
 	"=a" (a), "=b" (b), "=c" (c)
 	:
 	"i" (X86_FLAGS_ID)
-	:
 	);
 
     // Two successful flips of the CPUID flag indicate CPUID support.
