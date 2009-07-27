@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007, 2009,  Karlsruhe University
  *                
  * File path:     arch/x86/atomic.h
  * Description:   
@@ -22,22 +22,22 @@
 
 class atomic_t {
 public:
-    int operator ++ (int) 
+    word_t operator ++ (int) 
 	{
 	    __asm__ __volatile__(X86_LOCK "add $1, %0" : "=m"(val));
 	    return val;
 	}
 
-    int operator-- (int) 
+    word_t operator-- (int) 
 	{
 	    __asm__ __volatile__(X86_LOCK "sub $1, %0" : "=m"(val));
 	    return val;
 	}
 
-    int operator = (word_t val) 
+    word_t operator = (word_t val) 
 	{ return this->val = val; }
 
-    int operator = (int val) 
+    word_t operator = (int val) 
 	{ return this->val = val; }
 
     bool operator == (word_t val) 
