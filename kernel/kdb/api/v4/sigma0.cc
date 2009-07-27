@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2006,  Karlsruhe University
+ * Copyright (C) 2002, 2006, 2009,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/sigma0.cc
  * Description:   Sigma0 interaction
@@ -79,7 +79,7 @@ DECLARE_CMD (cmd_s0_verbose, s0_interact, 'v', "verbose",
 CMD (cmd_s0_verbose, cg)
 {
     sigma0_send (s0_verbose, get_dec ("Verbose level", 1));
-    return CMD_QUIT;
+    return CMD_NOQUIT;
 }
 
 
@@ -92,7 +92,7 @@ DECLARE_CMD (cmd_s0_dumpmem, s0_interact, 'm', "dumpmem",
 CMD (cmd_s0_dumpmem, cg)
 {
     sigma0_send (s0_dumpmem);
-    return CMD_QUIT;
+    return CMD_NOQUIT;
 }
 
 
