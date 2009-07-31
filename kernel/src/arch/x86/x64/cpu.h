@@ -163,7 +163,7 @@ typedef union {
 class x86_x64_cpu_features_t{
 
 private:
-    char cpu_vendor[13];
+    char cpu_vendor[14];
     char cpu_name[49];
     u8_t family;
     u8_t model;
