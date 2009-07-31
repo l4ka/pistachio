@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006, 2008,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006, 2008-2009,  Karlsruhe University
  *                
  * File path:     l4/thread.h
  * Description:   Thread handling interfaces
@@ -35,6 +35,16 @@
 #include <l4/types.h>
 #include __L4_INC_ARCH(syscalls.h)
 #include __L4_INC_ARCH(vregs.h)
+
+#define L4_ERROR_OK			(0)
+#define L4_ERROR_NO_PRIVILEGE		(1)
+#define L4_ERROR_INVALID_THREAD		(2)
+#define L4_ERROR_INVALID_SPACE		(3)
+#define L4_ERROR_INVALID_SCHEDULER	(4)
+#define L4_ERROR_INVALID_PARAM		(5)
+#define L4_ERROR_UTCB_AREA		(6)
+#define L4_ERROR_KIP_AREA		(7)
+#define L4_ERROR_NO_MEM			(8)
 
 
 /*
@@ -133,6 +143,35 @@ L4_INLINE L4_Word_t L4_ErrorCode (void)
 {
     return __L4_TCR_ErrorCode ();
 }
+
+L4_INLINE const char *L4_ErrorCode_String(L4_Word_t err)
+{
+    switch (err)
+    {
+    case L4_ERROR_OK:			
+        return "l4_error_ok";
+    case L4_ERROR_NO_PRIVILEGE:	
+        return "l4_error_no_privilege";
+    case L4_ERROR_INVALID_THREAD:
+        return "l4_error_invalid_thread";
+    case L4_ERROR_INVALID_SPACE:
+        return "l4_error_invalid_space";
+    case L4_ERROR_INVALID_SCHEDULER:
+        return "l4_error_invalid_scheduler";
+    case L4_ERROR_INVALID_PARAM:
+        return "l4_error_invalid_param";
+    case L4_ERROR_UTCB_AREA:
+        return "l4_error_utcb_area";
+    case L4_ERROR_KIP_AREA:
+        return "l4_error_kip_area";
+    case L4_ERROR_NO_MEM:
+        return "l4_error_no_mem";
+    default:
+        return "invalid error code";
+    };
+
+   
+};
 
 L4_INLINE L4_Word_t L4_XferTimeouts (void)
 {
