@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2004, 2007,  Karlsruhe University
+ * Copyright (C) 1999-2004, 2007, 2009,  Karlsruhe University
  *                
  * File path:     crt0-amd64.S
  * Description:   Startup code for x86 family processors.
@@ -44,12 +44,7 @@ _start:
         movl    %ebx, %edi
 	cli     /* disable int's */
 	cld     /* clear direction flag */
-	mov     %ds, %ax
-	mov     %ax, %es
-	mov     %ax, %fs
-	mov     %ax, %gs
-	mov     %ax, %ss
-
+        
 	/* load temporary stack pointer */
 	lea     _mini_stack, %esp
 	/* set up paging */

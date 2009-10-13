@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2009,  Karlsruhe University
  *                
  * File path:     platform/pc99/startup.S
  * Description:   startup file for pc99 platform
@@ -41,12 +41,7 @@ start:
 _start:
 	cli	/* disable int's */
 	cld	/* clear direction flag */
-	mov	%ds, %ax
-	mov	%ax, %es
-	mov	%ax, %fs
-	mov	%ax, %gs
-	mov	%ax, %ss
-
+        
 	/* load temporary stack pointer */
 	lea	_mini_stack-4, %esp
 	/* indicate that init_paging was called by the BSP. Only needed for AMD64 */
