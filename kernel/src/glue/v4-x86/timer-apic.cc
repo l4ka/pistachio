@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/timer-apic.cc
  * Description:   implementation of apic timer
@@ -70,7 +70,7 @@ void timer_t::init_cpu(cpuid_t cpu)
     TRACE_INIT("\tCalculating processor speed (CPU %d)...", cpu);
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
-    local_apic.timer_set(-1UL);
+    local_apic.timer_set((u32_t) -1UL);
 
     word_t delay = 0;
     
