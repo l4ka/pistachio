@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2009,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-x86/prepost.cc
  * Description:   IA-32 specific handlers for KDB entry and exit
@@ -363,6 +363,20 @@ bool kdb_t::pre()
 		    printf("[string not completely mapped]");
 		break;
 	    }
+	    case 0x3:
+		//
+		// KDB_ToggleBreakin()
+		//
+#if defined(CONFIG_KDB_BREAKIN) 	
+		extern bool kdebug_check_breakin_enabled;
+		
+		if (kdebug_check_breakin_enabled)
+		    kdebug_check_breakin_enabled = false;
+		else 
+		    kdebug_check_breakin_enabled = true;
+#endif
+		break;
+
 
 	    case 0xd:
 		//

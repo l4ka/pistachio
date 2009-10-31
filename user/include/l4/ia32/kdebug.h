@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2009,  Karlsruhe University
  *                
- * File path:     l4/x86/kdebug.h
+ * File path:     l4/ia32/kdebug.h
  * Description:   L4 Kdebug interface for ia32
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -86,6 +86,7 @@ L4_INLINE rettype L4_KDB_##name (void)		\
 __L4_KDB_Op_Arg (0x00, PrintChar, char);
 __L4_KDB_Op_Arg (0x01, PrintString, char *);
 __L4_KDB_Op     (0x02, ClearPage);
+__L4_KDB_Op     (0x03, ToggleBreakin);
 __L4_KDB_Op_Ret (0x08, ReadChar, char);
 __L4_KDB_Op_Ret (0x0d, ReadChar_Blocked, char);
 

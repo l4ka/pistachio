@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001, 2003-2007,  Karlsruhe University
+ * Copyright (C) 2001, 2003-2007, 2009,  Karlsruhe University
  *                
  * File path:     kdb/platform/pc99/io.cc
  * Description:   PC99 specific I/O functions
@@ -64,6 +64,7 @@ static char getc_serial (bool) SECTION (SEC_PC99_IO);
 static void init_serial (void) SECTION (SEC_PC99_IO);
 void init_console (void) SECTION (SEC_INIT);
 # if defined(CONFIG_KDB_BREAKIN)
+extern bool kdebug_check_breakin_enabled;
 void kdebug_check_breakin (void) SECTION (SEC_PC99_IO);
 #endif
 
@@ -352,9 +353,10 @@ static char getc_serial (bool block)
 }
 
 #if defined(CONFIG_KDB_BREAKIN) 
+bool kdebug_check_breakin_enabled = true;
 void kdebug_check_breakin (void)
 {
-    if (getc_blocked)
+    if (getc_blocked || !kdebug_check_breakin_enabled)
 	return;
     
 #if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
