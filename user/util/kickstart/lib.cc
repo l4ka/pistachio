@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2009,  Karlsruhe University
  *                
  * File path:     lib.cc
  * Description:   
@@ -208,7 +208,7 @@ strtoul(const char* nptr, char** endptr, int base)
 			break;
 		if (any < 0)
 			continue;
-		if (acc > cutoff || acc == cutoff && c > cutlim) {
+		if (acc > cutoff || (acc == cutoff && c > cutlim)) {
 			any = -1;
 			acc = ULONG_MAX;
 		} else {
