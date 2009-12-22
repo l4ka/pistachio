@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2009,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/trapgate.h
  * Description:   defines macros for implementation of trap and 
@@ -154,6 +154,7 @@ extern "C" void name (void);					\
 static void name##handler(x86_exceptionframe_t * frame);	\
 void name##_wrapper()						\
 {								\
+    u32_t *handler = (u32_t*)name##handler;                     \
     __asm__ (							\
         ".global "#name "		\n"			\
 	"\t.type "#name",@function	\n"			\
@@ -174,7 +175,7 @@ void name##_wrapper()						\
 	"addl	$4, %%esp		\n"			\
 	"iret				\n"			\
 	:							\
-	: "m"(*(u32_t*)name##handler), "i"(reason)		\
+	: "m"(*handler), "i"(reason)                            \
 	);							\
 }								\
 static void name##handler(x86_exceptionframe_t * frame)
@@ -186,6 +187,7 @@ extern "C" void name (void);					\
 static void name##handler(x86_exceptionframe_t * frame);	\
 void name##_wrapper()						\
 {								\
+    u32_t *handler = (u32_t*)name##handler;                     \
     __asm__ (							\
         ".global "#name "		\n"			\
 	"\t.type "#name",@function	\n"			\
@@ -208,7 +210,7 @@ void name##_wrapper()						\
 	"addl	$4, %%esp		\n"			\
 	"iret				\n"			\
 	:							\
-	: "m"(*(u32_t*)name##handler), "i"(reason)		\
+	: "m"(*handler), "i"(reason)                            \
 	);							\
 }								\
 static void name##handler(x86_exceptionframe_t * frame)
