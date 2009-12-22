@@ -274,17 +274,27 @@ bool kdb_t::pre()
 
 	    addr_t user_addr = NULL;
 	    bool mapped = false;
+            
 	    if (c == 0xb8)
 	    {
-
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 		if (space->is_compatibility_mode() && space->is_user_area(addr))
+                {
+                    u32_t user_word32;
 		    /* movl addr32, %eax */
-		    mapped = readmem (space, addr_offset(addr, 3), (u32_t *) &user_addr);
+		    mapped = readmem (space, addr_offset(addr, 3), &user_word32);
+                    
+                    user_addr = (addr_t) user_word32;
+                }
 		else
 #endif 
-		    /* mov addr, AREG  */
-		    mapped = readmem (space, addr_offset(addr, 3), (word_t *) (addr_t) &user_addr);
+                {
+                    word_t user_word = 0;
+                    /* mov addr, AREG  */
+		    mapped = readmem (space, addr_offset(addr, 3), &user_word);
+                    
+                    user_addr = (addr_t) user_word;
+                }
 	    }
 	    else if (c == 0x48)
 	    {
