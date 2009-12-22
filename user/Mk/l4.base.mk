@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003,  Karlsruhe University
+## Copyright (C) 2003, 2009,  Karlsruhe University
 ##                
 ## File path:     l4.base.mk
 ## Description:   Generic settings for Pistachio user-level build
@@ -32,6 +32,9 @@
 
 include $(top_builddir)/config.mk
 
+CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
+CC_SUBVERSION	= $(shell echo __GNUC_MINOR__ | $(CC) -E  - | grep -v "\#")
+
 ECHO=		echo
 ECHO_MSG=	$(ECHO) ===\>
 MKDIRHIER=	$(top_srcdir)/../tools/mkdirhier
@@ -40,6 +43,16 @@ CPPFLAGS+=	$(CPPFLAGS_$(ARCH))
 CFLAGS+=	-Wall -Wshadow -Wconversion \
 		$(CFLAGS_$(ARCH))
 LDFLAGS+=	$(LDFLAGS_$(ARCH))
+
+ifeq ("$(CC_VERSION)", "4")
+ifeq ("$(CC_SUBVERSION)", "3")
+CFLAGS += -Wno-conversion
+endif
+ifeq ("$(CC_SUBVERSION)", "4")
+CFLAGS += -Wno-conversion
+endif
+endif
+
 
 # Create early targets so that a make without args (implicit all) does
 # not take the first target in worker makefile (e.g., a clean target).
