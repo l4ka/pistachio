@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002, 2009,  Karlsruhe University
  *                
  * File path:     kdb/generic/mapping.cc
  * Description:   Mapping database dumping
@@ -113,8 +113,8 @@ static void dump_mdbmaps (mapnode_t * map, addr_t paddr,
 		map);
 	
 	pmap = map;
-	if (map->is_next_root () || map->is_next_both () &&
-	    map->get_nextroot () != NULL)
+	if (map->is_next_root () || (map->is_next_both () &&
+                                     map->get_nextroot () != NULL))
 	{
 	    dump_mdbroot (mdb_index_root (size-1, map->get_nextroot (), paddr),
 			  paddr, size-1, spc - 2 - map->get_depth () * 2);
