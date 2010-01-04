@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4test/sig0.cc
  * Description:   Various sigma0 tests
@@ -90,12 +90,11 @@ request_page( void *page )
 	return 0;
 }
 
-static void
+static bool
 do_req( int accept )
 {
 	void *page = get_new_page();
 	int r;
-	const char *msg;
 
 	/* setup an acceptor? */
 	if( accept )
@@ -109,21 +108,17 @@ do_req( int accept )
 	/* give sigma0 a little time to recover */
 	msec_sleep(1000);
 
-	/* output */
-	if( r == 0 )
-		msg = "was";
-	else
-		msg = "WAS NOT";
-
-	printf( "Memory request %s successful\n", msg );
-
+        return (r == 0);
+        
 }
 
 /* menu fns */
 static void
 request_mem(void)
 {
-	do_req(1);
+    bool ok = do_req(1);
+    print_result ("Sigma0 memory request", ok);
+
 }
 
 static void
@@ -137,16 +132,21 @@ bad_send(void)
 	L4_Append( &msg, 0 );
 	L4_Load( &msg );
 
-	tag = L4_Call( L4_Pager() );
+	tag = L4_Call_Timeouts( L4_Pager(), L4_Never, L4_TimePeriod( 1000 * 1000 ));
+        bool ok = L4_IpcFailed(tag) && (L4_ErrorCode() & 0x1 == 1);
 
 	/* give sigma0 a little time to recover */
 	msec_sleep(1000);
+        
+        print_result ("Sigma0 memory request (phony send, ok=noresponse)", ok);
+
 }
 
 static void
 bad_recv(void)
 {
-	do_req(0);
+    bool ok = !do_req(0);
+    print_result ("Sigma0 memory request (phony receive, ok=nilmapping)", ok);
 }
 
 
@@ -173,10 +173,18 @@ dump_mempools (void)
     L4_Append (&msg, 1UL);
     L4_Load (&msg);
 
-    tag = L4_Call (L4_Pager ());
+    tag = L4_Call_Timeouts( L4_Pager(), L4_Never, L4_TimePeriod( 1000 * 1000 ));
+    print_result ("Sigma0 pool dump", L4_IpcSucceeded(tag));
+    
+    
+}
 
-    if (L4_IpcFailed (tag))
-	printf ("IPC failed\n");
+void all_s0_tests(void)
+{
+    request_mem();
+    bad_send();
+    bad_recv();
+    dump_mempools();
 }
 
 
@@ -185,9 +193,10 @@ static struct menuitem menu_items[] =
 {
 	{ NULL, "return" },
 	{ request_mem,  "Request Memory" },
-	{ bad_send,     "Phony Request" },
+	{ bad_send,     "Phony Send" },
 	{ bad_recv,     "Phony Receive" },
 	{ dump_mempools, "Dump Mempools" },
+        { all_s0_tests, "All sigma0 tests" },
 };
 
 static struct menu menu = 

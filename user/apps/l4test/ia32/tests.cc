@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4test/ia32/tests.cc
  * Description:   
@@ -19,6 +19,7 @@
 #include <l4io.h>
 #include "../l4test.h"
 #include "../assert.h"
+#include "../menu.h"
 
 #define START_ADDR(func)	((L4_Word_t) func)
 #define NOUTCB	((void*)-1)
@@ -44,7 +45,7 @@ void exc2 (void)
 
 
 
-void arch_test(void)
+void exception_test(void)
 
 {
     L4_KernelInterfacePage_t * kip =
@@ -53,11 +54,9 @@ void arch_test(void)
     L4_Word_t utcb_size = L4_UtcbSize (kip); 
     L4_MsgTag_t tag;
     L4_Msg_t exc_msg;
-    L4_Word_t dummy, old_control;
     L4_ThreadId_t tid;
     L4_ThreadId_t exc_tid = L4_GlobalId (L4_ThreadNo (L4_Myself()) + 1, 2);
     L4_Word_t exc_utcb = L4_MyLocalId().raw;
-    L4_Word_t eip, esp;
     
     exc_utcb = (exc_utcb & ~(utcb_size - 1)) + utcb_size;
 
@@ -88,4 +87,29 @@ void arch_test(void)
 
     kill_thread( exc_tid );
 
+}
+
+void all_arch_tests( void )
+{
+    exception_test();
+}
+
+static struct menuitem menu_items[] =
+{
+    { NULL,		"return" },
+    { exception_test,	"Exception test" },
+    { all_arch_tests,	"All IA32 tests" },
+};
+
+static struct menu menu = 
+{
+    "IA32 Menu",
+    0,
+    NUM_ITEMS( menu_items ),
+    menu_items
+};
+
+void arch_test(void)
+{
+    menu_input( &menu );
 }

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     l4test/exreg.cc
  * Description:   Various ExchangeRegisers() tests
@@ -32,6 +32,7 @@
 #include <l4/thread.h>
 #include <l4/ipc.h>
 #include <l4io.h>
+#include <l4/kip.h>
 #include <config.h>
 
 /* for the current arch */
@@ -42,15 +43,6 @@
 #include "menu.h"
 #include "assert.h"
 #include "threads.h"
-
-static const char*
-tidcmp( L4_ThreadId_t t1, L4_ThreadId_t t2 )
-{
-	if( t1.raw == t2.raw )
-		return "ok";
-	else
-		return "ERROR!";
-}
 
 static void
 dummy_thread(void)
@@ -65,8 +57,8 @@ printy_thread(void)
 {
 	while(1)
 	{
-		printf( "This is a printy thread!\n" );
-		msec_sleep( 500 );
+            //printf( "." );
+            msec_sleep( 500 );
 	}
 }
 
@@ -126,7 +118,7 @@ exreg_to_null(void)
 	tid = get_new_tid();
 	me = L4_Myself();
 
-	printf( "ThreadControlling\n" );
+	//printf( "ThreadControl..." );
 
 	res = L4_ThreadControl (tid, me, me, L4_nilthread, (void *) -1);
 	if( res != 1 )
@@ -135,10 +127,10 @@ exreg_to_null(void)
 		return;
 	}
 
-	printf( "Sleeping around TC bug\n" );
+	//printf( "Sleeping around TC bug..." );
 	msec_sleep( 1000 );
 
-	printf( "Starting with exreg\n" );
+	//printf( "Starting with exreg..." );
 
 	/* exreg it to the NULL */
 	do_exreg_thread_pager( L4_nilthread, tid, NULL, NULL );
@@ -147,10 +139,14 @@ exreg_to_null(void)
 	/* it should print out now... */
 	msec_sleep( 5000 );
 
-	printf( "Killing thread\n" );
+	//printf( "Killing thread\n" );
 
 	/* kill it :) */
 	kill_thread( tid );
+        
+        print_result ("ExReg thread with no pager", true);
+
+        
 }
 
 
@@ -160,7 +156,6 @@ static void
 exreg_ret(void)
 {
 	L4_ThreadId_t tid, ret;
-	const char *msg;
 
 	/* get an unused TID */
 	tid = get_new_tid();
@@ -168,8 +163,7 @@ exreg_ret(void)
 	ret = dumb_exreg_thread( tid );
 
 	/* checking for error returns is always a pain */
-	SET_MSG( msg, ret.raw == L4_nilthread.raw, "OK", "ERROR!" );
-	printf( "ExReg return value was %s\n", msg );
+        print_result ("ExReg return value", (ret.raw == L4_nilthread.raw));
 }
 
 static void
@@ -177,7 +171,6 @@ exreg_g2l(void)
 {
 	L4_ThreadId_t myg, myl;
 	L4_ThreadId_t rmyg, rmyl;
-	const char *g_msg, *l_msg;
 
 	/* get my IDs out of TCRs */
 	myg = L4_MyGlobalId();
@@ -187,15 +180,10 @@ exreg_g2l(void)
 	rmyg = L4_GlobalIdOf( myl );
 	rmyl = L4_LocalIdOf( myg );
 
-	/* compare them */
-	g_msg = tidcmp( myg, rmyg );
-	l_msg = tidcmp( myl, rmyl );
-	
+
 	/* check them */
-	printf( "Global IDs %lx == %lx: %s\n",
-		myg.raw, rmyg.raw, g_msg );
-	printf( "Local  IDs %lx == %lx: %s\n",
-		myl.raw, rmyl.raw, l_msg );
+        print_result ("ExRegs local  -> global", myg == rmyg);
+        print_result ("ExRegs global -> local ", myl == rmyl);
 }
 
 static void
@@ -217,7 +205,7 @@ ex_thrash(void)
 	safe_mem_touch( code_addr( (void*) dummy_thread ) );
 
 	/* start it! */
-	printf( "Starting Thread\n" );
+	//printf( "Starting Thread..." );
 	start_thread( tid, ip, sp );
 
 	/* wait a bit */
@@ -227,10 +215,10 @@ ex_thrash(void)
 	 * ... and barf if it has? just in case?
 	 */
 
-	printf( "Ex-Reg'ing Thread\n" );
+	//printf( "Ex-Reg'ing Thread..." );
 
 	/* exreg the thread many times */
-	for( x = 0; x < 100; x++ )
+	for( x = 0; x < 20; x++ )
 	{
 		setup_exreg( &ip, &sp, printy_thread );
 		do_exreg_thread( tid, ip, sp );
@@ -239,10 +227,12 @@ ex_thrash(void)
 		msec_sleep( 500 );
 	}
 
-	printf( "Killing thread\n" );
+	//printf( "Killing thread\n" );
 
 	/* kill it :) */
 	kill_thread( tid );
+        
+        print_result ("ExReg thrash (wait)", true);
 }
 
 static void
@@ -260,10 +250,10 @@ ex_thrash2(void)
 	tid = create_thread();
 
 	/* start it! */
-	printf( "Starting Thread\n" );
+	//printf( "Starting Thread..." );
 	start_thread( tid, ip, sp );
 
-	printf( "Ex-Reg'ing Thread\n" );
+	//printf( "Ex-Reg'ing Thread..." );
 
 	/* exreg the thread many times */
 	for( x = 0; x < 100; x++ )
@@ -272,10 +262,13 @@ ex_thrash2(void)
 		do_exreg_thread( tid, ip, sp );
 	}
 
-	printf( "Killing thread\n" );
+	//printf( "Killing thread\n" );
 
 	/* kill it :) */
 	kill_thread( tid );
+        
+        print_result ("ExReg thrash (nowait)", true);
+
 }
 
 static void
@@ -283,27 +276,35 @@ ex_tc(void)
 {
 	L4_ThreadId_t tid;
 	L4_Word_t res;
-	const char *msg;
+	L4_ThreadId_t mylocalid = L4_MyLocalId ();
+        static L4_Word_t utcb_base;
+        static void * kip;
+	kip = L4_GetKernelInterface ();
+	
+        utcb_base = *(L4_Word_t *) &mylocalid;
+	utcb_base &= ~(L4_UtcbAreaSize (kip) - 1);
 
 	/* create us a thread ID */
 	tid = get_new_tid();
+        
+        L4_Word_t utcb_location =
+            utcb_base + L4_UtcbSize (kip) * L4_ThreadNo (tid);
 
 	/* exreg it for no good reason */
-	printf( "Doing dumb exreg\n" );
+	//printf( "Dumb exreg..." );
 	dumb_exreg_thread( tid );
 
 	/* now create it */
-	printf( "Doing ThreadControl\n" );
-	res = L4_ThreadControl( tid, L4_Myself(), L4_Myself(), L4_Myself(),
-				(void *) -1 );
-
-	SET_MSG( msg, res == 1, "OK", "ERROR" );
-	printf( "ThreadControl returned: %s\n", msg );
+	//printf( "ThreadControl\n" );
+	res = L4_ThreadControl( tid, L4_Myself(), L4_Myself(), L4_Myself(), (void *) utcb_location);
+        
+        print_result ("ExReg then ThreadControl", res == 1);
 	
 	/* I wonder if that killed it? 
 	 * kill it now 
 	 */
 	kill_thread( tid );
+        
 }
 
 
@@ -353,6 +354,18 @@ exreg_inactive_thread (void)
     kill_thread (tid);
 }
 
+void all_exreg_tests(void)
+{
+    exreg_ret();
+    exreg_g2l();
+    ex_thrash();
+    ex_thrash2();
+    ex_tc();
+    exreg_inactive_thread();
+    exreg_to_null();
+       
+}
+
 /* the menu */
 static struct menuitem menu_items[] = 
 {
@@ -365,6 +378,8 @@ static struct menuitem menu_items[] =
 	{ exreg_inactive_thread,
 	  "ExchangeRegisters on inactive thread" },
 	{ exreg_to_null, "Try to start a thread with no pager (@NULL)" },
+        { all_exreg_tests, "All exreg tests" },
+
 };
 
 static struct menu menu = 

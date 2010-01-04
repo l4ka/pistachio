@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
  * File path:     l4test/tcontrol.cc
  * Description:   Various thread control tests
@@ -49,7 +49,7 @@ static void
 print_ok_thread(void)
 {
 	ok_thread_worked = 1;
-	printf( "This is OK Thread running...\n" );
+	//printf( "This is OK Thread running...\n" );
 	while(1)
 		msec_sleep( 500 );
 }
@@ -59,7 +59,6 @@ printy_thread(void)
 {
 	while(1)
 	{
-		printf( "This is a printy thread!\n" );
 		msec_sleep( 500 );
 	}
 }
@@ -83,7 +82,7 @@ run_a_thread(void)
 	/* start it! */
 	start_thread( tid, ip, sp );
 
-	printf( "Starting Thread\n" );
+	//printf( "Starting Thread..." );
 
 	/* wait a bit */
 	msec_sleep( 5000 );
@@ -92,10 +91,13 @@ run_a_thread(void)
 	 * ... and barf if it has? just in case?
 	 */
 
-	printf( "Killing thread\n" );
+	//printf( "Killing thread\n" );
 
 	/* kill it :) */
 	kill_thread( tid );
+        
+        print_result ("Run a thread", true);
+
 }
 
 
@@ -104,7 +106,6 @@ tc_then_exreg(void)
 {
 	L4_Word_t ip, sp;
 	L4_ThreadId_t tid;
-	const char *msg;
 
 	/* init a new stack & all */
 	sp = NULL;
@@ -125,11 +126,8 @@ tc_then_exreg(void)
 	msec_sleep( 5000 );
 
 	/* check if it flagged as OK */
-	SET_MSG( msg, ok_thread_worked != 0, "worked", "FAILED!!" );
-	printf( "TC+ExReg %s\n", msg );
-
-
-	printf( "Killing thread\n" );
+        print_result ("ThreadControl+ExReg", ok_thread_worked != 0);
+        
 
 	/* kill it :) */
 	kill_thread( tid );
@@ -138,9 +136,18 @@ tc_then_exreg(void)
 static void
 delete_self(void)
 {
-	kill_thread(L4_Myself());
+    L4_Word_t res = kill_thread(L4_Myself());
+    print_result ("Delete self", (res == 0));
+
 }
 
+void all_tc_tests(void)
+{
+    run_a_thread();
+    delete_self();
+    tc_then_exreg();
+
+}
 
 /* the menu */
 static struct menuitem menu_items[] = 
@@ -149,6 +156,7 @@ static struct menuitem menu_items[] =
 	{ run_a_thread,  "Run a thread" },
 	{ delete_self,  "Delete self" },
 	{ tc_then_exreg, "ThreadControl + ExReg" },
+	{ all_tc_tests, "All ThreadControl tests" },
 };
 
 static struct menu menu = 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
  * File path:     l4test/powerpc/tests.cc
  * Description:   Architecture dependent tests
@@ -402,7 +402,7 @@ static void syscall_unwind_test( void )
 	    "Legacy system call exception unwind");
 }
 
-static void all_tests( void )
+void all_arch_tests( void )
 {
     generic_exc_test();
     syscall_exc_test();
@@ -419,7 +419,7 @@ static struct menuitem menu_items[] =
     { generic_unwind_test,	"Generic exception unwind" },
     { syscall_unwind_test,	"Legacy system call exception unwind" },
     { unhandled_exception_test,	"Unhandled exception test" },
-    { all_tests,	"All PowerPC tests" },
+    { all_arch_tests,	"All PowerPC tests" },
 };
 
 static struct menu menu = 

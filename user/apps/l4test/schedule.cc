@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  University of New South Wales
+ * Copyright (C) 2004, 2010,  University of New South Wales
  *                
- * File path:     l4test/tcontrol.cc
+ * File path:     l4test/schedule.cc
  * Description:   Various thread control tests
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -56,14 +56,11 @@ test_irq_priority_unassociated(void)
 	irq_thrd.global.X.thread_no = IRQ_NUMBER;
 	irq_thrd.global.X.version = 1;
 
-	printf("Changing priority of irq thread %lx\n", 
-	       irq_thrd.global.X.thread_no);
+	//printf("Changing priority of irq thread %lx\n", 
+        //     irq_thrd.global.X.thread_no);
 	ret  = L4_Set_Priority(irq_thrd, 12);
-	if (ret == 0) {
-		printf("Failed to change IRQ priority\n");
-	} else {
-		printf("Succeeded\n");
-	}
+        
+         print_result ("Change priority unassociated (ok=change failed)", ret == 0);
 	
 }
 
@@ -75,18 +72,22 @@ test_irq_priority_associated(void)
 	irq_thrd.global.X.thread_no = IRQ_NUMBER;
 	irq_thrd.global.X.version = 1;
 
-	printf("Associating irq thread\n");
+	//printf("Associating irq thread\n");
 	ret = L4_AssociateInterrupt(irq_thrd, L4_Myself());
 	if (ret == 0) {
-		printf("Association of IRQ thread failed.\n");
-		return;
+            print_result ("Change priority associated: associate failed", false);
+            return;
 	}
 	ret  = L4_Set_Priority(irq_thrd, 13);
-	if (ret == 0) {
-		printf("Failed to change IRQ priority of associated thread\n");
-	} else {
-		printf("Succeeded\n");
-	}
+        print_result ("Change priority associated (ok=change succeeded)", ret != 0);
+
+}
+
+void all_schedule_tests(void)
+{
+
+    test_irq_priority_unassociated();
+    test_irq_priority_associated();
 }
 
 /* the menu */
@@ -97,6 +98,7 @@ static struct menuitem menu_items[] =
 	  "Change irq thread priority of an unassociated thread" },
 	{ test_irq_priority_associated,  
 	  "Change irq thread priority of an associated thread" },
+        { all_schedule_tests, "All schedule tests" },
 };
 
 static struct menu menu = 

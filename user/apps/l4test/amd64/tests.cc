@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
- * File path:     l4test/ia32/tests.cc
+ * File path:     l4test/amd64/tests.cc
  * Description:   Architecture dependent tests
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,36 @@
  * $Id: tests.cc,v 1.2 2003/09/24 19:05:57 skoglund Exp $
  *                
  ********************************************************************/
+#include <l4/kip.h>
+#include <l4/ipc.h>
+#include <l4/schedule.h>
+#include <l4/kdebug.h>
+#include <l4/ia32/arch.h>
+
+#include <l4io.h>
+#include "../l4test.h"
+#include "../assert.h"
+#include "../menu.h"
+
+void all_arch_tests( void )
+{
+}
+
+static struct menuitem menu_items[] =
+{
+    { NULL,		"return" },
+    { all_arch_tests,	"All AMD64 tests" },
+};
+
+static struct menu menu = 
+{
+    "IA32 Menu",
+    0,
+    NUM_ITEMS( menu_items ),
+    menu_items
+};
 
 void arch_test(void)
 {
+    menu_input( &menu );
 }

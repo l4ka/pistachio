@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
  * File path:     l4test/mem.cc
  * Description:   
@@ -49,26 +49,33 @@ page_touch(void)
 {
 	volatile L4_Word_t *addr = (L4_Word_t*) get_new_page();
 	int n = 0;
-
+        int max = 1000;
+        
 	printf("test: Welcome to memtest!\n" );
 
-	while(1)
+	while (max--)
 	{
-		printf( "Touching page %p (%d)\n", addr, n );
-		*addr = 0x37ULL;
-		addr += (PAGE_SIZE/sizeof(*addr));
-		n++;
-		printf( "Touched page!\n" );
+            //printf( "Touching page %p (%d)\n", addr, n );
+            *addr = 0x37ULL;
+            addr += (PAGE_SIZE/sizeof(*addr));
+            n++;
+            //printf( "Touched page!\n" );
 	}
+        print_result ("Page touch", true);
 
-	assert(!"shouldn't get here!");
+
 }
 
+void all_mem_tests()
+{
+    page_touch();
+}
 /* the menu */
 static struct menuitem menu_items[] = 
 {
 	{ NULL, "return" },
 	{ page_touch,  "Page Touch" },
+	{ all_mem_tests,  "All mem tests" },
 };
 
 static struct menu menu = 

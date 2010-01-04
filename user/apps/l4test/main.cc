@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  University of New South Wales
+ * Copyright (C) 2002-2003, 2007, 2010,  University of New South Wales
  *                
  * File path:     l4test/main.cc
  * Description:   main setup/loop for L4/pistachio testing suite
@@ -188,6 +188,28 @@ msec_sleep( L4_Word_t msec )
 	L4_Sleep( L4_TimePeriod( msec * 1000 ) );
 }
 
+void all_tests(void)
+{
+    extern void all_kip_tests();
+    extern void all_arch_tests();
+    extern void all_mem_tests();
+    extern void all_ipc_tests();
+    extern void all_s0_tests();
+    extern void all_exreg_tests();
+    extern void all_tc_tests();
+    extern void all_schedule_tests();
+
+    all_kip_tests();
+    all_arch_tests();
+    all_mem_tests();
+    all_ipc_tests();
+    all_s0_tests();
+    all_exreg_tests();
+    all_tc_tests();
+    all_schedule_tests();
+
+}
+
 /* Main menu code */
 static struct menuitem main_menu_items[] = 
 {
@@ -199,6 +221,7 @@ static struct menuitem main_menu_items[] =
 	{ exreg_test, "Test ExReg" },
 	{ tcontrol_test, "Test ThreadControl" },
 	{ schedule_test, "Test Schedule" },
+	{ all_tests, "All tests" },
 };
 
 static struct menu main_menu = 

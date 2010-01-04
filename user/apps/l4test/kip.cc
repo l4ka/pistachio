@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4test/kip.cc
  * Description:   Various KIP tests
@@ -290,12 +290,19 @@ thrash_kip(void)
 	}
 }
 
+void all_kip_tests(void)
+{
+    print_kip();
+    thrash_kip();
+}
+
 /* the menu */
 static struct menuitem menu_items[] = 
 {
 	{ NULL, "return" },
 	{ print_kip,  "Print KIP" },
 	{ thrash_kip, "Thrash GetKip" },
+        { all_kip_tests, "All KIP tests" },
 };
 
 static struct menu menu = 

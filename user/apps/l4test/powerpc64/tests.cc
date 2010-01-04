@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
- * File path:     l4test/powerpc/tests.cc
+ * File path:     l4test/powerpc64/tests.cc
  * Description:   Architecture dependent tests
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -177,12 +177,19 @@ void fpu_test(void)
 	);
 }
 
+void all_arch_tests( void )
+{
+    rtas_test();
+    fpu_test();
+}
+
 /* the menu */
 static struct menuitem menu_items[] = 
 {
     { NULL, "return" },
     { rtas_test,  "Test RTAS" },
     { fpu_test, "Test FPU" },
+    { all_arch_tests,	"All PowerPC tests" },
 };
 
 static struct menu menu = 
