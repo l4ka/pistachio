@@ -79,11 +79,12 @@ void exception_test(void)
     
     tag = L4_Receive (exc_tid);
     L4_Store (tag, &exc_msg);
-    printf ("ExcHandler got msg from %p (%p, %p, %p, %p, %p)\n",
-	    (void *) tid.raw, (void *) tag.raw,
-	    (void *) L4_Get (&exc_msg, 0), (void *) L4_Get (&exc_msg, 1),
-	    (void *) L4_Get (&exc_msg, 2), (void *) L4_Get (&exc_msg, 3));;
+    //printf ("ExcHandler got msg from %p (%p, %p, %p, %p, %p)\n",
+    //    (void *) tid.raw, (void *) tag.raw,
+    //    (void *) L4_Get (&exc_msg, 0), (void *) L4_Get (&exc_msg, 1),
+    //    (void *) L4_Get (&exc_msg, 2), (void *) L4_Get (&exc_msg, 3));;
     
+    print_result("IA32 exception IPC handling", true);
 
     kill_thread( exc_tid );
 
