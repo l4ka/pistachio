@@ -33,7 +33,7 @@
 #include <l4/ipc.h>
 #include <l4/schedule.h>
 #include <l4/kdebug.h>
-#include <l4/ia32/arch.h>
+#include <l4/amd64/arch.h>
 
 #include <l4io.h>
 #include "../l4test.h"
