@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006-2007,  Karlsruhe University
+ * Copyright (C) 2006-2007, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/x32comp/user.cc
  * Description:   user-mode syscall stubs for 32-bit programs
@@ -64,7 +64,10 @@
 #endif /* !defined(CONFIG_X86_EM64T) */
 
 
-__asm__ __volatile__ (
+extern "C" void SECTION(".user.syscall_32.ipc") user_ipc_32_wrapper();
+void user_ipc_32_wrapper()
+{
+    __asm__ __volatile__ (
 	"	.global user_lipc_32		\n"
 	"	.set user_lipc_32, user_ipc_32	\n"
 
@@ -108,7 +111,12 @@ __asm__ __volatile__ (
 	"	jz	2b			\n"	/* yes: continue */
 	"	movl	-60(%edx), %edx		\n"	/* no: load global id (from) */
 	"	jmp	2b			\n"	/* continue */
-
+        );
+}
+extern "C" void SECTION(".user.syscall_32.exregs") user_exchange_registers_32_wrapper();
+void user_exchange_registers_32_wrapper()
+{
+    __asm__ __volatile__ (
 	BEGIN(user_exchange_registers_32, ".user.syscall_32.exregs")
 	"	pushl	%ecx			\n"	/* save ECX (control) */
 	"	movl	%gs:0,	%ecx		\n"	/* load UTCB */
@@ -124,16 +132,28 @@ __asm__ __volatile__ (
 	"	movl	%gs:0,	%ecx		\n"	/* load UTCB */
 	"	movl	-496(%ecx), %ecx	\n"	/* load control from UTCB */
 	END
+        );
+}
 
-	BEGIN(user_system_clock_32,	  ".user.syscall_32.sysclock")
+extern "C" void SECTION(".user.syscall_32.sysclock") user_system_clock_32_wrapper();
+void user_system_clock_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_system_clock_32,	  ".user.syscall_32.sysclock")
 	"	pushl	%ebx			\n"	/* save EBX */
 	"	pushl	%ebp			\n"	/* save EBP */
 	SYSCALL
 	"	popl	%ebp			\n"	/* restore EBP */
 	"	popl	%ebx			\n"	/* restore EBX */
 	END
+        );
+}
 
-	BEGIN(user_thread_switch_32,	  ".user.syscall_32.threadswtch")
+extern "C" void SECTION(".user.syscall_32.threadswtch") user_thread_switch_32_wrapper();
+void user_thread_switch_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_thread_switch_32,	  ".user.syscall_32.threadswtch")
 	"	pushl	%eax			\n"	/* save EAX */
 	"	pushl	%ebx			\n"	/* save EBX */
 	"	pushl	%ecx			\n"	/* save ECX */
@@ -156,8 +176,14 @@ __asm__ __volatile__ (
 	"	popl	%ebx			\n"	/* restore EBX */
 	"	popl	%eax			\n"	/* restore EAX */
 	END
+        );
+}
 
-	BEGIN(user_schedule_32,		  ".user.syscall_32.schedule")
+extern "C" void SECTION(".user.syscall_32.schedule") user_schedule_32_wrapper();
+void user_schedule_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_schedule_32,		  ".user.syscall_32.schedule")
 	"	test	$0x3f,	%al		\n"
 	"	jne	1f			\n"
 	"	movl	-60(%eax), %eax		\n"
@@ -165,14 +191,26 @@ __asm__ __volatile__ (
 	"	movl	%ecx,	%ebx		\n"	/* save ECX (clobbered by syscall) */
 	SYSCALL
 	END
+        );
+}
 
-	BEGIN(user_unmap_32,		  ".user.syscall_32.unmap")
+extern "C" void SECTION(".user.syscall_32.unmap") user_unmap_32_wrapper();
+void user_unmap_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_unmap_32,		  ".user.syscall_32.unmap")
 	SYSCALL
 	"	movl	%eax,	%edi		\n"	/* load UTCB */
 	"	movl	(%edi),	%esi		\n"	/* load MR0 */
 	END
+        );
+}
 
-	BEGIN(user_thread_control_32,	  ".user.syscall_32.threadctrl")
+extern "C" void SECTION(".user.syscall_32.threadctrl") user_thread_control_32_wrapper();
+void user_thread_control_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_thread_control_32,	  ".user.syscall_32.threadctrl")
 	"	test	%ecx,	%ecx		\n"
 	"	je	1f			\n"
 	"	test	$0x3f,	%cl		\n"
@@ -192,8 +230,14 @@ __asm__ __volatile__ (
 	"	movl	%ecx,	%ebx		\n"	/* save ECX (clobbered by syscall) */
 	SYSCALL
 	END
+        );
+}
 
-	BEGIN(user_space_control_32,	  ".user.syscall_32.spacectrl")
+extern "C" void SECTION(".user.syscall_32.spacectrl") user_space_control_32_wrapper();
+void user_space_control_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_space_control_32,	  ".user.syscall_32.spacectrl")
 	"	test	%edi,	%edi		\n"
 	"	je	1f			\n"
 	"	test	$0x3f,	%edi		\n"
@@ -204,15 +248,28 @@ __asm__ __volatile__ (
 	SYSCALL
 	"	movl	%edx,	%ecx		\n"	/* load result */
 	END
+        );
+}
 
-	BEGIN(user_processor_control_32,  ".user.syscall_32.procctrl")
+extern "C" void SECTION(".user.syscall_32.procctrl") user_processor_control_32_wrapper();
+void user_processor_control_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_processor_control_32,  ".user.syscall_32.procctrl")
 	"	movl	%ecx,	%ebx		\n"	/* save ECX (clobbered by syscall) */
 	SYSCALL
 	END
+        );
+}
 
-	BEGIN(user_memory_control_32,	  ".user.syscall_32.memctrl")
+extern "C" void SECTION(".user.syscall_32.memctrl") user_memory_control_32_wrapper();
+void user_memory_control_32_wrapper()
+{
+    __asm__ __volatile__ (
+        BEGIN(user_memory_control_32,	  ".user.syscall_32.memctrl")
 	/* Don't call AMD64 MemoryControl with IA-32 parameters;
 	   they may not have the same meaning. */
 	"	movl	$0,	%eax		\n"	/* set failing result */
 	END
-);
+        );
+}
