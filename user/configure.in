@@ -282,7 +282,7 @@ case $ARCH in
 	default_roottask_linkbase=00300000
 	;;
   amd64)
-  	default_kickstart_linkbase=00180000
+  	default_kickstart_linkbase=00100000
 	default_sigma0_linkbase=00e00000
 	default_roottask_linkbase=01000000
 	;;
