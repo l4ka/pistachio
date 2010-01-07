@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2003,  Karlsruhe University
+ * Copyright (C) 1999-2003, 2010,  Karlsruhe University
  *                
  * File path:     l4test/amd64/crt0.S
  * Description:   Startup code for x86 family processors.
@@ -63,5 +63,5 @@ ___return_from_main:
 		
 	.bss
 
-	.space	1024
+	.space	4096 * 2
 stack:
