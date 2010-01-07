@@ -68,7 +68,7 @@ CFLAGS_kickstart_ia32:= $(CFLAGS)
 SRCS_amd64=		$(SRCS_MBI) 
 OBJS_amd64+=		elf64.o bootinfo64.o
 LIBS_amd64=		-lio32
-CFLAGS_kickstart_amd64:=$(patsubst -m64, -m32, $(CFLAGS)) -O2 -fPIC
+CFLAGS_kickstart_amd64:=$(patsubst -m64, -m32, $(CFLAGS)) -O2 
 CPPFLAGS_amd64= 	-I$(top_srcdir)/lib/io -I$(srcdir) \
 			-DALSO_ELF64 -DALSO_BOOTINFO64
 LDFLAGS_amd64=		-b elf32-i386 --oformat elf32-i386 \

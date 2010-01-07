@@ -283,7 +283,7 @@ case $ARCH in
 	;;
   amd64)
   	default_kickstart_linkbase=00100000
-	default_sigma0_linkbase=00e00000
+	default_sigma0_linkbase=00f00000
 	default_roottask_linkbase=01000000
 	;;
 esac
