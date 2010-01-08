@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2007,  Karlsruhe University
+ * Copyright (C) 2003-2007, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/linker.lds
  * Description:   AMD64 PC99 Linker Script
@@ -205,13 +205,12 @@ SECTIONS
 
 #include <generic/debug.ldi>
 
-/*	/DISCARD/ :
+	/DISCARD/ :
 	{
-	    *(*);
 	    *(.eh_frame);
 	    *(.note);
 	    *(.comment); 
-	} */	
+	} 
 }
 
 /* physical addresses */

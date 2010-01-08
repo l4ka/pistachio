@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2005, 2007-2008,  Karlsruhe University
+ * Copyright (C) 1999-2005, 2007-2008, 2010,  Karlsruhe University
  *                
- * File path:     glue/v4-x86/x32/linker-pc99.lds
+ * File path:     glue/v4-x86/x32/linker.lds
  * Description:   Generic linkser script for x86.
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -138,14 +138,13 @@ SECTIONS
 
 	/* special section that is discarded during linking
 	   all unwanted sections should go here */
-/*
+
 	/DISCARD/ :
 	{
-		*(*)
 		*(.eh_frame)
 		*(.note)
 		*(.comment)
-	}*/
+	}
 
 }
 /* all the physical address calculations */
