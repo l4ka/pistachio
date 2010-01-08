@@ -9,4 +9,10 @@ SECTIONS
         }
         _end = .;
 	_kickstart_end = .;
+	/DISCARD/ :
+	{
+		*(.eh_frame)
+		*(.note)
+		*(.comment)
+        }
 }
