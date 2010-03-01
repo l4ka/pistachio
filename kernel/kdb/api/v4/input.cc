@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2009,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/input.cc
  * Description:   Version 4 specific input functions
@@ -46,51 +46,56 @@
  *
  * @return pointer to space
  */
+
+
 space_t SECTION(SEC_KDEBUG) * get_space (const char * prompt)
 {
-    space_t * dummy = kdb.kdb_current->get_space ();
-    space_t * space;
     addr_t val;
+    
+    if (!kdb.last_space)
+	kdb.last_space = kdb.kdb_current->get_space() 
+	    ? kdb.kdb_current->get_space()
+	    : get_kernel_space ();
 
-    if (!dummy)
-	dummy = get_kernel_space ();
+    val = (addr_t) get_hex (prompt, (word_t) kdb.last_space, "last");
 
-    val = (addr_t) get_hex (prompt, (word_t) dummy,
-			    "current");
+    tcb_t * tidtcb = kdb.last_space->get_tcb (threadid ((word_t) val));
 
-    tcb_t * tidtcb = dummy->get_tcb (threadid ((word_t) val));
-
-    if (dummy->is_tcb_area (val))
+    if (kdb.last_space->is_tcb_area (val))
     {
 	// Pointer into the TCB area
 	tcb_t * tcb = addr_to_tcb (val);
-	space = tcb->get_space ();
+	kdb.last_space = tcb->get_space ();
     }
-    else if (dummy->is_tcb_area(tidtcb) && 
+    else if (kdb.last_space->is_tcb_area(tidtcb) && 
 	     tidtcb->myself_global == threadid ((word_t) val))
     {
 	// A valid thread ID
-	space = tidtcb->get_space ();
+	kdb.last_space = tidtcb->get_space ();
     }
-    else if (dummy->is_user_area (val))
+    else if (kdb.last_space->is_user_area (val))
     {
-	// Pointer in lower memory area.  Probably a physical address.
+	// Pointer in lower memory area.  Probably a physical address
+	// but doublecheck
 	val = phys_to_virt (val);
-	space = (space_t *) val;
+	if (!kdb.last_space->is_user_area(val))
+	    kdb.last_space = (space_t *) val;
+	else 
+	    kdb.last_space = kdb.kdb_current->get_space ();
     }
-    else
+    else 
     {
-	// Hopefuly a valid space pointer
-	space = (space_t *) val;
+	// Hopefully a valid space pointer
+	kdb.last_space = (space_t *) val;
     }
 
-    return space;
+    return kdb.last_space;
 }
 
 
 
 static const char * thread_names[] = {
-    "nil_thrd", "irq_", "idlethrd", "sigma0", "sigma1", "roottask", 0
+    "nil_thrd", "irq_", "idlethrd", "sigma0", "sigma1", "roottask", "kdbthrd", 0
 };
 
 static inline char lowercase (char c)
@@ -173,8 +178,8 @@ tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
 	    version_char = len++;
 	    break;
 
-	case 'S': case 'N': case 'R': case 'I':
-	case 's': case 'n': case 'r': case 'i':
+	case 'S': case 'N': case 'R': case 'I': case 'K': 
+	case 's': case 'n': case 'r': case 'i':	case 'k':
 	    if (len == 0)
 	    {
 		// Trying to type in name of thread.
@@ -239,6 +244,12 @@ tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
 		    val = threadid_t::threadid (ubase + 2, 1).get_raw ();
 		    break;
 
+#if defined(CONFIG_DEBUG)
+		case 7: // KDB thread
+		    val = (word_t) get_kdebug_tcb();
+		    break;
+#endif
+
 		default: // (invalid)
 		    while (i-- > 0)
 			printf ("\b \b");
@@ -291,8 +302,13 @@ tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
     printf ("\n");
 
     if (dummy->is_tcb_area ((addr_t) val) || 
-	(addr_t) val == (addr_t) get_idle_tcb())
+	(addr_t) val == (addr_t) get_idle_tcb() || 
+	(addr_t) val  == (addr_t)  get_kdebug_tcb())
 	return addr_to_tcb ((addr_t) val); 
+#if defined(CONFIG_X_SCHED_HS)
+    else if (!dummy->is_user_area ((addr_t) val))
+	return addr_to_tcb ((addr_t) val); 
+#endif
     else
 	return dummy->get_tcb (threadid (val));
 }

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2009,  Karlsruhe University
  *                
  * File path:     generic/linear_ptab_walker.cc
  * Description:   Linear page table manipulation
@@ -663,13 +663,11 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 				    addr_mask (f_addr, ~page_mask (f_size)));
 
 #if !defined(CONFIG_NEW_MDB)
-		TRACEPOINT (MDB_MAP, "mdb_map (node=%p from {spc=%p pg=%p addr=%p %d%cB} to {"
-				    "spc=%p pg=%p addr=%p %d%cB})  paddr=%p\n",
-				      map, this, fpg, f_addr, 
-				      dbg_pgsize (page_size(f_size)), dbg_szname (page_size(f_size)),  
-				      t_space, tpg, t_addr,
-				      dbg_pgsize (page_size(t_size)), dbg_szname (page_size(t_size)),
-				      addr_offset (fpg->address (this, f_size),  offset + f_off));
+		TRACEPOINT (MDB_MAP, "mdb_map (node=%p from {pg=%p addr=%p %d%cB} to {"
+			    "pg=%p addr=%p %d%cB}) paddr=%p\n", map, 
+			    fpg, f_addr, dbg_pgsize (page_size(f_size)), dbg_szname (page_size(f_size)),  
+			    tpg, t_addr, dbg_pgsize (page_size(t_size)), dbg_szname (page_size(t_size)),
+			    addr_offset (fpg->address (this, f_size),  offset + f_off));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
@@ -817,10 +815,10 @@ fpage_t space_t::mapctrl (fpage_t fpage, mdb_t::ctrl_t ctrl,
     word_t r_num[pgent_t::size_max];
 
     TRACEPOINT (FPAGE_MAPCTRL,
-		"<spc=%p>::mapctrl ([%x, %d %x] [%x/%s], %x, %c)\n",
+		"<spc=%p>::mapctrl ([%d, %x %x] [%s], %x, %c)\n",
 		this, fpage.get_address (), 
 		fpage.get_size_log2 (), fpage.get_rwx (),
-		ctrl.raw, ctrl.string(), attribute,
+		ctrl.raw, ctrl.string(),attribute,
 		unmap_all ? 't' : 'f');
     
 #if !defined(CONFIG_NEW_MDB)
@@ -1054,7 +1052,7 @@ bool space_t::lookup_mapping (addr_t vaddr, pgent_t ** r_pg,
     {
 	if (!pg) 
 	    return false;
-	if (pg->is_valid (this, pgsize))
+	else if (pg->is_valid (this, pgsize))
 	{
 	    if (pg->is_subtree (this, pgsize))
 	    {

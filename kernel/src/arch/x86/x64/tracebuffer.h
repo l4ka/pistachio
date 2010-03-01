@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/tracebuffer.h
  * Description:   Functions for accessing the tracebuffer
@@ -32,34 +32,58 @@
 
 #include <tcb_layout.h>
 
-#define TRACEBUFFER_MAGIC 	0x1464b123acebf
+#define TRACEBUFFER_MAGIC       0x1464b123acebf
 #define TRACEBUFFER_PGENTSZ     pgent_t::size_2m
 
 /*
  * Access to stack pointer, timestamp, and performance monitoring counters
  */
 
-#define TBUF_RDTSC	"	rdtsc					\n"	\
-			"	shl	$32, %%rdx			\n"	\
-			"	movl	%%eax, %%edx			\n"	\
-			"	mov	%2, %%fs:2*%c9(%0)		\n"	
+#define TBUF_SP         "       mov     %%rsp, %%fs:3*%c9(%0)           \n"     
 
-#define TBUF_SP		"	mov	%%rsp, %%fs:3*%c9(%0)		\n"	
+#define X86_PMC_TSC_SHIFT                  0
 
-
-#if defined(CONFIG_TBUF_PERFMON)
-#define TBUF_RDPMC_0   "	rdpmc					\n"	\
-			"	shl	$32, %%rdx			\n"	\
-			"	movl	%%eax, %%edx			\n"	\
-			"	mov	%2, %%fs:4*%c9(%0)		\n"	
-
-#define TBUF_RDPMC_1   "	rdpmc					\n"	\
-			"	shl	$32, %%rdx			\n"	\
-			"	movl	%%eax, %%edx			\n"	\
-			"	mov	%2, %%fs:5*%c9(%0)		\n"	
-
-#endif
 #include INC_ARCH(tracebuffer.h)
+
+#define TBUF_RDPMCS                                                     \
+    /* Get config into rbx/ebx  */                                      \
+    "   push %%rbx                    \n" /* save ebx           */      \
+    "   movq    %%fs:4*%c9, %%rbx     \n"                               \
+    "   test    $2, %%rbx             \n"                               \
+    "   jz 4f                         \n" /* no pmon, rdtsc only */     \
+    "   test    $4, %%rbx             \n"                               \
+    "   jz 3f                         \n" /* P2/K8 pmon */              \
+    /* P4 PerfMon  */                                                   \
+    "   mov     $12, %1               \n"                               \
+    "   rdpmc                         \n"                               \
+    "   shl     $32, %%rdx            \n"                               \
+    "   movl    %%eax, %%edx          \n"                               \
+    "   mov     %2, %%fs:4*%c9(%0)    \n"                               \
+    "   add     $2, %1                \n"                               \
+    "   rdpmc                         \n"                               \
+    "   shl     $32, %%rdx            \n"                               \
+    "   movl    %%eax, %%edx          \n"                               \
+    "   mov     %2, %%fs:5*%c9(%0)    \n"                               \
+    "   jmp 4f                        \n"                               \
+    "3:                               \n"                               \
+    /* P2/K8 PerfMon  */                                                \
+    "   xor  %1, %1                   \n"                               \
+    "   rdpmc                         \n"                               \
+    "   shl     $32, %%rdx            \n"                               \
+    "   movl    %%eax, %%edx          \n"                               \
+    "   mov     %2, %%fs:4*%c9(%0)    \n"                               \
+    "   mov  $1, %1                   \n"                               \
+    "   rdpmc                         \n"                               \
+    "   shl     $32, %%rdx            \n"                               \
+    "   movl    %%eax, %%edx          \n"                               \
+    "   mov     %2, %%fs:5*%c9(%0)    \n"                               \
+    "4:                               \n"                               \
+    "   rdtsc                         \n"                               \
+    "   shl     $32, %%rdx            \n"                               \
+    "   movl    %%eax, %%edx          \n"                               \
+    "   mov     %2, %%fs:2*%c9(%0)    \n"                               \
+    "   pop %%rbx                     \n" /* restore ebx           */   \
+
 
 
 #endif /* !__ARCH__X86__X64__TRACEBUFFER_H__ */

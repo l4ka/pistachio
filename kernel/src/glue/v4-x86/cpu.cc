@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005-2003, 2006-2009,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005-2003, 2006-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/cpu.cc
  * Description:   X86 CPU implementation
@@ -37,6 +37,8 @@
 #include INC_GLUE(cpu.h)
 #include <debug.h>
 
+DECLARE_TRACEPOINT_DETAIL(X86_APIC_IPI);
+
 cpu_t cpu_t::descriptors[CONFIG_SMP_MAX_CPUS];
 word_t cpu_t::count;
 
@@ -49,6 +51,12 @@ X86_EXCNO_ERRORCODE(smp_trigger_ipi, 0)
     // ack early - we may switch
     apic.EOI();
 
+    TRACEPOINT(X86_APIC_IPI, "IPI frame %x IP %x SP %x FLAGS %x\n",
+	       frame, 
+	       frame->regs[x86_exceptionframe_t::ipreg],
+	       frame->regs[x86_exceptionframe_t::spreg],
+	       frame->regs[x86_exceptionframe_t::freg]);
+
     // now handle the request
     process_xcpu_mailbox();
     
@@ -58,21 +66,13 @@ X86_EXCNO_ERRORCODE(smp_trigger_ipi, 0)
 
 void smp_xcpu_trigger(cpuid_t cpu)
 {
+    TRACEPOINT(X86_APIC_IPI, "send IPI to CPU %d\n", cpu);
     apic.send_ipi(cpu_t::get(cpu)->get_apic_id(), IDT_LAPIC_XCPU_IPI);
 }
 
 void init_xcpu_handling ()
 {
-    idt.add_gate(IDT_LAPIC_XCPU_IPI, idt_t::interrupt, smp_trigger_ipi);
+    idt.add_int_gate(IDT_LAPIC_XCPU_IPI, smp_trigger_ipi);
 }
-
-#if defined(CONFIG_SMP_IDLE_POLL)
-void processor_sleep()
-{
-    asm("sti; nop; nop; nop; cli\n");
-    process_xcpu_mailbox();
-}
-#endif
-
 
 #endif /* defined(CONFIG_SMP) */

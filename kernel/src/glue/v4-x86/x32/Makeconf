@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2002-2007, 2009,  Karlsruhe University
+## Copyright (C) 2002-2009,  Karlsruhe University
 ##                
 ## File path:     glue/v4-x86/x32/Makeconf
 ##                
@@ -32,7 +32,7 @@
 LDSCRIPT = $(SRCDIR)/src/glue/$(API)-$(ARCH)/$(SUBARCH)/linker.lds
 
 SOURCES += $(addprefix src/glue/$(API)-$(ARCH)/$(SUBARCH)/, init.cc exception.cc \
-	space.cc user.cc trap.S trampoline.S memcontrol.cc)
+	space.cc user.cc thread.cc trap.S trampoline.S memcontrol.cc)
 
 SOURCES+=	src/generic/linear_ptab_walker.cc \
 		src/generic/mapping_alloc.cc
@@ -54,4 +54,12 @@ endif
 
 ifeq ("$(CONFIG_X86_SMALL_SPACES)","y")
 SOURCES+=	src/glue/$(API)-$(ARCH)/$(SUBARCH)/smallspaces.cc
+endif
+
+ifeq ("$(CONFIG_X_X86_HVM)","y")
+SOURCES += 	$(addprefix src/glue/$(API)-$(ARCH)/$(SUBARCH)/, hvm-vmx.cc hvm-vtlb.cc)
+endif
+
+ifeq ("$(CONFIG_X_EVT_LOGGING)","y")
+SOURCES += 	$(addprefix src/glue/$(API)-$(ARCH)/$(SUBARCH)/, logging.cc)
 endif

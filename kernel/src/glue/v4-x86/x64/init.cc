@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/init.cc
  * Description:   System initialization
@@ -226,11 +226,13 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 					 x86_segdesc_t::m_long,
 					 x86_segdesc_t::msr_fs);
 #endif
-
-
+    
+    __asm__ __volatile__ ("" ::: "memory");
+    
 
     /* Load segment registers */
-    asm("mov  %0, %%ds		\n\t"		// load data  segment (DS)
+    __asm__ __volatile__(
+        "mov  %0, %%ds		\n\t"		// load data  segment (DS)
 	"mov  %0, %%es		\n\t"		// load extra segment (ES)
 	"mov  %0, %%ss		\n\t"		// load stack segment (SS)
 	"mov  %1, %%gs		\n\t"		// load UTCB segment  (GS)
@@ -239,15 +241,11 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #else
 	"mov  %0, %%fs		\n\t"	        // no tracebuffer
 #endif  
-	"xor  %%rax, %%rax	\n"		//
-	"lldt %%ax		\n"		// clear LDTR
-	"pushq  %3	      	\n\t"		// new CS
+ 	"pushq  %3	      	\n\t"		// new CS
  	"pushq $1f		\n\t"		// new IP		
  	"lretq			\n\t"
  	"1:			\n\t"	
-	: /* No Output */ 
-	: "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
-	: "rax", "memory"
+	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
 	);
     
     
@@ -259,10 +257,10 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
     
 #if defined(CONFIG_TRACEBUFFER)
     gdt.segdsc[GDT_IDX(X86_TBS)].set_seg( (u64_t) get_tracebuffer(),
-					 x86_segdesc_t::data,
-					 3,
-					 x86_segdesc_t::m_long,
-					 x86_segdesc_t::msr_fs);
+                                          x86_segdesc_t::data,
+                                          3,
+                                          x86_segdesc_t::m_long,
+                                          x86_segdesc_t::msr_fs);
 #endif
 
 }

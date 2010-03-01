@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2007, 2009,  Karlsruhe University
  *                
  * File path:     api/v4/types.h
  * Description:   General type declarations for V4 API
@@ -90,7 +90,8 @@ public:
     bool is_point() { return time.type == 1; }
 
     bool operator< (time_t & r);
-
+    operator u16_t() { return raw ; }
+    
     union {
 	u16_t raw;
 	struct {
@@ -137,6 +138,7 @@ public:
 	} __attribute__((packed)) x;
 	word_t raw;
     };
+    
 };
 
 

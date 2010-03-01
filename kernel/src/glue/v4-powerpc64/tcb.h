@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  National ICT Australia (NICTA)
+ * Copyright (C) 2003-2004, 2006-2007,  National ICT Australia (NICTA)
  *                
  * File path:     glue/v4-powerpc64/tcb.h
  * Description:   TCB related functions for Version 4, PowerPC 64
@@ -669,7 +669,7 @@ INLINE msg_tag_t tcb_t::do_ipc (threadid_t to_tid, threadid_t from_tid,
 {
     msg_tag_t tag;
     sys_ipc(to_tid, from_tid, timeout);
-    tag.raw = get_mr (0);
+    tag = get_mr (0);
 
     return tag;
 }

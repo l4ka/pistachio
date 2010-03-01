@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/arch/x86/breakpoints.cc
  * Description:   Hardware breakpoints for IA-32
@@ -38,13 +38,15 @@
 
 DECLARE_CMD(cmd_breakpoint, root, 'b', "breakpoint", "set breakpoints");
 
+word_t x86_kdb_dr_mask = 0;
+
 #if defined(CONFIG_TRACEPOINTS)
 EXTERN_TRACEPOINT(X86_BREAKPOINT);
 bool x86_breakpoint_cpumask;
 bool x86_breakpoint_cpumask_kdb;
 #endif
 
-void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb)
+void x86_set_kdb_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb)
 {
     word_t db7;
     __asm__ __volatile__ ("mov %%db7,%0" : "=r" (db7));
@@ -52,18 +54,21 @@ void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable
     ASSERT(num < 4);
     
     if (enable)
+    {
+	x86_kdb_dr_mask |= (1 << num);
 	db7 |=  (2 << (num * 2)); /* enable */
+    }
     else
+    {
+	x86_kdb_dr_mask &= ~(1 << num);
 	db7 &= ~(2 << (num * 2)); /* disable */
+    }
     
     db7 &= ~(0x000F0000 << (num * 4));
     db7 |= (type << (num * 4));
-    
-    if (num==0) __asm__ __volatile__ ("mov %0, %%db0" : : "r" (addr));
-    if (num==1) __asm__ __volatile__ ("mov %0, %%db1" : : "r" (addr));
-    if (num==2) __asm__ __volatile__ ("mov %0, %%db2" : : "r" (addr));
-    if (num==3) __asm__ __volatile__ ("mov %0, %%db3" : : "r" (addr));
-    __asm__ __volatile__ ("mov %0, %%db7" : : "r" (db7));
+
+    x86_dr_write(num, addr);
+    X86_SET_DR(7, db7);
 
 #if defined(CONFIG_TRACEPOINTS)
     cpuid_t cpu = get_current_cpu();
@@ -91,37 +96,41 @@ CMD(cmd_breakpoint, cg)
 	break;
 	/* reset all debug registers */
     case '-':
-	__asm__ __volatile__ ("mov %%db7,%0": "=r" (db7));
+	x86_kdb_dr_mask = 0;
+	X86_GET_DR(7, db7);
 	db7 &= ~(0x00000FF);
-	__asm__ __volatile__ ("mov %0, %%db7": :"r" (db7));
-	return CMD_NOQUIT; break;
+	X86_SET_DR(7, db7);
+	return CMD_NOQUIT; 
+	break;
 	
 	/* any key dumps debug registers */
     case '?':
     default:
-        __asm__ ("mov %%db7,%0": "=r"(db7));
+	X86_GET_DR(7, db7);
 	printf("\nDR7: %wx\n", db7);
-	__asm__ ("mov %%db6,%0": "=r"(db7));
+	X86_GET_DR(6, db7);
 	printf("DR6: %wx\n", db7); addr=db7;
-	__asm__ ("mov %%db3,%0": "=r"(db7));
+	X86_GET_DR(3, db7);
 	printf("DR3: %wx %c\n", db7, addr & 8 ? '*' : ' ');
-	__asm__ ("mov %%db2,%0": "=r"(db7));
+	X86_GET_DR(2, db7);
 	printf("DR2: %wx %c\n", db7, addr & 4 ? '*' : ' ');
-	__asm__ ("mov %%db1,%0": "=r"(db7));
+	X86_GET_DR(1, db7);
 	printf("DR1: %wx %c\n", db7, addr & 2 ? '*' : ' ');
-	__asm__ ("mov %%db0,%0": "=r"(db7));
+	X86_GET_DR(0, db7);
 	printf("DR0: %wx %c\n", db7, addr & 1 ? '*' : ' ');
 	return CMD_NOQUIT; break;
     }
     /* read debug control register */
-    __asm__ __volatile__ ("mov %%db7,%0" : "=r" (db7));
-    
+    X86_GET_DR(7, db7);
     
     char t = get_choice("Type", "Instr/Access/pOrt/Write/-/+", 'i');
+
+    x86_kdb_dr_mask |= (1 << num);
 
     switch (t)
     {
     case '-':
+	x86_kdb_dr_mask &= ~(1 << num);
 	db7 &= ~(2 << (num * 2)); /* disable */
 	num = -1;
 	break;
@@ -154,20 +163,20 @@ CMD(cmd_breakpoint, cg)
 	db7 |= (2 << (num * 2)); /* enable */
 	break;
     };
-    if (num==0) __asm__ __volatile__ ("mov %0, %%db0" : : "r" (addr));
-    if (num==1) __asm__ __volatile__ ("mov %0, %%db1" : : "r" (addr));
-    if (num==2) __asm__ __volatile__ ("mov %0, %%db2" : : "r" (addr));
-    if (num==3) __asm__ __volatile__ ("mov %0, %%db3" : : "r" (addr));
-    __asm__ __volatile__ ("mov %0, %%db7" : : "r" (db7));
     
+    x86_dr_write(num, addr);
+    X86_SET_DR(7, db7);
+   
 #if defined(CONFIG_TRACEPOINTS)
-    cpuid_t cpu = get_current_cpu();
-    if (get_choice ("Enter KDB", "y/n", 'y') == 'y')
-	x86_breakpoint_cpumask_kdb |= (1 << cpu);
-    else
-	x86_breakpoint_cpumask_kdb &= ~(1 << cpu);
-    x86_breakpoint_cpumask |= (1 << cpu);
- 
+    if (num != -1)
+    {
+	cpuid_t cpu = get_current_cpu();
+	if (get_choice ("Enter KDB", "y/n", 'y') == 'y')
+	    x86_breakpoint_cpumask_kdb |= (1 << cpu);
+	else
+	    x86_breakpoint_cpumask_kdb &= ~(1 << cpu);
+	x86_breakpoint_cpumask |= (1 << cpu);
+    }
 #endif
     
     return CMD_NOQUIT;

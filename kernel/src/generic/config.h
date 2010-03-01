@@ -40,7 +40,7 @@
 /**
  * SMP derives
  */
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 # define CONFIG_SMP_MAX_CPUS		CONFIG_SMP_MAX_PROCS
 #else /* ! CONFIG_SMP */
 # define CONFIG_SMP_MAX_CPUS		1

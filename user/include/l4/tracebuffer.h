@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     l4/tracebuffer.h
  * Description:   Access to L4 kernel tracebuffer
@@ -32,6 +32,13 @@
 
 #ifndef __L4__TRACEBUFFER_H__
 #define __L4__TRACEBUFFER_H__
+
+/* use
+ *  L4_TRACEBUFFER
+ *  L4_PERFMON
+ *  to enable tracebuffer and tbuf performance counting 
+ */
+
 #if defined(L4_TRACEBUFFER)
 
 #include <l4/thread.h>

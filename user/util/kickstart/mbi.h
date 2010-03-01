@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2008,  Karlsruhe University
  *                
  * File path:     mbi.h
  * Description:   

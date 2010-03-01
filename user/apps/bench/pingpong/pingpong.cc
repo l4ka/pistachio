@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2010,  Karlsruhe University
  *                
  * File path:     bench/pingpong/pingpong.cc
  * Description:   Pingpong test application
@@ -35,8 +35,38 @@
 #include <l4/schedule.h>
 #include <l4/kdebug.h>
 #include <l4io.h>
+#include <l4/arch.h>
 
-#if defined(L4_ARCH_IA64) || defined(L4_ARCH_ALPHA) || defined(L4_ARCH_POWERPC64)
+int strcmp( const char *str1, const char *str2 )
+{
+    while( *str1 && *str2 ) {
+	if( *str1 < *str2 )
+	    return -1;
+	if( *str1 > *str2 )
+	    return 1;
+	str1++;
+	str2++;
+    }
+    if( *str2 )
+	return -1;
+    if( *str1 )
+	return 1;
+    return 0;
+}
+
+bool l4_has_feature( const char *feature_name )
+{
+    void *kip = L4_GetKernelInterface();
+    char *name;
+
+    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
+	if( !strcmp(feature_name, name) )
+	    return true;
+    return false;
+}
+
+
+#if defined(L4_ARCH_POWERPC64)
 extern long _start_pager;
 extern long _start_ping_thread;
 extern long _start_pong_thread;
@@ -49,7 +79,6 @@ extern long _start_pong_thread;
 #define IPC_ARCH_OPTIMIZATION
 
 //#define PERFMON
-
 #define PING_PONG_PRIO		128
 #define SMALLSPACE_SIZE		16
 
@@ -59,16 +88,22 @@ int SMALL_AS = 0;
 int LIPC = 0;
 int PRINT_TABLE = 0;
 
+bool tbuf, pmipc, hsched;
 
-L4_ThreadId_t master_tid, pager_tid, ping_tid, pong_tid;
+#define Dprintf(args...)                                \
+	if (tbuf) L4_Tbuf_RecordEvent (1, args);	        
+         
+
+L4_ThreadId_t s0tid, roottid, pager_tid, ping_tid, pong_tid;
+L4_KernelInterfacePage_t * kip;
 
 L4_Word_t ping_stack[2048] __attribute__ ((aligned (16)));
 L4_Word_t pong_stack[2048] __attribute__ ((aligned (16)));
 L4_Word_t pager_stack[2048] __attribute__ ((aligned (16)));
 
-
 L4_Fpage_t kip_area, utcb_area;
 L4_Word_t utcb_size;
+
 
 #define UTCB(x) ((void*)(L4_Address(utcb_area) + (x) * utcb_size))
 #define NOUTCB	((void*)-1)
@@ -139,7 +174,7 @@ L4_INLINE L4_Fpage_t handle_arch_pagefault (L4_MsgTag_t tag, L4_Word_t faddr, L4
 #endif
 
 #if !defined(HAVE_READ_CYCLES)
-L4_INLINE L4_Word_t read_cycles (void)
+L4_INLINE L4_Word64_t read_cycles (void)
 {
     return 0;
 }
@@ -177,7 +212,7 @@ L4_INLINE L4_Word_t pingpong_lipc (L4_ThreadId_t dest, L4_Word_t untyped)
 void pong_thread (void)
 {
     L4_Word_t untyped = 0;
-
+    
     if (LIPC)
     {
 	L4_ThreadId_t ping_ltid = L4_LocalId (ping_tid);
@@ -186,17 +221,20 @@ void pong_thread (void)
     }
     else
 	for (;;)
+	{
+	    Dprintf("pong ipc\n");
 	    untyped = pingpong_ipc (ping_tid, untyped);
+	}
 }
 
 
-#define ROUNDS		(1024*128)
+#define ROUNDS (1000)
 #define FACTOR		(8)
-#define MRSTEPPING	4
+#define MRSTEPPING	1
 
 void ping_thread (void)
 {
-    L4_Word_t cycles1, cycles2;
+    L4_Word64_t cycles1, cycles2;
     L4_Clock_t usec1, usec2;
     L4_Word_t instrs1, instrs2;
 #ifdef PERFMON
@@ -238,7 +276,10 @@ void ping_thread (void)
 		for (;i; i -= FACTOR)
 		{
 		    for (int k = 0; k < FACTOR; k++)
+		    {	    
+			Dprintf( "ping ipc\n");
 			pingpong_ipc (pong_tid, j);
+		    }
 		}
 	    cycles2 = read_cycles ();
 	    usec2 = L4_SystemClock ();
@@ -286,7 +327,7 @@ void ping_thread (void)
 
     // Tell master that we're finished
     L4_Set_MsgTag (L4_Niltag);
-    L4_Send (master_tid);
+    L4_Send (roottid);
 
     for (;;)
 	L4_Sleep (L4_Never);
@@ -309,9 +350,9 @@ static void send_startup_ipc (L4_ThreadId_t tid, L4_Word_t ip, L4_Word_t sp)
     L4_Send (tid);
 }
 
-
 void pager (void)
 {
+
     L4_ThreadId_t tid;
     L4_MsgTag_t tag;
     L4_Msg_t msg;
@@ -323,12 +364,16 @@ void pager (void)
 	for (;;)
 	{
 	    L4_Store (tag, &msg);
+            
+            Dprintf( "Pager got msg from %p\n", (L4_Word_t) tid.raw);
+            Dprintf( "\tmsg  (%p, %p, %p, %p)\n",                             
+                             (L4_Word_t) tag.raw, 
+                             (L4_Word_t) L4_Get (&msg, 0), 
+                             (L4_Word_t) L4_Get (&msg, 1),
+                             (L4_Word_t) L4_Get (&msg, 2));
 
-	    //printf ("Pager got msg from %p (%p, %p, %p)\n",
-	    //    (void *) tid.raw, (void *) tag.raw,
-	    //    (void *) L4_Get (&msg, 0), (void *) L4_Get (&msg, 1));
 
-	    if (L4_GlobalId (tid) == master_tid)
+	    if (L4_GlobalId (tid) == roottid)
 	    {
 		// Startup notification, start ping and pong thread
 		send_startup_ipc (ping_tid, L4_Get (&msg, 0),
@@ -343,6 +388,7 @@ void pager (void)
 	    if (L4_UntypedWords (tag) != 2 || L4_TypedWords (tag) != 0 ||
 		!L4_IpcSucceeded (tag))
 	    {
+		L4_KDB_Enter ("malformed pf");
 		printf ("pingpong: malformed pagefault IPC from %p (tag=%p)\n",
 			(void *) tid.raw, (void *) tag.raw);
 		L4_KDB_Enter ("malformed pf");
@@ -367,8 +413,11 @@ int main (void)
     L4_Word_t control;
     L4_Msg_t msg;
 
-    L4_KernelInterfacePage_t * kip =
-	(L4_KernelInterfacePage_t *) L4_KernelInterface ();
+    kip = (L4_KernelInterfacePage_t *) L4_KernelInterface ();
+
+    /* Me and sigma0 */
+    roottid = L4_Myself();
+    s0tid = L4_GlobalId (kip->ThreadInfo.X.UserBase, 1);
 
     /* Find smallest supported page size. There's better at least one
      * bit set. */
@@ -392,8 +441,8 @@ int main (void)
     // We need a maximum of two threads per task
     utcb_area = L4_FpageLog2 ((L4_Word_t) UTCB_ADDRESS,
 			      L4_UtcbAreaSizeLog2 (kip) + 1);
-    printf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
-	    kip_area.raw, utcb_area.raw, utcb_size);
+    Dprintf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
+             kip_area.raw, utcb_area.raw, utcb_size);
 
     // Touch the memory to make sure we never get pagefaults
     extern L4_Word_t _end, _start;
@@ -404,33 +453,60 @@ int main (void)
     }
     
     // Create pager
-    master_tid = L4_Myself ();
-    pager_tid = L4_GlobalId (L4_ThreadNo (master_tid) + 1, 2);
-    ping_tid = L4_GlobalId (L4_ThreadNo (master_tid) + 2, 2);
-    pong_tid = L4_GlobalId (L4_ThreadNo (master_tid) + 3, 2);
-
+    pager_tid = L4_GlobalId (L4_ThreadNo (roottid) + 1, 2);
+    ping_tid = L4_GlobalId (L4_ThreadNo (roottid) + 2, 2);
+    pong_tid = L4_GlobalId (L4_ThreadNo (roottid) + 3, 2);
+    
+    L4_ThreadId_t scheduler_tid[2] = { roottid, roottid };
+    
+    pmipc  = l4_has_feature("pmscheduling");
+    hsched  = l4_has_feature("hscheduling");
+    
+#if defined(L4_TRACEBUFFER)
+    tbuf =  l4_has_feature("tracebuffer");
+#endif
+    
     // VU: calculate UTCB address -- this has to be revised
     L4_Word_t pager_utcb = L4_MyLocalId().raw;
     pager_utcb = (pager_utcb & ~(utcb_size - 1)) + utcb_size;
-    printf("local id = %lx, pager UTCB = %lx\n", L4_MyLocalId().raw,
-	   pager_utcb);
+    Dprintf("local id = %lx, pager UTCB = %lx\n", L4_MyLocalId().raw,
+            pager_utcb);
 
-    L4_ThreadControl (pager_tid, L4_Myself (), L4_Myself (), 
-		      L4_Myself (), (void*)pager_utcb);
+    L4_ThreadControl (pager_tid, L4_Myself (), scheduler_tid[0], L4_Myself (), (void*)pager_utcb);
+    
+
     L4_Start (pager_tid, (L4_Word_t) pager_stack + sizeof(pager_stack) - 32,
 	      START_ADDR (pager));
 
+    if (hsched)
+    {
+	L4_Word_t sched_control = 0, old_sched_control = 0, result = 0;
+	L4_Word_t prio = 50, stride = 63;;
+
+	//New Subqueue below me
+        
+	sched_control = 1;
+        
+        result = L4_HS_Schedule (pager_tid, sched_control, L4_Myself(), prio, stride, &old_sched_control);
+            
+	//Restride
+	sched_control = 16;
+	old_sched_control = 0;
+        stride = 500;
+        result = L4_HS_Schedule (L4_Myself(), sched_control, pager_tid, 0, stride, &old_sched_control);
+    }
     
+
     
-#if defined(L4_TRACEBUFFER)
     const char *str = "Pingpong started %x\n";
     printf(str, L4_Myself());
-    L4_Tbuf_RecordEvent (1, str, L4_Myself().raw);
-#endif
+    Dprintf( str, L4_Myself().raw);
     
     for (;;)
     {
 	bool printmenu = true;
+        
+
 	for (;;)
 	{
 	    if (printmenu)
@@ -469,18 +545,19 @@ int main (void)
 
 	if (INTER_AS)
 	{
-	    L4_ThreadControl (ping_tid, ping_tid, master_tid,
+	    L4_ThreadControl (ping_tid, ping_tid, scheduler_tid[0],
 			      L4_nilthread, UTCB(0));
-	    L4_ThreadControl (pong_tid, pong_tid, master_tid, 
+	    L4_ThreadControl (pong_tid, pong_tid, scheduler_tid[0], 
 			      L4_nilthread, UTCB(1));
 	    L4_SpaceControl (ping_tid, 0, kip_area, utcb_area, L4_nilthread,
 			     &control);
 	    L4_SpaceControl (pong_tid, 0, kip_area, utcb_area, L4_nilthread,
 			     &control);
-	    L4_ThreadControl (ping_tid, ping_tid, master_tid, pager_tid, 
+	    L4_ThreadControl (ping_tid, ping_tid, scheduler_tid[0], pager_tid, 
 			      NOUTCB);
-	    L4_ThreadControl (pong_tid, pong_tid, master_tid, pager_tid, 
+	    L4_ThreadControl (pong_tid, pong_tid, scheduler_tid[0], pager_tid, 
 			      NOUTCB);
+	    
 	    
 #if defined(L4_ARCH_IA32)
 	    if (SMALL_AS)
@@ -501,18 +578,29 @@ int main (void)
 	else
 	{
 	    // Intra-as -- put both into the same space
-	    L4_ThreadControl (ping_tid, ping_tid, master_tid, L4_nilthread, 
+	    L4_ThreadControl (ping_tid, ping_tid, scheduler_tid[0], L4_nilthread, 
 			      UTCB(0));
 	    L4_SpaceControl (ping_tid, 0, kip_area, utcb_area, L4_nilthread,
 			     &control);
-	    L4_ThreadControl (ping_tid, ping_tid, master_tid, pager_tid, 
+	    L4_ThreadControl (ping_tid, ping_tid, scheduler_tid[0], pager_tid, 
 			      NOUTCB);
-	    L4_ThreadControl (pong_tid, ping_tid, master_tid, pager_tid, 
+	    L4_ThreadControl (pong_tid, ping_tid, scheduler_tid[0], pager_tid, 
 			      UTCB(1));
 	}
 
+#if defined(L4_ARCH_IA32)
+	if (hsched)
+	{
+	    L4_Set_Logid (ping_tid, 4);
+	    L4_Set_Logid (pong_tid, 5);
+	}
+#endif
+		    
 	if (MIGRATE)
+	{
 	    L4_Set_ProcessorNo (pong_tid, (L4_ProcessorNo() + 1) % 2);
+	    L4_ThreadControl (pong_tid, pong_tid, scheduler_tid[1], pager_tid, NOUTCB);
+	}
 
 	// Send message to notify pager to startup both threads
 	L4_Clear (&msg);
@@ -528,6 +616,8 @@ int main (void)
 			  L4_nilthread, NOUTCB);
 	L4_ThreadControl (pong_tid, L4_nilthread, L4_nilthread, 
 			  L4_nilthread, NOUTCB);
+        
+        
     }
 
     for (;;)

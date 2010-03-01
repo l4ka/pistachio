@@ -108,6 +108,7 @@ word_t pgent_t::smp_reference_bits(space_t * space, pgsize_e pgsize, addr_t vadd
 {
     printf("L4 Kernel BUG: X64 shouldn't have non-global superpages");
     UNIMPLEMENTED();
+    return 0;
 }
 
 #endif

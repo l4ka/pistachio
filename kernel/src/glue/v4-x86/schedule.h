@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/schedule.h
  * Description:   scheduling functions
@@ -32,6 +32,7 @@
 #ifndef __GLUE__V4_X86__SCHEDULE_H__
 #define __GLUE__V4_X86__SCHEDULE_H__
 
+#include INC_API(kernelinterface.h)
 
 INLINE u32_t get_timer_tick_length()
 {
@@ -49,5 +50,18 @@ INLINE void processor_sleep()
 #else
 extern void processor_sleep();
 #endif
+
+INLINE u64_t get_cpu_cycles()
+{
+    // We hope that all processors have synchronized cycle counters.
+    return x86_rdtsc();
+}
+
+INLINE u64_t get_timestamp()
+{
+    // We hope that all processors have synchronized cycle counters.
+    return get_cpu_cycles() / 
+        (get_kip()->processor_info.get_procdesc(0)->internal_freq / 1000);
+}
 
 #endif /* !__GLUE__V4_X86__SCHEDULE_H__ */

@@ -45,6 +45,8 @@ public:
     void set_seg(u32_t base, u32_t limit, int dpl, segtype_e type);
     void set_sys(u32_t base, u32_t limit, int dpl, segtype_e type);
 
+    word_t get_base() { return (x.d.base_high << 24) | x.d.base_low; };
+
 private:
     union {
 	u32_t raw[2];
@@ -63,6 +65,9 @@ private:
 	} d __attribute__((packed));
     } x;
     friend class kdb_t;
+#if defined(CONFIG_X_X86_HVM)
+    friend class arch_hvm_ktcb_t;
+#endif
 };
 
 INLINE void x86_segdesc_t::set_seg(u32_t base, u32_t limit, 
@@ -76,8 +81,8 @@ INLINE void x86_segdesc_t::set_seg(u32_t base, u32_t limit,
     }
     else
     {
-	x.d.limit_low  = limit & 0xFFFF;
-	x.d.limit_high = limit >> 16;
+	x.d.limit_low  =  limit & 0xFFFF;
+	x.d.limit_high =  limit >> 16;
 	x.d.g = 0;	/* 1B granularity	*/
     }
 
@@ -144,6 +149,9 @@ private:
 	} d;
     } x;
     friend class kdb_t;
+#if defined(CONFIG_X_X86_HVM)
+    friend class arch_hvm_ktcb_t;
+#endif
 };
 
 

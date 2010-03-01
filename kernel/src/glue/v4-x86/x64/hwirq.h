@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2008,  Karlsruhe University
  *                
- * File path:     glue/v4-amd64/hwirq.h
+ * File path:     glue/v4-x86/x64/hwirq.h
  * Description:   Macros to define interrupt handler stubs for AMD64
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
  ********************************************************************/
 #ifndef __GLUE_V4_X86__X64__HWIRQ_H__
 #define __GLUE_V4_X86__X64__HWIRQ_H__
+
 
 #define HW_IRQ(num)						\
 extern "C" void hwirq_##num();					\
@@ -69,7 +70,7 @@ __asm__ (							\
     "	.type hwirq_common ,@function			\n"	\
     "hwirq_common:					\n"	\
     "movq $intctrl, %rdi	/* this pointer */	\n"	\
-    "callq	intctrl_t_handle_irq			\n"	\
+    "callq	intctrl_t_handle_irq			\n"     \
     "popq %r15						\n"	\
     "popq %r14						\n"	\
     "popq %r13						\n"	\

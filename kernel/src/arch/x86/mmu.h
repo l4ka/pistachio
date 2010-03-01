@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2005, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2003-2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/mmu.h
  * Description:   X86 specific MMU Stuff
@@ -62,8 +62,8 @@ public:
  */
 INLINE void x86_mmu_t::flush_tlb(bool global)
 {
-    word_t dummy1;
-#if defined(CONFIG_X86_PGE)
+    word_t dummy1, dummy2;
+
     if (!global)
     {
         __asm__ __volatile__(
@@ -73,8 +73,7 @@ INLINE void x86_mmu_t::flush_tlb(bool global)
     }
     else
     {
-        word_t dummy2;
-            __asm__ __volatile__(
+        __asm__ __volatile__(
                 "mov    %%cr4, %0       \n"
                 "and    %2, %0          \n"
                 "mov    %0, %%cr4       \n"
@@ -85,12 +84,6 @@ INLINE void x86_mmu_t::flush_tlb(bool global)
                 : "=r"(dummy1), "=r"(dummy2)
                 : "i" (~X86_CR4_PGE), "i" (X86_CR4_PGE));
     }
-#else
-    __asm__ __volatile__(
-            "mov    %%cr3, %0   \n\t"
-            "mov    %0, %%cr3   \n\t"
-            : "=r" (dummy1));
-#endif
 }
 
 

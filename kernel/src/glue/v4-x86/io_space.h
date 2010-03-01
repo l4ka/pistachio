@@ -29,8 +29,11 @@
  * $Id: io_space.h,v 1.3 2005/05/19 08:43:48 stoess Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_X86__IO_SPACE_H__
-#define __GLUE__V4_X86__IO_SPACE_H__
+
+#ifndef __PLATFORM__PC99__IO_SPACE_H__
+#define __PLATFORM__PC99__IO_SPACE_H__
+
+
 #if !defined(CONFIG_X86_IO_FLEXPAGES)
 
 #include INC_API(generic-archmap.h)
@@ -64,5 +67,4 @@ void set_io_bitmap(space_t *space, word_t port, word_t log2size);
 
 
 
-
-#endif /* !__GLUE__V4_X86__IO_SPACE_H__ */
+#endif /* !__PLATFORM__PC99__IO_SPACE_H__ */

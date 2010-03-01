@@ -34,8 +34,9 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(cpu.h)
 
-bool x86_single_step_on_branches = false;
-word_t x86_last_ip = ~0U;
+bool x86_kdb_singlestep = false;
+bool x86_kdb_branchstep = false;
+word_t x86_kdb_last_ip = ~0U;
 
 DECLARE_CMD (cmd_singlestep, root, 's', "singlestep", "Single step");
 
@@ -43,8 +44,9 @@ CMD(cmd_singlestep, cg)
 {
     debug_param_t * param = (debug_param_t*)kdb.kdb_param;
     x86_exceptionframe_t* f = param->frame;
-
-    x86_last_ip = f->regs[x86_exceptionframe_t::ipreg];
+    
+    x86_kdb_singlestep = true;
+    x86_kdb_last_ip = f->regs[x86_exceptionframe_t::ipreg];
     f->regs[x86_exceptionframe_t::freg] |= (1 << 8) + (1 << 16); /* RF + TF */
 
     return CMD_QUIT;
@@ -62,7 +64,7 @@ CMD (cmd_branchstep, cg)
 
     f->regs[x86_exceptionframe_t::freg] |= (1 << 8) + (1 << 16); /* RF + TF */
     x86_wrmsr (X86_MSR_DEBUGCTL, ((1 << 0) + (1 << 1))); /* LBR + BTF */
-    x86_single_step_on_branches = true;
+    x86_kdb_branchstep = true;
 
     return CMD_QUIT;
 }

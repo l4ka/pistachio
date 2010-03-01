@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007, 2009,  Karlsruhe University
+ * Copyright (C) 2002-2010,  Karlsruhe University
  *                
  * File path:     api/v4/thread.cc
  * Description:   thread manipulation
@@ -40,6 +40,11 @@
 #include INC_GLUE(syscalls.h)
 #include INC_API(syscalls.h)
 #include INC_API(smp.h)
+#include INC_GLUE(syscalls.h)
+
+#if defined(CONFIG_X_EVT_LOGGING)
+#include INC_GLUE(logging.h)
+#endif
 
 #include <generic/lib.h>
 #include <kdb/tracepoints.h>
@@ -62,17 +67,23 @@ bool tcb_t::is_interrupt_thread ()
 static void thread_startup()
 {
     tcb_t * current = get_current_tcb();
-
-#if 0
-    printf ("Startup %t: ip=%p  sp=%p\n", current,
-	    current->get_mr (1), current->get_mr (2));
-#endif
+    msg_tag_t tag = current->get_tag();
 
     // Poke received IP/SP into exception frame (or whatever is used
     // by the architecture).  No need to check for valid IP/SP.
     // Thread will simply fault if values are not valid.
-    current->set_user_ip((addr_t)current->get_mr(1));
-    current->set_user_sp((addr_t)current->get_mr(2));
+    // To avoid a mess when thread is set up via ctrlxfer items, 
+    // set IP/SP only if pager sends at least 2 untyped words
+    
+    if (current->get_tag().get_untyped() == 2)
+    {
+	current->set_user_ip((addr_t)current->get_mr(1));
+	current->set_user_sp((addr_t)current->get_mr(2));
+    }
+
+    TRACE_SCHEDULE_DETAILS("startup %t: ip=%p  sp=%p\n", current,
+			    current->get_user_ip(), current->get_user_sp());
+    
     current->set_saved_state (thread_state_t::aborted);
     current->set_state (thread_state_t::running);
 }
@@ -87,15 +98,22 @@ static void thread_startup()
 static void fake_wait_for_startup (tcb_t * tcb, threadid_t pager)
 {
     // Fake that we are waiting to receive untyped words from our
-    // pager.
+    // pager. 
     tcb->set_state (thread_state_t::waiting_forever);
+
     tcb->set_partner (pager);
-    tcb->set_br (0, 0);
+    
+    acceptor_t acceptor;
+    acceptor.clear();
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    acceptor.x.ctrlxfer = 1;
+    acceptor.set_rcv_window(fpage_t::complete_mem());
+#endif
+    tcb->set_br(0, acceptor.raw);
 
     // Make sure that unwind will work on waiting thread.
     tcb->set_saved_partner (threadid_t::nilthread ());
 
-#warning VU: revise fake_wait_for_startup
     // Make sure that IPC abort will restore user-level exception
     // frame instead of trying to return from IPC syscall.
     tcb->set_saved_state (thread_state_t::running);
@@ -107,24 +125,22 @@ void thread_return()
     /* normal return function - do nothing */
 }
 
-void tcb_t::init(threadid_t dest)
+void tcb_t::init(threadid_t dest, sktcb_type_e type)
 {
     ASSERT(this);
-
     allocate();
 
     /* clear utcb and space */
     utcb = NULL;
     space = NULL;
 
-#warning fix locking for thread creation
     tcb_lock.init();
 
     /* make sure, nobody messes around with the thread */
     set_state(thread_state_t::aborted);
-    set_saved_state (thread_state);
     partner = threadid_t::nilthread();
-    set_saved_partner (threadid_t::nilthread());
+    init_saved_state();
+
 
     /* set thread id */
     myself_global = dest;
@@ -137,17 +153,14 @@ void tcb_t::init(threadid_t dest)
     queue_state.init();
     send_head = NULL;
 
-#ifdef CONFIG_SMP
-#warning VU: uninitialized threads assigned to CPU
+#if defined(CONFIG_SMP)
     /* initially assign to this CPU */
     cpu = get_current_cpu();
-    lock_state.init(false);
-    requeue = NULL;
+    lock_state.init(true);
 #endif
 
-
     /* initialize scheduling */
-    get_current_scheduler()->init_tcb(this);
+    sched_state.init(type);
 
     /* enqueue into present list, do not enqueue 
      * the idle thread since they are CPU local and break 
@@ -159,20 +172,18 @@ void tcb_t::init(threadid_t dest)
 }
 
 
-void tcb_t::create_kernel_thread(threadid_t dest, utcb_t * utcb)
+void tcb_t::create_kernel_thread(threadid_t dest, utcb_t * utcb, sktcb_type_e type)
 {
     //TRACEF("dest=%t\n", TID(dest));
-    init(dest);
+    init(dest, type);
     this->utcb = utcb;
-    // kernel threads have prio 0 by default
-    get_current_scheduler()->set_priority(this, 0);
 }
 
-void tcb_t::create_inactive(threadid_t dest, threadid_t scheduler)
+void tcb_t::create_inactive(threadid_t dest, threadid_t scheduler, sktcb_type_e type)
 {
     //TRACEF("tcb=%t, %t\n", this, TID(dest));
-    init(dest);
-    this->scheduler = scheduler;
+    init(dest, type);
+    sched_state.set_scheduler(scheduler);
 }
 
 bool tcb_t::activate(void (*startup_func)(), threadid_t pager)
@@ -195,11 +206,16 @@ bool tcb_t::activate(void (*startup_func)(), threadid_t pager)
     /* update global id in UTCB */
     set_global_id (this->get_global_id());
 
-    /* initialize scheduler, pager and exception handler */
+    /* initialize pager and exception handler */
     set_pager(pager);
     set_cpu(get_current_cpu());
-    set_scheduler(this->scheduler);
     set_exception_handler(NILTHREAD);
+    
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    /* set default ctrlxfer items for faults */
+    for(word_t fault = 0; fault < 4 + arch_ktcb_t::fault_max; fault++)
+	fault_ctrlxfer[fault] = ctrlxfer_mask_t(0);
+#endif
 
     /* initialize the startup stack */
     create_startup_stack(startup_func);
@@ -233,7 +249,7 @@ bool tcb_t::check_utcb_location (void)
 }
 
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 static void do_xcpu_delete_done(cpu_mb_entry_t * entry)
 {
     tcb_t * tcb = entry->tcb;
@@ -248,7 +264,7 @@ static void do_xcpu_delete_done(cpu_mb_entry_t * entry)
 
     tcb->xcpu_status = entry->param[0];
     tcb->set_state(thread_state_t::running);
-    get_current_scheduler()->enqueue_ready(tcb);
+    get_current_scheduler()->schedule(tcb);
 }
 
 static void idle_xcpu_delete(tcb_t *tcb, word_t src)
@@ -278,7 +294,7 @@ static void do_xcpu_delete(cpu_mb_entry_t * entry)
 
         if (current == tcb){
 	    get_idle_tcb()->notify(idle_xcpu_delete, tcb, (word_t) src);
-	    current->switch_to_idle();
+	    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 	}
 
         tcb->delete_tcb();
@@ -287,8 +303,8 @@ static void do_xcpu_delete(cpu_mb_entry_t * entry)
     }
     xcpu_request(src->get_cpu(), do_xcpu_delete_done, src, done);
     
-    if (!get_current_scheduler()->get_prio_queue(current)->timeslice_tcb) {
-	get_current_scheduler()->get_prio_queue(current)->timeslice_tcb =  current;
+    if (!get_current_scheduler()->get_accounted_tcb()) {
+	get_current_scheduler()->set_accounted_tcb(current);
     }
 }
 #endif
@@ -297,13 +313,13 @@ void tcb_t::delete_tcb()
 {
     ASSERT(this->exists());
 
-#ifdef CONFIG_SMP
- delete_tcb_retry:
+#if defined(CONFIG_SMP) 
+delete_tcb_retry:
     if ( !this->is_local_cpu() )
     {
 	xcpu_request(this->get_cpu(), do_xcpu_delete, this, (word_t)get_current_tcb());
 	get_current_tcb()->set_state(thread_state_t::xcpu_waiting_deltcb);
-	get_current_tcb()->switch_to_idle();
+	get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 
 	// wait for re-activation, if not successfull simply retry
 	if (get_current_tcb()->xcpu_status)
@@ -318,7 +334,8 @@ void tcb_t::delete_tcb()
 	scheduler_t * sched = get_current_scheduler();
 
 	// dequeue from ready queue
-	sched->dequeue_ready(this);
+	sched->deschedule
+	    (this);
 	
 	// unwind ongoing IPCs
 	if (get_state().is_sending() || get_state().is_receiving())
@@ -342,16 +359,12 @@ void tcb_t::delete_tcb()
 	this->utcb = NULL;
 
 	// make sure that we don't get accounted anymore
-	if (sched->get_prio_queue(this)->timeslice_tcb == this)
-	    sched->get_prio_queue(this)->timeslice_tcb = NULL;
+	if (sched->get_accounted_tcb() == this)
+	    sched->set_accounted_tcb(get_idle_tcb());
 	
 	// remove from requeue list
-	ON_CONFIG_SMP(if (this->requeue) sched->smp_requeue(false));
-	
+	sched_state.delete_tcb();
     }
-#ifdef CONFIG_SMP
-    ASSERT(this->requeue == NULL);
-#endif
 
     // clear ids
     this->myself_global = NILTHREAD;
@@ -412,7 +425,7 @@ static void calculate_errorcodes (tcb_t::unwind_reason_e reason,
 
 #if defined(CONFIG_SMP)
 
-DECLARE_TRACEPOINT (XCPU_UNWIND);
+DECLARE_TRACEPOINT (IPC_XCPU_UNWIND);
 
 /**
  * Handler invoked when our IPC partner has aborted/timed out the IPC.
@@ -428,10 +441,10 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
     tcb_t * tcb = entry->tcb;
     threadid_t partner_id = threadid (entry->param[0]);
     thread_state_t expected_state (entry->param[1]);
-    msg_tag_t tag = msgtag (entry->param[2]);
+    msg_tag_t tag = entry->param[2];
     word_t err = entry->param[3];
 
-    TRACEPOINT (XCPU_UNWIND,
+    TRACEPOINT (IPC_XCPU_UNWIND,
 		"tcb=%t, partner=%t, state=%s, tag=%p, err=%p\n",
 			TID (tcb->get_global_id ()), TID (partner_id),
 			expected_state.string (), tag.raw, err);
@@ -470,13 +483,13 @@ static void do_xcpu_unwind_partner (cpu_mb_entry_t * entry)
 
     // Reactivate thread.
     tcb->notify (handle_ipc_error);
-    get_current_scheduler ()->enqueue_ready (tcb);
+    get_current_scheduler ()->schedule (tcb);
 }
 
 #endif /* CONFIG_SMP */
 
 
-DECLARE_TRACEPOINT (UNWIND);
+DECLARE_TRACEPOINT (IPC_UNWIND);
 
 /**
  * Unwinds a thread from an ongoing IPC.
@@ -489,7 +502,7 @@ void tcb_t::unwind (unwind_reason_e reason)
     thread_state_t cstate;
     tcb_t * partner;
 
-    TRACEPOINT (UNWIND,
+    TRACEPOINT (IPC_UNWIND,
 		"Unwind: tcb=%t p=%t s=%s (saved: p=%t s=%s)\n",
 			TID (get_global_id ()), TID (get_partner ()),
 			get_state ().string (),	TID (get_saved_partner ()),
@@ -506,12 +519,12 @@ redo_unwind:
     set_state (thread_state_t::running);
     partner = get_partner_tcb ();
 
-    if (cstate.is_polling_or_waiting ())
+    if (cstate.is_polling_or_waiting())
     {
 	// IPC operation has not yet started.  I.e., partner is not
 	// yet involved.
 
-	get_current_scheduler ()->cancel_timeout (this);
+	sched_state.cancel_timeout();
 
 	if (cstate.is_polling ())
 	{
@@ -542,7 +555,6 @@ redo_unwind:
 		       IPC_SND_ERROR (err) : IPC_RCV_ERROR (err));
 	return;
     }
-
     else if (cstate == thread_state_t::waiting_tunneled_pf)
     {
 	// We have tunneled a pagefault to our partner.  Inform the
@@ -569,7 +581,7 @@ redo_unwind:
 	    partner->set_tag (tag);
 	    partner->set_state (thread_state_t::running);
 	    partner->notify (handle_ipc_error);
-	    get_current_scheduler ()->enqueue_ready (partner);
+	    get_current_scheduler ()->schedule (partner);
 	}
 
 	set_tag (tag);
@@ -615,15 +627,14 @@ redo_unwind:
 		partner->set_tag (tag);
 		partner->set_state (thread_state_t::running);
 		partner->notify (handle_ipc_error);
-		get_current_scheduler ()->enqueue_ready (partner);
+		get_current_scheduler ()->schedule (partner);
 	    }
 	}
 
         if (! get_saved_partner ().is_nilthread () &&
             ! get_saved_state ().is_running () )
         {
-	    // We're handling a nested IPC.
-	    restore_state ();
+            restore_state ();
 	    goto redo_unwind;
 	}
 
@@ -660,7 +671,7 @@ redo_unwind:
 		partner->set_tag (tag);
 		partner->set_state (thread_state_t::running);
 		partner->notify (handle_ipc_error);
-		get_current_scheduler()->enqueue_ready(partner);
+		get_current_scheduler()->schedule(partner);
 	    }
 	}
 
@@ -695,14 +706,13 @@ redo_unwind:
 		partner->set_tag (tag);
 		partner->set_state (thread_state_t::running);
 		partner->notify (handle_ipc_error);
-		get_current_scheduler()->enqueue_ready(partner);
+		get_current_scheduler()->schedule(partner);
 	    }
 	}
 
         if (! get_saved_partner ().is_nilthread () &&
             ! get_saved_state ().is_running () )
         {
-	    // We're handling a nested IPC.
 	    restore_state ();
 	    goto redo_unwind;
 	}
@@ -772,8 +782,7 @@ bool tcb_t::migrate_to_space(space_t * space)
     return true;
 }
 
-#ifdef CONFIG_SMP
-
+#if defined(CONFIG_SMP)
 /**
  * releases all resources held by the thread
  */
@@ -782,18 +791,18 @@ static void xcpu_release_thread(tcb_t * tcb)
     scheduler_t * sched = get_current_scheduler();
 
     // thread is on the current CPU
-    sched->dequeue_ready(tcb);
+    sched->deschedule(tcb);
 
     // make sure that we don't get accounted anymore
-    if (sched->get_prio_queue(tcb)->timeslice_tcb == tcb)
-	sched->get_prio_queue(tcb)->timeslice_tcb = NULL;
+    if (sched->get_accounted_tcb() == tcb)
+	sched->set_accounted_tcb(get_idle_tcb());
 
     // remove from wakeup queue, we use the absolute timeout
     // as identifier whether a thread was in the wakeup list or not
     if (!tcb->queue_state.is_set(queue_state_t::wakeup))
-	tcb->absolute_timeout = 0;
+	tcb->sched_state.set_timeout(0, false);
     else
-	sched->cancel_timeout(tcb);
+	tcb->sched_state.cancel_timeout();
 
     tcb->resources.purge(tcb);
 
@@ -802,70 +811,15 @@ static void xcpu_release_thread(tcb_t * tcb)
 	migrate_interrupt_start (tcb);
 }
 
-/**
- * re-integrates a thread into the CPUs queues etc.
- */
-static void xcpu_integrate_thread(tcb_t * tcb)
-{
-    ASSERT(!tcb->queue_state.is_set(queue_state_t::wakeup));
-    ASSERT (tcb != get_current_tcb());
-
-    TRACE_SCHEDULE_DETAILS("integrate %t (s=%s) current %t\n", tcb, tcb->get_state().string(), get_current_tcb());
-
-    tcb->lock();
-
-    // interrupt threads are handled specially
-    if (tcb->is_interrupt_thread())
-    {
-	migrate_interrupt_end(tcb);
-	tcb->unlock();
-	return;
-    }
-
-    tcb->unlock();
-
-    /* VU: the thread may have received an IPC meanwhile hence we
-     * check whether the thread is already running again.  to make it
-     * fully working the waiting timeout must be set more carefull! */
-    if (tcb->get_state().is_runnable())
-	get_current_scheduler()->enqueue_ready(tcb);
-    else if (tcb->absolute_timeout &&
-	     tcb->get_state().is_waiting_with_timeout())
-	get_current_scheduler()->set_timeout(tcb, tcb->absolute_timeout);
-}
 
 static void xcpu_put_thread(tcb_t * tcb, word_t processor)
 {
     TRACE_SCHEDULE_DETAILS("migrating %t from %d -> %d (%s)", 
 		    tcb, tcb->get_cpu(), processor, tcb->get_state().string());
 
-    tcb->lock();
-
-    /* VU: it is only necessary to notify the other CPU if the thread
-     * is in one of the scheduling queues (wakeup, ready) or is an
-     * interrupt thread */
-    bool need_xcpu = tcb->get_state().is_runnable() || 
-	(tcb->absolute_timeout != 0) || tcb->is_interrupt_thread();
-
     // dequeue all threads from requeue list and continue holding lock
-    scheduler_t *scheduler = get_current_scheduler();
-    scheduler->smp_requeue(true);
-    ASSERT(tcb->requeue == NULL);
-
-    if (tcb->get_space())
-	tcb->get_space()->move_tcb(tcb, get_current_cpu(), processor);
-
-    tcb->set_cpu(processor);
-    scheduler->unlock_requeue();
+    get_current_scheduler()->move_tcb(tcb, processor);
     
-    if (need_xcpu) 
-    {
-	tcb->requeue_callback = xcpu_integrate_thread;
-	get_current_scheduler()->remote_enqueue_ready(tcb);
-    }
-    
-    tcb->unlock();
-
 }
 
 /**
@@ -908,18 +862,15 @@ bool tcb_t::migrate_to_processor(cpuid_t processor)
 	{
 	    get_idle_tcb()->notify(xcpu_put_thread, this, processor);
 	    space_t::switch_to_kernel_space(get_current_cpu());
-	    this->switch_to_idle();
+	    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 	}
 	else 
 	{
 	    xcpu_put_thread(this, processor);
 
 	    // schedule if we've been running on the thread's timeslice
-	    if (!get_current_scheduler()->get_prio_queue(this)->timeslice_tcb) 
-	    {
-		get_current_scheduler()->enqueue_ready(current);
-		current->switch_to_idle();
-	    }
+	    if (!get_current_scheduler()->get_accounted_tcb()) 
+		get_current_scheduler()->schedule();
 	}
     }
 
@@ -934,14 +885,17 @@ bool tcb_t::migrate_to_processor(cpuid_t processor)
  * (caused by user-level memory access) we need to restore the thread
  * prior to the pagefault and return to user-level.
  */
+EXTERN_TRACEPOINT(IPC_ERROR);
+
 void handle_ipc_error (void)
 {
     tcb_t * current = get_current_tcb ();
 
+    TRACEPOINT (IPC_ERROR, "handle ipc error %s %d\n", 
+                current->get_saved_state().string(), (word_t) current->get_error_code());
+                
     current->release_copy_area ();
     current->flags -= tcb_t::has_xfer_timeout;
-
-    //TRACEF("saved state == %x\n", (word_t)current->get_saved_state ());
 
     // We're going to skip the last part of the switch_to() function
     // invoked when switching from the current thread.  Make sure that
@@ -951,25 +905,20 @@ void handle_ipc_error (void)
     if (EXPECT_FALSE (current->resource_bits))
 	current->resources.load (current);
 
+
     if (current->get_saved_state ().is_running ())
     {
 	// Thread was doing a pagefault IPC.  Restore thread state
 	// prior to IPC operation and return directly to user-level.
-	for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
-	    current->set_mr (i, current->misc.ipc_copy.saved_mr[i]);
-	current->set_br (0, current->misc.ipc_copy.saved_br0);
-        
-	current->set_partner (threadid_t::nilthread ());
-	current->set_state (thread_state_t::running);
-        
-	current->set_saved_partner (threadid_t::nilthread ());
-	current->set_saved_state (thread_state_t::aborted);
-
+	current->restore_state();
+        current->set_partner(threadid_t::nilthread()); // sanity
 	current->return_from_user_interruption ();
     }
     else
     {
+        TRACEPOINT (IPC_ERROR, "ipc error ret from ipc\n");
 	current->set_saved_state (thread_state_t::aborted); // sanity
+        current->set_saved_partner (threadid_t::nilthread());
 	current->return_from_ipc ();
     }
 
@@ -987,7 +936,7 @@ void handle_ipc_error (void)
 void handle_ipc_timeout (word_t state)
 {
     tcb_t * current = get_current_tcb ();
-    // TRACEF("%t (%x, %x)\n", current, state, (word_t)current->get_saved_state ());
+    //TRACEF("%t (%s, %s)\n", current, current->state.string(), current->get_saved_state().string());
 
     // Restore thread state when timeout occured
     current->set_state ((thread_state_t) state);
@@ -999,35 +948,76 @@ void handle_ipc_timeout (word_t state)
 
 
 void tcb_t::save_state ()
-{
-    TRACE_SCHEDULE_DETAILS("save_state sp %t ss %s", 
-			   TID(get_saved_partner()), get_saved_state().string());
+{ 
+    TRACE_SCHEDULE_DETAILS("save_state %t p %t s %s e %x mr <%x:%x:%x>", this,
+			   TID(get_partner()), get_state().string(),
+			   get_error_code(), get_mr(0), get_mr(1), get_mr(2));
+			   
+			 
+    ASSERT (get_saved_partner (IPC_NESTING_LEVEL-1) == threadid_t::nilthread ());
+    ASSERT (get_saved_state (IPC_NESTING_LEVEL-1) == thread_state_t::aborted);
 
-    for (word_t i = 0; i < IPC_NUM_SAVED_MRS; i++)
-	misc.ipc_copy.saved_mr[i] = get_mr (i);
-    misc.ipc_copy.saved_br0 = get_br (0);
-    misc.ipc_copy.saved_error = get_error_code ();
+    for (int l = 1; l < IPC_NESTING_LEVEL; l++)
+    {
+	for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
+	    misc.saved_state[l].mr[i] = misc.saved_state[l-1].mr[i];
+	misc.saved_state[l].br0 = misc.saved_state[l-1].br0;
+	misc.saved_state[l].error = misc.saved_state[l-1].error;
+	misc.saved_state[l].partner = misc.saved_state[l-1].partner;
+	misc.saved_state[l].vsender = misc.saved_state[l-1].vsender;
+	misc.saved_state[l].state = misc.saved_state[l-1].state;
+
+    }
     
-    ASSERT (get_saved_partner () == threadid_t::nilthread ());
-    ASSERT (get_saved_state () == thread_state_t::aborted);
-    set_saved_partner (get_partner ());
-    set_saved_state (get_state ());
+    for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
+	misc.saved_state[0].mr[i] = get_mr(i);
+    
+    misc.saved_state[0].br0 = get_br(0);
+    misc.saved_state[0].error = get_error_code();
+    misc.saved_state[0].partner = get_partner();
+    misc.saved_state[0].vsender = get_virtual_sender();
+    misc.saved_state[0].state = get_state();
+
 }
 
 void tcb_t::restore_state ()
 {
-    TRACE_SCHEDULE_DETAILS("restore_state saved_partner %t saved_state %s", 
-			   TID( get_saved_partner()), get_saved_state().string());
-    
-    for (word_t i = 0; i < IPC_NUM_SAVED_MRS; i++)
-	set_mr (i, misc.ipc_copy.saved_mr[i]);
-    set_br (0, misc.ipc_copy.saved_br0);
-    set_partner (get_saved_partner ());
-    set_state (get_saved_state ());
-    set_error_code (misc.ipc_copy.saved_error);
+    TRACE_SCHEDULE_DETAILS("restore_state %t sp %t ss %s se %x mr <%x:%x:%x>", this,
+			   TID(get_saved_partner()), get_saved_state().string(),
+			   misc.saved_state[0].error,
+			   misc.saved_state[0].mr[0],
+			   misc.saved_state[0].mr[1],
+			   misc.saved_state[0].mr[2]);
 
-    set_saved_partner (threadid_t::nilthread());
-    set_saved_state (thread_state_t::aborted);
+
+    //x86_x32_dump_frame_tb(get_user_frame(this));
+
+    for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
+	set_mr (i, misc.saved_state[0].mr[i]);
+    set_br (0, misc.saved_state[0].br0);
+    set_partner (get_saved_partner ());
+    set_state(get_saved_state ());
+    set_error_code (misc.saved_state[0].error);
+    set_actual_sender(misc.saved_state[0].vsender);
+    
+    for (int l = 1; l < IPC_NESTING_LEVEL; l++)
+    {
+	for (int i = 0; i < IPC_NUM_SAVED_MRS; i++)
+	    misc.saved_state[l-1].mr[i] = misc.saved_state[l].mr[i];
+	misc.saved_state[l-1].br0 = misc.saved_state[l].br0;
+	misc.saved_state[l-1].error = misc.saved_state[l].error;
+	misc.saved_state[l-1].partner = misc.saved_state[l].partner;
+	misc.saved_state[l-1].state = misc.saved_state[l].state;
+	misc.saved_state[l-1].vsender = misc.saved_state[l].vsender;
+    }
+    
+    set_saved_partner (threadid_t::nilthread(), IPC_NESTING_LEVEL-1);
+    set_saved_state (thread_state_t::aborted, IPC_NESTING_LEVEL-1);
+    
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    flags -= tcb_t::kernel_ctrlxfer_msg;
+#endif
+    
 }
 
 void tcb_t::send_pagefault_ipc (addr_t addr, addr_t ip,
@@ -1044,17 +1034,20 @@ void tcb_t::send_pagefault_ipc (addr_t addr, addr_t ip,
 	    ((access == space_t::readwrite) ? (1 << 2)+(1 << 1) : 0));
 
     /* create acceptor for whole address space */
-    acceptor_t acceptor;
-    acceptor.clear();
+    acceptor_t acceptor = 0;
     acceptor.set_rcv_window(fpage_t::complete_mem());
-    
+
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    acceptor.x.ctrlxfer = 1;
+    tag.x.typed += append_ctrlxfer_item(tag, 3);
+#endif
+
     set_tag(tag);
     set_mr(1, (word_t)addr);
     set_mr(2, (word_t)ip);
     set_br(0, acceptor.raw);
 
-    //TRACEF("send pagefault IPC (%t)\n", TID(get_pager()));
-    
+
     tag = do_ipc(get_pager(), get_pager(), timeout_t::never());
     if (tag.is_error())
     {
@@ -1066,35 +1059,134 @@ void tcb_t::send_pagefault_ipc (addr_t addr, addr_t ip,
     restore_state ();
 }
 
-bool tcb_t::send_preemption_ipc(u64_t time)
+bool tcb_t::send_preemption_ipc()
 {
-    save_state ();
-
-    /* generate preemption message */
-    msg_tag_t tag;
-    tag = msg_tag_t::preemption_tag();
-    
-    /* create acceptor for whole address space */
+    u64_t time = get_current_scheduler()->get_current_time();
+    threadid_t to;
     acceptor_t acceptor;
-    acceptor = get_br(0);
-    
-    set_tag(tag);
-    set_mr (1, (word_t)time);
-    set_mr (2, (word_t)((time >> (BITS_WORD-1)) >> 1)); // Avoid gcc warn
-    set_br (0, acceptor.raw); // no acceptor
+    msg_tag_t tag;
 
 #warning preemption IPC with timeout never -- should be zero
+    save_state ();
+
+    tag = msg_tag_t::preemption_tag();
+	
+    /* generate preemption message */
+    to = sched_state.pre_preemption_ipc(tag);
     
-    tag = do_ipc(get_scheduler(), threadid_t::nilthread(), timeout_t::never());
+    set_mr(1, (word_t) time);
+    set_mr(2, (word_t)((time >> (BITS_WORD-1)) >> 1)); // Avoid gcc warn
+
+    acceptor.raw = get_br(0);
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    acceptor.x.ctrlxfer = 1;
+    acceptor.set_rcv_window(fpage_t::complete_mem());
+    tag.x.typed += append_ctrlxfer_item(tag, 3);
+#endif
+
+    set_tag(tag);
+    set_br(0, acceptor.raw);
+    
+    tag = do_ipc(to, sched_state.get_scheduler(), timeout_t::never());
 
     restore_state ();
 
+    sched_state.post_preemption_ipc();
+    
     if (tag.is_error())
     {
 	enter_kdebug("preemption IPC error");
     }
     return tag.is_error();
 }
+
+#if defined(CONFIG_X_CTRLXFER_MSG)
+
+word_t tcb_t::ctrlxfer(tcb_t *dst, msg_item_t item, word_t src_idx, word_t dst_idx, bool src_mr, bool dst_mr)
+{
+    word_t num_regs = 0;
+    word_t ctrlxfer_item_id;
+    msg_item_t ctrlxfer_item;
+    ctrlxfer_mask_t ctrlxfer_mask;
+
+    if (flags.is_set(tcb_t::kernel_ctrlxfer_msg))
+    {
+	/*
+	 * on kernel we have inserted a single dummy ctrlxfer item with the
+	 * fault id encoded to reduce the number of saved MRs space; we get the
+	 * "real" items by inspecting the fault bitmasks
+	 */
+	ctrlxfer_mask = get_fault_ctrlxfer_items(item.get_ctrlxfer_id());
+	ctrlxfer_item_id = lsb(ctrlxfer_mask);	
+	ctrlxfer_item = ctrlxfer_item_t::fault_item((ctrlxfer_item_t::id_e) ctrlxfer_item_id);
+	TRACE_CTRLXFER_DETAILS( "ctrlxfer kernel msg fault %d mask %x", 
+				item.get_ctrlxfer_id(), (word_t) ctrlxfer_mask);
+	
+    }
+    else
+    {
+	ctrlxfer_item_id = 1;
+	ctrlxfer_mask += ctrlxfer_item_id;
+	ctrlxfer_item = item;
+    }
+
+    do 
+    {
+	word_t id = ctrlxfer_item.get_ctrlxfer_id();
+        word_t num = 0;
+        word_t mask = ctrlxfer_item.get_ctrlxfer_mask();
+
+        ctrlxfer_item_t::mask_hwregs(id, mask);
+        TRACE_CTRLXFER_DETAILS( "ctrlxfer id %d %s mask %x ", id, ctrlxfer_item_t::get_idname(id), mask);
+            
+        if (src_mr)
+        {
+            if (dst_mr)
+            {
+                dst->set_mr(dst_idx++, ctrlxfer_item.raw);
+
+                for (word_t reg=lsb(mask); mask!=0; mask>>=lsb(mask)+1,reg+=lsb(mask)+1,num++)
+                {
+                    TRACE_CTRLXFER_DETAILS( "\t (m%06d->m%06d) -> %08x", src_idx+1, dst_idx, get_mr(src_idx+1));
+                    dst->set_mr(dst_idx++, get_mr(src_idx++ +1));
+                }
+            }
+            else
+            {
+                // skip ctrlxfer item
+                src_idx++;
+                /* transfer from src mrs to dst frame */
+                num += (dst->arch.*(arch_ktcb_t::set_ctrlxfer_regs[id]))(id, mask, this, src_idx);
+            }
+        }
+        else 
+        { 
+            if (dst_mr)
+            {
+                dst->set_mr(dst_idx++, ctrlxfer_item.raw);
+                /* transfer from src frame to dst mrs */
+                num += (arch.*arch_ktcb_t::get_ctrlxfer_regs[id])(id, mask, dst, dst_idx);
+            }
+            else 
+            {
+                TRACEF("Ignore frame2frame ctrlxfer");
+            }
+        }
+                
+        num_regs += 1 + num;
+        ctrlxfer_mask -= ctrlxfer_item_id;
+        ctrlxfer_item_id = lsb(ctrlxfer_mask);	
+        ctrlxfer_item = ctrlxfer_item_t::fault_item((ctrlxfer_item_t::id_e) ctrlxfer_item_id);
+        
+    } while (ctrlxfer_mask);
+
+    flags -= tcb_t::kernel_ctrlxfer_msg;
+
+    return num_regs;
+}
+
+#endif /* defined(CONFIG_X_CTRLXFER_MSG) */
+
 
 /**********************************************************************
  *
@@ -1112,7 +1204,7 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
     ASSERT(scheduler_tid.is_global());
     ASSERT(pager_tid.is_global() || pager_tid.is_nilthread());
     ASSERT(!utcb_area.is_nil_fpage() && !(kip_area.is_nil_fpage()));
-
+    
     tcb_t * tcb = get_current_space()->get_tcb(dest_tid);
     space_t * space = allocate_space();
 
@@ -1120,12 +1212,12 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
      * if not - we are in deep shit anyway */
     ASSERT(space);
     ASSERT(tcb);
-
+    
     tcb->arch_init_root_server(space, ip, sp);
 
-    tcb->create_inactive(dest_tid, scheduler_tid);
+    tcb->create_inactive(dest_tid, scheduler_tid, sktcb_root);
     space->init(utcb_area, kip_area);
-
+    
     /* set the space */
     tcb->set_space(space);
     space->add_tcb(tcb, get_current_cpu());
@@ -1142,9 +1234,8 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
 
     /* and off we go... */
     tcb->set_state(thread_state_t::running);
-    get_current_scheduler()->set_priority(tcb, ROOT_PRIORITY);
-    get_current_scheduler()->enqueue_ready(tcb);
-
+    
+    get_current_scheduler()->schedule(tcb, sched_current);
     return tcb;
 }
 
@@ -1217,11 +1308,8 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    }
 
 	    // schedule if we've been running on this thread's timeslice
-	    if (!get_current_scheduler()->get_prio_queue(current)->timeslice_tcb) 
-	    {
-		get_current_scheduler()->enqueue_ready(current);
-		current->switch_to_idle();
-	    }
+	    if (!get_current_scheduler()->get_accounted_tcb()) 
+		get_current_scheduler()->schedule();
 	}
 
 	return_thread_control(1);
@@ -1297,7 +1385,6 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 			current->set_error_code (ENO_MEM);
 			return_thread_control (0);
 		    }
-
 		    fake_wait_for_startup (dest_tcb, pager_tid);
 		}
 		else
@@ -1305,8 +1392,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    }
 
 	    if (!scheduler_tid.is_nilthread())
-		dest_tcb->set_scheduler(scheduler_tid);
-
+		dest_tcb->sched_state.set_scheduler(scheduler_tid);
 
 	    // change global id
 	    if (dest_tcb->get_global_id() != dest_tid)
@@ -1355,7 +1441,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    }
 
 	    /* ok, we can create the thread */
-	    dest_tcb->create_inactive(dest_tid, scheduler_tid);
+	    dest_tcb->create_inactive(dest_tid, scheduler_tid, sktcb_user);
 
 	    /* set UTCB location, the multiple checks are necessary to
 	     * be compliant with the manual which says the operation
@@ -1408,9 +1494,8 @@ void SECTION(".init") init_kernel_threads()
     // Create a dummy kernel thread.
     threadid_t ktid;
     ktid.set_global_id (get_kip ()->thread_info.get_system_base (), 1);
-
     tcb_t * tcb = get_kernel_space ()->get_tcb (ktid);
-    tcb->create_kernel_thread (ktid, &kernel_utcb);
+    tcb->create_kernel_thread (ktid, &kernel_utcb, sktcb_lo);
     tcb->set_state (thread_state_t::aborted);
 }
 
@@ -1426,6 +1511,9 @@ void SECTION(".init") init_kernel_threads()
 void SECTION(".init") init_root_servers()
 {
     TRACE_INIT ("Initializing root servers\n");
+    //ENABLE_TRACEPOINT(SCHEDULE_PM_IPC, ~0, ~0);
+    //ENABLE_TRACE_SCHEDULE_DETAILS( ~0, ~0);
+    
     word_t ubase = get_kip()->thread_info.get_user_base();
     tcb_t * tcb;
 
@@ -1499,7 +1587,6 @@ void SECTION(".init") init_root_servers()
 	    ROOT_UTCB_START,
 	    get_kip()->root_server.ip,
 	    get_kip()->root_server.sp);
-
 	roottask_space = tcb->get_space();
     }
 }

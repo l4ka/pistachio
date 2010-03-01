@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
- * File path:     kdb/arch/ia32/ia32-dis.c
+ * File path:     kdb/arch/x86/x32/ia32-dis.c
  * Description:   Wrapper for IA-32 disassembler
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -198,6 +198,23 @@ int SECTION(SEC_KDEBUG) disas(addr_t pc)
 	rmf,
 	mef,
 	bfd_mach_i386_i386,
+	0,
+	NULL,
+	fprintf,
+	paf
+    };
+    extern int print_insn_i386_att (bfd_vma pc, disassemble_info *info);
+    return print_insn_i386_att((bfd_vma) pc, &info);
+}
+
+int SECTION(SEC_KDEBUG) disas16(addr_t pc)
+{
+    disassemble_info info =
+    {
+	NULL,
+	rmf,
+	mef,
+	bfd_mach_i386_i8086,
 	0,
 	NULL,
 	fprintf,

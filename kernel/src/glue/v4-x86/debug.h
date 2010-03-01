@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/debug.h
  * Description:   x86 debugging support
@@ -38,8 +38,10 @@
 
 #if defined(CONFIG_DEBUG)
 
-#define DEBUG_SCREEN (KERNEL_OFFSET + 0xb8000)
+#include <kdb/tracepoints.h>
 
+#define DEBUG_SCREEN (KERNEL_OFFSET + 0xb8000)
+#define KDB_STACK_SIZE	KTCB_SIZE
 
 INLINE void spin_forever(int pos = 0)
 {
@@ -87,6 +89,7 @@ INLINE void spin(int pos, int cpu = 0)
             :                                   \
             : "a" (0UL))
 
+extern void do_enter_kdebug(x86_exceptionframe_t *frame, const word_t exception);
 
 enum x86_breakpoint_type_e {
     x86_bp_instr =  0x00000000,
@@ -95,10 +98,11 @@ enum x86_breakpoint_type_e {
     x86_bp_access = 0x00030000
 };
 
-extern void x86_set_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb);
+extern void x86_set_kdb_dr(word_t num, x86_breakpoint_type_e type, word_t addr, bool enable, bool kdb);
 
 extern "C" void x86_reset(void);
 extern bool x86_reboot_scheduled;
+
 
 
 #else

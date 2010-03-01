@@ -239,7 +239,7 @@ SECTION(".init") static void finish_api_init( void )
 {
     get_timer()->init_global();
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     init_processor( boot_cpu, boot_buskhz, boot_cpukhz );
 #else
     init_processor( 0, boot_buskhz, boot_cpukhz );
@@ -338,7 +338,7 @@ extern "C" SECTION(".init") void virtmode_call(void)
     printf( "PPC64 %dMHz   ", boot_cpukhz/1000 );
 #endif
 
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
     init_serial_console();
 #endif
 

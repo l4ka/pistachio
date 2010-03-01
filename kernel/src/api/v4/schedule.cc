@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2010,  Karlsruhe University
  *                
  * File path:     api/v4/schedule.cc
  * Description:   Scheduling functions
@@ -37,88 +37,27 @@
 #include INC_API(syscalls.h)
 #include INC_API(smp.h)
 #include INC_API(kernelinterface.h)
+#include INC_GLUE(cpu.h)
 #include INC_GLUE(syscalls.h)
 #include INC_GLUE(config.h)
 
 #include <kdb/tracepoints.h>
 
 /* global idle thread, we allocate a utcb to make accessing MRs etc easier */
-whole_tcb_t __idle_tcb UNIT("cpulocal") __attribute__((aligned(sizeof(whole_tcb_t))));
+whole_tcb_t __whole_idle_tcb UNIT("cpulocal") __attribute__((aligned(sizeof(whole_tcb_t))));
 utcb_t	    __idle_utcb UNIT("cpulocal") __attribute__((aligned(sizeof(utcb_t))));
+const tcb_t *__idle_tcb = (const tcb_t *) &__whole_idle_tcb;	    
 
 /* global scheduler object */
 scheduler_t scheduler UNIT("cpulocal");
-volatile u64_t scheduler_t::current_time = 0;
+schedule_request_queue_t scheduler_t::schedule_request_queue[CONFIG_SMP_MAX_CPUS];
 
-#define TOTAL_QUANTUM_EXPIRED (~0ULL)
 
 DECLARE_TRACEPOINT(SYSCALL_THREAD_SWITCH);
-DECLARE_TRACEPOINT(TIMESLICE_EXPIRED);
-DECLARE_TRACEPOINT(TOTAL_QUANTUM_EXPIRED);
-DECLARE_TRACEPOINT(PREEMPTION_DELAYED);
-DECLARE_TRACEPOINT(PREEMPTION_DELAY_OVERRULED);
-DECLARE_TRACEPOINT(PREEMPTION_FAULT);
-DECLARE_TRACEPOINT(PREEMPTION_DELAY_REFRESH);
-DECLARE_TRACEPOINT(WAKEUP_TIMEOUT);
-
 DECLARE_TRACEPOINT(SYSCALL_SCHEDULE);
+DECLARE_TRACEPOINT(SCHEDULE_IDLE);
 DECLARE_TRACEPOINT_DETAIL(SCHEDULE_DETAILS);
-
-
-#ifdef CONFIG_SMP
-smp_requeue_t scheduler_t::smp_requeue_lists[CONFIG_SMP_MAX_CPUS];
-
-void scheduler_t::smp_requeue(bool holdlock)
-{
-    smp_requeue_t * rq = &smp_requeue_lists[get_current_cpu()];
-    
-    if (!rq->is_empty() || holdlock)
-    {
-	rq->lock.lock();
-	tcb_t *tcb = NULL;
-
-	while (!rq->is_empty()) 
-	{
-	    tcb = rq->dequeue_head();
-	    ASSERT( tcb->get_cpu() == get_current_cpu() );
-	    
-	    if (tcb->requeue_callback) 
-	    {
-		tcb->requeue_callback(tcb);
-		tcb->requeue_callback = NULL;
-	    }
-	    else {
-		cancel_timeout( tcb );
-		enqueue_ready( tcb );
-	    }
-	}
-	if (!holdlock) 
-	    rq->lock.unlock();
-	
-    }
-}
-
-void scheduler_t::remote_enqueue_ready(tcb_t * tcb)
-{
-    if (!tcb->requeue)
-    {
-	cpuid_t cpu = tcb->get_cpu();
-	smp_requeue_t * rq = &smp_requeue_lists[cpu];
-	rq->lock.lock();
-	if (tcb->get_cpu() != cpu) 
-	{
-	    // thread may have migrated meanwhile
-	    TRACEF("curr=%p, %p, CPU#%d != CPU#%d\n", get_current_tcb(), 
-		   tcb, cpu, tcb->get_cpu());
-	    UNIMPLEMENTED();
-	}
-	//tcb->requeue_func = __builtin_return_address(0);
-	rq->enqueue_head(tcb);
-	rq->lock.unlock();
-	smp_xcpu_trigger(cpu);
-    }
-}
-#endif
+EXTERN_TRACEPOINT(INTERRUPT_DETAILS);
 
 
 /**
@@ -154,355 +93,7 @@ bool time_t::operator< (time_t & r)
 }
 
 
-/**
- * sends preemption IPC to the scheduler thread that the total quantum
- * has expired */
-void scheduler_t::total_quantum_expired(tcb_t * tcb)
-{
-    TRACEPOINT(TOTAL_QUANTUM_EXPIRED, "total quantum expired for %t\n", tcb);
-
-#warning VU: total quantum IPC disabled
-    /* Total quantum IPC is an open point.  The expiration may happen
-     * in the wrong thread context and thus we have to tunnel the IPC.
-     * Also it may happen in the middle of a long IPC which leads to
-     * nesting of four.  More details in eSk's p-core posting.
-     * Disabled for the time being.
-     */
-    //tcb->send_preemption_ipc(current_time);
-}
-
-
-/**
- * find_next_thread: selects the next tcb to be dispatched
- *
- * returns the selected tcb, if no runnable thread is available, 
- * the idle tcb is returned.
- */
-tcb_t * scheduler_t::find_next_thread(prio_queue_t * prio_queue)
-{
-    ASSERT(prio_queue);
-
-#ifdef CONFIG_SMP
-    // requeue threads which got activated by other CPUs
-    smp_requeue(false);
-#endif
-
-    for (prio_t prio = prio_queue->max_prio; prio >= 0; prio--)
-    {
-	//TRACEF("prio=%d, (max=%d)\n", prio, max_prio);
-	tcb_t *tcb = prio_queue->get(prio);
-	while (tcb) {
-	    ASSERT(tcb->queue_state.is_set(queue_state_t::ready));
-
-	    if ( tcb->get_state().is_runnable() /*&& tcb->current_timeslice > 0 */)
-	    {
-		prio_queue->set(prio, tcb);
-		prio_queue->max_prio = prio;
-		//TRACE("find_next: returns %t\n", tcb);
-		return tcb;
-	    }
-	    else {
-		if (tcb->get_state().is_runnable())
-		    TRACEF("dequeueing runnable thread %t without timeslice\n", tcb);
-		/* dequeue non-runnable thread */
-		prio_queue->dequeue(tcb);
-		tcb = prio_queue->get(prio);
-	    }
-	}
-    }
-    /* if we can't find a schedulable thread - switch to idle */
-    //TRACE("find_next: returns idle\n");
-    prio_queue->max_prio = -1;
-    return get_idle_tcb();
-}
-
-tcb_t * scheduler_t::parse_wakeup_queues(tcb_t * current)
-{
-    if (!wakeup_list)
-	return current;
-
-    // use thread owning the current timeslice
-    tcb_t * highest_wakeup = get_prio_queue(current)->timeslice_tcb;
-    tcb_t * tcb = wakeup_list;
-
-    ASSERT(highest_wakeup);
-
-    // check if the current timeslice holder is higher prio than timeslice owner
-    if (! check_dispatch_thread(current, highest_wakeup))
-	highest_wakeup = current;
-
-    bool list_head_changed = false;
-
-    do
-    {
-	list_head_changed = false;
-	if ( has_timeout_expired(tcb, current_time) )
-	{
-	    /*
-	     * We might try to wake up a thread which is waiting
-	     * forever.  This can happen if:
-	     *
-	     *  1) we have issued a timeout IPC, an IPC fast path 
-	     * 	   reply occured before the timeout triggered, and an
-	     * 	   infinite timeout IPC was issued.  Since we're doing
-	     * 	   fast IPC we will do the dequeing lazily (i.e.,
-	     * 	   doing it now instead).
-	     *
-	     *  2) this is an xfer timeout, in which case we should
-	     *     let the timeout trigger.
-	     */
-	    if (tcb->get_state().is_waiting_forever () &&
-		! tcb->flags.is_set (tcb_t::has_xfer_timeout))
-	    {
-		tcb_t * tmp = tcb->wait_list.next;
-		cancel_timeout (tcb);
-		list_head_changed = true;
-		tcb = tmp;
-		continue;
-	    }
-
-	    /* we have to wakeup the guy */
-	    if (check_dispatch_thread(highest_wakeup, tcb))
-		highest_wakeup = tcb;
-
-	    tcb_t * tmp = tcb->wait_list.next;
-	    cancel_timeout(tcb);
-	    list_head_changed = true;
-
-	    tcb->flags -= tcb_t::has_xfer_timeout;
-
-	    if (tcb->get_state().is_sending() ||
-		tcb->get_state().is_receiving())
-	    {
-		/*
-		 * The thread must invoke function which handles the
-		 * IPC timeout.  The handler returns directly to user
-		 * level with an error code.  As such, no special
-		 * timeout code is needed in the IPC path.
-		 */
-		tcb->notify (handle_ipc_timeout, (word_t) tcb->get_state ());
-	    }
-	    
-	    /* set it running and enqueue into ready-queue */
-	    tcb->set_state(thread_state_t::running);
-	    enqueue_ready(tcb);
-
-	    TRACEPOINT(WAKEUP_TIMEOUT, "wakeup timeout (curr=%t wu=%p) Current time = %ld\n",
-		       current, tcb, current_time);
-
-	    /* was preempted -- give him a fresh timeslice */
-	    //tcb->current_timeslice = tcb->timeslice_length;
-	    tcb = tmp;
-	}
-	else
-	    tcb = tcb->wait_list.next;
-    } while ( wakeup_list && (tcb != wakeup_list || list_head_changed) );
-
-    if (highest_wakeup == get_prio_queue(current)->timeslice_tcb)
-	highest_wakeup = current;
-
-    return highest_wakeup;
-}
-
-/**
- * selects the next runnable thread and activates it.
- * @return true if a runnable thread was found, false otherwise
- */
-bool scheduler_t::schedule(tcb_t * current)
-{
-    tcb_t * tcb = find_next_thread (&root_prio_queue);
-    
-    ASSERT(tcb);
-    ASSERT(current);
-
-    // the newly selected thread gets accounted
-    get_prio_queue(tcb)->timeslice_tcb = tcb;
-    
-    // do not switch to ourself
-    if (tcb == current)
-	return false;
-
-    if (current != get_idle_tcb())
-	enqueue_ready(current);
-
-    current->switch_to(tcb);
-
-    return true;
-}
-
-/**
- * selects the next runnable thread in a round-robin fashion
- */
-void scheduler_t::end_of_timeslice (tcb_t * tcb)
-{
-    spin(74, get_current_cpu());
-    ASSERT(tcb);
-    ASSERT(tcb != get_idle_tcb()); // the idler never yields
-
-    prio_queue_t * prio_queue = get_prio_queue ( tcb );
-    ASSERT(prio_queue);
-
-    tcb_t * timeslice_tcb = prio_queue->timeslice_tcb;
-    ASSERT(timeslice_tcb);
-    ASSERT(get_prio_queue(timeslice_tcb) == prio_queue);
-
-    /*
-     * if the timeslice TCB is in the prio queue perform RR
-     * scheduling, otherwise the thread gets enqueued later on
-     */
-    if (prio_queue->timeslice_tcb->queue_state.is_set(queue_state_t::ready))
-	prio_queue->set(get_priority( timeslice_tcb ), timeslice_tcb->ready_list.next);
-
-    /*
-     * make sure we are in the ready list, enqueue at tail to give
-     * others a chance to run; if still in the ready list the thread
-     * position is maintained
-     */
-    enqueue_ready (tcb, false);
-
-    /* renew timeslice of accounted TCB */
-    timeslice_tcb->current_timeslice += timeslice_tcb->timeslice_length;
-
-    /* clear the accounted TCB */
-    prio_queue->timeslice_tcb = NULL;
-}
-
-
-void scheduler_t::handle_timer_interrupt()
-{
-    spin(77, get_current_cpu());
-
-    if (kdebug_check_interrupt())
-	return;
-
-    if (get_current_cpu() == 0)
-    {
-	/* update the time global time*/
-	current_time += get_timer_tick_length();
-    }
-
-#if defined(CONFIG_SMP)
-    process_xcpu_mailbox();
-    smp_requeue(false);
-#endif
-
-    tcb_t * current = get_current_tcb();
-    tcb_t * wakeup = parse_wakeup_queues(current);
-
-    /* the idle thread schedules itself so no point to do it here.
-     * Furthermore, it should not be preempted on end of timeslice etc.
-     */
-    if (current == get_idle_tcb())
-	return;
-
-    // tick timeslice
-    bool reschedule = false;
-
-    tcb_t * timeslice_tcb = get_prio_queue(current)->timeslice_tcb;
-    ASSERT(timeslice_tcb);
-
-    /* Check for not infinite timeslice and expired */
-    if ( EXPECT_TRUE( timeslice_tcb->timeslice_length != 0 ) &&
-	 EXPECT_FALSE( (timeslice_tcb->current_timeslice -=
-			 get_timer_tick_length()) <= 0 ) )
-    {
-	ASSERT(current->get_utcb());
-
-	if( current->get_preempt_flags().is_delayed() &&
-	    this->delay_preemption(current, wakeup) )
-	{
-	    // We have a delayed preemption.  Perform accounting, etc.
-	    TRACEPOINT(PREEMPTION_DELAYED, "delayed preemption thread=%t, time=%dus\n", 
-		       current, current->current_max_delay);
-
-    	    /* VU: should we give max_delay? */
-    	    timeslice_tcb->current_timeslice += current->current_max_delay;
-    	    current->current_max_delay = 0;
-    	    current->set_preempt_flags( 
-		    current->get_preempt_flags().set_pending() );
-	}
-	else
-	{
-	    // We have end-of-timeslice.
-	    TRACEPOINT(TIMESLICE_EXPIRED, "timeslice expired for %t\n", current);
-
-	    if( EXPECT_FALSE(current->get_preempt_flags().is_delayed()) )
-	    {
-		if( current->current_max_delay == 0 )
-		{
-		    TRACEPOINT(PREEMPTION_FAULT, "delay preemption fault by %t\n", current);
-		}
-		else
-		{
-		    TRACEPOINT(PREEMPTION_DELAY_OVERRULED, "delayed preemption overruled for %t by %t, "
-			       "current prio %08x, sensitive prio %08x, target prio %08x\n",
-			       current, wakeup, get_priority(current), get_sensitive_prio(current), 
-			       get_priority(wakeup));
-		}
-	    }
-
-	    end_of_timeslice ( current );
-	    reschedule = true;
-	}
-    }
-
-    /* a higher priority thread was woken up - switch to him.
-     * Note: wakeup respects delayed preemption flags */
-    if (!reschedule)
-    {
-	if ( wakeup == current )
-	    return;
-
-	ASSERT(wakeup);
-	//printf("wakeup preemption %t->%t\n", current, wakeup);
-	preempt_thread(current, wakeup);
-	current->switch_to(wakeup);
-	return;
-    }
-
-    /* time slice expired */
-    if (EXPECT_FALSE (timeslice_tcb->total_quantum))
-    {
-	/* we have a total quantum - so do some book-keeping */
-	if (timeslice_tcb->total_quantum == TOTAL_QUANTUM_EXPIRED)
-	{
-	    /* VU: must be revised. If a thread has an expired time quantum
-	     * and is activated with switch_to his timeslice will expire
-	     * and the event will be raised multiple times */
-	    total_quantum_expired (timeslice_tcb);
-	}
-	else if (timeslice_tcb->total_quantum <= timeslice_tcb->timeslice_length)
-	{
-	    /* we are getting close... */
-	    timeslice_tcb->current_timeslice += timeslice_tcb->total_quantum;
-	    timeslice_tcb->total_quantum = TOTAL_QUANTUM_EXPIRED;
-	}
-	else
-	{
-	    // account this time slice
-	    timeslice_tcb->total_quantum -= timeslice_tcb->timeslice_length;
-	}
-    }
-
-    /* schedule the next thread */
-    enqueue_ready(current);
-    schedule(current);
-}
-
-bool scheduler_t::delay_preemption( tcb_t * current, tcb_t * tcb )
-{
-    // we always allow ourself to delay our preemption
-    if (current == tcb)
-	return true;
-    
-    if ( get_sensitive_prio (current) < get_priority (tcb) )
-	return false;
-
-    return current->current_max_delay > 0;
-}
-	
-
-static void SECTION(".init") init_all_threads(void)
+void SECTION(".init") init_all_threads(void)
 {
     init_interrupt_threads();
     init_kernel_threads();
@@ -513,24 +104,56 @@ static void SECTION(".init") init_all_threads(void)
 #endif
 }
 
-/**
- * the idle thread checks for runnable threads in the run queue
- * and performs a thread switch if possible. Otherwise, it 
- * invokes a system sleep function (which should normally result in
- * a processor halt)
- */
+#if defined(CONFIG_SMP)
+void do_xcpu_send_irq(cpu_mb_entry_t * entry)
+{
+    tcb_t * handler_tcb = entry->tcb;
+    word_t irq = entry->param[0];
+    threadid_t irq_tid = threadid_t::irqthread(irq);
+    tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
+	
+    if (!handler_tcb->is_local_cpu())
+    {
+	TRACEF("xcpu-IRQ forward (%d->%t %d)", irq, handler_tcb, handler_tcb->get_cpu());
+	enter_kdebug("Untested");
+	xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, handler_tcb, irq);
+	return;
+    }
+
+    if ((handler_tcb->get_state().is_waiting() || 
+	 handler_tcb->get_state().is_locked_waiting()) &&  
+	(handler_tcb->get_partner().is_anythread() ||
+	 handler_tcb->get_partner() == threadid_t::irqthread(irq)))
+    {
+	// ok, thread is waiting -- deliver IRQ
+	TRACE_IRQ_DETAILS("irq %d xcpu delivery (%d->%t)", irq, handler_tcb);
+	handler_tcb->set_tag(msg_tag_t::irq_tag());
+	handler_tcb->set_partner(threadid_t::irqthread(irq));
+	handler_tcb->set_state(thread_state_t::running);
+	get_current_scheduler()->schedule(handler_tcb, sched_current);
+    }
+    else
+    {
+	TRACEF("irq %d xcpu handler not ready %t s=%s", 
+	       irq, handler_tcb, handler_tcb->get_state().string());
+	enter_kdebug("UNTESTED");
+	irq_tcb->set_tag(msg_tag_t::irq_tag());
+	irq_tcb->set_partner(handler_tcb->get_global_id());	
+	irq_tcb->set_state(thread_state_t::polling);
+	handler_tcb->lock();
+	irq_tcb->enqueue_send(handler_tcb);
+	handler_tcb->unlock();
+    }
+}
+#endif
+
 static void idle_thread()
 {
-    TRACE_INIT("Idle thread started on CPU %d\n", get_current_cpu());
-
-    while(1)
-    {
-	if (!get_current_scheduler()->schedule(get_idle_tcb()))
-	{
-	    spin(78, get_current_cpu());
-	    processor_sleep();
-	}
-    }
+    get_current_scheduler()->set_accounted_tcb(get_current_tcb());
+#if defined(CONFIG_X_EVT_LOGGING)
+    get_idle_tcb()->sched_state.set_logid(IDLE_LOGID);
+#endif
+    get_current_scheduler()->idle();
 }
 
 SYS_THREAD_SWITCH (threadid_t dest)
@@ -556,163 +179,189 @@ SYS_THREAD_SWITCH (threadid_t dest)
 	     dest_tcb->myself_global == dest &&
 	     dest_tcb->is_local_cpu() )
 	{
-	    scheduler->enqueue_ready(current);
-	    current->switch_to(dest_tcb);
+	    scheduler->schedule(dest_tcb, sched_ds2_flag + rr_tsdonate_flag);
 	    return_thread_switch();
 	}
     }
-
-    scheduler->enqueue_ready(current);
-
-    /* user cooperatively preempts */
-    if ( current->current_max_delay < current->max_delay )
-    {
-	current->set_preempt_flags( current->get_preempt_flags().clear_pending() );
-	/* refresh max delay */
-	current->current_max_delay = current->max_delay;
-	TRACEPOINT(PREEMPTION_DELAY_REFRESH, "delayed preemption refresh for %t\n", current);
-    }
-
-
-    /* eat up timeslice - we get a fresh one */
-    scheduler->get_prio_queue(current)->timeslice_tcb->current_timeslice = 0;
-    scheduler->end_of_timeslice (current);
-    scheduler->schedule (current);
+    
+    current->sched_state.sys_thread_switch();
     return_thread_switch();
 }
 
 
-/* local part of schedule */
-bool do_schedule(tcb_t * tcb, word_t time_control, word_t prio, 
-		 word_t preemption_control )
-{
-    ASSERT(tcb->get_cpu() == get_current_cpu());
-
-    scheduler_t * scheduler = get_current_scheduler();
-
-    if ( (prio != (~0UL)) && ((prio_t)prio != scheduler->get_priority(tcb)) )
-    {
-	scheduler->dequeue_ready(tcb);
-	scheduler->set_priority(tcb, (prio_t) (prio & 0xff));
-	scheduler->enqueue_ready(tcb);
-    }
-
-    if ( time_control != (~0UL) )
-    {
-	time_t time;
-	
-	// total quantum
-	time.set_raw ((u16_t)time_control);
-	if ( time.is_period() )
-	{
-	    scheduler->set_total_quantum (tcb, time);
-	    scheduler->enqueue_ready (tcb);
-	}
-	
-	// timeslice length
-	time.set_raw (time_control >> 16);
-	if ( time.is_period() )
-	    scheduler->set_timeslice_length (tcb, time);
-    }
-
-    if ( preemption_control != (~0UL) )
-    {
-#warning VU: limit upper bound of sensitive prio!
-	scheduler->set_maximum_delay (tcb, preemption_control & 0xffff);
-	    
-	/* only set sensitive prio if _at least_ equal to current prio */
-	prio_t sens_prio = (preemption_control >> 16) & 0xff;
-	if ( sens_prio >= scheduler->get_priority(tcb) )
-	    scheduler->set_sensitive_prio(tcb, sens_prio);
-    }
-
-    return true;
-}
-
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 static void do_xcpu_schedule(cpu_mb_entry_t * entry)
 {
-    tcb_t * tcb = entry->tcb;
-
-    // meanwhile migrated? 
-    if (tcb->get_cpu() != get_current_cpu())
-	xcpu_request (tcb->get_cpu(), do_xcpu_schedule, tcb, 
-		      entry->param[0], entry->param[1], entry->param[2]);
-    else
-	do_schedule (tcb, entry->param[0], entry->param[1], entry->param[2]);
+    get_current_scheduler()->process_schedule_requests();
 }
 #endif
 
+word_t scheduler_t::add_schedule_request(schedule_req_t &req)
+{
+    ASSERT(req.tcb);
+    
+    cpuid_t cpu = get_current_cpu();
+    cpuid_t reqcpu = req.tcb->get_cpu();
+    schedule_req_t *qreq = NULL;
+
+
+    if (req.tcb->flags.is_set(tcb_t::schedule_in_progress))
+    {
+	TRACE_SCHEDULE_DETAILS("schedule %t on cpu %d still in progress, skip\n", req.tcb, reqcpu, req.tcb);
+	return EINVALID_PARAM;
+    }
+    
+    do 
+    {
+	if ((qreq = schedule_request_queue[reqcpu].reserve_request()))
+	    break;
+	
+	TRACE_SCHEDULE_DETAILS("schedule request queue cpu %d full, empty it\n", reqcpu);
+	
+	if (reqcpu == cpu)
+	    process_schedule_requests();
+#if defined(CONFIG_SMP)
+	else 
+	{
+	    xcpu_request(reqcpu, do_xcpu_schedule);
+	    while (schedule_requests_pending(reqcpu))
+		; /* spin */
+	}
+#endif
+	
+	TRACE_SCHEDULE_DETAILS("schedule request queue cpu %d empty again, retry reservation\n", reqcpu);
+	
+    } while(!qreq);
+    
+    
+    TRACE_SCHEDULE_DETAILS("add %t cpu %d to requeust queue on cpu %d", req.tcb, req.tcb->get_cpu(), reqcpu);
+    qreq->tcb = req.tcb;
+    qreq->tcb->flags += tcb_t::schedule_in_progress;
+    qreq->prio_control = req.prio_control;
+    qreq->time_control = req.time_control;
+    qreq->preemption_control = req.preemption_control;
+    qreq->processor_control = req.processor_control;
+    qreq->valid = 1;	
+	
+    schedule_request_queue[reqcpu].commit_request();
+    
+    return EOK;
+
+}
+
+
+void scheduler_t::process_schedule_requests() 
+{
+    /* local part of schedule */
+
+    cpuid_t cpu = get_current_cpu();
+    
+    TRACE_SCHEDULE_DETAILS("process schedule requests");
+	
+
+    while (!schedule_request_queue[cpu].is_empty())
+    {
+	schedule_req_t req = schedule_request_queue[cpu].process_request();
+	
+	if (!req.valid)
+	    continue;	
+	
+	tcb_t *dest_tcb = req.tcb;
+
+	TRACE_SCHEDULE_DETAILS("process_request: %t time=%x, prio=%x proc=%x, preempt=%x",
+		   dest_tcb, req.time_control.get_raw(), req.prio_control.get_raw(), 
+		   req.processor_control.get_raw(), req.preemption_control.get_raw());
+	
+	if (dest_tcb->get_cpu() != cpu)
+	{
+	    TRACEF(" wrong cpu %t cpu %d time=%x, prio=%x proc=%x, preempt=%x",
+		   dest_tcb, dest_tcb->get_cpu(),
+		   req.time_control.get_raw(), req.prio_control.get_raw(), 
+		   req.processor_control.get_raw(), req.preemption_control.get_raw());
+	    enter_kdebug("SCHEDULE BUG");
+	}
+	
+	ASSERT(dest_tcb->get_cpu() == cpu);
+	commit_schedule_parameters(req);
+	dest_tcb->flags -= tcb_t::schedule_in_progress;
+    }
+	    
+}
+
 SYS_SCHEDULE (threadid_t dest_tid, word_t time_control, 
-	      word_t processor_control, word_t prio,
+	      word_t processor_control, word_t prio_control,
 	      word_t preemption_control )
 {
     
+    tcb_t * current = get_current_tcb();
+    tcb_t * dest_tcb = get_current_space()->get_tcb(dest_tid);
+    scheduler_t *scheduler = get_current_scheduler();
+    
     TRACEPOINT(SYSCALL_SCHEDULE, 
 	       "SYS_SCHEDULE: curr=%t, dest=%t, time_ctrl=%x, "
-	       "proc_ctrl=%x, prio=%x, preemption_ctrl=%x\n",
-	       get_current_tcb(), TID(dest_tid), time_control, 
-	       processor_control, prio, preemption_control);
+	       "proc_ctrl=%x, prio_ctrl=%x, preemption_ctrl=%x\n",
+	       current, TID(dest_tid), time_control, 
+	       processor_control, prio_control, preemption_control);
 
-    tcb_t * dest_tcb = get_current_space()->get_tcb(dest_tid);
+    schedule_req_t req;
+    req.tcb = dest_tcb;
+    req.time_control = time_control;
+    req.prio_control = prio_control;
+    req.preemption_control = preemption_control;
+    req.processor_control = processor_control; 
+
+    word_t err, ret0, ret1;
+ 
+    if (dest_tid != threadid_t::nilthread())
+    {
+        // make sure the thread id is valid
+	if (dest_tcb->get_global_id() != dest_tid)
+	{
+	    get_current_tcb ()->set_error_code (EINVALID_THREAD);
+	    return_schedule(0, 0);
+	}
     
-    // make sure the thread id is valid
-    if (dest_tcb->get_global_id() != dest_tid)
-    {
-	get_current_tcb ()->set_error_code (EINVALID_THREAD);
-	return_schedule(0, 0);
+	if (!scheduler->is_scheduler(current, dest_tcb))
+	{
+	    get_current_tcb ()->set_error_code (ENO_PRIVILEGE);
+	    return_schedule(0, 0);
+	}
+    
+	err = scheduler->check_schedule_parameters(current, req);
+	if (err != EOK)
+	{
+	    get_current_tcb ()->set_error_code (err);
+	    return_schedule (0, 0);
+	}
+
+        /* Calculate return values before operation */
+        ret0 = scheduler->return_schedule_parameter(0, req);
+        ret1 = scheduler->return_schedule_parameter(1, req); 
+       
+	err = scheduler->add_schedule_request(req);
+	if (err != EOK)
+	{
+	    get_current_tcb ()->set_error_code (err);
+	    return_schedule (0, 0);
+	}
+    
     }
 
-    // Don't allow to raise priority above current thread's prio
-    if ((prio != (~0UL)) &&
-	((prio_t) prio >
-	 get_current_scheduler ()->get_priority (get_current_tcb ())))
-    {
-	get_current_tcb ()->set_error_code (EINVALID_PARAM);
-	return_schedule (0, 0);
-    }
+    
+    // Process our own requests
+    scheduler->process_schedule_requests();
 
-    // are we in the same address space as the scheduler of the thread?
-    tcb_t * sched_tcb = get_current_space()->get_tcb(dest_tcb->get_scheduler());
-    if (sched_tcb->get_global_id() != dest_tcb->get_scheduler() ||
-	sched_tcb->get_space() != get_current_space())
+#if defined(CONFIG_SMP)
+    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
     {
-	get_current_tcb ()->set_error_code (ENO_PRIVILEGE);
-	return_schedule(0, 0);
-    }
-
-#warning FIXME: Check sys_schedule parameters
-
-    if ( dest_tcb->is_local_cpu() )
-    {
-	do_schedule ( dest_tcb, time_control, prio, preemption_control);
-	
-	if ( processor_control != ~0UL ) 
-	    dest_tcb->migrate_to_processor (processor_control);
-    }
-#ifdef CONFIG_SMP
-    else
-    {
-	xcpu_request(dest_tcb->get_cpu(), do_xcpu_schedule, 
-		     dest_tcb, time_control, prio, preemption_control);
-
-	if ( processor_control != ~0UL ) 
-	    dest_tcb->migrate_to_processor (processor_control);
+	if (scheduler->schedule_requests_pending(cpu))
+	    xcpu_request(cpu, do_xcpu_schedule);
     }
 #endif
 
-    thread_state_t state = dest_tcb->get_state();
-
-    return_schedule(state == thread_state_t::aborted	? 1 : 
-		    state.is_halted()			? 2 :
-		    state.is_running()			? 3 :
-		    state.is_polling()			? 4 :
-		    state.is_sending()			? 5 :
-		    state.is_waiting()			? 6 :
-		    state.is_receiving()		? 7 : ({ TRACEF("invalid state (%x)\n", (word_t)state); 0; }),
-		    0);
+    get_current_tcb ()->set_error_code (EOK);
+    return_schedule(ret0, ret1);
 }
-
 
 /**********************************************************************
  *
@@ -722,27 +371,30 @@ SYS_SCHEDULE (threadid_t dest_tid, word_t time_control,
 
 void SECTION(".init") scheduler_t::start(cpuid_t cpuid)
 {
-    TRACE_INIT ("Switching to idle thread (CPU %d)\n", cpuid);
+    TRACE_INIT ("\tSwitching to idle thread (CPU %d)\n", cpuid);
     get_idle_tcb()->set_cpu(cpuid);
 
     initial_switch_to(get_idle_tcb());
 }
 
+typedef void (*func_ptr_t) (void);
+
 void SECTION(".init") scheduler_t::init( bool bootcpu )
 {
     
-    TRACE_INIT ("Initializing threading CPU %d\n", get_current_cpu());
+    TRACE_INIT ("\tInitializing threading CPU %d\n", get_current_cpu());
+    policy_scheduler_init();
+    
 
-    /* wakeup list */
-    wakeup_list = NULL;
-    root_prio_queue.init();
-
-    get_idle_tcb()->create_kernel_thread(NILTHREAD, &__idle_utcb);
     /* set idle-magic */
+    get_idle_tcb()->create_kernel_thread(NILTHREAD, &__idle_utcb, sktcb_lo);
     get_idle_tcb()->set_space(get_kernel_space());
     get_idle_tcb()->myself_global.set_raw((word_t)0x1d1e1d1e1d1e1d1eULL);
     get_idle_tcb()->create_startup_stack(idle_thread);
+    
     if( bootcpu )
     	get_idle_tcb()->notify(init_all_threads);
+    
+    
     return;
 }

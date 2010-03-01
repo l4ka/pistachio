@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2009,  Karlsruhe University
  *                
  * File path:     api/v4/syscalls.h
  * Description:   declaration of system calls
@@ -96,11 +96,11 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
  * @param dest_tid thread id of the destination thread
  * @param time_control specifies total quantum and timeslice length
  * @param processor_control processor number the thread migrates to
- * @param prio new priority of the thread
+ * @param prio_control new priority of the thread
  * @param preemption_control delayed preemption parameters
  */
 SYS_SCHEDULE (threadid_t dest_tid, word_t time_control, 
-	      word_t processor_control, word_t prio,
+	      word_t processor_control, word_t prio_control,
 	      word_t preemption_control);
 
 
@@ -164,35 +164,40 @@ class exregs_ctrl_t {
     
 public:
     enum flag_e {
-	halt_flag        = 0,
-	recv_flag	 = 1,
-	send_flag	 = 2,
-	sp_flag	         = 3,
-	ip_flag	         = 4,
-	flags_flag	 = 5,
-	uhandle_flag	 = 6,
-	pager_flag	 = 7,
-	haltflag_flag    = 8,
-	exchandler_flag  = 9,
-	scheduler_flag   = 10,
-	ctrlxfer_flag    = 11,
+	halt_flag        	= 0,
+	recv_flag	 	= 1,
+	send_flag	 	= 2,
+	sp_flag	         	= 3,
+	ip_flag	         	= 4,
+	flags_flag	 	= 5,
+	uhandle_flag	 	= 6,
+	pager_flag	 	= 7,
+	haltflag_flag    	= 8,
+	ctrlxfer_conf_flag    	= 9,
+	ctrlxfer_read_flag    	= 10,
+	ctrlxfer_write_flag    	= 11,
+	exchandler_flag  	= 12,
+	scheduler_flag   	= 13,
+
     };
     
     union {
 	struct {
-	    word_t halt		: 1;
-	    word_t recv		: 1;
-	    word_t send		: 1;
-	    word_t sp		: 1;
-	    word_t ip		: 1;
-	    word_t flags	: 1;
-	    word_t uhandle	: 1;
-	    word_t pager	: 1;
-	    word_t haltflag	: 1;
-	    word_t exchandler	: 1;
-	    word_t scheduler	: 1;
-	    word_t ctrlxfer	: 1;
-	    word_t __pad	: 20;
+	    word_t halt			: 1;
+	    word_t recv			: 1;
+	    word_t send			: 1;
+	    word_t sp			: 1;
+	    word_t ip			: 1;
+	    word_t flags		: 1;
+	    word_t uhandle		: 1;
+	    word_t pager		: 1;
+	    word_t haltflag		: 1;
+	    word_t ctrlxfer_conf	: 1;
+	    word_t ctrlxfer_read	: 1;
+	    word_t ctrlxfer_write	: 1;
+	    word_t exchandler		: 1;
+	    word_t scheduler		: 1;
+	    word_t __pad		: 18;
 	};
 	word_t raw;
     };
@@ -205,24 +210,81 @@ public:
 
     char *string()
 	{
-	    static char s[] =  "~~~~~~~~~~~~";
+	    static char s[] =  "~~~~~~~~~~~~~~";
 	    
-	    s[0]  =  halt    	? 'h' : '~';
-	    s[1]  =  recv    	? 'r' : '~';
-	    s[2]  =  send    	? 's' : '~';
-	    s[3]  =  sp      	? 's' : '~';
-	    s[4]  =  ip      	? 'i' : '~';
-	    s[5]  =  flags   	? 'f' : '~';
-	    s[6]  =  uhandle 	? 'u' : '~';
-	    s[7]  =  pager   	? 'p' : '~';
-	    s[8]  =  haltflag	? 'h' : '~';
-	    s[9]  =  exchandler	? 'e' : '~';	
-	    s[10] =  scheduler	? 's' : '~';
-	    s[11] =  ctrlxfer	? 'X' : '~';
+	    s[0]  =  halt    		? 'h' : '~';
+	    s[1]  =  recv    		? 'r' : '~';
+	    s[2]  =  send    		? 's' : '~';
+	    s[3]  =  sp      		? 's' : '~';
+	    s[4]  =  ip      		? 'i' : '~';
+	    s[5]  =  flags   		? 'f' : '~';
+	    s[6]  =  uhandle 		? 'u' : '~';
+	    s[7]  =  pager   		? 'p' : '~';
+	    s[8]  =  haltflag		? 'h' : '~';
+	    s[9]  =  ctrlxfer_conf	? 'C' : '~';
+	    s[10] =  ctrlxfer_read	? 'R' : '~';
+	    s[11] =  ctrlxfer_write	? 'W' : '~';
+	    s[12] =  exchandler		? 'e' : '~';	
+	    s[13] =  scheduler		? 's' : '~';
 	    
 	    return s;
 	}
 };
+
+struct schedule_ctrl_t {
+    union {
+	struct {
+	    u8_t	pad0[sizeof(word_t)-4];
+	    time_t	timeslice;
+	    time_t	total_quantum;
+	};
+	struct {	
+	    BITFIELD4(long,
+		      prio		:  9,
+		      logid		:  7,
+		      stride		:  16,
+		      : BITS_WORD-24);
+	};
+	struct {
+	    BITFIELD5(word_t,
+		      max_delay		: 16,
+		      sensitive_prio	:  8,
+		      log_pm_msg	:  1,
+		      hs_extended	:  1,
+		      hs_extended_ctrl	:  6);
+	}; 	
+	struct {
+	    BITFIELD3(word_t,
+		      processor		: 16,
+		      extended_migrate	: 1, 
+		      : BITS_WORD-17);
+	};
+        threadid_t tid;
+	word_t raw;
+   };
+
+    inline void operator = (word_t raw) 
+	{ this->raw = raw; }
+
+    inline bool operator == (schedule_ctrl_t ctrl) 
+	{ return (this->raw == ctrl.raw); }
+
+    inline bool operator != (schedule_ctrl_t ctrl) 
+	{ return (this->raw != ctrl.raw); }
+
+    word_t get_raw()
+	{ return this->raw; }
+
+    static schedule_ctrl_t nilctrl()
+	{
+	    schedule_ctrl_t ctrl;
+	    ctrl.raw = (~0UL);
+	    return ctrl;
+	}
+
+
+}; 
+
 
 /*
  * Error code values

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/user.cc
  * Description:   
@@ -171,7 +171,7 @@ SYSCALL_STUB(system_clock)
 	"1:				\n"
 	"add	$kip-1b,%%ecx		\n"
 	"add	%c0(%%ecx), %%ecx	\n"	/* procdesc */
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	/* get processor # --> allow for differently clocked CPUs */
 	"mov	%%gs:0, %%eax		\n"	/* myutcb */
 	"mov	%c2(%%eax), %%eax	\n"

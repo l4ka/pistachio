@@ -4,7 +4,7 @@
  *
  * File path:    api/v4/schedule.cc 
  * Description:  debugging of scheduling related stuff
- *
+1 *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -40,66 +40,70 @@
 tcb_t * global_present_list UNIT("kdebug") = NULL;
 spinlock_t present_list_lock;
 
-DECLARE_CMD(cmd_show_ready, root, 'q', "showqueue",  "show scheduling queue");
+DECLARE_CMD(cmd_show_sched, root, 'q', "showqueue",  "show scheduling queue");
 
-CMD(cmd_show_ready, cg)
+CMD(cmd_show_sched, cg)
 {
-    int abort = 1000000;
     present_list_lock.lock();
-    scheduler_t * scheduler = get_current_scheduler();
-    printf("\n");
-    for (prio_t prio = MAX_PRIO; prio >= 0; prio--)
+    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
     {
-        /* check whether we have something for this prio */
-        tcb_t* walk = global_present_list;
-        do {
-            if ( scheduler->get_priority(walk) == prio)
-            {
-                /* if so, print */
-                printf("[%03d]:", prio);
-                walk = global_present_list;
-                do {
-                    if (scheduler->get_priority(walk) == prio) 
-		    {
-#if !defined(CONFIG_SMP)
-			printf(walk->queue_state.is_set(queue_state_t::ready) ? " %.wt" : " (%.wt)", walk);
-#else
-			printf(walk->queue_state.is_set(queue_state_t::ready) ? 
-			       " %t:%d" : " (%t:%d)", walk, walk->get_cpu());
-#endif
-                    }
-                    walk = walk->present_list.next;
-
-                } while (walk != global_present_list);
-                printf("\n");
-                break;
-            }
-            walk = walk->present_list.next;
-
-	    if (abort-- == 0)
-	    {
-		// huha -- something fucked up?
-		printf("present-list fucked???\n");
-		walk = global_present_list;
-		for (int i = 0; i < 200; i++)
+	bool print_cpu_header = false;
+	for (word_t level = 0; level < MAX_SCHEDULING_LEVEL; level++)
+	{
+	    /* check whether we have something for this prio */
+	    tcb_t* walk = global_present_list;
+	    bool print_level_header = false;
+	    do {
+		if (walk->sched_state.get_level() == level && walk->get_cpu() == cpu) 
 		{
-		    printf("%t (%t <-> %t) ", walk, walk->present_list.prev, walk->present_list.next);
-		    if (walk->present_list.prev->present_list.next != walk ||
-			walk->present_list.next->present_list.prev != walk)
-			printf("\n*** ERROR ***\n");
-		    walk = walk->present_list.next;
-		    if (walk == global_present_list)
+		    /* if so, print */
+		    if (!print_cpu_header)
 		    {
-			printf("---> END");
+			pgent_t *pgent;
+			pgent_t::pgsize_e pgsize;
+			space_t *kspace = get_kernel_space();
+			addr_t rsched_addr = get_current_scheduler();
+			bool valid = kspace->lookup_mapping(rsched_addr, &pgent, &pgsize, cpu);
+			ASSERT(valid);
+			
+			scheduler_t *rsched = (scheduler_t *) 
+			    addr_offset(phys_to_virt(pgent->address(kspace, pgsize)),
+					addr_mask(rsched_addr, page_mask (pgsize)));
+			printf("\n\nCPU %d root %t\n", cpu, rsched->get_root_scheduler());
+			print_cpu_header = true;
+		    }
+		    if (!print_level_header)
+		    {		    
+			printf("\n[%03d]:", level);
+			print_level_header = true;
+		    }		    
+		    switch (walk->get_state())
+		    {
+		    case thread_state_t::polling:
+			printf(" <%t>", walk);
+			break;
+		    case thread_state_t::locked_running:
+		    case thread_state_t::locked_waiting:
+			printf(" (%t)", walk);
+			break;
+		    case thread_state_t::waiting_forever:
+			printf(" [%t]", walk);
+			break;
+		    case thread_state_t::halted:
+		    case thread_state_t::aborted:
+			printf(" *%t*", walk);
+			break;
+		    default:
+			printf(" %t", walk);
 			break;
 		    }
+	    
 		}
-		return CMD_NOQUIT;
-	    }
-
-        } while (walk != global_present_list);
+		walk = walk->present_list.next;
+	    } while (walk != global_present_list);
+	}
     }
-    printf("idle : %t\n\n", get_idle_tcb());
+    printf("\nidle : %t\n\n", get_idle_tcb());
     present_list_lock.unlock();
     return CMD_NOQUIT;
 }

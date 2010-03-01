@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/kdb.h
  * Description:   
@@ -38,7 +38,8 @@ class mdb_node_t;
 class mdb_table_t;
 class vrt_t;
 class vrt_table_t;
-
+class space_t;
+    
 #include <kdb/cmd.h>
 
 class kdb_t {
@@ -47,6 +48,9 @@ public:
     static cmd_mode_t	kdb_cmd_mode;
     void *		kdb_param;
     tcb_t *		kdb_current;
+    
+    space_t *		last_space;
+    word_t		last_dump;
 
 
     friend class cmd_group_t;

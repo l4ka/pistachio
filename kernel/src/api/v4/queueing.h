@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2008,  Karlsruhe University
  *                
  * File path:     api/v4/queueing.h
  * Description:   tcb queue management
@@ -67,7 +67,6 @@ do {							\
     if (tcb->list.next == tcb)				\
     {							\
 	head = NULL;					\
-	tcb->list.next = tcb->list.prev = NULL;		\
     }							\
     else						\
     {							\
@@ -76,6 +75,7 @@ do {							\
 	(tcb->list.next)->list.prev = tcb->list.prev;	\
 	(tcb->list.prev)->list.next = tcb->list.next;	\
     }							\
+    tcb->list.next = tcb->list.prev = NULL;		\
 } while(0)
     
 #endif /* !__API__V4__QUEUEING_H__ */

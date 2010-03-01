@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                 
 * File path:     glue/v4-x86/x32/init.cc
  * Description:   ia32-specific initialization
@@ -54,6 +54,11 @@
 #if defined(CONFIG_CPU_X86_K8)
 #include INC_ARCH(amdhwcr.h)
 #endif 
+
+/* Virtual Machine Extensions */
+#if defined(CONFIG_X_X86_HVM)
+#include INC_ARCH_SA(vmx.h)
+#endif
 
 #include INC_GLUE(config.h)
 #include INC_GLUE(idt.h)
@@ -146,32 +151,37 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
     gdt[gdt_idx(X86_TSS)].set_sys((u32_t) &tss, sizeof(x86_x32_tss_t)-1, 
 				   0, x86_segdesc_t::tss);
     
+    
 #ifdef CONFIG_TRACEBUFFER
     if (get_tracebuffer())
         gdt[gdt_idx(X86_TBS)].set_seg((u32_t)get_tracebuffer(), TRACEBUFFER_SIZE-1, 3,
 				       x86_segdesc_t::data);
-    else gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, x86_segdesc_t::data);
+    else 
+        gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, x86_segdesc_t::data);
 #endif
-
-	
+    
+    
     /* create a temporary GDT descriptor to load the GDTR from */
-
+    
     x86_descreg_t gdtr((word_t) &gdt, sizeof(gdt));
     gdtr.setdescreg(x86_descreg_t::gdtr);
     x86_descreg_t tr(X86_TSS);
     tr.setselreg(x86_descreg_t::tr);
-
-
-    asm("ljmp	%0,$1f		\n"	/* refetch code segment	descr.	*/
-	"1:			\n"	/*   by jumping across segments	*/
-	:
-	: "i" (X86_KCS)
-	);
     
+    __asm__ __volatile__ ("" ::: "memory");
+    
+    __asm__ __volatile__(
+        "ljmp	%0,$1f		\n"	/* refetch code segment	descr.	*/
+        "1:			\n"	/*   by jumping across segments	*/
+        :
+        : "i" (X86_KCS)
+        );
+   
 
     /* set the segment registers from the freshly installed GDT
        and load the Task Register with the TSS via the GDT */
-    asm("mov  %0, %%ds		\n"	/* reload data segment		*/
+    __asm__ __volatile__(
+        "mov  %0, %%ds		\n"	/* reload data segment		*/
 	"mov  %0, %%es		\n"	/* need valid %es for movs/stos	*/
 	"mov  %1, %%ss		\n"	/* reload stack segment		*/
 	"mov  %2, %%gs		\n"	/* load UTCB segment		*/
@@ -190,8 +200,9 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 	"r"(X86_UDS),
 #endif
 	"r"(X86_KDS), "r"(X86_UTCBS), "r"(X86_TBS)
-	: "eax"
+	: "eax", "memory"
 	);
+    
 }
 
 
@@ -232,6 +243,22 @@ void setup_msrs (void)
 #endif
 }
 
+#if defined(CONFIG_X_X86_HVM)
+void SECTION(".init.cpu") setup_vmx (cpuid_t cpuid)
+{
+    if (x86_x32_vmx_t::is_available())
+    {
+	x86_x32_vmx_t::enable();
+
+	if (!x86_x32_vmx_t::is_enabled())
+	    printf("Error enabling VMX on (CPU %d)\n", cpuid);
+    }
+    else
+	TRACE_INIT("\tVMX not available (CPU %d)\n", cpuid);
+}
+#endif
+
+
 /**
  * checks the IA32 features (CPUID) to make sure the processor
  * has all necessary features */
@@ -250,7 +277,7 @@ void SECTION(".init.cpu") check_cpu_features()
 #ifdef CONFIG_X86_SYSENTER
     req_features |= X86_X32_FEAT_SEP;
 #endif
-#ifdef CONFIG_IOAPIC
+#if defined(CONFIG_IOAPIC)
     req_features |= X86_X32_FEAT_APIC;
 #endif
     u32_t avail_features = x86_x32_get_cpu_features();
@@ -365,7 +392,6 @@ extern "C" void SECTION(SEC_INIT) init_paging()
     /* Setup the initial mappings.  The first MAX_KERNEL_MAPPINGS*4MB
        are mapped 1:1.  The same region is also visible at
        KERNEL_OFFSET */
-#warning "use virt_to_phys for page mappings"
 #if defined(CONFIG_X86_PSE)
     for (int i = 0; i < MAX_KERNEL_MAPPINGS; i++)
 	init_pdir[i] = 

@@ -42,11 +42,13 @@
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 
+
 #include INC_GLUE(cpu.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(space.h)
 #include INC_API(kernelinterface.h)
 
+EXTERN_TRACEPOINT(DEBUG);
 
 /**********************************************************************
  *
@@ -176,7 +178,7 @@ word_t pgent_t::smp_reference_bits(space_t * space, pgsize_e pgsize, addr_t vadd
     
     word_t rwx = 0;
     
-    for (cpuid_t cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
+    for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
         if (space->data.cpu_ptab[cpu].top_pdir)
         {
             //TRACEF("smp refbits %d / %x\n",  cpu, space->pgent(idx(), cpu)->raw);
@@ -227,6 +229,15 @@ bool is_smallspace(space_t *space)
 
 word_t space_t::space_control (word_t ctrl)
 {
+#if defined(CONFIG_X_X86_HVM)
+    // Check if 'v' bit is set.
+    if (ctrl & (1 << 30))
+    {
+    if (get_hvm_space ()->activate (this))
+        return (1 << 30);
+    }
+#endif
+
     return 0;
 }
 

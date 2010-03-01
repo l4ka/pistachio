@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2006-2008,  Karlsruhe University
+ * Copyright (C) 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     platform/pc99/perfmon.h
- * Description:   Performance monitoring counter macros for x86 CPUS.
+ * Description:   Performance monitoring counter macros for IA32/AMD64 CPUS.
  *                
  * @LICENSE@
  *                
@@ -32,7 +32,7 @@
  * Athlon and Opteron processors
  *********************************************************************/
 
-#elif defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
+#elif defined(CONFIG_CPU_X86_K8) 
 
 #define X86_MSR_PMC_EVTSEL0		       0xC0010000      /* Performance EVT0 */
 #define X86_MSR_PMC_EVTSEL1		       0xC0010001      /* Performance EVT1 */
@@ -48,7 +48,7 @@
  * P4, Pentium D and Xeon processors
  *********************************************************************/
 
-#elif defined(CONFIG_CPU_X86_P4) || defined(CONFIG_CPU_X86_P4)
+#elif defined(CONFIG_CPU_X86_P4)
 
 #define X86_MSR_PMC_BASE			0x300
 #define X86_MSR_PMC_CTR_NO(addr)		(addr - X86_X64_MRS_PMC_BASE) 
@@ -125,23 +125,122 @@
 INLINE void setup_perfmon_cpu(word_t cpuid)
 {
 
-#if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8) || defined(CONFIG_CPU_X86_K8)
-    
+#if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_K8)
+
     /* disable PerfEvents */
-     x86_wrmsr(X86_MSR_PMC_EVTSEL0, 0);
-     x86_wrmsr(X86_MSR_PMC_EVTSEL1, 0);
+    x86_wrmsr(X86_MSR_PMC_EVTSEL0, 0);
+    x86_wrmsr(X86_MSR_PMC_EVTSEL1, 0);
  
-     /* clear PMCs */
-     x86_wrmsr(X86_MSR_PMC_CTR0, 0);
-     x86_wrmsr(X86_MSR_PMC_CTR1, 0);
- 
+    /* clear PMCs */
+    x86_wrmsr(X86_MSR_PMC_CTR0, 0);
+    x86_wrmsr(X86_MSR_PMC_CTR1, 0);
+    
      /* init PMCs */
      x86_wrmsr(X86_MSR_PMC_EVTSEL0, 0x4100C0);  // ENABLE + USER + INST_RETIRED
      x86_wrmsr(X86_MSR_PMC_EVTSEL1, 0x4200C0);  // ENABLE + KRNL + INST_RETIRED
 
 
 #elif defined(CONFIG_CPU_X86_P4)
+#if defined(CONFIG_TBUF_PERFMON_ENERGY) || defined(CONFIG_X_EVT_LOGGING)
+    u64_t val;
 
+    // reset performance counters
+    for (word_t addr=X86_MSR_PMC_BPU_CCCR(0); addr <= X86_MSR_PMC_IQ_CCCR(5); ++addr)
+	x86_wrmsr(addr, 0x30000);
+
+    for (word_t addr=X86_MSR_PMC_BPU_COUNTER(0); addr <= X86_MSR_PMC_IQ_COUNTER(5); ++addr)
+	x86_wrmsr(addr, 0);
+
+    // Configure ESCRs
+
+    val = ((u64_t)0x0 << 32) | 0xFC00;
+    x86_wrmsr(X86_MSR_PMC_TC_PRECISE_EVENT, val);
+
+    // Enable Precise Event Based Sampling (accurate & low sampling overhead)
+    val = ((u64_t)0x0 << 32) | 0x1000001;
+    x86_wrmsr(X86_MSR_PEBS_ENABLE, val);
+
+    // Also enabling PEBS
+    val = ((u64_t)0x0 << 32) | 0x1;
+    x86_wrmsr(X86_MSR_PEBS_MATRIX_VERT, val);
+
+    // Count unhalted cycles
+    val = ((u64_t)0x0 << 32) | 0x2600020C;
+    x86_wrmsr(X86_MSR_PMC_FSB_ESCR(0), val);
+
+    // Count load uops that are replayed due to unaligned addresses
+    // and/or partial data in the Memory Order Valfer (MOB)
+    val = ((u64_t)0x0 << 32) | 0x600740C;
+    x86_wrmsr(X86_MSR_PMC_MOB_ESCR(0), val);
+
+    // Count op queue writes
+    val = ((u64_t)0x0 << 32) | 0x12000E0C;
+    x86_wrmsr(X86_MSR_PMC_MS_ESCR(0), val);
+
+    // Count retired branches
+    val = ((u64_t)0x0 << 32) | 0x8003C0C;
+    x86_wrmsr(X86_MSR_PMC_TBPU_ESCR(0), val);
+
+    // Count x87_FP_uop 
+    val = ((u64_t)0x0 << 32) | 0x900000C;
+    x86_wrmsr(X86_MSR_PMC_FIRM_ESCR(0), val);
+
+    // Count mispredicted
+    val = ((u64_t)0x0 << 32) | 0x600020C;
+    x86_wrmsr(X86_MSR_PMC_CRU_ESCR0, val);
+
+    // Count memory retired
+    val = ((u64_t)0x0 << 32) | 0x1000020C;
+    x86_wrmsr(X86_MSR_PMC_CRU_ESCR2, val);
+
+    // Count load miss level 1 data cache
+    val = ((u64_t)0x0 << 32) | 0x1200020C;
+    x86_wrmsr(X86_MSR_PMC_CRU_ESCR3, val);
+
+    // uop type
+    val = ((u64_t)0x0 << 32) | 0x4000C0C;
+    x86_wrmsr(X86_MSR_PMC_RAT_ESCR(0), val);
+    // Configure CCCRs
+
+    // Store unhalted cycles
+    val = ((u64_t)0x0 << 32) | 0x3D000;
+    x86_wrmsr(X86_MSR_PMC_BPU_CCCR(0), val);
+
+    // Store MOB load replay
+    val = ((u64_t)0x0 << 32) | 0x35000;
+    x86_wrmsr(X86_MSR_PMC_BPU_CCCR(1), val);
+
+    // Store op queue writes
+    val = ((u64_t)0x0 << 32) | 0x31000;
+    x86_wrmsr(X86_MSR_PMC_MS_CCCR(0), val);
+
+    // Store retired branches
+    val = ((u64_t)0x0 << 32) | 0x35000;
+    x86_wrmsr(X86_MSR_PMC_MS_CCCR(1), val);
+
+    // Store x87_FP_uop
+    val = ((u64_t)0x0 << 32) | 0x33000;
+    x86_wrmsr(X86_MSR_PMC_FLAME_CCCR(0), val);
+
+    // Store mispredicted branches
+    val = ((u64_t)0x0 << 32) | 0x39000;
+    x86_wrmsr(X86_MSR_PMC_IQ_CCCR(0), val);
+
+    // Store memory retired
+    val = ((u64_t)0x0 << 32) | 0x3B000;
+    x86_wrmsr(X86_MSR_PMC_IQ_CCCR(1), val);
+
+    // Store load miss level 1 data cache
+    val = ((u64_t)0x0 << 32) | 0x3B000;
+    x86_wrmsr(X86_MSR_PMC_IQ_CCCR(2), val);
+
+    // Store uop type
+    val = ((u64_t)0x0 << 32) | 0x35000;
+    x86_wrmsr(X86_MSR_PMC_IQ_CCCR(4), val);
+
+    // Setup complete
+
+#else
      /* disable PMCs via CCCR*/
      x86_wrmsr(X86_MSR_PMC_IQ_CCCR(0), 3 << 16);
      x86_wrmsr(X86_MSR_PMC_IQ_CCCR(2), 3 << 16);
@@ -173,8 +272,7 @@ INLINE void setup_perfmon_cpu(word_t cpuid)
      x86_wrmsr(X86_MSR_PMC_IQ_CCCR(0), (1 << 12) | (X86_MSR_PMC_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16)); 
      x86_wrmsr(X86_MSR_PMC_IQ_CCCR(2), (1 << 12) | (X86_MSR_PMC_IQ_CTR_CRU_ESCR01 << 13) | (3 << 16));
 
-     x86_cr4_set(X86_CR4_PCE); // allow rdpmc in user mode
-     
+#endif /* CONFIG_TBUF_PERFMON_ENERGY */
 #endif /* CONFIG_CPU_X86_P4 */
  
 }

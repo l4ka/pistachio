@@ -69,6 +69,8 @@ INLINE bool x86_x32_has_cpuid()
     return (eflags & X86_FLAGS_ID);
 }
 
+
+
 INLINE u32_t x86_x32_get_cpu_features()
 {
     if (x86_x32_has_cpuid ())

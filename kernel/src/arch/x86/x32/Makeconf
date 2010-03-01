@@ -1,0 +1,5 @@
+#SOURCES += $(addprefix src/arch/ia32/, init.cc)
+
+ifeq ("$(CONFIG_X_X86_HVM)","y")
+SOURCES += $(addprefix src/arch/x86/x32/, vmx.cc)
+endif

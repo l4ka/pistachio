@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     api/v4/kernelinterface.h
  * Description:   Version 4 kernel-interface page
@@ -308,7 +308,12 @@ public:
     mem_region_t	dedicated_mem4;
 
     /* info fields */
+#if defined(CONFIG_X_EVT_LOGGING)
+    addr_t		logging_log_region;
+    word_t		logging_selector_page; 
+#else
     word_t		reserved1[2];
+#endif
     utcb_info_t		utcb_info;
     kip_area_info_t	kip_area_info;
     

@@ -1,5 +1,18 @@
+######################################################################
+##                
+## Copyright (C) 2007, 2009,  Karlsruhe University
+##                
+## File path:     api/v4/Makeconf
+## Description:   
+##                
+## @LICENSE@
+##                
+## $Id:$
+##                
+######################################################################
 SOURCES += $(addprefix src/api/v4/, exregs.cc ipc.cc ipcx.cc kernelinterface.cc thread.cc schedule.cc space.cc interrupt.cc smp.cc processor.cc)
 
+SOURCES += $(addprefix src/api/v4/sched-$(SCHED)/, schedule.cc)
 
 VERSIONFILE=$(BUILDDIR)/.version
 

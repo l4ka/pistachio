@@ -1,0 +1,31 @@
+/*********************************************************************
+ *                
+ * Copyright (C) 2004,  Karlsruhe University
+ *                
+ * File path:     glue/v4-x86/x32/logging.ldi
+ * Description:   linker script include for accounting
+ *                
+ * @LICENSE@
+ *                
+ * $Id: debug.ldi,v 1.2 2004/06/02 09:24:05 stoess Exp $
+ *                
+ ********************************************************************/
+#if defined(CONFIG_X_EVT_LOGGING)
+	/* Log event backpointers  */
+	. = ALIGN(4K);
+	_log_evtenable_start = .;
+	.log.evtenable . : AT (ADDR(.log.evtenable) - KERNEL_OFFSET)
+	{
+		*(SORT(.log.evtenable.*)) 
+	} = 0xAFFEAFFE
+	_log_evtenable_end = .;
+
+	. = ALIGN(16);
+	_log_evtlist_start = .;
+	.log.evtlist . : AT (ADDR(.log.evtlist) - KERNEL_OFFSET)
+	{
+		*(SORT(.log.evtlist.*)) 
+	} = 0xAFFEAFFE
+	_log_evtlist_end = .;
+	
+#endif

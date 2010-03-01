@@ -2,6 +2,7 @@ ARCH = ia32
 SUBARCH = none
 CPU = p4
 PLATFORM = pc99
+SCHED = rr
 
 SRCDIR	= /home/ud3/L4/pistachio/kernel
 BUILDDIR = $(CURDIR)

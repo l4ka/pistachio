@@ -56,6 +56,7 @@
 #define INC_CPU(x)              <arch/__ARCH__/__CPU__/x>
 #define INC_PLAT(x)             <platform/__PLATFORM__/x>
 #define INC_API(x)              <api/__API__/x>
+#define INC_API_SCHED(x)        <api/__API__/sched-__SCHED__/x>
 #define INC_GLUE(x)             <glue/__API__-__ARCH__/x>
 #define INC_GLUE_API_ARCH(x)    <glue/__API__-__ARCH__/x>
 #define INC_GLUE_API_CPU(x)     <glue/__API__-__ARCH__/__CPU__/x>
@@ -87,8 +88,9 @@
 #endif
 
 /*
- * Mark variables as unused.
+ * Mark variables as (un)used.
  */
+#define USED __attribute__(( used ))
 #define UNUSED __attribute__(( unused ))
 
 /* Functions with this are NEVER generated standalone. 
@@ -176,5 +178,12 @@
 #define SHUFFLE6(a,b,c,d,e,f)		a,b,c,d,e,f
 #define SHUFFLE7(a,b,c,d,e,f,g)		a,b,c,d,e,f,g
 #endif
+
+
+#define FLAGFIELD1(b1)		      ((1UL << b1))
+#define FLAGFIELD2(b1, b2)	      ((1UL << b1) | (1UL << b2))
+#define FLAGFIELD3(b1,b2,b3)	      ((1UL << b1) | (1UL << b2) | (1UL << b3)) 
+#define FLAG_IS_SET(field, b)	      ((field & (1UL << b)) != 0)
+#define FLAGS_ARE_SET(field, flags)   ((field & flags) != 0)
 
 #endif /* !__MACROS_H__ */

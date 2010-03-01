@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/ptab.h
  * Description:   pagetable management
@@ -159,14 +159,24 @@ public:
 	}
 
     void set_global (bool global)
-	{
-	    this->pg.global = global;
-	}
+    {
+	this->pg.global = global;
+    }
 
 
     void set_cpulocal (bool local)
     {
 	this->pg.cpulocal = local;
+    }
+    
+    void set_accessed (bool accessed)
+    {
+	this->pg.accessed = accessed;
+    }
+
+    void set_dirty (bool dirty)
+    {
+	this->pg.dirty = dirty;
     }
 
 

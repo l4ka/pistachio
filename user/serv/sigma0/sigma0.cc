@@ -269,10 +269,6 @@ extern "C" void sigma0_main (void)
 
 	case L4_SIGMA0_EXT:
 	{
-	    dprintf (0, "s0: sigma0 extended request from %p, (%p, %p, %p)\n",
-		     (void *) tid.raw, (void *) tag.raw,
-		     (void *) L4_Get (&msg, 0), (void *) L4_Get(&msg, 1));
-            
 	    // Only allow kernel threads to use extended sigma0 protocol.
 	    if (! is_kernel_thread (tid) && tid != rootserver_id)
 	    {

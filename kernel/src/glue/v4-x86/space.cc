@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.cc
  * Description:   
@@ -97,8 +97,6 @@ void space_t::init (fpage_t utcb_area, fpage_t kip_area)
 
 void space_t::allocate_tcb(addr_t addr)
 {
-    //enter_kdebug("allocate tcb");
-
     addr_t page = kmem.alloc(kmem_tcb, X86_PAGE_SIZE);
     ASSERT(page);
     //TRACEF("tcb=%p, page=%p\n", addr, page);
@@ -107,8 +105,7 @@ void space_t::allocate_tcb(addr_t addr)
     get_kernel_space()->add_mapping(addr, virt_to_phys(page), PGSIZE_KTCB, 
 			      true, true, true);
     
-    flush_tlbent (this, addr, page_shift(PGSIZE_KTCB));
-
+    flush_tlbent (this, addr, page_shift (PGSIZE_KTCB));
     sync_kernel_space(addr);
 }
 
@@ -177,7 +174,7 @@ space_t * space_t::allocate_space()
 
 void space_t::free_space() 
 {
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     for (cpuid_t cpuid = 0; cpuid < CONFIG_SMP_MAX_CPUS; cpuid++)
 	if (data.cpu_ptab[cpuid].top_pdir)
 	    free_cpu_top_pdir(cpuid);
@@ -213,9 +210,13 @@ void space_t::add_mapping(addr_t vaddr, addr_t paddr, pgent_t::pgsize_e size,
 {
     pgent_t::pgsize_e curr_size = pgent_t::size_max;
     pgent_t * pgent = this->pgent(page_table_index(curr_size, vaddr));
-
-    //TRACEF("space=%p, v=%p, p=%08p, s=%d %s %s %s %s\n", this, vaddr, paddr, (long) size, 
-    // (writable ? "w" : "ro"), (kernel  ? "k" : "u"), (global  ? "g" : "ng"), (cacheable  ? "c" : "nc")); 
+ 
+    //TRACEF("space=%p, pdir %p, v=%p, p=%08p, s=%d %s %s %s %s\n", 
+    //       this, pgent, vaddr, paddr, (long) size, 
+    //       (writable ? "w" : "ro"), 
+    //       (kernel  ? "k" : "u"), 
+    //       (global  ? "g" : "ng"), 
+    //       (cacheable  ? "c" : "nc"));
 	 
     /*
      * Sanity checking on page size (must be 4k or 2m)
@@ -260,16 +261,18 @@ void space_t::add_mapping(addr_t vaddr, addr_t paddr, pgent_t::pgsize_e size,
 	}
 	else
 	{
-	    pgent->make_subtree(this, curr_size, kernel);
-	    //TRACEF("make_subtree %p -> %p sz %d\n", 
-	    //   &pgent->raw, pgent->raw, curr_size);
+	    pgent->make_subtree(this, curr_size, kernel);	
+	    //TRACEF("make_subtree %p -> %p sz %d\n", &pgent->raw, pgent->raw, curr_size);
+	    
 	}
 	curr_size--;
 	pgent = pgent->subtree(this, curr_size + 1)->next(this, curr_size, page_table_index(curr_size, vaddr));
 
     }
+    
+    //TRACEF("set_entry %p -> %p old %p, curr_size %d\n", &pgent->raw, paddr, pgent->raw, curr_size);
+
     pgent->set_entry(this, size, paddr, writable ? 7 : 5, 0, kernel);
-    //    TRACEF("set_entry %p -> %p, curr_size %d\n", &pgent->raw, pgent->raw, curr_size);
 
     // default is cacheable
     if (!cacheable) pgent->set_cacheability (this, curr_size, false);
@@ -314,12 +317,11 @@ static tcb_t * get_dummy_tcb()
  */
 void space_t::map_dummy_tcb(addr_t addr)
 {
-    //TRACEF("%p\n", addr);
-    //enter_kdebug("map dummy");
+    //TRACEF("%p cpu %d\n", addr, get_current_cpu());
     get_kernel_space()->add_mapping(addr, (addr_t)get_dummy_tcb(), PGSIZE_KTCB, 
-				    false, true, false); 
-    
-    flush_tlbent (this, addr, page_shift(PGSIZE_KTCB));
+				    false, true, false);
+
+    flush_tlbent (this, addr, page_shift (PGSIZE_KTCB));
     sync_kernel_space(addr);
 }
 
@@ -339,6 +341,7 @@ void space_t::switch_to_kernel_space(cpuid_t cpu)
 bool space_t::sync_kernel_space(addr_t addr)
 {
     if (this == get_kernel_space()) return false;
+    
     cpuid_t cpu = get_current_cpu();
     
     pgent_t::pgsize_e size = pgent_t::size_max;
@@ -354,14 +357,14 @@ bool space_t::sync_kernel_space(addr_t addr)
 	    TRACE("sync kspace dst is valid @ %p (src=%p (%d), dst=%p (%d))\n", 
 		  addr, kernel_space, src_pgent->is_valid(kernel_space, size),
 		  this, dst_pgent->is_valid(this, size));
- #endif
+#endif
 	return false;
     }
 
 #if 0
-	TRACE("sync ksp @ %p (src=%p (%d), dst=%p (%d))\n", 
-	      addr, kernel_space, src_pgent->is_valid(kernel_space, size),
-	      this, dst_pgent->is_valid(this, size));
+    TRACE("sync ksp @ %p (src=%p (%d), dst=%p (%d))\n", 
+	  addr, kernel_space, src_pgent->is_valid(kernel_space, size),
+	  this, dst_pgent->is_valid(this, size));
 #endif
 
 #if !defined(CONFIG_SMP)
@@ -706,6 +709,11 @@ void SECTION(".init.memory") space_t::init_kernel_mappings()
      * each processor gets a full cache line to avoid bouncing 
      * page is user-writable and global
      */
+    EXTERN_KMEM_GROUP(kmem_misc);
+    add_mapping((addr_t)UTCB_MAPPING,	
+		virt_to_phys(kmem.alloc(kmem_misc, X86_PAGE_SIZE)), 
+		pgent_t::size_4k, true,	false, true);
+    
     EXTERN_KMEM_GROUP(kmem_misc); 
     utcb_page = kmem.alloc(kmem_misc, X86_PAGE_SIZE);
     ASSERT(utcb_page);
@@ -753,12 +761,12 @@ void SECTION(".init.memory") space_t::init_kernel_mappings()
 	    pgent = pgent->next(this, size, page_table_index(size, addr));
 	}
 	
-	TRACE_INIT("\tClearing global bit for cpulocal data v=%x p=%x (CPU 0) size %d\n", 
-		   addr, pgent->raw, size);
-
 #if defined(CONFIG_X86_PGE)
+	//TRACE_INIT("\tClearing global bit for cpulocal data v=%x p=%x (CPU 0) size %d\n", 
+        //   addr, pgent->raw, size);
 	/* HT boxes share TLB entries, thus need to make entries non-global */
 	pgent->set_global(this, size, false);
+	pgent->set_cpulocal(this, size, true);
 #endif
 	
     }
@@ -786,7 +794,7 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
     /* allocate kernel top pdir */
     alloc_cpu_top_pdir(cpu);
 
-  
+ 
     /*  use CPU0 as reference top dir and fix up cpulocal data afterwards */
     //TRACE_INIT("\tcopying shared TOPD entries from %p -> %p (size %d)\n", 
     // data.cpu_ptab[0].top_pdir->pgent + X86_TOP_PDIR_IDX(KERNEL_AREA_START),
@@ -833,15 +841,15 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
     for ( addr_t addr = reg.low; addr < reg.high;
 	  addr = addr_offset(addr, KERNEL_PAGE_SIZE) )
     {
-	addr_t ptab = kmem.alloc(kmem_pgtab, KERNEL_PAGE_SIZE);
+	addr_t page = kmem.alloc(kmem_pgtab, KERNEL_PAGE_SIZE);
 	
-	ASSERT(ptab);
-	TRACE_INIT("\tallocated %s cpu-local data at %x -> phys %x\n", 
-		   (size == pgent_t::size_superpage ? "PDIR" : "PTAB"),
-		   addr, virt_to_phys(ptab));
+	ASSERT(page);
+	//TRACE_INIT("\tallocated %s cpu-local data at %x -> phys %x\n", 
+        //   (size == pgent_t::size_superpage ? "PDIR" : "PTAB"),
+        //   addr, virt_to_phys(page));
 	
-	memcpy(ptab, addr, KERNEL_PAGE_SIZE);
-	dst_pgent->set_entry(this, size, virt_to_phys(ptab), 7, 8, true);
+	memcpy(page, addr, KERNEL_PAGE_SIZE);
+	dst_pgent->set_entry(this, size, virt_to_phys(page), 7, 8, true);
 #if defined(CONFIG_X86_PGE)
 	/* HT boxes share TLB entries, thus need to make entries non-global */
 	//TRACE_INIT("\tClearing global bit for cpulocal data %x %x, %p (CPU 0)\n", 
@@ -916,11 +924,28 @@ void free_space(space_t * space)
 X86_EXCWITH_ERRORCODE(exc_pagefault, 0)
 {
     word_t pf = x86_mmu_t::get_pagefault_address();
+    
     //TRACEF("pagefault @ %p, ip=%p, sp=%p\n", pf, 
-    //   frame->regs[x86_exceptionframe_t::ipreg], 
-    //   frame->regs[x86_exceptionframe_t::spreg]);
+    //frame->regs[x86_exceptionframe_t::ipreg], 
+    //frame->regs[x86_exceptionframe_t::spreg]);
 
     space_t * space = get_current_space();
+
+#if defined(CONFIG_X_X86_HVM)
+    if (space->is_hvm_space())
+    {
+    // Maybe a page fault during guest page table walk by kernel.
+    // Unconditionally send a page fault IPC to the monitor.
+
+    // This call blocks until the page fault reply is received.
+    get_current_tcb()->send_pagefault_ipc((addr_t) pf, (addr_t) ~0UL,
+        (space_t::access_e) (frame->error & X86_PAGE_WRITABLE));
+
+    // Returning from the exception will cause the faulting
+    // instruction to be executed again.
+    return;
+    }
+#endif
 
 #if defined(CONFIG_X86_SMALL_SPACES)
     if (space->is_smallspace_area ((addr_t) pf))
@@ -984,11 +1009,9 @@ active_cpu_space_t active_cpu_space;
 #endif
 
 
-
 static void do_xcpu_flush_tlb(cpu_mb_entry_t * entry)
 {
     spin(60, get_current_cpu());
-    //TRACEF("remote flush %x %d\n", get_current_space(), get_current_cpu());
     x86_mmu_t::flush_tlb (__FLUSH_GLOBAL__);
 }
 
@@ -1037,6 +1060,10 @@ INLINE void tag_flush_remote (space_t * curspace, bool force=false)
 
 void space_t::flush_tlb (space_t * curspace)
 {
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->handle_gphys_unmap (0, -1UL);
+#endif
+    
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
     tag_flush_remote (this);
@@ -1045,9 +1072,12 @@ void space_t::flush_tlb (space_t * curspace)
 
 void space_t::flush_tlbent (space_t * curspace, addr_t addr, word_t log2size)
 {
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->handle_gphys_unmap (addr, log2size);
+#endif
+    
     /* js: for kernel addresses, we force an immediate remote flush */
     bool force = !is_user_area(addr);
-    
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlbent ((word_t) addr);
     

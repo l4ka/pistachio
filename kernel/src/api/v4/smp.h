@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006, 2008-2009,  Karlsruhe University
  *                
  * File path:     api/v4/smp.h
  * Description:   multiprocessor handling
@@ -34,6 +34,21 @@
 
 #include INC_API(types.h)
 #include INC_API(tcb.h)
+#include <generic/linear_ptab.h>
+
+template<typename T> INLINE T *get_on_cpu(cpuid_t cpu, T *item)
+{
+    pgent_t *pgent;
+    pgent_t::pgsize_e pgsize;
+    space_t *kspace = get_kernel_space();
+    bool ret = kspace->lookup_mapping(item, &pgent, &pgsize, cpu);
+    
+    if (ret)
+        return (T *) addr_offset(phys_to_virt(pgent->address(kspace, pgsize)),
+                                 addr_mask(item, page_mask (pgsize)));
+    else 
+        return NULL;
+}
 
 #if defined (CONFIG_SMP)
 
@@ -105,7 +120,7 @@ class cpu_mb_t
 {
 public:
     void walk_mailbox();
-    void dump_mailbox();
+    void dump_mailbox(word_t cpu);
     cpu_mb_entry_t * alloc()
 	{
 	    lock.lock();
@@ -175,7 +190,9 @@ INLINE void xcpu_request(cpuid_t dstcpu, xcpu_handler_t handler,
 
     if (!entered)
     {
-	printf("Failing XCPU requests are unimplemented\n");
+	printf("CPU %d tcb %t Failing XCPU requests are unimplemented cpu %d ra %x\n", 
+	       get_current_cpu(), get_current_tcb(), dstcpu, __builtin_return_address(0));
+	get_cpu_mailbox(dstcpu)->dump_mailbox(dstcpu);
 	enter_kdebug("BUG");
 	spin_forever();
     }
@@ -198,7 +215,9 @@ INLINE void xcpu_request(cpuid_t dstcpu, xcpu_handler_t handler, tcb_t * tcb,
     
     if (!entered)
     {
-	printf("Failing XCPU requests are unimplemented\n");
+	printf("CPU %d Failing XCPU requests are unimplemented cpu %d ra %x\n", 
+	       get_current_cpu(), dstcpu, __builtin_return_address(0));
+	get_cpu_mailbox(dstcpu)->dump_mailbox(dstcpu);
 	enter_kdebug("BUG");
 	spin_forever();
     }
@@ -216,7 +235,7 @@ INLINE void xcpu_request(cpuid_t dstcpu, xcpu_handler_t handler, tcb_t * tcb,
  *                   Synchronous XCPU handling
  *
  **********************************************************************/
-#ifdef CONFIG_SMP_SYNC_REQUEST
+#if defined(CONFIG_SMP_SYNC_REQUEST)
 
 /*
  * synchronous XCPU request handling, depends on the hardware

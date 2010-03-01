@@ -73,6 +73,8 @@ void make_offsets()						\n\
 	   $(AWK) '{ print "   O(OFS_TCB_"toupper($$1)",offsetof(tcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
 	@$(call extract_members,$(SRCDIR)/src/glue/$(API)-$(ARCH)/ktcb.h) | \
 	   $(AWK) '{ print "   O(OFS_TCB_ARCH_"toupper($$1)",offsetof(tcb_t,arch."$$1"));" } ' >> $(TCBLAYOUTTMP).c
+	@$(call extract_members,$(SRCDIR)/src/api/$(API)/sktcb.h) | \
+	   $(AWK) '{ print "   O(OFS_TCB_SCHED_STATE_"toupper($$1)",offsetof(tcb_t,sched_state."$$1"));" } ' >> $(TCBLAYOUTTMP).c
 	@$(call extract_members,$(SRCDIR)/src/glue/$(API)-$(ARCH)/utcb.h) | \
 	   $(AWK) '{ print "   O(OFS_UTCB_"toupper($$1)",offsetof(utcb_t,"$$1"));" } ' >> $(TCBLAYOUTTMP).c
 	@$(PRINTF)   '\n};\n' \

@@ -80,7 +80,7 @@ BEGIN_PROC(exc_user_sysipc)
 	mov	%ebx, %ds
 #endif
 	
-#ifdef CONFIG_IPC_FASTPATH
+#if defined(CONFIG_IPC_FASTPATH)
 
 	/* msgtag only untyped items and no flags */
 	movl	%esi, %ebx
@@ -117,10 +117,16 @@ BEGIN_PROC(exc_user_sysipc)
 	jnc	slowpath
 
 1:	
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	/* check that both threads are on the same CPU */
 	mov	OFS_TCB_CPU(%ebp), %ecx
 	cmp	%ecx, OFS_TCB_CPU(%ebx)
+	jne	slowpath
+#endif
+#if defined(CONFIG_X_EVT_LOGGING)
+	/* check that both threads have in the same logid */
+	mov	OFS_TCB_SCHED_STATE_LOGID(%ebp), %ecx
+	cmp	%ecx, OFS_TCB_SCHED_STATE_LOGID(%ebx)
 	jne	slowpath
 #endif
 
@@ -399,7 +405,7 @@ reenter_sysexit_uaccess:
 #endif /* CONFIG_X86_SMALL_SPACE */
 
 
-#ifdef CONFIG_IPC_FASTPATH
+#if defined(CONFIG_IPC_FASTPATH)
 /* precondition %ebx == tcb */
 fp_save_resources:
 	/* no caller-saved registers contain values!!! */

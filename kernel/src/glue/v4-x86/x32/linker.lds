@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2005, 2007-2008, 2010,  Karlsruhe University
+ * Copyright (C) 1999-2005, 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/linker.lds
  * Description:   Generic linkser script for x86.
@@ -45,7 +45,7 @@ SECTIONS
 	.text _start_text : AT (ADDR(.text) - KERNEL_OFFSET)
 	{
 		*(.mb_header)
-		*(.text)
+		*(.text.*)
 		*(.gnu.linkonce.*)
 		*(.spinlock)
 	}
@@ -78,6 +78,17 @@ SECTIONS
 	{
 		*(.data.cpulocal)
 		*(.data.x86.cpulocal)
+#if defined(CONFIG_X_EVT_LOGGING)
+		. = ALIGN(1024K);
+		_kernel_log_area_start = .;
+		*(.data.logfile)
+		. = ALIGN(4K);
+		*(.data.logsel)
+		. = ALIGN(4K);
+		_kernel_log_area_end = .;
+#else
+		. = . + 68K;
+#endif
 #if defined(CONFIG_DEBUG)
 		. = . + 8;
 #endif
@@ -107,6 +118,7 @@ SECTIONS
 	}
 
 #include <generic/linkersets.ldi>
+#include <glue/v4-x86/x32/logging.ldi>
 
 	_memory_descriptors_offset = memory_descriptors - kip;
 	_memory_descriptors_size =
@@ -138,14 +150,12 @@ SECTIONS
 
 	/* special section that is discarded during linking
 	   all unwanted sections should go here */
-
 	/DISCARD/ :
 	{
 		*(.eh_frame)
 		*(.note)
 		*(.comment)
 	}
-
 }
 /* all the physical address calculations */
 _end_text_phys = _end_text - KERNEL_OFFSET;

@@ -36,9 +36,8 @@
 #include INC_API(tcb.h)
 #include <linear_ptab.h>
 
-#define SEC_KDEBUG	".kdebug"
-
 extern void putc(const char c);
+
 int print_tid (word_t val, word_t width, word_t precision, bool adjleft);
 
 
@@ -65,6 +64,42 @@ int SECTION(SEC_KDEBUG) print_hex(const word_t val,
 				  int precision = 0,
 				  bool adjleft = false,
 				  bool nullpad = false)
+{
+    int i, n = 0;
+    int nwidth = 0;
+
+    // Find width of hexnumber
+    while ((val >> (4 * nwidth)) && ((unsigned) nwidth <  2 * sizeof (val)))
+	nwidth++;
+    if (nwidth == 0)
+	nwidth = 1;
+
+    // May need to increase number of printed digits
+    if (precision > nwidth)
+	nwidth = precision;
+
+    // May need to increase number of printed characters
+    if (width == 0 && width < nwidth)
+	width = nwidth;
+
+    // Print number with padding
+    if (! adjleft)
+	for (i = width - nwidth; i > 0; i--, n++)
+	    putc (nullpad ? '0' : ' ');
+    for (i = 4 * (nwidth - 1); i >= 0; i -= 4, n++)
+	putc (hexchars ((val >> i) & 0xF));
+    if (adjleft)
+	for (i = width - nwidth; i > 0; i--, n++)
+	    putc (' ');
+
+    return n;
+}
+
+int SECTION(SEC_KDEBUG) print_hex64(const u64_t val,
+                                    int width = 0,
+                                    int precision = 0,
+                                    bool adjleft = false,
+                                    bool nullpad = false)
 {
     int i, n = 0;
     int nwidth = 0;
@@ -167,8 +202,8 @@ int SECTION(SEC_KDEBUG) print_hex_sep(const word_t val,
  *	@returns the number of characters printed (may be more than WIDTH)
  */
 int SECTION(SEC_KDEBUG) print_dec(const word_t val,
-				  const int width = 0,
-				  const char pad = ' ')
+                                  const int width = 0,
+                                  const char pad = ' ')
 {
     word_t divisor;
     int digits;
@@ -189,6 +224,29 @@ int SECTION(SEC_KDEBUG) print_dec(const word_t val,
     return digits;
 }
 
+
+int SECTION(SEC_KDEBUG) print_dec64(const u64_t val,
+                                  const int width = 0,
+                                  const char pad = ' ')
+{
+    u64_t divisor;
+    int digits;
+
+    /* estimate number of spaces and digits */
+    for (divisor = 1, digits = 1; val/divisor >= 10; divisor *= 10, digits++);
+
+    /* print spaces */
+    for ( ; digits < width; digits++ )
+	putc(pad);
+
+    /* print digits */
+    do {
+	putc(((val/divisor) % 10) + '0');
+    } while (divisor /= 10);
+
+    /* report number of digits printed */
+    return digits;
+}
 
 DEFINE_SPINLOCK(printf_spin_lock);
 
@@ -214,15 +272,12 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
     bool adjleft = false, nullpad = false;
 
 #define arg(x) va_arg(args, x)
-
+    
     printf_spin_lock.lock();
-
+    
     /* sanity check */
     if (format == NULL)
-    {
-	printf_spin_lock.unlock();
-	return 0;
-    }
+	goto done;
 
     while (*format)
     {
@@ -265,6 +320,18 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 		putc(arg(int));
 		n++;
 		break;
+	    case 'C':
+	    {
+		word_t cw = arg(int);
+		for (word_t i=0; i<sizeof(word_t); i++)
+		{
+		    u8_t c = ((u8_t *) &cw)[i];
+		    if (!c) break;
+		    putc(c);
+		}
+		n+= sizeof(word_t);
+		break;
+	    }
 	    case 'd':
 	    {
 		long val = arg(long);
@@ -279,11 +346,18 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 	    case 'u':
 		n += print_dec(arg(long), width, nullpad ? '0' : ' ');
 		break;
+	    case 'U':
+		n += print_dec64(arg(u64_t), width, nullpad ? '0' : ' ');
+		break;
 	    case 'p':
 		precision = sizeof (word_t) * 2;
 	    case 'x':
 		n += print_hex(arg(long), width, precision,
 			       adjleft, nullpad);
+		break;
+	    case 'X':
+		n += print_hex64(arg(u64_t), width, precision,
+                                 adjleft, nullpad);
 		break;
 	    case 's':
 	    {
@@ -318,7 +392,8 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 	}
 	format++;
     }
-
+    
+done:
     printf_spin_lock.unlock();
     return n;
 }

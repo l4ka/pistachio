@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2006, 2008,  Karlsruhe University
  *                
  * File path:     api/v4/kernelinterface.cc
  * Description:   defines the kernel interface page
@@ -106,7 +106,11 @@ kernel_interface_page_t KIP UNIT(KIP_SECTION) =
     {0, 0},			// dedicated memory 3
     {0, 0},			// dedicated memory 4
 
+#if defined(CONFIG_X_EVT_LOGGING) 
+    0, 0,			// evt logging information
+#else
     {0, 0},			// reserved1
+#endif
     KIP_UTCB_INFO,		// UTCB info
     KIP_KIP_AREA,		// KIP area info
 

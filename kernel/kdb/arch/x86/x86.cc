@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2009,  Karlsruhe University
  *                
  * File path:     kdb/arch/x86/x86.cc
  * Description:   
@@ -28,10 +28,13 @@
 #include INC_PLAT(nmi.h)
 #include INC_GLUE(idt.h)
 #if defined(CONFIG_IOAPIC)
-# include INC_ARCH(apic.h)
+#include INC_ARCH(apic.h)
 #endif
 #if defined(CONFIG_SMP)
 #include INC_GLUE(cpu.h)
+#endif
+#if defined(CONFIG_X_X86_HVM)
+#include INC_ARCH_SA(vmx.h)
 #endif
 
 DECLARE_CMD (cmd_reset, root, '6', "reset", "Reset system");
@@ -63,6 +66,11 @@ CMD(cmd_reset, cg)
 #if defined(CONFIG_IOAPIC)
     local_apic_t<APIC_MAPPINGS_START> local_apic;
     local_apic.disable();
+#endif
+#if defined(CONFIG_X_X86_HVM)
+    // Have to disable VMX Root Mode to reboot CPU.
+    if (x86_x32_vmx_t::is_enabled ())
+	x86_x32_vmx_t::disable ();
 #endif
     x86_reboot_scheduled = true;
     x86_reset();
@@ -99,10 +107,10 @@ CMD(cmd_show_ctrlregs, cg)
 CMD (cmd_dump_msrs, cg)
 {
 #if defined(CONFIG_CPU_X86_I686)
-    printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_MSR_LASTBRANCHFROMIP));
-    printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_MSR_LASTBRANCHTOIP));
-    printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_MSR_LASTINTFROMIP));
-    printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_MSR_LASTINTTOIP));
+     printf("LASTBRANCH_FROM_IP: %x\n", x86_rdmsr (X86_MSR_LASTBRANCHFROMIP));
+     printf("LASTBRANCH_TO_IP:   %x\n", x86_rdmsr (X86_MSR_LASTBRANCHTOIP));
+     printf("LASTINT_FROM_IP:    %x\n", x86_rdmsr (X86_MSR_LASTINTFROMIP));
+     printf("LASTINT_TO_IP:      %x\n", x86_rdmsr (X86_MSR_LASTINTTOIP));
 #endif
 
 #if defined(CONFIG_CPU_X86_P4)
@@ -201,7 +209,7 @@ CMD(cmd_send_nmi, cg)
     if (cpu->get_apic_id() == local_apic.id())
 	return CMD_NOQUIT;
     local_apic.send_nmi(cpu->get_apic_id());
-    return CMD_QUIT;
+    return CMD_NOQUIT;
 }
 
 DECLARE_CMD (cmd_switch_cpus, arch, 'S', "switch_cpu", "switch CPU");
@@ -214,16 +222,19 @@ CMD(cmd_switch_cpus, cg)
     cpuid_t cpu = get_current_cpu();
     word_t dst_cpu = get_dec("CPU id", 0, NULL);
     if (dst_cpu >= CONFIG_SMP_MAX_CPUS ||
+	dst_cpu == cpu || 
 	!cpu_t::get(dst_cpu)->is_valid())
 	return CMD_NOQUIT;
 
     kdb_current_cpu = dst_cpu;
     local_apic_t<APIC_MAPPINGS_START> local_apic;
     local_apic.send_nmi(dst_cpu);
+    
     /* Execute a dummy iret to receive NMIs again, then sleep */
     x86_iret_self();
     x86_sleep_uninterruptible();
-    
+    /* Unmask NMIs again */
+
     if (kdb_current_cpu == cpu)
     {
 	printf("--- Switched to CPU %d ---\n", cpu);
@@ -256,3 +267,35 @@ CMD(cmd_show_lvt, cg)
 }
 #endif
 
+
+#if defined(CONFIG_X_X86_HVM)
+DECLARE_CMD(cmd_dump_gva, arch, 'd', "d",
+	    "dump HVM virtual address");
+
+extern void memdump_loop (space_t * space, addr_t addr);
+
+CMD(cmd_dump_gva, cg)
+{
+    word_t addr = get_hex ("Dump GV address", kdb.last_dump);
+     
+    if (addr == ABORT_MAGIC)
+	return CMD_NOQUIT;
+
+    kdb.last_dump = addr;
+
+    addr_t gvaddr = (addr_t) addr;
+    
+    space_t *space = get_space ("Space");
+    if (!space->is_hvm_space())
+	return CMD_NOQUIT;
+
+    addr_t gpaddr;
+    
+    if (! space->get_hvm_space()->lookup_gphys_addr (gvaddr, &gpaddr))
+	return CMD_NOQUIT;
+    
+    memdump_loop (space, gpaddr);
+    
+    return CMD_NOQUIT;
+}
+#endif

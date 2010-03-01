@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2008,  Karlsruhe University
  *                
- * File path:     pistachio.cvs/kernel/kdb/generic/memdump.cc
+ * File path:     kdb/generic/memdump.cc
  * Description:   Memory dumping code
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -49,10 +49,7 @@ void memdump (space_t * space, addr_t addr);
 static word_t memdump_wordsize = sizeof (word_t);
 
 
-/**
- * Last memory dump address.
- */
-static word_t kdb_last_dump = 0;
+
 
 
 /**
@@ -80,12 +77,12 @@ DECLARE_CMD (cmd_memdump, root, 'd', "memdump", "dump memory");
 
 CMD (cmd_memdump, cg)
 {
-    word_t addr = get_hex ("Dump address", kdb_last_dump);
+    word_t addr = get_hex ("Dump address", kdb.last_dump);
 
     if (addr == ABORT_MAGIC)
 	return CMD_NOQUIT;
 
-    kdb_last_dump = addr;
+    kdb.last_dump = addr;
     memdump_loop (kdb.kdb_current->get_space (), (addr_t) addr);
 
     return CMD_NOQUIT;
@@ -100,12 +97,12 @@ DECLARE_CMD (cmd_memdump_remote, root, 'D', "memdump",
 
 CMD(cmd_memdump_remote, cg)
 {
-    word_t addr = get_hex ("Dump address", kdb_last_dump);
+    word_t addr = get_hex ("Dump address", kdb.last_dump);
 
     if (addr == ABORT_MAGIC)
 	return CMD_NOQUIT;
 
-    kdb_last_dump = addr;
+    kdb.last_dump = addr;
     memdump_loop (get_space ("Space"), (addr_t) addr);
 
     return CMD_NOQUIT;

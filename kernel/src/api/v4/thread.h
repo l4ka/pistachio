@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2008,  Karlsruhe University
  *                
  * File path:     api/v4/thread.h
  * Description:   thread ids
@@ -75,6 +75,13 @@ public:
 	return tid;
     }
 
+    static const threadid_t idlethread()
+	{
+	    threadid_t tid;
+	    tid.raw = 0x1d1e1d1e;
+	    return tid;
+	}
+    
     static threadid_t threadid(word_t threadno, word_t version)
     {
 	threadid_t tid;

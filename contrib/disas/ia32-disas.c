@@ -1,4 +1,4 @@
-/*
+ /*
  * This file is based on revision 1.50 of opcodes/i386-dis.c from the
  * binutils CVS.
  *
@@ -1945,7 +1945,9 @@ print_insn (bfd_vma pc, disassemble_info *info)
   int needcomma;
   unsigned char uses_SSE_prefix;
   int sizeflag;
+#if 0
   const char *p;
+#endif
   struct dis_private priv;
 
   mode_64bit = (info->mach == bfd_mach_x86_64_intel_syntax
@@ -3733,7 +3735,7 @@ OP_I (int bytemode, int sizeflag)
 
   op &= mask;
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + 1, 1, op);
+  print_operand_value (scratchbuf + 1, 1, (unsigned) op);
   oappend (scratchbuf + intel_syntax);
   scratchbuf[0] = '\0';
 }
@@ -3784,7 +3786,7 @@ OP_I64 (int bytemode, int sizeflag)
 
   op &= mask;
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + 1, 1, op);
+  print_operand_value (scratchbuf + 1, 1, (unsigned) op);
   oappend (scratchbuf + intel_syntax);
   scratchbuf[0] = '\0';
 }
@@ -3834,7 +3836,7 @@ OP_sI (int bytemode, int sizeflag)
     }
 
   scratchbuf[0] = '$';
-  print_operand_value (scratchbuf + 1, 1, op);
+  print_operand_value (scratchbuf + 1, 1, (unsigned) op);
   oappend (scratchbuf + intel_syntax);
 }
 
@@ -3842,7 +3844,7 @@ static void
 OP_J (int bytemode, int sizeflag)
 {
   bfd_vma disp;
-  bfd_vma mask = -1;
+  bfd_vma mask = (bfd_vma) -1;
 
   switch (bytemode)
     {

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/tcb.h
  * Description:   
@@ -141,6 +141,7 @@ INLINE void tcb_t::set_br(word_t index, word_t value)
 
 #endif /* CONFIG_X86_COMPATIBILITY_MODE */
 
+
 /**********************************************************************
  * 
  *            access functions for ex-regs'able registers
@@ -192,16 +193,14 @@ INLINE void tcb_t::set_user_sp(addr_t sp)
     get_stack_top()[KSTACK_USP] = (word_t)sp;
 }
 
-
 /**
  * set the user-level flags
  * @param flags	new user-level flags
  */
 INLINE void tcb_t::set_user_flags (const word_t flags)
 {
-    get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~X86_USER_FLAGMASK)) | (flags & X86_USER_FLAGMASK);
+	get_stack_top()[KSTACK_UFLAGS] = (get_user_flags() & (~X86_USER_FLAGMASK)) | (flags & X86_USER_FLAGMASK);
 }
-
 
 
 /**********************************************************************
@@ -239,7 +238,7 @@ INLINE void tcb_t::release_copy_area (void)
  *
  **********************************************************************/
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 extern cpuid_t current_cpu;
 INLINE cpuid_t get_current_cpu()
 {

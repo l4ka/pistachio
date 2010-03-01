@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001, 2003-2007, 2009,  Karlsruhe University
+ * Copyright (C) 2001, 2003-2009,  Karlsruhe University
  *                
  * File path:     kdb/platform/pc99/io.cc
  * Description:   PC99 specific I/O functions

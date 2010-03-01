@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/ipc.h
  * Description:   IPC declarations
@@ -33,7 +33,9 @@
 #define __API__V4__IPC_H__
 
 #include INC_API(fpage.h)
+#include INC_GLUE(ipc.h)
 #include <debug.h>
+#include <kdb/tracepoints.h>
 
 class tcb_t;
 
@@ -64,11 +66,16 @@ class tcb_t;
 #define IPC_MR0_ERROR			(1 << 15)
 #define IPC_MR0_PAGEFAULT		((-2UL) << 4)
 
-#define IPC_NUM_SAVED_MRS		3
+#define IPC_NESTING_LEVEL	1	
+
 
 class msg_tag_t 
 {
 public:
+    inline msg_tag_t () { }
+    inline msg_tag_t (word_t raw)
+	{ this->raw = raw; }
+
     word_t get_label() { return x.label; }
     word_t get_typed() { return x.typed; }
     word_t get_untyped() { return x.untyped; }
@@ -98,8 +105,7 @@ public:
 
     static msg_tag_t error_tag() 
 	{ 
-	    msg_tag_t tag; 
-	    tag.raw = 0; 
+	    msg_tag_t tag = 0; 
 	    tag.set_error(); 
 	    return tag;
 	}
@@ -111,16 +117,17 @@ public:
 	    return tag;
 	}
 
-    static msg_tag_t irq_tag()
+    static msg_tag_t irq_tag(word_t untyped = 0)
 	{
-	    return tag(0, 0, -1UL << 4);
+	    return tag(0, untyped, -1UL << 4);
 	}
 
+   
     static msg_tag_t preemption_tag()
 	{
-	    return tag (0, 0, -3UL << 4);
+	    return tag (0, 2, (-3UL << 4));
 	}
-
+   
     static msg_tag_t pagefault_tag(bool read, bool write, bool exec)
 	{
 	    return tag (0, 2, (-2UL << 4) | 
@@ -128,6 +135,7 @@ public:
 			(write ? 1 << 1 : 0) | 
 			(exec  ? 1 << 0 : 0));
 	}
+    
 public:
     union {
 	word_t raw;
@@ -155,51 +163,82 @@ class msg_item_t
 {
 public:
     inline bool is_map_item() 
-	{ return x.type == 4; }
+	{ return type == 4; }
 
     inline bool is_grant_item() 
-	{ return x.type == 5; }
+	{ return type == 5; }
 
     inline bool is_string_item() 
-	{ return (x.type & 4) == 0; }
+	{ return (type & 4) == 0; }
+
+    inline bool is_ctrlxfer_item() 
+	{ return type == 6; }
 
     inline bool more_strings()
-	{ return (x.continued); }
+	{ return (continued); }
 
     inline bool get_string_cache_hints() 
-	{ ASSERT(is_string_item()); return (x.type & 3); }
+	{ ASSERT(is_string_item()); return (type & 3); }
 
     inline word_t get_string_length()
-	{ ASSERT(is_string_item()); return (x.length); }
+	{ ASSERT(is_string_item()); return (length); }
 
     inline word_t get_string_ptr_count()
-	{ ASSERT(is_string_item()); return (x.num_ptrs + 1); }
+	{ ASSERT(is_string_item()); return (num_ptrs + 1); }
 
     inline bool is_string_compound()
-	{ ASSERT(is_string_item()); return (x.continuation); }
+	{ ASSERT(is_string_item()); return (continuation); }
 
     inline word_t get_snd_base()
 	{ return raw & (~0x3ff); }
 
+    inline bool more_ctrlxfer_items()
+	{ return (continued); }
+
+    
+    inline word_t get_ctrlxfer_id()
+	{ ASSERT(is_ctrlxfer_item()); return id; }
+    
+    inline word_t get_ctrlxfer_mask()
+	{ ASSERT(is_ctrlxfer_item()); return mask; }
+    
     inline void operator = (word_t raw) 
 	{ this->raw = raw; }
 public:
     union {
 	word_t raw;
-	struct {
-	    BITFIELD5(word_t,
-		      continued		: 1,
-		      type		: 3,
-		      num_ptrs		: 5,
-		      continuation	: 1,
-		      length		: (sizeof(word_t)*8) - 10);
-	} x __attribute__((packed));
+	union {
+	    struct{
+		BITFIELD3(word_t,
+			  continued		: 1,
+			  type			: 3,
+						: (sizeof(word_t)*8) - 4);
+		
+	    };
+	    struct{
+		BITFIELD4(word_t,
+						: 4,
+			  num_ptrs		: 5,
+			  continuation		: 1,
+			  length		: (sizeof(word_t)*8) - 10);
+	    };
+	    struct{
+		BITFIELD3(word_t,
+			  			: 4,	
+			  id			: 8,
+			  mask			: (sizeof(word_t)*8) - 12);
+	    };    
+	} __attribute__((packed));
     };
 };
 
 class acceptor_t
 {
 public:
+    inline acceptor_t () { }
+    inline acceptor_t (word_t raw)
+	{ this->raw = raw; }
+    
     inline void clear()
 	{ this->raw = 0; }
 
@@ -208,6 +247,9 @@ public:
 
     inline bool accept_strings()
 	{ return x.strings; }
+
+    inline bool accept_ctrlxfer()
+	{ return x.ctrlxfer; }
 
     inline word_t get_rcv_window()
 	{ return x.rcv_window << 4; }
@@ -221,13 +263,69 @@ public:
     union {
 	word_t raw;
 	struct {
-	    BITFIELD3(word_t,
-		      strings		: 1,
-		      reserved		: 3,
-		      rcv_window	: (sizeof(word_t)*8) - 4);
+	    BITFIELD4 (word_t,
+		       strings		: 1,
+		       ctrlxfer		: 1,
+		       reserved		: 2,
+		       rcv_window	: (sizeof(word_t)*8) - 4);
 	} x;
     };
+    
 };
+
+#if !defined(CONFIG_X_CTRLXFER_MSG)
+#define IPC_NUM_SAVED_MRS	3
+#else
+
+#define IPC_NUM_SAVED_MRS	4
+#define IPC_CTRLXFER_STDFAULTS	4
+
+class ctrlxfer_item_t : public arch_ctrlxfer_item_t
+{ 
+
+public:
+    /* members */
+    msg_item_t item;
+    union
+    {
+	word_t regs[];
+    };
+
+    static msg_item_t kernel_fault_item(word_t fault)
+	{
+	    msg_item_t item;
+	    item.raw = 0;
+	    item.continued = 0;
+	    item.type = 6;
+	    item.mask = 0x3ff;	
+	    item.id = fault; // we operate with 0-based fault IDs
+	    return item;
+	}
+
+    static msg_item_t fault_item(id_e id)
+	{
+	    msg_item_t item;
+	    item.raw = 0;
+	    item.continued = 0;
+	    item.type = 6;
+	    item.mask = (1 << num_hwregs[id]) - 1;	
+	    item.id = id;
+	    return item;	
+	}
+
+    static const void mask_hwregs(const word_t  id, word_t &val)
+	{ val &= (1UL << num_hwregs[id])-1; }
+
+#if defined(CONFIG_DEBUG)
+    static const char* get_idname(const word_t id);
+    static const char* get_hwregname(const word_t id, const word_t reg);
+#endif
+
+    static const word_t num_hwregs[id_max];
+    static const word_t * const hwregs[id_max];
+};
+
+#endif
 
 
 /**

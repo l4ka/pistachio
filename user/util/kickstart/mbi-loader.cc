@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2006,  Karlsruhe University
+ * Copyright (C) 2004-2006, 2008,  Karlsruhe University
  *                
  * File path:     mbi-loader.cc
  * Description:   MBI specific boot loader functions
@@ -453,9 +453,11 @@ L4_Word_t mbi_init (void)
 
     // Protect all user-level modules.
     for (L4_Word_t i = 3; i < mbi->modcount; i++)
+    {
 	kip.dedicate_memory (mbi->mods[i].start, mbi->mods[i].end - 1,
 			     L4_BootLoaderSpecificMemoryType, 
 			     kip_manager_t::desc_boot_module);
+    }
 
 #if defined(L4_32BIT) || defined(ALSO_BOOTINFO32)
     if (root_task_type == 1)

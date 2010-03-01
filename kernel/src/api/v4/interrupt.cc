@@ -39,6 +39,7 @@
 #include INC_API(schedule.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(smp.h)
+#include INC_GLUE(cpu.h)
 
 
 DECLARE_TRACEPOINT(INTERRUPT);
@@ -49,48 +50,6 @@ static utcb_t *irq_utcb;
 static word_t irq_utcb_count;
 
 #if defined(CONFIG_SMP)
-static void do_xcpu_send_irq(cpu_mb_entry_t * entry)
-{
-    tcb_t * handler_tcb = entry->tcb;
-    word_t irq = entry->param[0];
-    threadid_t irq_tid = threadid_t::irqthread(irq);
-    tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
-	
-    
-    if (!handler_tcb->is_local_cpu())
-    {
-	TRACEF("xcpu-IRQ forward (%d->%t %d)\n", irq, handler_tcb, handler_tcb->get_cpu());
-	enter_kdebug("Untested");
-	xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, handler_tcb, irq);
-	return;
-    }
-
-    if ((handler_tcb->get_state().is_waiting() || 
-	 handler_tcb->get_state().is_locked_waiting()) &&  
-	(handler_tcb->get_partner().is_anythread() ||
-	 handler_tcb->get_partner() == threadid_t::irqthread(irq)))
-    {
-	// ok, thread is waiting -- deliver IRQ
-	TRACE_IRQ_DETAILS("irq %d xcpu delivery (%d->%t)", irq, handler_tcb);
-	handler_tcb->set_tag(msg_tag_t::irq_tag());
-	handler_tcb->set_partner(threadid_t::irqthread(irq));
-	handler_tcb->set_state(thread_state_t::running);
-	get_current_scheduler()->enqueue_ready(handler_tcb);
-    }
-    else
-    {
-	TRACEF("irq %d xcpu handler not ready %t s=%s\n", 
-	       irq, handler_tcb, handler_tcb->get_state().string());
-	enter_kdebug("UNTESTED");
-	irq_tcb->set_tag(msg_tag_t::irq_tag());
-	irq_tcb->set_partner(handler_tcb->get_global_id());	
-	irq_tcb->set_state(thread_state_t::polling);
-	handler_tcb->lock();
-	irq_tcb->enqueue_send(handler_tcb);
-	handler_tcb->unlock();
-    }
-}
-
 /* for IRQ forwarding */
 static void do_xcpu_interrupt(cpu_mb_entry_t * entry)
 {
@@ -105,7 +64,8 @@ static void irq_thread()
 {
     tcb_t * current = get_current_tcb();
     int irq = current->get_global_id().get_irqno();
-
+    scheduler_t *scheduler = get_current_scheduler();
+    
     while(1)
     {
 	tcb_t * handler_tcb = 
@@ -133,27 +93,26 @@ static void irq_thread()
 	    {
 		TRACE_IRQ_DETAILS("irq %d xcpu deliver IRQ message", irq);
 		xcpu_request( handler_tcb->get_cpu(), do_xcpu_send_irq, handler_tcb, irq);
-		current->switch_to_idle();
+		scheduler->schedule(get_idle_tcb(), sched_handoff);
 	    }
 	    else 
 #endif
 	    {
 		current->set_partner(current->get_irq_handler());
 		current->set_state(thread_state_t::waiting_forever);
-		current->switch_to(handler_tcb);
+		scheduler->schedule(handler_tcb, sched_handoff);
 	    }
 	}
 
 	// got re-activated due to send operation to IRQ thread...
-	TRACE_IRQ_DETAILS("irq %d ACK handler %t", irq, handler_tcb);
-
+	TRACE_IRQ(irq, "irq %d ACK handler %t", irq, handler_tcb);
 	current->set_state(thread_state_t::halted);
 	 
 	// if an interrupt was already pending deliver it
 	if (get_interrupt_ctrl()->unmask(irq))
 	    handle_interrupt(irq);
 
-	current->switch_to_idle();
+	get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
     }
 }
 
@@ -164,28 +123,31 @@ static void irq_thread()
  */
 void handle_interrupt(word_t irq)
 {
-    TRACEPOINT (INTERRUPT, "IRQ %d\n", irq);
 
     spin(76, get_current_cpu());
 
-    tcb_t * current = get_current_tcb();
-    TRACE_IRQ_DETAILS("IRQ%d (curr=%t)\n", irq, current);
-
     threadid_t irq_tid = threadid_t::irqthread(irq);
     tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
+    scheduler_t *scheduler = get_current_scheduler();
     
     // some sanity checks
     ASSERT(irq_tid.get_irqno() < get_kip()->thread_info.get_system_base());
+
+    TRACE_IRQ(irq, "IRQ %d (%s)", irq, irq_tcb->get_state().string());
 
     /* VU: we can get a spurious interrupt if we de-attached the IRQ
      * meanwhile in this case we simply ignore the IRQ */
     if ( irq_tcb->get_state() == thread_state_t::aborted )
     {
-	TRACE("CPU%d spurious IRQ%d?\n", get_current_cpu(), irq);
+	TRACE("CPU%d spurious IRQ%d?", get_current_cpu(), irq);
 	return;
     }
 
-#ifdef CONFIG_SMP
+    // we should only receive irqs if the thread is halted
+    if (!irq_tcb->get_state().is_halted())
+	return;
+
+#if defined(CONFIG_SMP)
     /* while migrating it may happen that we get an IRQ -> forward to
      * other CPU */
     if ( !irq_tcb->is_local_cpu() )
@@ -195,9 +157,6 @@ void handle_interrupt(word_t irq)
     }
 #endif
 
-    // we should only receive irqs if the thread is halted
-    ASSERT(irq_tcb->get_state().is_halted());
-
     // get the handler thread id
     threadid_t handler_tid = irq_tcb->get_irq_handler();
     tcb_t * handler_tcb = get_kernel_space()->get_tcb(handler_tid);
@@ -205,16 +164,14 @@ void handle_interrupt(word_t irq)
     // if the handler TID is not valid -- abort the IRQ thread
     if (EXPECT_FALSE( handler_tcb->get_global_id() != handler_tid ))
     {
-	TRACE("IRQ handler TID is invalid -- halting IRQ%d\n", irq);
+	TRACE("IRQ handler TID is invalid -- halting IRQ%d", irq);
 	irq_tcb->set_state(thread_state_t::aborted);
 	return;
     }
 
-    TRACE_IRQ_DETAILS("irq %d current %t handler %t (s=%s)",  
-	      irq, current, handler_tcb, 
-	      (handler_tcb ? handler_tcb->get_state().string() : "UNDEF"));
-
-
+    TRACE_IRQ_DETAILS("irq %d handler %t (s=%s)",  irq, handler_tcb, 
+		      (handler_tcb ? handler_tcb->get_state().string() : "UNDEF"));
+    
     if (EXPECT_TRUE( handler_tcb->get_state().is_waiting() ))
     {
 	// thread is waiting for IPC -- we use a shortcut
@@ -226,7 +183,7 @@ void handle_interrupt(word_t irq)
 	    irq_tcb->set_partner(handler_tid);
 	    irq_tcb->set_state(thread_state_t::waiting_forever);
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	    if (!handler_tcb->is_local_cpu())
 	    {
 		TRACE_IRQ_DETAILS("irq %d xcpu forward IRQ tcb creation", irq);
@@ -236,49 +193,28 @@ void handle_interrupt(word_t irq)
 	    }
 #endif
 
+	    TRACE_IRQ_DETAILS("irq %d deliver message", irq);
+	    
 	    // deliver IPC
 	    handler_tcb->set_tag(msg_tag_t::irq_tag());
 	    handler_tcb->set_partner(irq_tid);
-
+	    
+	    handler_tcb->set_state(thread_state_t::running);
 	    /* we enter this path only if the handler is waiting -- so
-	     * we are not currently executing on its TCB */
-	    if (current == get_idle_tcb())
-		current->switch_to(handler_tcb);
-	    else if (get_current_scheduler()->check_dispatch_thread(current, handler_tcb))
-	    {
-		ASSERT(current != get_kdebug_tcb());
-		TRACE_IRQ_DETAILS("irq %d deliver to %t current %t", irq, handler_tcb, current);
-
-		// make sure we are in the ready queue
-		get_current_scheduler()->preempt_thread (current, handler_tcb);
-		current->switch_to (handler_tcb);
-	    }
-	    else
-	    {
-		/* according to the scheduler should the current
-		 * thread remain active so simply activate the other
-		 * guy and return */
-		TRACE_IRQ_DETAILS("irq %d enqueue %t current %t", irq, handler_tcb, current);
-		handler_tcb->set_state(thread_state_t::running);
-		get_current_scheduler()->enqueue_ready(handler_tcb);
-	    }
+	     * we are not currently execuing on its TCB */
+	    scheduler->schedule(handler_tcb);
 	    return;
 	}
     }
 
-    TRACE_IRQ_DETAILS("irq %d not delivered, enqueue irq_tcb %t current %t", irq, irq_tcb, current);
-
+    TRACE_IRQ_DETAILS("irq %d schedule interrupt %t", irq, irq_tcb);
+    
     /* the thread is not waiting for IPC -- so generate nice msg and
      * enqueue into send queue */
-    irq_tcb->set_tag(msg_tag_t::irq_tag());
-    irq_tcb->set_partner(handler_tid);
-    irq_tcb->set_state(thread_state_t::polling);
-    handler_tcb->lock();
-    irq_tcb->enqueue_send(handler_tcb);
-    handler_tcb->unlock();
+    scheduler->schedule_interrupt(irq_tcb, handler_tcb);
 }
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 static void do_xcpu_thread_control_interrupt(cpu_mb_entry_t * entry)
 {
     threadid_t handler_tid;
@@ -299,7 +235,7 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     tcb_t * irq_tcb = get_current_space()->get_tcb(irq_tid);
     word_t irq = irq_tid.get_irqno();
 
-    TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, "SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)\n",
+    TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, "SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)",
 		irq, TID(irq_tid), TID(handler_tid));
 
     // check for valid handler tid
@@ -308,11 +244,16 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 	return false;
 
     // check whether this is a valid/available IRQ
-    if (!irq_tid.is_interrupt() || !get_interrupt_ctrl()->is_irq_available(irq))
+    if (!irq_tid.is_interrupt() || 
+	(irq < get_interrupt_ctrl()->get_number_irqs() && !get_interrupt_ctrl()->is_irq_available(irq)))
 	return false;
 
     // allocate before usage to avoid remapping...
+#ifdef CONFIG_STATIC_TCBS
+    irq_tcb = tcb_t::allocate(irq_tid);
+#else
     irq_tcb->allocate();
+#endif
 
     /* VU: IRQ TCBs always "exist" -- so we check whether they 
      * already have a UTCB */
@@ -322,7 +263,7 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 	if (irq_tcb->get_irq_handler() == handler_tid)
 	    return true;
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	if (!irq_tcb->is_local_cpu())
 	{
 	    xcpu_request(irq_tcb->get_cpu(), do_xcpu_thread_control_interrupt,
@@ -341,11 +282,11 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     }
     else
     {
+
 	if (irq_utcb_count++ % (KMEM_CHUNKSIZE / sizeof(utcb_t)) == 0)
 	    irq_utcb = (utcb_t *) kmem.alloc(kmem_utcb, KMEM_CHUNKSIZE);
 	else 
 	    irq_utcb++;
-	irq_tcb->create_kernel_thread(irq_tid, irq_utcb);
 
 	/*
 	 * Set the priority of the kernel interrupt thread to the
@@ -357,7 +298,8 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 	 * match more closely the API idea of interrupts being
 	 * represented as threads but having no execution time.
 	 */
-	get_current_scheduler()->set_priority(irq_tcb, MAX_PRIO);
+	
+	irq_tcb->create_kernel_thread(irq_tid, irq_utcb, sktcb_irq);
 	irq_tcb->notify(irq_thread);
     }
 
@@ -368,14 +310,13 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 
     if (irq_tid == handler_tid)
     {
-	//printf("disable IRQ %d\n", irq);
-	// de-activate irq thread
+	TRACE_IRQ_DETAILS("disable irq %d", irq);
 	get_interrupt_ctrl()->disable(irq);
 	irq_tcb->set_state(thread_state_t::aborted);
     }
     else
     {
-	//printf("enable IRQ %d\n", irq);
+	TRACE_IRQ_DETAILS("enable irq %d cpu %d", irq, irq_tcb->get_cpu());
 	irq_tcb->set_state(thread_state_t::halted);
 	get_interrupt_ctrl()->set_cpu(irq, irq_tcb->get_cpu());
 	get_interrupt_ctrl()->enable(irq);
@@ -383,7 +324,7 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
     return true;
 }
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 void migrate_interrupt_start (tcb_t * tcb)
 {
     ASSERT(tcb->is_interrupt_thread());
@@ -418,6 +359,7 @@ void SECTION(".init") init_interrupt_threads()
 {
     /* initialize KIP */
     word_t num_irqs = get_interrupt_ctrl()->get_number_irqs();
+
+    TRACE_INIT("System has %d hardware interrupts\n", num_irqs);
     get_kip()->thread_info.set_system_base(num_irqs);
-    TRACE_INIT("System has %d interrupts\n", num_irqs);
 }

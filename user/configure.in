@@ -61,7 +61,6 @@ case $HOST in
   ia32|x86|i386*|i486*|i586*|i686*)
 	ARCH=ia32
 	KERNEL=x86-kernel
-	LIBGCCFLAGS=-m32
 	;;
   powerpc64*|ppc64*)
 	ARCH=powerpc64
@@ -103,10 +102,9 @@ if test "x$CC" = x -a "x$host_alias" != x; then
   fi
 
   AC_CHECK_PROGS(CROSSCC,
-	[$host_alias-gcc $gcc_prefix-gcc $gcc_prefix-elf-gcc \
-	$gcc_prefix-unknown-elf-gcc $gcc_prefix-linux-gcc \
-	$gcc_prefix-unknown-linux-gcc $gcc_prefix-unknown-linux-gnu-gcc \
-	$gcc_prefix-pc-linux-gnu-gcc])
+	[$host_alias-gcc $gcc_prefix-elf-gcc $gcc_prefix-unknown-elf-gcc \
+	$gcc_prefix-linux-gcc $gcc_prefix-unknown-linux-gcc \
+	$gcc_prefix-unknown-linux-gnu-gcc $gcc_prefix-pc-linux-gnu-gcc])
 fi
 
 if test "x$CROSSCC" != x; then
@@ -270,7 +268,7 @@ case $ARCH in
   ia32)
   	default_kickstart_linkbase=00800000
 	default_sigma0_linkbase=00020000
-	default_roottask_linkbase=00300000
+	default_roottask_linkbase=00400000
 	;;
   powerpc)
 	default_kickstart_linkbase=00400000
@@ -290,10 +288,6 @@ esac
 
 dnl Platform dependent settings.
 case $HOST in
-  ia32|x86|i386*|i486*|i586*|i686*)
-        CFLAGS="$CFLAGS -m32"
-        LDFLAGS="$LDFLAGS -melf_i386"
-        ;;
   amd64*)
 	PLAT=amd64-pc99
 	CFLAGS="$CFLAGS -m64 -mno-red-zone"

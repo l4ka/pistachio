@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2007,  Karlsruhe University
+ * Copyright (C) 2004-2008, 2010,  Karlsruhe University
  *                
  * File path:     bench/pingpong/amd64.h
  * Description:   AMD64 specific pingpong functions
@@ -32,7 +32,6 @@
 #include <l4/arch.h>
 
 #undef L4_TRACEBUFFER
-#undef L4_PERFMON
 #include <l4/tracebuffer.h>
 
 #include L4_COMPAT_H_LOCATION
@@ -50,15 +49,15 @@
 #define L4_IO_PORT_END		(1<<16)
 
 
-L4_INLINE L4_Word_t read_cycles (void)
+L4_INLINE L4_Word64_t read_cycles(void)
 {
-    L4_Word32_t __eax, __edx;
+    L4_Word32_t eax, edx;
 
-    asm volatile (
-	"rdtsc"
-	: "=a"(__eax), "=d"(__edx));
-    
-    return ( (((L4_Word_t) __edx) << 32) | ( (L4_Word_t) __eax));	     
+    __asm__ __volatile__ (
+            "rdtsc"
+            : "=a"(eax), "=d"(edx));
+
+    return (((L4_Word64_t)edx) << 32) | (L4_Word64_t)eax;
 }
 
 
@@ -83,7 +82,7 @@ extern void pong_32_thread (void);
 void arch_specific (void)
 {
 #if 0
-    L4_Word_t cycles1, cycles2;
+    L4_Word64_t cycles1, cycles2;
     L4_Clock_t usec1, usec2;
     L4_Word_t tot = 1000, i;
 
@@ -112,9 +111,9 @@ void arch_specific (void)
 
     printf("\nIPC between 32-bit and 64-bit threads:\n\n");
 
-    L4_ThreadControl (ping_tid, ping_tid, master_tid,
+    L4_ThreadControl (ping_tid, ping_tid, roottid,
 		      L4_nilthread, UTCB(0));
-    L4_ThreadControl (pong_tid, pong_tid, master_tid, 
+    L4_ThreadControl (pong_tid, pong_tid, roottid, 
 		      L4_nilthread, UTCB(1));
     L4_SpaceControl (ping_tid, 0, kip_area, utcb_area, L4_nilthread,
 		     &control);
@@ -122,9 +121,9 @@ void arch_specific (void)
 		     &control);
     if (control & (1ULL << 63))
     {
-	L4_ThreadControl (ping_tid, ping_tid, master_tid, pager_tid, 
+	L4_ThreadControl (ping_tid, ping_tid, roottid, pager_tid, 
 			  NOUTCB);
-	L4_ThreadControl (pong_tid, pong_tid, master_tid, pager_tid, 
+	L4_ThreadControl (pong_tid, pong_tid, roottid, pager_tid, 
 			  NOUTCB);
 
 	L4_Clear (&msg);

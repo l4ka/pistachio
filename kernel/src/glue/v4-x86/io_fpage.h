@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2006, 2008,  Karlsruhe University
+ * Copyright (C) 2005-2006,  Karlsruhe University
  *                
- * File path:     glue/v4-x86/io_fpage.h
+ * File path:     platform/pc99/io_fpage.h
  * Description:   IO fpage declaration
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -29,8 +29,12 @@
  * $Id: io_fpage.h,v 1.5 2006/02/21 08:43:57 stoess Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_X86__IO_FPAGE_H__
-#define __GLUE__V4_X86__IO_FPAGE_H__
+
+
+#ifndef __PLATFORM__PC99__IO_FPAGE_H__
+#define __PLATFORM__PC99__IO_FPAGE_H__
+
+
 #if !defined(CONFIG_X86_IO_FLEXPAGES)
 
 #include INC_API(generic-archfpage.h)
@@ -174,5 +178,4 @@ public:
 };
 #endif /* !defined(CONFIG_X86_IO_FLEXPAGES) */
 
-
-#endif /* !__GLUE__V4_X86__IO_FPAGE_H__ */
+#endif /* !__PLATFORM__PC99__IO_FPAGE_H__ */

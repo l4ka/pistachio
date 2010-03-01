@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     api/v4/exregs.cc
  * Description:   Iplementation of ExchangeRegisters() 
@@ -36,11 +36,14 @@
 #include <kdb/tracepoints.h>
 
 DECLARE_TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS);
+#if defined(CONFIG_X_CTRLXFER_MSG)
+EXTERN_TRACEPOINT(IPC_CTRLXFER_ITEM);
+#endif
 
 void handle_ipc_error (void);
 void thread_return (void);
 
-static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
+static bool perform_exregs (tcb_t *src, tcb_t * dst, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle);
 
@@ -85,7 +88,7 @@ static void do_xcpu_exregs_reply (cpu_mb_entry_t * entry)
 
     // Reactivate thread.
     tcb->set_state (thread_state_t::running);
-    get_current_scheduler ()->enqueue_ready (tcb);
+    get_current_scheduler()->schedule(tcb);
 }
 
 
@@ -94,16 +97,15 @@ static void do_xcpu_exregs_reply (cpu_mb_entry_t * entry)
  */
 static void do_xcpu_exregs (cpu_mb_entry_t * entry)
 {
-    tcb_t * current = get_current_tcb();
-    tcb_t * dest = entry->tcb;
+    tcb_t * dst = entry->tcb;
     tcb_t * from = (tcb_t *) entry->param[0];
 
-    //TRACEF ("%t %t\n", get_current_tcb(), dest);
+    //TRACEF ("%t %t\n", get_current_tcb(), dst);
 
-    if (EXPECT_FALSE (! dest->is_local_cpu ()))
+    if (EXPECT_FALSE (! dst->is_local_cpu ()))
     {
 	// Forward request.
-	xcpu_request (dest->get_cpu (), do_xcpu_exregs, dest, entry->param[0],
+	xcpu_request (dst->get_cpu (), do_xcpu_exregs, dst, entry->param[0],
 		      entry->param[1], entry->param[2], entry->param[3],
 		      entry->param[4], entry->param[5], entry->param[6]);
 	return;
@@ -113,7 +115,7 @@ static void do_xcpu_exregs (cpu_mb_entry_t * entry)
     pager_tid.set_raw (entry->param[5]);
     exregs_ctrl_t ctrl(entry->param[1]);
     
-    bool reschedule = perform_exregs (from, dest,
+    bool reschedule = perform_exregs (from, dst,
 				      &ctrl,
 				      &entry->param[2],
 				      &entry->param[3],
@@ -122,36 +124,34 @@ static void do_xcpu_exregs (cpu_mb_entry_t * entry)
 				      &entry->param[6]
 				      );
     
+    
     // Pass return values back to invoker thread.
     xcpu_request (from->get_cpu (), do_xcpu_exregs_reply, from,
 		  ctrl.raw, entry->param[2], entry->param[3],
 		  entry->param[4], pager_tid.get_raw (), entry->param[6]);
     
-    if (reschedule && current != get_idle_tcb())
-    {
-	get_current_scheduler ()->enqueue_ready (current);
-	current->switch_to_idle(); 
-    }
+    if (reschedule)
+	get_current_scheduler ()->schedule ();
 }
 
 
 /**
  * Peform ExchangeRegisters() on a remote CPU.
  */
-static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
+static void remote_exregs (tcb_t *current, tcb_t * dst, word_t * control,
 			   word_t * usp, word_t * uip, word_t * uflags,
 			   threadid_t * pager, word_t * uhandle)
 {
-    //TRACEF ("current=%t tcb=%t\n", current, dest);
+    //TRACEF ("current=%t tcb=%t\n", current, dst);
     
     // Pass exregs request to remote CPU.
-    xcpu_request (dest->get_cpu (), do_xcpu_exregs, dest, (word_t) current,
+    xcpu_request (dst->get_cpu (), do_xcpu_exregs, dst, (word_t) current,
 		  *control, *usp, *uip, *uflags, pager->get_raw (),
 		  *uhandle);
 
     // Now wait for operation to complete.
     current->set_state(thread_state_t::xcpu_waiting_exregs);
-    current->switch_to_idle ();
+    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 
     // Grab exregs return values from tcb.
     *control =	current->misc.exregs.control;
@@ -160,6 +160,9 @@ static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
     *uflags = 	current->misc.exregs.flags;
     *pager =	current->misc.exregs.pager;
     *uhandle =	current->misc.exregs.user_handle;
+    
+    // Reinitialize state 
+    current->init_saved_state();
 }
 
 #endif /* CONFIG_SMP */
@@ -178,7 +181,7 @@ static void remote_exregs (tcb_t *current, tcb_t * dest, word_t * control,
  * @param pager		pager (in/out)
  * @param uhandler	user defined handle (in/out)
  */
-static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, word_t * usp,
+static bool perform_exregs (tcb_t *src, tcb_t * dst, exregs_ctrl_t * control, word_t * usp,
 			    word_t * uip, word_t * uflags, threadid_t * pager,
 			    word_t * uhandle)
 {
@@ -186,66 +189,141 @@ static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
     exregs_ctrl_t ctrl = *control;
 
     // Load return values before they are clobbered.
-    word_t old_usp = (word_t) dest->get_user_sp();
-    word_t old_uip = (word_t) dest->get_user_ip();
-    word_t old_uhandle = dest->get_user_handle();
-    word_t old_uflags = dest->get_user_flags();
-    threadid_t old_pager = dest->get_pager();
+    word_t old_usp = (word_t) dst->get_user_sp();
+    word_t old_uip = (word_t) dst->get_user_ip();
+    word_t old_uhandle = dst->get_user_handle();
+    word_t old_uflags = dst->get_user_flags();
+    threadid_t old_pager = dst->get_pager();
     exregs_ctrl_t old_control = 0;
+    
     bool reschedule = false;
+
+    UNUSED word_t src_idx = 1;
+    
+#if defined(CONFIG_X_CTRLXFER_MSG) 
+    word_t items = 0;
+    msg_item_t src_item;
+    acceptor_t acceptor = dst->get_br(0);
+
+    if (ctrl.is_set(exregs_ctrl_t::ctrlxfer_conf_flag))
+    {
+	do 
+	{
+	    src_item.raw = src->get_mr(src_idx++);
+	    
+	    if (!src_item.is_ctrlxfer_item())
+		break;
+	    
+	    TRACEPOINT(IPC_CTRLXFER_ITEM, "ctrlxfer item: conf %t->%t fault=%d, id_mask=%x",
+		       src, dst, src_item.get_ctrlxfer_id(), src_item.get_ctrlxfer_mask());
+	    
+	    dst->set_fault_ctrlxfer_items( src_item.get_ctrlxfer_id(), 
+					   ctrlxfer_mask_t(src_item.get_ctrlxfer_mask()));	
+		    
+	} while (src_item.more_ctrlxfer_items());
+	
+    }
+    if (ctrl.is_set(exregs_ctrl_t::ctrlxfer_read_flag))
+    {
+	do 
+	{
+	    src_item.raw = src->get_mr(src_idx);
+	    
+	    if (!src_item.is_ctrlxfer_item() || !acceptor.accept_ctrlxfer())
+		break;
+	    
+    	    TRACEPOINT(IPC_CTRLXFER_ITEM,
+		       "ctrlxfer item: read %t->%t id=%d, mask=%x (m->%c)",
+		       src, dst, 
+		       src_item.get_ctrlxfer_id(), src_item.get_ctrlxfer_mask(),
+		       acceptor.accept_ctrlxfer() ? 'f' : 'm');
+	    
+	    if( (items = dst->ctrlxfer(src, src_item, 0, src_idx, false, true)) == 0)
+		break;
+
+	    src_idx += items;
+	    
+	} while (src_item.more_ctrlxfer_items());
+
+    }
+    if (ctrl.is_set(exregs_ctrl_t::ctrlxfer_write_flag))
+    {
+	do 
+	{
+	    src_item.raw = src->get_mr(src_idx);
+	    
+	    if (!src_item.is_ctrlxfer_item() || !acceptor.accept_ctrlxfer())
+		break;
+	    
+    	    TRACEPOINT(IPC_CTRLXFER_ITEM,
+		       "ctrlxfer item: write %t->%t id=%d, mask=%x (m->%c)",
+		       src, dst, 
+		       src_item.get_ctrlxfer_id(), src_item.get_ctrlxfer_mask(),
+		       acceptor.accept_ctrlxfer() ? 'f' : 'm');
+	    
+	    if( (items = src->ctrlxfer(dst, src_item, src_idx, 0, true, false)) == 0)
+		break;
+
+	    src_idx += items; 
+
+	} while (src_item.more_ctrlxfer_items());
+		
+    }
+
+#endif
     
     if (ctrl.is_set(exregs_ctrl_t::sp_flag))
-	dest->set_user_sp ((addr_t) *usp);
+	dst->set_user_sp ((addr_t) *usp);
     
     if (ctrl.is_set(exregs_ctrl_t::ip_flag))
-	dest->set_user_ip ((addr_t) *uip);
+	dst->set_user_ip ((addr_t) *uip);
     
     if (ctrl.is_set(exregs_ctrl_t::flags_flag))
-	dest->set_user_flags (*uflags);
+	dst->set_user_flags (*uflags);
 
     if (ctrl.is_set(exregs_ctrl_t::pager_flag))
-	dest->set_pager (*pager);
+	dst->set_pager (*pager);
 
     if (ctrl.is_set(exregs_ctrl_t::uhandle_flag))
-	dest->set_user_handle (*uhandle);
+	dst->set_user_handle (*uhandle);
 
     
     // Check if thread was IPCing
-    if (dest->get_state().is_sending())
+    if (dst->get_state().is_sending())
     {
 	old_control.set(exregs_ctrl_t::send_flag);
 	if (ctrl.is_set(exregs_ctrl_t::send_flag))
 	{
-	    dest->unwind (tcb_t::abort);
-	    dest->set_state(thread_state_t::running);
-	    dest->notify(handle_ipc_error);
-	    get_current_scheduler()->enqueue_ready(dest);
+	    dst->unwind (tcb_t::abort);
+	    dst->set_state(thread_state_t::running);
+	    dst->notify(handle_ipc_error);
+	    get_current_scheduler()->schedule(dst, sched_current);
 	    reschedule = true;
 	}
     }
-    else if (dest->get_state().is_receiving())
+    else if (dst->get_state().is_receiving())
     {
 	old_control.set(exregs_ctrl_t::recv_flag);
 	if (ctrl.is_set(exregs_ctrl_t::recv_flag))
 	{
-	    dest->unwind (tcb_t::abort);
-	    dest->set_state(thread_state_t::running);
-	    dest->notify(handle_ipc_error);
-	    get_current_scheduler()->enqueue_ready(dest);
+	    dst->unwind (tcb_t::abort);
+	    dst->set_state(thread_state_t::running);
+	    dst->notify(handle_ipc_error);
+	    get_current_scheduler()->schedule(dst, sched_current);
 	    reschedule = true;
 	}
     }
 
     // Check if we should resume the thread.
-    if (dest->get_state().is_halted())
+    if (dst->get_state().is_halted())
     {
 	old_control.set(exregs_ctrl_t::halt_flag);
 
 	// If thread is halted - resume it.
 	if ((ctrl.is_set(exregs_ctrl_t::haltflag_flag)) && !(ctrl.is_set(exregs_ctrl_t::halt_flag)))
 	{
-	    dest->set_state(thread_state_t::running);
-	    get_current_scheduler()->enqueue_ready(dest);
+	    dst->set_state(thread_state_t::running);
+	    get_current_scheduler()->schedule(dst, sched_current);
 	    reschedule = true;
 	}
     } 
@@ -253,10 +331,10 @@ static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
     // Check if we should halt the thread.
     else if ((ctrl.is_set(exregs_ctrl_t::haltflag_flag)) && (ctrl.is_set(exregs_ctrl_t::halt_flag)))
     {
-	if (dest->get_state().is_running())
+	if (dst->get_state().is_running())
 	{
 	    // Halt a running thread
-	    dest->set_state(thread_state_t::halted);
+	    dst->set_state(thread_state_t::halted);
 	    reschedule = true;
 	}
 	else
@@ -268,6 +346,7 @@ static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 	// kernel operations are finished.  We can not let the thread
 	// return to user level.
     }
+
 
     // Load up return values.
     *control =	old_control;
@@ -286,31 +365,37 @@ static bool perform_exregs (tcb_t *src, tcb_t * dest, exregs_ctrl_t * control, w
 #if defined(CONFIG_X_PAGER_EXREGS)
 FEATURESTRING ("pagerexregs");
 #endif
+#if defined(CONFIG_X_CTRLXFER_MSG)
+FEATURESTRING ("ctrlxfer");
+#endif
 
-static inline bool has_exregs_perms(tcb_t * dest, threadid_t dest_tid)
+static inline bool has_exregs_perms(tcb_t * dst, threadid_t dst_tid)
 {
     space_t * space = get_current_space();
     // correct tid?
-    if (dest->myself_global != dest_tid)
+    if (dst->myself_global != dst_tid)
 	return false;
-    if (dest->get_space() == space)
+    if (dst->get_space() == space)
 	return true;
 
 #if defined(CONFIG_X_PAGER_EXREGS)
     // all threads in pager address space can ex-regs
-    threadid_t pager_tid = dest->get_pager(); // make copy
-    tcb_t * pager = dest->get_space()->get_tcb(pager_tid);
+    threadid_t pager_tid = dst->get_pager(); // make copy
+    tcb_t * pager = dst->get_space()->get_tcb(pager_tid);
 
     if ( pager->myself_global == pager_tid &&
 	 pager->get_space() == space )
 	return true;
 #endif
-
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    if ( is_privileged_space(space))
+	return true;
+#endif
     return false;
 }
 
 
-SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control, 
+SYS_EXCHANGE_REGISTERS (threadid_t dst_tid, word_t control, 
 			word_t usp, word_t uip, word_t uflags,
 			word_t uhandle, threadid_t pager_tid,
 			bool is_local)
@@ -320,25 +405,25 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
     exregs_ctrl_t ctrl(control);
     
     TRACEPOINT (SYSCALL_EXCHANGE_REGISTERS,
-		"SYS_EXCHANGE_REGISTERS: current %t, dest=%t [%s], control=0x%x [%s]"
+		"SYS_EXCHANGE_REGISTERS: current %t, dst=%t [%s], control=0x%x [%s]"
 		", usp=%p, uip=%p, uflags=%p, pager=%t, uhandle=%x\n", 
-		current, TID(dest_tid), is_local ? "local" : "global",
+		current, TID(dst_tid), is_local ? "local" : "global",
 		ctrl.raw, ctrl.string(), usp, uip, uflags, TID(pager_tid), uhandle);
 
-    // Upon entry a local dest_tid will be converted into a global
+    // Upon entry a local dst_tid will be converted into a global
     // thread ID before kernel entry.  If user somehow tricked kernel
     // entry with a local ID this will be handled in the test case
     // below.
 
     space_t * space = get_current_space();
-    tcb_t * dest = space->get_tcb(dest_tid);
+    tcb_t * dst = space->get_tcb(dst_tid);
 
     // Only allow exregs on:
     //  - active threads
     //  - in the same address space
     //  - with a valid thread ID.
 
-    if ((! dest->is_activated ()) || (! has_exregs_perms(dest, dest_tid)) )
+    if ((! dst->is_activated ()) || (! has_exregs_perms(dst, dst_tid)) )
     {
     
 	get_current_tcb ()->set_error_code (EINVALID_THREAD);
@@ -347,28 +432,25 @@ SYS_EXCHANGE_REGISTERS (threadid_t dest_tid, word_t control,
     }
  
 #if defined(CONFIG_SMP)
-    if (! dest->is_local_cpu ())
+    if (! dst->is_local_cpu ())
     {
 	// Destination thread on remote CPU.  Must perform operation
 	// remotely.
-	remote_exregs (current, dest, &ctrl.raw, &usp, &uip, &uflags,
+	remote_exregs (current, dst, &ctrl.raw, &usp, &uip, &uflags,
 		       &pager_tid, &uhandle);
     }
     else
 #endif
     {
-	// Destination thread on same CPU.  Perform operation immediately.
-	if (perform_exregs (current, dest, &ctrl, &usp, &uip, &uflags,
+	// Dstination thread on same CPU.  Perform operation immediately.
+	if (perform_exregs (current, dst, &ctrl, &usp, &uip, &uflags,
 			    &pager_tid, &uhandle))
-	{
-	    get_current_scheduler ()->enqueue_ready (current);
- 	    current->switch_to_idle();
-	}
+	    get_current_scheduler()->schedule();
 	    
     }
 
     return_exchange_registers
-	(is_local ? dest->get_global_id () : dest->get_local_id (),
+	(is_local ? dst->get_global_id () : dst->get_local_id (),
 	 ctrl.raw, usp, uip, uflags, pager_tid, uhandle);
 
 }

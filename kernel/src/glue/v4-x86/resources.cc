@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007,  Karlsruhe University
+ * Copyright (C) 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/resources.cc
  * Description:   
@@ -95,7 +95,7 @@ void thread_resources_t::load(tcb_t * tcb)
     {
 	ASSERT (fpu_owner == tcb);
 	ASSERT (fpu_state != NULL);
-	TRACEPOINT(AMD64_FPU_REENABLE, "strictly reenabling FPU for %t\n", tcb);
+	TRACEPOINT(X86_X64_FPU_REENABLE, "strictly reenabling FPU for %t\n", tcb);
 	x86_fpu_t::enable();
     }
 #endif
@@ -117,6 +117,11 @@ void thread_resources_t::purge(tcb_t * tcb)
 
     if (tcb->resource_bits.have_resource (COPY_AREA))
 	release_copy_area (tcb, false);
+
+#if defined(CONFIG_X_X86_HVM)
+    if (tcb->resource_bits.have_resource (HVM))
+	tcb->get_arch()->disable_hvm ();
+#endif
 }
 
 

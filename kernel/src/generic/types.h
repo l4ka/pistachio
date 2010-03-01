@@ -145,6 +145,13 @@ template<typename T> inline const T& max(const T& a, const T& b)
     return a;
 }
 
+template <class T> class ringlist_t
+{
+public:
+    T * next;
+    T * prev;
+};
+
 #endif /* defined(__cplusplus) */
 
 #endif /* !__TYPES_H__ */

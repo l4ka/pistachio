@@ -48,13 +48,13 @@ public:
 	{
             if (regs[csreg] == X86_KCS)
             {
-                printf("fault addr: %8x\tstack (K): %8x\terror code: %x frame: %p\n",
+                printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
                        regs[ipreg], (word_t) this + sizeof(*this) - 2 * sizeof(word_t), 
                        error,  this);
             }
             else
             {
-                printf("fault addr: %8x\tstack (U): %8x\terror code: %x frame: %p\n",
+                printf("fault addr: %8x\tstack: %8x\terror code: %x frame: %p\n",
                        regs[ipreg], regs[spreg], error,  this);
             }
 	    

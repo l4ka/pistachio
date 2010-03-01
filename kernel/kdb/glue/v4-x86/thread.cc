@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2005, 2007-2008,  Karlsruhe University
  *                
- * File path:     kdb/glue/v4-x86/x32/thread.cc
+ * File path:     kdb/glue/v4-x86/thread.cc
  * Description:   Various thread management stuff
  *                
  * Redistribution and use in source and binary forms, with or without

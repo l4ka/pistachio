@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2007,  Karlsruhe University
+ * Copyright (C) 2004-2010,  Karlsruhe University
  *                
  * File path:     bench/pingpong/ia32.h
  * Description:   IA32 specific pingpong functions
@@ -31,8 +31,7 @@
  ********************************************************************/
 #include <l4/arch.h>
 
-#undef L4_TRACEBUFFER
-#undef L4_PERFMON
+#define L4_TRACEBUFFER
 #include <l4/tracebuffer.h>
 
 #define HAVE_HANDLE_ARCH_PAGEFAULT
@@ -76,11 +75,15 @@ L4_Fpage_t handle_arch_pagefault (L4_MsgTag_t tag, L4_Word_t faddr, L4_Word_t fi
     return L4_FpageLog2 (faddr, log2size);
 }
 
-L4_INLINE L4_Word_t read_cycles (void)
+L4_INLINE L4_Word64_t read_cycles(void)
 {
-    L4_Word_t ret;
-    asm volatile ("rdtsc" :"=a" (ret) : :"edx");
-    return ret;
+    L4_Word32_t eax, edx;
+
+    __asm__ __volatile__ (
+            "rdtsc"
+            : "=a"(eax), "=d"(edx));
+
+    return (((L4_Word64_t)edx) << 32) | (L4_Word64_t)eax;
 }
 
 L4_INLINE L4_Word_t pingpong_ipc (L4_ThreadId_t dest, L4_Word_t untyped)

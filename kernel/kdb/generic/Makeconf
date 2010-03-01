@@ -9,7 +9,7 @@ SOURCES+=	kdb/generic/bootinfo.cc \
 		kdb/generic/memdump.cc \
 		kdb/generic/print.cc \
 		kdb/generic/tid_format.cc \
-		kdb/generic/tracepoints.cc 
+		kdb/generic/tracepoints.cc \
 
 ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
 SOURCES+=	kdb/generic/vrt.cc

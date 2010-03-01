@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     arch/x86/segdesc.h
  * Description:   
@@ -27,7 +27,7 @@ public:
     {
 	struct {
 	    u16_t	   size;
-	    word_t	   addr __attribute__((packed)); 
+	    word_t	   addr __attribute__((packed));
 	} descriptor;
 	u16_t  selector;
     };
@@ -54,10 +54,10 @@ public:
 	    switch(type)
 	    {	
 	    case gdtr:
-		asm("lgdt %0\n" : /* No Output */ : "m"(descriptor)); 
+		__asm__ __volatile__("lgdt %0\n" : /* No Output */ : "m"(descriptor)); 
 		break;
 	    case idtr:
-		asm("lidt %0\n" : /* No Output */ : "m"(descriptor));
+		__asm__ __volatile__("lidt %0\n" : /* No Output */ : "m"(descriptor));
 		break;
 	    default:
 		break;
@@ -69,10 +69,10 @@ public:
 	    
 	    switch(type){	
 	    case gdtr:
-		asm("sgdt %0\n" : "=m"(descriptor));
+		__asm__ __volatile__("sgdt %0\n" : "=m"(descriptor));
 		break;
 	    case idtr:
-		asm("sidt %0\n" : "=m"(descriptor));
+		__asm__ __volatile__("sidt %0\n" : "=m"(descriptor));
 		break;
 	    default:
 		break;
@@ -82,14 +82,13 @@ public:
 
     void setselreg(const regtype_e type)
 	{
-	   
 	    switch(type)
 	    {	
 	    case ldtr:
-		asm("lldt %0\n" : /* No Output */ : "m"(selector));
+		__asm__ __volatile__("lldt %0\n" : /* No Output */ : "m"(selector));
 		break;
 	    case tr:
-		asm("ltr %0\n"  : /* No Output */ : "m"(selector));
+		__asm__ __volatile__("ltr %0\n"  : /* No Output */ : "m"(selector));
 		break;
 	    default:
 		break;
@@ -100,10 +99,10 @@ public:
 	    
 	    switch(type){	
 	    case ldtr:
-		asm("sldt %0\n" : "=m"(selector));
+		__asm__ __volatile__("sldt %0\n" : "=m"(selector));
 		break;
 	    case tr:
-		asm("str %0\n" : "=m"(selector));
+		__asm__ __volatile__("str %0\n" : "=m"(selector));
 		break;
 	    default:
 		selector = 0;

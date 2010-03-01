@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2007, 2009,  Karlsruhe University
  *                
  * File path:     kdb/generic/sprintf.cc
  * Description:   disassembler support code

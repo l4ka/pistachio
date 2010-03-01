@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/debug.cc
  * Description:   Debugging support
@@ -59,7 +59,7 @@ extern "C" void sync_debug (word_t address)
 {
    
     if (get_current_tcb() == get_kdebug_tcb())
-	ENABLE_TRACEPOINT(DEBUG_LOCK, ~0, 0);
+	ENABLE_TRACEPOINT(DEBUG_LOCK, ~0U, 0U);
     
     if (!sync_dbg_enter)
     {
@@ -92,8 +92,7 @@ public:
 	{
 	    user_tcb = NULL;
 	    kdb_tcb = (tcb_t *) &__kdb_tcb;
-	    get_idle_tcb()->create_kernel_thread(NILTHREAD, &__kdb_utcb);
-	    kdb_tcb->priority = MAX_PRIO;
+	    get_idle_tcb()->create_kernel_thread(NILTHREAD, &__kdb_utcb, sktcb_hi);
 	    kdb_tcb->set_cpu(get_current_cpu());
 	    kdb_tcb->set_space(get_kernel_space());
 	}
@@ -151,7 +150,7 @@ X86_EXCNO_ERRORCODE(exc_nmi, X86_EXC_NMI)
 {
     cpu_kdb.do_enter_kdebug(frame, X86_EXC_NMI);
 }    
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 X86_EXCNO_ERRORCODE(exc_debug_ipi, 0)
 {
     

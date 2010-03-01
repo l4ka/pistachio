@@ -29,8 +29,9 @@
  * $Id: mdb_io.h,v 1.3 2007/01/08 14:08:10 skoglund Exp $
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_X86__MDB_IO_H__
-#define __GLUE__V4_X86__MDB_IO_H__
+
+#ifndef __PLATFORM__PC99__MDB_IO_H__
+#define __PLATFORM__PC99__MDB_IO_H__
 
 #include <mdb.h>
 #include INC_GLUE(mdb.h)
@@ -71,5 +72,4 @@ extern mdb_io_t mdb_io;
 extern mdb_node_t * sigma0_ionode;
 
 
-
-#endif /* !__GLUE__V4_X86__MDB_IO_H__ */
+#endif /* !__PLATFORM__PC99__MDB_IO_H__ */

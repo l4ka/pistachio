@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006, 2009,  Karlsruhe University
  *                
  * File path:     l4/amd64/syscalls.h
  * Description:   amd64 syscall implementations
@@ -233,7 +233,7 @@ extern __L4_Schedule_t __L4_Schedule;
 L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
 				  L4_Word_t TimeControl,
 				  L4_Word_t ProcessorControl,
-				  L4_Word_t prio,
+				  L4_Word_t PrioControl,
 				  L4_Word_t PreemptionControl,
 				  L4_Word_t * old_TimeControl)
 {
@@ -257,7 +257,7 @@ L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
 	[procontrol]	"0" (ProcessorControl),	/* %5  RAX <- R8 */
 	[precontrol]	"1" (PreemptionControl),/* %6  RCX <- R9 */
 	[tcontrol]	"2" (TimeControl),	/* %7  RDX */
-	[prio]		"3" (prio),		/* %8  RSI */	
+	[PrioControl]	"3" (PrioControl),	/* %8  RSI */	
 	[dest]		"4" (dest)		/* %9  RDI */
 	: /* clobbers */
 	"memory", "rbx","r8", "r9", "r10",  "r11", "r12", "r13", "r14", "r15"

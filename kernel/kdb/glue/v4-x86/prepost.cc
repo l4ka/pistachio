@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2009,  Karlsruhe University
+ * Copyright (C) 2002-2010,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-x86/prepost.cc
  * Description:   IA-32 specific handlers for KDB entry and exit
@@ -44,6 +44,7 @@
 #include INC_ARCH(trapgate.h)	
 #include INC_GLUE(cpu.h)	
 #include INC_GLUE(schedule.h)	
+#include INC_PLAT(nmi.h)
 
 extern space_t *current_disas_space;
 
@@ -63,10 +64,15 @@ INLINE void disas_addr (addr_t ip, const char * str = "")
 }
 #endif
 
+extern word_t x86_kdb_last_ip;
+extern bool x86_kdb_singlestep;
+extern bool x86_kdb_branchstep;
+
 #if defined(CONFIG_TRACEPOINTS)
 extern bool x86_breakpoint_cpumask;
 extern bool x86_breakpoint_cpumask_kdb;
 DECLARE_TRACEPOINT(X86_BREAKPOINT);
+EXTERN_TRACEPOINT(X86_APIC_IPI);
 #endif
 
 #if defined(CONFIG_SMP)
@@ -75,19 +81,18 @@ atomic_t kdb_current_cpu;
 KDEBUG_INIT(kdb_prepost_init);
 void kdb_prepost_init()
 {
-    kdb_current_cpu = CONFIG_SMP_MAX_CPUS;
+    kdb_current_cpu = CONFIG_SMP_MAX_CPUS; 
 }
 #endif
 
 
-
 bool kdb_t::pre() 
 {
-    cpuid_t cpu = get_current_cpu();
     bool enter_kernel_debugger = true;
     debug_param_t * param = (debug_param_t*) kdb_param;
     x86_exceptionframe_t* f = param->frame;
     kdb_current = param->tcb;
+
 
 #if defined(CONFIG_SMP)
     while (!kdb_current_cpu.cmpxchg(CONFIG_SMP_MAX_CPUS, current_cpu))
@@ -103,6 +108,7 @@ bool kdb_t::pre()
 	 */
 	if (param->exception == X86_EXC_NMI)
 	{
+	    cpuid_t cpu = get_current_cpu();
 	    if (kdb_current_cpu == cpu)
 	    {
 		printf("--- Switched to CPU %d ---\n", cpu);
@@ -120,25 +126,23 @@ bool kdb_t::pre()
     }
     
 #endif
-
+    
     switch (param->exception)
     {
     case X86_EXC_DEBUG:	/* single step, hw breakpoints */
     {
-	/* breakpoint exception */
 	if (f->regs[x86_exceptionframe_t::freg] & (1 << 8))
 	{
-	    extern word_t x86_last_ip;
+	    x86_kdb_singlestep = false;
 #if defined(CONFIG_CPU_X86_I686) || defined(CONFIG_CPU_X86_P4) 
-	    extern bool x86_single_step_on_branches;
-	    if (x86_single_step_on_branches)
+	    if (x86_kdb_branchstep)
 	    {
 		addr_t last_branch_ip;
-		x86_wrmsr (X86_MSR_DEBUGCTL, 0);
-		x86_single_step_on_branches = false;
+ 		x86_wrmsr (X86_MSR_DEBUGCTL, 0);
+		x86_kdb_branchstep = false;
 #if defined(CONFIG_CPU_X86_I686)
 		last_branch_ip = (addr_t) (word_t)
-		    x86_rdmsr (X86_MSR_LASTBRANCHFROMIP);
+ 		    x86_rdmsr (X86_MSR_LASTBRANCHFROMIP);
 #else
 		word_t last_branch_tos = x86_rdmsr (X86_MSR_LASTBRANCH_TOS);
 		ASSERT(last_branch_tos < 16);
@@ -153,49 +157,24 @@ bool kdb_t::pre()
 		last_branch_ip = (addr_t) (word_t) x86_rdmsr(lbipmsr);
 #endif
 		disas_addr (last_branch_ip, "branch to");
-		x86_last_ip = f->regs[x86_exceptionframe_t::ipreg];
+		x86_kdb_last_ip = f->regs[x86_exceptionframe_t::ipreg];
 	    }
 #endif
-	    if (x86_last_ip != ~0U)
-		disas_addr ((addr_t) x86_last_ip);
+	    if (x86_kdb_last_ip != ~0U)
+		disas_addr ((addr_t) x86_kdb_last_ip);
+	    
 	    f->regs[x86_exceptionframe_t::freg] &= ~((1 << 8) + (1 << 16));	/* !RF + !TF */
-	    x86_last_ip = ~0U;
+	    x86_kdb_last_ip = ~0U;
 	}
 	else
 	{
 #if defined(CONFIG_TRACEPOINTS)
 	    // TCB, address, content
 	    word_t db7, db6, dbnum = 0, db = 0;
-	    __asm__ ("mov %%db7,%0": "=r"(db7));
-	    __asm__ ("mov %%db6,%0": "=r"(db6));
-	    
-	    if (db6 & 8)
-	    {
-		dbnum = 3;
-		__asm__ ("mov %%db3,%0": "=r"(db));
-	    }
-	    else if (db6 & 4)
-	    {
-		dbnum = 2;
-		__asm__ ("mov %%db2,%0": "=r"(db));
-
-	    }
-	    else if (db6 & 2)
-	    {
-		dbnum = 1;
-		__asm__ ("mov %%db1,%0": "=r"(db));
-
-	    }
-	    else if (db6 & 1)
-	    {
-		dbnum = 0;
-		__asm__ ("mov %%db0,%0": "=r"(db));
-
-	    }
-	    else 
-	    {
-		printf("--- Debug Exception NO DR---\n");
-	    }
+	    X86_GET_DR(7, db7);
+	    X86_GET_DR(6, db6);
+	    dbnum = ((db6 & 8) ? 3 : ((db6 & 4) ? 2 : ((db6 & 2) ? 1 : 0)));
+	    db = x86_dr_read(dbnum);
 	    space_t *space = kdb.kdb_current->get_space();
 	    if (!space)
 		space = get_kernel_space();
@@ -211,7 +190,7 @@ bool kdb_t::pre()
 		TRACEPOINT(X86_BREAKPOINT, "breakpoint dr%d ip: %x addr %x content %x", 
 			   dbnum, f->regs[x86_exceptionframe_t::ipreg], db, content);
 	    
-	    enter_kernel_debugger = ((x86_breakpoint_cpumask_kdb & (1 << cpu)) != 0);
+	    enter_kernel_debugger = ((x86_breakpoint_cpumask_kdb & (1 << get_current_cpu())) != 0);
 #else
 	    printf("--- Debug Exception ---\n");
 #endif
@@ -280,7 +259,7 @@ bool kdb_t::pre()
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 		if (space->is_compatibility_mode() && space->is_user_area(addr))
                 {
-                    u32_t user_word32;
+                    u32_t user_word32 = 0;
 		    /* movl addr32, %eax */
 		    mapped = readmem (space, addr_offset(addr, 3), &user_word32);
                     
@@ -300,7 +279,7 @@ bool kdb_t::pre()
 	    {
 		if (! readmem(space, addr_offset(addr, 3), &c) )
 		    break;
-		
+ 
 		if (c == 0xc7)
 		{
 		    /* movq addr32, %rax */
@@ -310,6 +289,7 @@ bool kdb_t::pre()
 		}
 		
 	    }
+            
 	    if (user_addr)
 	    {
 		
@@ -387,7 +367,6 @@ bool kdb_t::pre()
 #endif
 		break;
 
-
 	    case 0xd:
 		//
 		// KDB_ReadChar_Blocked()
@@ -401,6 +380,7 @@ bool kdb_t::pre()
 		//
 	    	f->regs[x86_exceptionframe_t::areg] = getc (false);
 		break;
+
 
 	    default:
 		enter_kernel_debugger = true;
@@ -426,7 +406,6 @@ bool kdb_t::pre()
   
     return enter_kernel_debugger;
 };
-
 
 
 void kdb_t::post() {

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2006,  Karlsruhe University
+ * Copyright (C) 2002-2006, 2009,  Karlsruhe University
  *                
  * File path:     api/v4/config.h
  * Description:   V4 specific configurations
@@ -63,12 +63,6 @@
 #define L4_LOCAL_ID_BITS		L4_ARCH_CONST(L4_LOCAL_ID_BITS)
 #define L4_LOCAL_ID_ZERO_BITS		L4_ARCH_CONST(L4_LOCAL_ID_ZERO_BITS)
 #define L4_FPAGE_BASE_BITS		L4_ARCH_CONST(L4_FPAGE_BASE_BITS)
-
-#define DEFAULT_TIMESLICE_LENGTH	(time_t::period(625, 4))
-#define DEFAULT_TOTAL_QUANTUM		(time_t::never())
-#define MAX_PRIO			255
-#define ROOT_PRIORITY			MAX_PRIO
-#define DEFAULT_PRIORITY		100
 
 /*
  * root server configuration

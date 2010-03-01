@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2008,  Karlsruhe University
  *                
  * File path:     platform/generic/intctrl-pic.h
  * Description:   PIC cascade in standard PCs

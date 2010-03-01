@@ -1,2 +1,13 @@
+######################################################################
+##                
+## Copyright (C) 2008,  Karlsruhe University
+##                
+## File path:     kdb/platform/pc99/Makeconf
+## Description:   
+##                
+## @LICENSE@
+##                
+## $Id:$
+##                
+######################################################################
 SOURCES += kdb/platform/pc99/io.cc kdb/platform/pc99/intctrl.cc
-

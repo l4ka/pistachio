@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     generic/acpi.h
  * Description:   ACPI structures
@@ -264,7 +264,7 @@ public:
     void list(addr_t myself_phys) {
 	for (word_t i = 0; i < ((header.len-sizeof(header))/sizeof(ptrs[0])); i++)
 	{
-	    acpi_thead_t* t= (acpi_thead_t*)(acpi_remap((addr_t)ptrs[i]));
+	    UNUSED acpi_thead_t* t= (acpi_thead_t*)(acpi_remap((addr_t)ptrs[i]));
 	    TRACE_INIT("\t%c%c%c%c is at %p\n",
 		       t->sig[0], t->sig[1], t->sig[2], t->sig[3], ptrs[i]);
 	    acpi_remap(myself_phys);

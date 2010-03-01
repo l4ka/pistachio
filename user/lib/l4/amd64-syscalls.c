@@ -53,7 +53,7 @@ void __L4_Init( void )
 {
     L4_KernelInterfacePage_t *kip;
     L4_Word_t dummy;
-        
+    
     kip = L4_KernelInterface( &dummy, &dummy, &dummy );
 
 

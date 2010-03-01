@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.h
  * Description:   
@@ -14,6 +14,9 @@
 #define __GLUE__V4_X86__SPACE_H__
 
 #include INC_GLUE_SA(space.h)
+#if defined(CONFIG_X_EVT_LOGGING)
+#include INC_GLUE(logging.h)
+#endif
 
 extern cpuid_t current_cpu;
 
@@ -51,6 +54,10 @@ public:
     bool is_mappable(addr_t addr);
     bool is_mappable(fpage_t fpage);
     bool is_arch_mappable(addr_t addr, size_t size);
+#if defined(CONFIG_X_EVT_LOGGING)
+    bool is_log_area(addr_t addr);
+    bool is_log_area(fpage_t fpage);
+#endif
 
     /* Copy area related methods */
     bool is_copy_area (addr_t addr);
@@ -107,10 +114,9 @@ public:
     void flush_tlbent (space_t * curspace, addr_t vaddr, word_t log2size);
     static bool does_tlbflush_pay (word_t log2size)
 	{ return log2size >= 28; }
-    
+
     bool readmem (addr_t vaddr, word_t * contents);
     static word_t readmem_phys (addr_t paddr);
-
 
     /* kip and utcb handling */
     fpage_t get_kip_page_area()
@@ -136,6 +142,17 @@ public:
 	{ return data.io_space; }
 #endif
 
+
+#if defined(CONFIG_X_X86_HVM)
+    x86_hvm_space_t *get_hvm_space ()
+    { return &data.hvm_space; }
+
+    bool is_hvm_space ()
+	{ return EXPECT_FALSE (get_hvm_space ()->is_active()); }
+
+#else
+    const bool is_hvm_space () { return false; }
+#endif
     
     friend class pgent_t;
 
@@ -177,6 +194,18 @@ INLINE bool space_t::is_arch_mappable (addr_t addr, size_t size)
 #endif
 }
 
+#if defined(CONFIG_X_EVT_LOGGING)
+INLINE bool space_t::is_log_area(addr_t addr)
+{
+    return (addr >= user_log_area_start && 
+            addr < addr_offset(user_log_area_start, LOG_AREA_SIZE));
+}
+INLINE bool space_t::is_log_area(fpage_t fpage)
+{
+    return is_log_area(fpage.get_address()) && 
+	is_log_area(addr_offset(fpage.get_address(), fpage.get_size()-1));
+}
+#endif
 
 
 INLINE space_t::top_pdir_t *space_t::get_top_pdir(cpuid_t cpu)
@@ -258,10 +287,13 @@ INLINE u8_t space_t::get_from_user(addr_t addr)
 INLINE void space_t::add_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     data.thread_count++;
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     data.cpu_ptab[cpu].thread_count++;
 #endif
 
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->enqueue_tcb (tcb, this);
+#endif
 }
 
 /**
@@ -273,10 +305,15 @@ INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
 {
     ASSERT (data.thread_count !=  0);
     data.thread_count--;
-#ifdef CONFIG_SMP
+
+#if defined(CONFIG_SMP)
     ASSERT (data.cpu_ptab[cpu].thread_count !=  0);
     data.cpu_ptab[cpu].thread_count--;
 #endif
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->dequeue_tcb (tcb, this);
+#endif
+
     return (data.thread_count == 0);
 }
 
@@ -288,7 +325,9 @@ INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
  */
 INLINE tcb_t * space_t::get_tcb(threadid_t tid)
 { 
-    return (tcb_t*)((KTCB_AREA_START) + ((tid.get_threadno() & VALID_THREADNO_MASK) * KTCB_SIZE)); 
+    extern tcb_t *__idle_tcb;
+    return (tid == threadid_t::idlethread() ? __idle_tcb :
+	    (tcb_t*) ((KTCB_AREA_START) + ((tid.get_threadno() & VALID_THREADNO_MASK) * KTCB_SIZE))); 
 }
 
 INLINE tcb_t * space_t::get_tcb(void * ptr)
@@ -331,6 +370,10 @@ INLINE pgent_t * space_t::pgent (word_t num)
  */
 INLINE void space_t::flush_tlb (space_t * curspace)
 {
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->handle_gphys_unmap (0, -1UL);
+#endif
+
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlb (IS_SPACE_GLOBAL (this));
 }
@@ -342,6 +385,10 @@ INLINE void space_t::flush_tlb (space_t * curspace)
 INLINE void space_t::flush_tlbent (space_t * curspace, addr_t addr,
 				   word_t log2size)
 {
+#if defined(CONFIG_X_X86_HVM)
+    get_hvm_space ()->handle_gphys_unmap (addr, log2size);
+#endif
+
     if (this == curspace || IS_SPACE_SMALL (this))
 	x86_mmu_t::flush_tlbent ((word_t) addr);
 }

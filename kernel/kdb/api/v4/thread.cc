@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2004, 2007-2009,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/thread.cc
  * Description:   Kdebug stuff for V4 threads
@@ -85,6 +85,12 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
     if (kdb_tid_format.X.human)
     {
 	// Convert special thread IDs to human readable form
+	threadid_t ktid;
+	ktid.set_global_id (get_kip ()->thread_info.get_system_base (), 1);
+
+	if (tcb->get_global_id() == ktid)
+	    return print_string ("KRN_THRD", width, precision);
+
 	if (tcb == get_idle_tcb ())
 	    return print_string ("IDLETHRD", width, precision);
 
@@ -102,7 +108,6 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 	    print_string ("IRQ_");
 	    return 4 + print_dec (tid.get_irqno(), width - 4, '0');
 	}
-
 	word_t base_id = tid.get_threadno () -
 	    get_kip()->thread_info.get_user_base ();
 	if (base_id < 3)

@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2008-2010,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/ktcb.h
+ * File path:     glue/v4-x86/x32/ktcb.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -32,9 +32,59 @@
 #ifndef __GLUE_V4_X86__X32__KTCB_H__
 #define __GLUE_V4_X86__X32__KTCB_H__
 
-typedef struct 
-{
-} arch_ktcb_t;
+#include <tcb_layout.h>
 
+#include INC_API(types.h)
+#include INC_API(tcb.h)
+#include INC_API_SCHED(ktcb.h)
+
+#if defined(CONFIG_X_CTRLXFER_MSG)
+#include INC_GLUE(ipc.h)
+#endif
+
+#if defined(CONFIG_X_X86_HVM)
+#include INC_GLUE(hvm.h)
+#define X86_CTRLXFER_FLAGMASK		(hvm_enabled ? (word_t) X86_HVM_EFLAGS_MASK : (word_t)  X86_USER_FLAGMASK)
+#define X86_CTRLXFER_FAULT_MAX          vmcs_ei_reason_t::be_max
+#else
+#define X86_CTRLXFER_FLAGMASK		(word_t) (X86_USER_FLAGMASK)
+#define X86_CTRLXFER_FAULT_MAX          0
+class arch_hvm_ktcb_t 
+{
+};
+#endif
+
+typedef bitmask_t<u32_t> ctrlxfer_mask_t;
+
+class arch_ktcb_t : public arch_hvm_ktcb_t
+{
+    /* TCB_START_MAKER */
+    /* TCB_END_MARKER */
+
+public:
+
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    word_t get_x86_gpregs(word_t id, word_t mask, tcb_t *dst, word_t &dst_mr);
+    word_t set_x86_gpregs(word_t id, word_t mask, tcb_t *src, word_t &src_mr);
+
+    word_t get_x86_fpuregs(word_t id, word_t mask, tcb_t *dst, word_t &dst_mr) { UNIMPLEMENTED(); return 0;}
+    word_t set_x86_fpuregs(word_t id, word_t mask, tcb_t *src, word_t &src_mr) { UNIMPLEMENTED(); return 0;}
+
+    static get_ctrlxfer_regs_t get_ctrlxfer_regs[arch_ctrlxfer_item_t::id_max];
+    static set_ctrlxfer_regs_t set_ctrlxfer_regs[arch_ctrlxfer_item_t::id_max];
+
+    
+#if defined(CONFIG_DEBUG)
+    word_t get_ctrlxfer_reg(word_t id, word_t reg);
+#endif
+
+    static const word_t fault_max = X86_CTRLXFER_FAULT_MAX;
+
+#endif /* defined(CONFIG_X_CTRLXFER_MSG) */
+
+    
+    friend class tcb_t;
+    friend class x86_hvm_space_t;
+};
 
 #endif /* !__GLUE_V4_X86__X32__KTCB_H__ */

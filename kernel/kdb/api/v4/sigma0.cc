@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2006, 2009,  Karlsruhe University
+ * Copyright (C) 2002, 2006-2007, 2009,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/sigma0.cc
  * Description:   Sigma0 interaction
@@ -115,9 +115,9 @@ static void sigma0_ipc (word_t type, word_t arg)
     // Abort kernel thread execution.
     current->set_space (NULL);
     current->set_state (thread_state_t::aborted);
-    get_current_scheduler ()->dequeue_ready (current);
-    get_current_scheduler ()->set_priority (current, 0);
-    current->switch_to_idle ();
+    get_current_scheduler ()->deschedule (current);
+    current->sched_state.init (sktcb_lo);
+    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 }
 
 
@@ -139,8 +139,8 @@ static void sigma0_send (sigma0_request_e type, word_t arg)
     tcb->notify (sigma0_ipc, (word_t) type, arg);
 
     // Make kernel thread run on highest prio.
-    get_current_scheduler ()->set_priority (tcb, MAX_PRIO);
+    tcb->sched_state.init (sktcb_hi);
     tcb->set_space (get_kernel_space ());
     tcb->set_state (thread_state_t::running);
-    get_current_scheduler ()->enqueue_ready (tcb);
+    get_current_scheduler ()->schedule (tcb, sched_current);
 }

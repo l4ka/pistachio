@@ -67,9 +67,19 @@ $(BUILDDIR)/Makeconf.local: .config
 	@awk -F'[_=]' '/^CONFIG_ARCH_[^_]*=y/ { ARCH=$$3 }\
 		       /^CONFIG_SUBARCH_[^_]*=y/ { SUBARCH=$$3 }\
 		       /^CONFIG_CPU_[^_]*_[^_]*=y/ { CPU=$$4 }\
+		       /^CONFIG_[_X]*SCHED_[^_]*=y/ { if ($$4 == "y") SCHED=$$3; else SCHED=$$4 } \
 		       /^CONFIG_PLAT_[^_]*=y/ { PLATFORM=$$3 } END\
-		       { { printf(",s/^ARCH *=.*/ARCH=%s/\n,s/^SUBARCH *=.*/SUBARCH=%s/\n,s/^CPU *=.*/CPU=%s/\n,s/^PLATFORM *=.*/PLATFORM=%s/\nwq\n",\
-			 tolower(ARCH), tolower(SUBARCH), tolower(CPU), tolower(PLATFORM)) }}' $< | ed -s $@
+	       { { printf(",s/^ARCH *=.*/ARCH=%s/\n\
+			  ,s/^SUBARCH *=.*/SUBARCH=%s/\n\
+			  ,s/^CPU *=.*/CPU=%s/\n\
+			  ,s/^PLATFORM *=.*/PLATFORM=%s/\n\
+			  ,s/^SCHED *=.*/SCHED=%s/\n\
+			  wq\n",\
+			  tolower(ARCH), \
+			  tolower(SUBARCH), \
+			  tolower(CPU), \
+			  tolower(PLATFORM),\
+			  tolower(SCHED)) }}' $< | ed -s $@
 
 menuconfig batchconfig ttyconfig xconfig: $(BUILDDIR)/Makeconf.local
 

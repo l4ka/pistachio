@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2001-2007,  Karlsruhe University
+## Copyright (C) 2001-2010,  Karlsruhe University
 ##                
 ## File path:     config/rules.cml
 ## Description:   Rules for Pistachio's CML2 configuration system
@@ -101,6 +101,33 @@ that thread.
 .
 
 
+X_CTRLXFER_MSG 'CtrlXfer Message Prococol' text
+
+Enable support for control transfer items sent along with kernel-generated
+messages
+.
+
+scheduler	'Kernel scheduling policy'
+
+SCHED_RR	'Round-Robin' text
+Priority-based round-robin scheduling
+.
+
+X_SCHED_HS	'Hierarchical Stride Scheduling' text
+Hierarchical Stride Scheduling
+.
+
+X_X86_HVM 'Support for full virtualization on x86-processors' text
+Support for Intel Vanderpool Virtualization Extensions / AMD Secure
+Virtual Mode 
+.
+
+X_EVT_LOGGING	'Event Logging features' text
+
+Enables kernel event logging and kernel performance counters.
+.
+
+
 #
 # debugger menu
 #
@@ -128,6 +155,7 @@ KDB_INPUT_HLT	'Use hlt while waiting for console input' text
 Use interruptible hlt while waiting for console input in the debugger,
 to reduce CPU load and power. Note that interrupts are enabled while waiting.
 .
+
 DEBUG_SYMBOLS	'Include debugging symbols in binary'
 
 KDB_DISAS	'Enable Disassembler [GPL license]' text
@@ -163,19 +191,15 @@ TRACEPOINTS	'Enable Tracepoints'
 KMEM_TRACE	'Enable tracing of kernel memory'
 TRACEBUFFER	'Enable Tracebuffer' text
 
-A low-level facility for debugging and monitoring the kernel and L4
-applications.  The facility is not safe in the respect that
-applications must be trusted to not clobber with the trace buffer.
-The option must not be enabled in production systems.
-.
-TBUF_LIGHT	'Light weight tracebuffer' text
-
-Disable all regular kernel tracepoint events from being logged in the
-tracebuffer
 .
 TBUF_PERFMON	'Tracebuffer perfmon counters' text
 
 Also log performance monitoring counters on tracebuffer events.
+.
+
+TBUF_PERFMON_ENERGY	'Tracebuffer energy perfmon counters' text
+
+Estimate energy via performance monitoring counters on tracebuffer events.
 .
 
 #
@@ -226,8 +250,8 @@ menu hardware
 	powerpc_platform
 	powerpc64_platform
 	powerpc64_type
-	SMP { SMP_MAX_PROCS% SMP_IDLE_POLL}
 	hardware_misc
+	SMP { SMP_MAX_PROCS% SMP_IDLE_POLL}
 	
 
 choices arch    # Basic architecture
@@ -244,6 +268,7 @@ choices powerpc_type
 unless ARCH_POWERPC suppress dependent powerpc_type
 unless ARCH_X86 or ARCH_POWERPC suppress dependent SMP
 unless ARCH_X86 and SMP suppress dependent SMP_IDLE_POLL
+unless ARCH_POWERPC or IOAPIC suppress SMP
 
 
 choices powerpc_platform
@@ -270,16 +295,36 @@ default SMP_MAX_PROCS from 4
 default CPU_X86_SIMICS_SPEED from 100
 unless CPU_X86_SIMICS suppress CPU_X86_SIMICS_SPEED
 
+choices scheduler    # Kernel scheduling policy
+	SCHED_RR
+        X_SCHED_HS
+	default SCHED_RR
+
 menu experimental
 	X_PAGER_EXREGS
+        X_CTRLXFER_MSG
+        X_X86_HVM
+	X_EVT_LOGGING
+	scheduler
+
 
 default X_PAGER_EXREGS from n
+default X_CTRLXFER_MSG from n
+
+unless ARCH_X86 and SUBARCH_X32 suppress X_CTRLXFER_MSG
+default X_X86_HVM from n
+unless X86_HVM suppress X_X86_HVM
+unless X_CTRLXFER_MSG suppress X_X86_HVM
+
+default X_EVT_LOGGING from n
+unless ARCH_X86 and SUBARCH_X32 suppress X_EVT_LOGGING
+
 menu kernel
+	EXPERIMENTAL
+	experimental
 	IPC_FASTPATH
 	DEBUG
 	DEBUG_SYMBOLS
-	EXPERIMENTAL
-	experimental
 	K8_FLUSHFILTER
         PERFMON
 	SPIN_WHEELS
@@ -298,7 +343,7 @@ unless EXPERIMENTAL suppress dependent experimental
 unless ARCH_POWERPC suppress PPC_BAT_SYSCALLS
 unless ARCH_POWERPC64 suppress PPC64_TRASH_OF
 unless CPU_X86_I686 or CPU_X86_P4 or CPU_X86_K8 suppress dependent PERFMON
-unless ARCH_POWERPC or ARCH_X86 suppress IPC_FASTPATH
+when  X_EVT_LOGGING suppress PERFMON
 unless ARCH_X86 suppress SPIN_WHEELS
 unless ARCH_X86 suppress NEW_MDB
 unless NEW_MDB suppress X86_IO_FLEXPAGES
@@ -326,8 +371,8 @@ default KDB_COMPORT from 0x3f8
 default KDB_COMSPEED from 115200 range 115200 57600 38400 19200 9600 4800 2400 1200 300
 unless KDB_CONS_COM suppress KDB_COMPORT KDB_COMSPEED
 unless KDB suppress dependent kdb_console KDB_COMPORT KDB_COMSPEED KDB_DISAS KDB_ON_STARTUP KDB_BREAKIN trace ppc_debug_consoles
-unless ARCH_X86 suppress KDB_INPUT_HLT
 when ARCH_POWERPC suppress kdb_console KDB_COMPORT KDB_COMSPEED KDB_BREAKIN
+unless ARCH_X86 suppress KDB_INPUT_HLT
 when ARCH_POWERPC64 suppress KDB_COMPORT KDB_COMSPEED
 unless ARCH_POWERPC suppress ppc_debug_consoles
 unless ARCH_POWERPC64 suppress ppc64_debug_consoles
@@ -345,14 +390,14 @@ menu trace
 	TRACEPOINTS
 	KMEM_TRACE
         TRACEBUFFER
-	TBUF_LIGHT
 	TBUF_PERFMON
+	TBUF_PERFMON_ENERGY
 	X86_KEEP_LAST_BRANCHES
 
 unless ARCH_X86 suppress dependent TRACEBUFFER
-unless TRACEBUFFER suppress TBUF_LIGHT
+when   X_EVT_LOGGING suppress TBUF_PERFMON TBUF_PERFMON_ENERGY
 unless TRACEBUFFER and PERFMON suppress TBUF_PERFMON
-default TBUF_LIGHT from n
+unless TBUF_PERFMON and SUBARCH_X32 and CPU_X86_P4 suppress TBUF_PERFMON_ENERGY
 default TBUF_PERFMON from PERFMON
 
 menu codegen
@@ -376,6 +421,7 @@ derive IS_32BIT from SUBARCH_X32 or ARCH_POWERPC
 derive IS_64BIT from SUBARCH_X64 or ARCH_POWERPC64
 derive BIGENDIAN from ARCH_POWERPC or ARCH_POWERPC64
 derive HAVE_MEMORY_CONTROL from ARCH_POWERPC64
+
 
 source "powerpc.cml"
 source "powerpc64.cml"

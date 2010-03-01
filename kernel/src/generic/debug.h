@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2009,  Karlsruhe University
  *                
  * File path:     generic/debug.h
  * Description:   Debug functions
@@ -33,7 +33,6 @@
 #define __DEBUG_H__
 
 #define SEC_KDEBUG ".kdebug"
-
 
 /*
  * Escape codes for controlling text color, brightness, etc.
@@ -69,29 +68,36 @@ void init_console (void);
 extern "C" int printf (const char * format, ...);
 tcb_t *get_kdebug_tcb();
 
-# define UNIMPLEMENTED()				\
-do {							\
+# define UNIMPLEMENTED()                                        \
+do {                                                            \
     printf ("\nNot implemented: %s\n%s, line %d\n",	\
-	    __PRETTY_FUNCTION__, __FILE__, __LINE__);	\
-    for (;;)						\
+	    __PRETTY_FUNCTION__, __FILE__, __LINE__);           \
+    for (;;)                                                    \
 	enter_kdebug ("unimplemented");			\
 } while (false)
 
+# define UNTESTED()                                     \
+do {							\
+    printf ("\nNot tested: %s\n%s, line %d\n",	\
+	    __PRETTY_FUNCTION__, __FILE__, __LINE__);	\
+    enter_kdebug ("untested");                         \
+} while (false)
+
 #if !defined(CONFIG_KDB_NO_ASSERTS)
-# define ASSERT(x)							\
-do {									\
-    if (EXPECT_FALSE(! (x))) {						\
+# define ASSERT(x)                                                              \
+do {                                                                            \
+    if (EXPECT_FALSE(! (x))) {                                                  \
 	printf ("Assertion "#x" failed in file %s, line %d (fn=%p)\n",	\
-		__FILE__, __LINE__, __builtin_return_address(0));	\
-	enter_kdebug ("assert");					\
-    }									\
+		__FILE__, __LINE__, __builtin_return_address(0));               \
+	enter_kdebug ("assert");                                               \
+    }                                                                           \
 } while(false)
 
-# define WARNING(fmt, args...)						\
-do {									\
+# define WARNING(fmt, args...)                                                  \
+do {                                                                            \
     printf ("WARNING: %s, line %d (fn=%p)\n===> " fmt,			\
-	    __FILE__, __LINE__, __builtin_return_address(0) , ## args);	\
-    enter_kdebug ("warning");						\
+	    __FILE__, __LINE__, __builtin_return_address(0) , ## args);         \
+    enter_kdebug ("warning");                                                  \
 } while (false)
 
 # define TRACEF(f, x...)					\
@@ -114,8 +120,6 @@ do {								\
 /* From kdb/generic/entry.cc */
 void kdebug_entry (void *);
 
-bool kdebug_check_interrupt();
-
 #else /* !CONFIG_DEBUG */
 
 /*
@@ -125,8 +129,6 @@ bool kdebug_check_interrupt();
 # define init_console(...)
 # define printf(fmt, args...)		do { } while (false)
 # define enter_kdebug(x)		do { } while (true)
-# define get_kdebug_tcb()		(NULL)
-# define kdebug_check_interrupt()	(false)
 # define UNIMPLEMENTED()		do { } while (true)
 # define ASSERT(x)			do { } while (false)
 # define WARNING(fmt, args...)		do { } while (false)
@@ -166,6 +168,8 @@ void kdebug_check_breakin();
 # else
 #  define kdebug_check_breakin()
 # endif /* CONFIG_DEBUG_BREAKIN */
+
+bool kdebug_check_interrupt();
 
 
 #endif /* !__DEBUG_H__ */

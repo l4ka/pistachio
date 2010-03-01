@@ -238,7 +238,7 @@ L4_INLINE L4_Word_t  L4_Schedule(
 	L4_ThreadId_t dest,
 	L4_Word_t TimeControl,
 	L4_Word_t ProcessorControl,
-	L4_Word_t prio,
+	L4_Word_t PrioControl,
 	L4_Word_t PreemptionControl,
 	L4_Word_t * old_TimeControl
 	)
@@ -246,7 +246,7 @@ L4_INLINE L4_Word_t  L4_Schedule(
     register L4_Word_t r3 asm("r3") = dest.raw;
     register L4_Word_t r4 asm("r4") = TimeControl;
     register L4_Word_t r5 asm("r5") = ProcessorControl;
-    register L4_Word_t r6 asm("r6") = prio;
+    register L4_Word_t r6 asm("r6") = PrioControl;
     register L4_Word_t r7 asm("r7") = PreemptionControl;
     
     __asm__ __volatile__ (

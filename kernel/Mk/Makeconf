@@ -63,16 +63,17 @@ PRINTF=		printf
 # Go fishing for cross development toolchain
 # we take the first one reported by type -p <list>
 ifeq "$(SUBARCH)" "x64"
-GCCPREFIX= 	x86_64
+TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
+		x86_64-gcc x86_64-linux-gcc x86_64-unknown-elf-gcc \
+		x86_64-elf-gcc x86_64-unknown-linux-gnu-gcc \
+		x86_64-pc-linux-gnu-gcc)))
 else
-GCCPREFIX=	$(ARCH)
+TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
+			$(ARCH)-gcc $(ARCH)-linux-gcc $(ARCH)-unknown-elf-gcc \
+			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc \
+			$(ARCH)-linux-gnu-gcc $(ARCH)-pc-linux-gnu-gcc)))
+
 endif
-
-TOOLPREFIX?=	$(subst -gcc,-,$(firstword  $(shell type -p \
-			$(GCCPREFIX)-gcc $(GCCPREFIX)-linux-gcc $(GCCPREFIX)-uknown-gcc \
-			$(GCCPREFIX)-elf-gcc $(GCCPREFIX)-linux-elf-gcc $(GCCPREFIX)-unknown-elf-gcc \
-			$(GCCPREFIX)-unknown-linux-gnu-gcc $(GCCPREFIX)-pc-linux-gnu-gcc)))
-
 
 # Try to use ccache if installed (and NO_CCACHE is not defined)
 ifndef NO_CCACHE
@@ -87,15 +88,9 @@ CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
 CC_SUBVERSION	= $(shell echo __GNUC_MINOR__ | $(CC) -E  - | grep -v "\#")
 
 
-# When compiling for 32-bit targets on 64-bit hosts, a 32-bit version
-# of libgcc is needed. Using the -m32 switch (hopefully) finds the correct
-# version.
-LIBGCCINC?= $(dir $(shell $(CC) -print-libgcc-file-name))include
-ifeq "$(SUBARCH)" "x32"
-    LIBGCCDIR?= $(dir $(shell $(CC) -m32 -print-libgcc-file-name))
-else
-    LIBGCCDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
-endif
+GCCINSTALLDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
+LIBGCCINC?= $(GCCINSTALLDIR)include
+LIBGCCDIR?= $(GCCINSTALLDIR)
 
 # Some CCs (e.g., the native FreeBSD gcc) do not follow the regular
 # gcc conventions when it comes to the gcc include files.
@@ -121,6 +116,9 @@ CPP=		$(TOOLPREFIX)cpp
 endif
 
 API?=	v4
+ifeq "$(SCHED)" ""
+SCHED=	rr
+endif
 
 ######################################################################
 #
@@ -134,8 +132,9 @@ API?=	v4
 
 
 # these macros will be undefined first - they may have default values
-UNDEFS	 += $(ARCH) $(CPU) $(PLATFORM) $(API)
-DEFINES	 += __ARCH__=$(ARCH) __CPU__=$(CPU) __PLATFORM__=$(PLATFORM) __API__=$(API) $(DEFINES_$(ARCH))
+UNDEFS	 += $(ARCH) $(CPU) $(PLATFORM) $(API) $(SCHED)
+DEFINES	 += __ARCH__=$(ARCH) __CPU__=$(CPU) __PLATFORM__=$(PLATFORM) \
+	    __API__=$(API) $(DEFINES_$(ARCH)) __SCHED__=$(SCHED)
 INCLUDES += $(BUILDDIR)/include $(SRCDIR)/src $(SRCDIR)/src/generic $(LIBGCCINC)
 
 
@@ -169,7 +168,7 @@ VFLAGS =
 
 # use optimization level of at least 1 - otherwise inlining will fail
 CCFLAGS += -fno-rtti -fno-builtin  -fomit-frame-pointer -fno-exceptions \
-	  -Wall -Wno-non-virtual-dtor -Wno-format -Wconversion \
+	  -Wall -Wno-non-virtual-dtor -Wno-format  -Wconversion \
 	  $(CFLAGS_$(ARCH)) $(CFLAGS_$(CPU)) $(CFLAGS_$(PLATFORM)) 
 
 ifeq ("$(CC_VERSION)", "4")
@@ -289,7 +288,7 @@ clean::
 	done 2>&1 | $(GREP) . && $(RM_F) $@ && exit -1 || exit 0
 
 # Don't include dependencies during cleanup or configure
-ifeq "$(filter clean %config, $(MAKECMDGOALS))" ""
+ifeq "$(filter .depend clean %config, $(MAKECMDGOALS))" ""
 -include .depend
 endif
 

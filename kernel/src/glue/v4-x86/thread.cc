@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/thread.cc
  * Description:   
@@ -64,8 +64,14 @@ void return_to_user_wrapper()
         "    add %3, %%rsp              \n"
         "    iretq                      \n"
 #else
-        "    add %3, %%esp              \n"
-        "    iret                       \n"
+#if defined(CONFIG_X_CTRLXFER_MSG)
+	"     addl   $16, %%esp		\n"
+	"     popa			\n"
+	"     addl   $4, %%esp		\n"
+#else
+	"     add %3, %%esp		\n"
+#endif
+	"     iret			\n"
 #endif
         :
         : "i"(X86_UDS), "i" (X86_TBS), "i"(X86_UTCBS),
@@ -79,6 +85,14 @@ static inline void push(word_t * &stack, word_t val)
     *(--stack) = val;
 }
 
+#if defined(CONFIG_X_X86_HVM)
+static void return_to_hvm()
+{
+    tcb_t *current = get_current_tcb();
+    current->get_arch()->enter_hvm_loop();
+}
+#endif
+
 
 /**
  * Setup TCB to execute a function when switched to
@@ -90,19 +104,29 @@ void tcb_t::create_startup_stack(void (*func)())
 {
     init_stack();
 
-    push(stack, X86_UDS);               /* ss (rpl = 3) */
-    push(stack, 0x12345678);            /* sp */
-    push(stack, X86_USER_FLAGS);
+    word_t cs = X86_UCS;
+    word_t flags = X86_USER_FLAGS;
+    word_t return_ip = (word_t) return_to_user;
+    
+#if defined(CONFIG_X_X86_HVM)
+    if (this->resource_bits.have_resource (HVM))
+    {
+	return_ip = (word_t) return_to_hvm;
+	flags = X86_HVM_FLAGS;
+    }
+#endif    
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
     if (resource_bits.have_resource(COMPATIBILITY_MODE))
-        push(stack, X86_UCS32);       /* cs */
-    else
-#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
-    {
-        push(stack, X86_UCS);           /* cs */
-    }
+        cs = X86_UCS32;       /* cs */
+#endif   
+
+    push(stack, X86_UDS);               /* ss (rpl = 3) */
+    push(stack, 0x12345678);            /* sp */
+    push(stack, flags);			/* flags */
+    push(stack, cs);			/* cs */
     push(stack, 0x87654321);            /* ip */
     stack -= EXC_FRAME_SIZE;
-    push(stack, (word_t)return_to_user);
+    push(stack, return_ip);
     push(stack, (word_t)func);
 }
+

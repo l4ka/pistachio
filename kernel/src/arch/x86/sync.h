@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2009,  Karlsruhe University
  *                
  * File path:     arch/x86/sync.h
  * Description:   synchronization primitives for x86
@@ -55,7 +55,9 @@ public: // to allow initializers
 #define DECLARE_SPINLOCK(name) extern spinlock_t name;
 #define DEFINE_SPINLOCK(name) spinlock_t name = {_lock: 0}
 
-#undef DEBUG_LOCK
+#if defined(CONFIG_DEBUG)
+#define DEBUG_LOCK
+#endif
 #define SYNC_THRESHOLD	0x8000000
 
 extern "C" void sync_debug (word_t lock);

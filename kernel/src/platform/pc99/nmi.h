@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2007, 2010,  Karlsruhe University
  *                
  * File path:     platform/pc99/nmi.h
  * Description:   Driver for NMI masking hardware
@@ -52,7 +52,7 @@ public:
 	    out_u8(0x61, (in_u8(0x61) & 0x03) | 0x0c);
 
 	    /* waste some time */
-	    for (int i = 10000000; i--; ) __asm__ ("");
+            x86_wait_cycles(10000000);
 
 	    /* enable IOCHK and PCI SERR# */
 	    out_u8(0x61, in_u8(0x61) & 0x03);

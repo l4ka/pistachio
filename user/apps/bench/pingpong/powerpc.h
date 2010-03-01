@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  Karlsruhe University
+ * Copyright (C) 2004, 2008, 2010,  Karlsruhe University
  *                
  * File path:     bench/pingpong/powerpc.h
  * Description:   PowerPC specific pingpong functions
@@ -35,12 +35,14 @@
 #define HAVE_ARCH_LIPC
 #define HAVE_ARCH_SPECIFIC
 
-L4_INLINE L4_Word_t read_cycles (void)
+#undef ARCH_PMC_SETUP
+
+L4_INLINE L4_Word64_t read_cycles (void)
 {
     L4_Word_t ret;
     /* We assume that the kernel configured pmc1 for cycle counting. */
     asm volatile ("mfspr %0, %1" : "=r" (ret) : "i" (937 /* upmc1 */));
-    return ret;
+    return (L4_Word64_t) ret;
 }
 
 L4_INLINE L4_Word_t read_instrs (void)

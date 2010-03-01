@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/timer-apic.cc
  * Description:   implementation of apic timer
@@ -37,25 +37,34 @@
 
 #include INC_API(schedule.h)
 
+DECLARE_TRACEPOINT(X86_APIC_TIMER);
 
 /* global instance of timer object */
 timer_t timer UNIT("cpulocal");
+
 static local_apic_t<APIC_MAPPINGS_START> local_apic;
+
 
 extern "C" void timer_interrupt(void);
 X86_EXCNO_ERRORCODE(timer_interrupt, 0)
 {
+    scheduler_t *scheduler = get_current_scheduler();
+    
+    //TRACEPOINT(X86_APIC_TIMER, "APIC TIMER %d", (word_t) scheduler->get_current_time());
+
     local_apic.EOI();
 
     /* handle the timer */
-    get_current_scheduler()->handle_timer_interrupt();
-}
+    scheduler->handle_timer_interrupt();
+}   
+
 
 
 void timer_t::init_global()
 {
     TRACE_INIT("\tglobal timer: trap gate %d\n", IDT_LAPIC_TIMER);
-    idt.add_gate(IDT_LAPIC_TIMER, idt_t::interrupt, timer_interrupt);
+    idt.add_int_gate(IDT_LAPIC_TIMER, timer_interrupt);
+
 }
 
 void timer_t::init_cpu(cpuid_t cpu)
@@ -66,11 +75,13 @@ void timer_t::init_cpu(cpuid_t cpu)
     // avoid competing for the RTC
     static DEFINE_SPINLOCK(timer_lock);
 
+
 #if !defined(CONFIG_CPU_X86_SIMICS)
     TRACE_INIT("\tCalculating processor speed (CPU %d)...", cpu);
     local_apic.timer_set_divisor(1);
     local_apic.timer_setup(IDT_LAPIC_TIMER, false);
     local_apic.timer_set((u32_t) -1UL);
+
 
     word_t delay = 0;
     
@@ -95,12 +106,15 @@ void timer_t::init_cpu(cpuid_t cpu)
         wait_for_second_tick();
         timer_lock.unlock();
     }
-   
+
+    word_t local_apic_cpu_mhz;
+    word_t local_apic_bus_mhz;
+
     cpu_cycles = x86_rdtsc() - cpu_cycles;
     bus_cycles -= local_apic.timer_get();
 
-    word_t local_apic_cpu_mhz = cpu_cycles / (delay * 1000);
-    word_t local_apic_bus_mhz = bus_cycles / (delay * 1000);
+    local_apic_cpu_mhz = cpu_cycles / (delay * 1000);
+    local_apic_bus_mhz = bus_cycles / (delay * 1000);
 
     proc_freq = cpu_cycles / delay;
     bus_freq = bus_cycles / delay;

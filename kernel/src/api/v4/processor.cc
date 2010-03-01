@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007, 2009,  Karlsruhe University
  *                
  * File path:     api/v4/processor.cc
  * Description:   Processor Management
@@ -65,7 +65,7 @@ static spinlock_t kiplock;
 void SECTION(".init")
 init_processor(cpuid_t processor, word_t external_freq, word_t internal_freq)
 {
-    TRACE_INIT("Registering processor %d in KIP (%dMHz, %dMHz)\n", 
+    TRACE_INIT("\tRegistering processor %d in KIP (%dMHz, %dMHz)\n", 
 	       processor, external_freq/1000, internal_freq/1000);
     kiplock.lock();
 

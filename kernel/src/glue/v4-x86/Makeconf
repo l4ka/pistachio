@@ -39,6 +39,14 @@ else
 SOURCES += src/glue/v4-x86/timer.cc
 endif
 
+ifeq ("$(CONFIG_X_CTRLXFER_MSG)","y")
+SOURCES+=	src/glue/$(API)-$(ARCH)/ipc.cc
+endif
+
+ifeq ("$(CONFIG_X_X86_HVM)","y")
+SOURCES += 	$(addprefix src/glue/$(API)-$(ARCH)/, hvm-space.cc)
+endif
+
 ifeq ("$(CONFIG_X86_IO_FLEXPAGES)","y")
 SOURCES += $(addprefix src/glue/v4-x86/, mdb_io.cc vrt_io.cc io_space.cc)
 endif

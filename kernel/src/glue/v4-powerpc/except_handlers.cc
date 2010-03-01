@@ -81,7 +81,7 @@ INLINE void halt_user_thread( void )
     tcb_t *current = get_current_tcb();
 
     current->set_state( thread_state_t::halted );
-    current->switch_to_idle();
+    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 }
 
 static bool send_exception_ipc( word_t exc_no, word_t exc_code )

@@ -46,6 +46,10 @@ DECLARE_TRACEPOINT_DETAIL(IPC_STRING_ITEM);
 DECLARE_TRACEPOINT_DETAIL(IPC_MAPGRANT_ITEM);
 DECLARE_TRACEPOINT_DETAIL(IPC_MESSAGE_OVERFLOW);
 DECLARE_TRACEPOINT_DETAIL(IPC_EXT_TRANSFER);
+#if defined(CONFIG_X_CTRLXFER_MSG)
+DECLARE_TRACEPOINT_DETAIL(IPC_CTRLXFER_ITEM);
+DECLARE_TRACEPOINT_DETAIL(IPC_CTRLXFER_ITEM_DETAILS);
+#endif
 
 #if !defined(IPC_STRING_COPY)
 extern "C" void * memcpy (void * dst, const void * src, word_t len);
@@ -98,10 +102,13 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     msg_item_t src_item;
     acceptor_t acceptor;
     int br_idx = 1;
-    word_t total_mrs = msgtag.get_untyped() + msgtag.get_typed();
+    word_t total_mrs = msgtag.get_untyped() + msgtag.get_typed() + 1;
     word_t total_len = 0;
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    word_t total_cxfer_mrs = 0;
+#endif
     bool accept_strings;
-
+    
 //    ENABLE_TRACEPOINT (IPC_STRING_COPY, ~0, 0);
 //    ENABLE_TRACEPOINT (IPC_STRING_ITEM, ~0, 0);
 //    ENABLE_TRACEPOINT (IPC_MESSAGE_OVERFLOW, ~0, 0);
@@ -128,12 +135,33 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     accept_strings = acceptor.accept_strings();
 
     TRACEPOINT(IPC_EXT_TRANSFER, "tag=%p, untyped: %d, typed: %d, acceptor: %x\n", 
-	       msgtag.raw, msgtag.get_untyped(), msgtag.get_typed(), acceptor);
+	       msgtag.raw, msgtag.get_untyped(), msgtag.get_typed(), acceptor.raw);
 
     for (word_t src_idx = msgtag.get_untyped() + 1; src_idx < total_mrs; )
     {
 	src_item = src->get_mr(src_idx);
 
+#if defined(CONFIG_X_CTRLXFER_MSG)
+	if (src_item.is_ctrlxfer_item()) 
+	{
+	    bool src_mr = !src->flags.is_set(tcb_t::kernel_ctrlxfer_msg);
+	    bool dst_mr = !acceptor.accept_ctrlxfer();
+	    word_t cxfer_regs;
+	    
+	    TRACEPOINT(IPC_CTRLXFER_ITEM,
+		       "ctrlxfer item: ipc %t->%t id=%d, mask=%x %c->%c",
+		       src, dst, src_item.get_ctrlxfer_id(), src_item.get_ctrlxfer_mask(),
+		       src_mr ? 'm' : 'f', dst_mr ? 'm' : 'f');	    
+	    
+	    cxfer_regs = src->ctrlxfer(dst, src_item, src_idx, msgtag.x.untyped+1+total_cxfer_mrs, src_mr, dst_mr); 
+	    
+	    src_idx += src_mr ? cxfer_regs : 1;
+	    msgtag.x.typed += src_mr ? 0 : cxfer_regs - 1;
+	    total_cxfer_mrs += dst_mr ? 0 : cxfer_regs;
+    
+	}
+	else
+#endif
 	if (src_item.is_map_item() || src_item.is_grant_item())
 	{
 	    /* is the descriptor beyond the valid range? */
@@ -163,9 +191,17 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    copy_mr(dst, src, src_idx++);
 
 	    if (snd_fpage.is_mempage ())
+	    {
 		src->get_space()->map_fpage
 		    (snd_fpage, src_item.get_snd_base(), 
 		     dst->get_space(), rcv_fpage, src_item.is_grant_item());
+#if 0 && defined(CONFIG_X_X86_HVM)
+		if (dst->get_space()->is_hvm_space())
+		    src->get_space()->map_fpage
+			(snd_fpage, src_item.get_snd_base(),
+			 dst->get_space()->get_hvm_space()->get_gpas(), rcv_fpage, src_item.is_grant_item());
+#endif
+	    }
 	    else if (snd_fpage.is_archpage ())
 		arch_map_fpage(src, snd_fpage, src_item.get_snd_base (),
 			       dst, rcv_fpage, src_item.is_grant_item ());
@@ -220,18 +256,18 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    dst_ptridx = 1;
 
 	    TRACEPOINT (IPC_STRING_ITEM, 
-			"IPC string item:  src_item=%p  dst_item=%p"
-			"  src: substrings=%d (idx=%d)  len=%p %s"
-			"  dst: substrings=%d (idx=%d)  len=%p %s",
-			src_item.raw, dst_item.raw,
+			"IPC string item: src:%p (sub=%d idx=%d len=%p %s)"
+			"dst:%p (sub=%d idx=%d len=%p %s)",
+			src_item.raw, 
 			src_item.get_string_ptr_count (),
 			src_ptridx, src_len,
 			src_item.is_string_compound () ?	
-			"compound" : "",
+			"c" : "",
+			dst_item.raw,
 			dst_item.get_string_ptr_count (),
 			dst_ptridx, dst_len,
 			dst_item.is_string_compound () ?
-			"compound" : "");
+			"c" : "");
 
 	    // Sanity checking
 	    if (! dst_item.is_string_item ())
@@ -245,8 +281,8 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
 	    while (! end_of_send_string)
 	    {
 		TRACEPOINT (IPC_STRING_ITEM, 
-			    "  src: addr=%p len=%p (idx=%d)"
-			    "  dst: addr=%p len=%p (idx=%d)",
+			    "  src: addr=%p len=%p (idx=%d)\n"
+			    "  dst: addr=%p len=%p (idx=%d)\n",
 			    src_addr, src_len, src_ptridx,
 			    dst_addr, dst_len, dst_ptridx);
 
@@ -397,7 +433,7 @@ msg_tag_t extended_transfer(tcb_t * src, tcb_t * dst, msg_tag_t msgtag)
     src->release_copy_area ();
 
     // Cancel any pending XFER timeouts.
-    get_current_scheduler ()->cancel_timeout (src);
+    src->sched_state.cancel_timeout ();
     src->flags -= tcb_t::has_xfer_timeout;
     return msgtag;
 
@@ -407,7 +443,7 @@ message_overflow:
     src->release_copy_area ();
 
     // Cancel any pending XFER timeouts.
-    get_current_scheduler ()->cancel_timeout (src);
+    src->sched_state.cancel_timeout ();
 
     TRACEPOINT (IPC_MESSAGE_OVERFLOW, "IPC message overflow (%t->%t), len=0x%x\n",
 		src, dst, total_len);

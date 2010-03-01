@@ -51,6 +51,10 @@
 #include INC_GLUE(io_space.h)
 #endif
 
+#if defined(CONFIG_X_X86_HVM)
+#include INC_GLUE(hvm-space.h)
+#endif
+
 // Even if new MDB is not used we need the mdb_t::ctrl_t
 #include <mdb.h>
 
@@ -117,6 +121,9 @@ public:
 	x86_space_t *prev;
 	x86_space_t *next;
 #endif
+#if defined(CONFIG_X_X86_HVM)
+	x86_hvm_space_t hvm_space;
+#endif
     } data;
     
 public:
@@ -180,7 +187,6 @@ INLINE void x86_space_t::arch_free (void)
     make_large ();
     dequeue_polluted ();
 }
-
 
 
 #endif /* CONFIG_X86_SMALL_SPACES */

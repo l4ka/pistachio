@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2005-2006,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2005-2007,  Karlsruhe University
  *                
  * File path:     l4/ia32/specials.h
  * Description:   x86 specific functions and defines
@@ -56,6 +56,23 @@ L4_INLINE int __L4_Msb (L4_Word_t w)
     return bitnum;
 }
 
+L4_INLINE int __L4_Lsb (L4_Word_t w) __attribute__ ((const));
+
+L4_INLINE int __L4_Lsb (L4_Word_t w)
+{
+    L4_Word_t bitnum;
+
+    __asm__ (
+	"/* l4_lsb()		*/			\n"
+	"bsf	%1, %0					\n"
+	: /* outputs */
+	"=r" (bitnum)
+	: /* inputs */
+	"rm" (w)
+	);
+
+    return bitnum;
+}
 
 /*
  * Control parameter for SpaceControl system call.

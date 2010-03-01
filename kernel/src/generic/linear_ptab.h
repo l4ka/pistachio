@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2008,  Karlsruhe University
  *                
- * File path:     linear_ptab.h
+ * File path:     generic/linear_ptab.h
  * Description:   Helper functions for generic linear page table
  *                manipulation.
  *                

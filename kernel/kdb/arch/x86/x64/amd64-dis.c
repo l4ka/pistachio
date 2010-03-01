@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007,  Karlsruhe University
  *                
- * File path:     kdb/arch/amd64/amd64-dis.c
+ * File path:     kdb/arch/x86/x64/amd64-dis.c
  * Description:   Wrapper for IA-32 disassembler
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -42,11 +42,9 @@
 #define bfd_mach_x86_64 64
 #define bfd_mach_x86_64_intel_syntax 65
 #define abort() do { } while (0)
-
+#define sprintf_vma(s,x) sprintf (s, "%016lx", x)
 
 #define SEC_KDEBUG ".kdebug"
-
-#define sprintf_vma(s,x) sprintf (s, "%016lx", x)
 
 int printf(const char* format, ...);
 int sprintf(char* s, const char* format, ...);

@@ -209,7 +209,7 @@ SECTIONS
 	{
 	    *(.eh_frame);
 	    *(.note);
-	    *(.comment); 
+	    *(.comment);
 	} 
 }
 

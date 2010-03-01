@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/exception.cc
  * Description:   exception handling
@@ -39,7 +39,9 @@
 #include INC_API(space.h)
 #include INC_API(kernelinterface.h)
 #include INC_GLUE(traphandler.h)
-
+#if defined(CONFIG_X_X86_HVM)
+#include INC_GLUE(hvm.h)
+#endif
 
 const word_t x86_exc_reg_t::mr2reg[NUM_EXC_REGS][2] = 
 {    
@@ -68,12 +70,14 @@ const word_t x86_exceptionframe_t::dbgreg[x86_exceptionframe_t::num_dbgregs] =
     x86_exceptionframe_t::csreg, x86_exceptionframe_t::ssreg,
     x86_exceptionframe_t::dsreg, x86_exceptionframe_t::esreg,
 };
-    
+
 const char *x86_exceptionframe_t::name[x86_exceptionframe_t::num_regs] = 
 {  "rsn", "es ", "ds ", "edi",	"esi", "ebp",    0, "ebx",		
    "edx", "ecx", "eax", "err", "eip", "cs ", "efl", "esp", "ss "		
 };    
 #endif
+
+
 
 
 void exc_catch_common_wrapper() 

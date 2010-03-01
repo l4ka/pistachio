@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     kdb/tracebuffer.h
  * Description:   Kernel tracebuffer facility
@@ -31,7 +31,6 @@
  ********************************************************************/
 #ifndef __KDB__TRACEBUFFER_H__
 #define __KDB__TRACEBUFFER_H__
-
 
 
 #if defined(CONFIG_TRACEBUFFER)
@@ -97,12 +96,7 @@ INLINE void __tbuf_record_event(word_t type, word_t tpid, const char *str, ...)
 #endif
 
 
-#if defined(CONFIG_TBUF_LIGHT)
-# define TBUF_REC_TRACEPOINT(tptype, tpid, str, args...)
-#else
-
 # define TBUF_REC_TRACEPOINT(tptype, tpid, str, args...)	\
     tbuf_record_event (tptype, tpid, str, ##args)
-#endif
 
 #endif /* !__KDB__TRACEBUFFER_H__ */

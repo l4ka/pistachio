@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006, 2008,  Karlsruhe University
  *                
  * File path:     l4/message.h
  * Description:   Message construction functions
@@ -66,6 +66,7 @@ typedef union {
 	L4_Word_t	label:16 __PLUS32;
 #endif
     } X;
+
 } L4_MsgTag_t;
 
 #define L4_Niltag		((L4_MsgTag_t) { raw : 0UL })

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/resources.h
  * Description:   ia32 specific resources
@@ -45,6 +45,7 @@ enum resource_type_e {
 #if defined(CONFIG_IS_64BIT)
     COMPATIBILITY_MODE	= 4,
 #endif
+    HVM		= 5,
 };
 
 

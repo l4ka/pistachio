@@ -39,11 +39,18 @@
 #define TP_DEFAULT				(1 << 0)
 #define TP_DETAIL				(1 << 1)
 
+extern u64_t tp_irq_mask;
+
+#define TRACE_IRQ(irq, x...)					\
+    if (tp_irq_mask & (1ULL << irq)) TRACEPOINT(INTERRUPT, x);
+
 #define TRACE_SCHEDULE_DETAILS(x...)		TRACEPOINT(SCHEDULE_DETAILS, x)
+#define TRACE_CTRLXFER_DETAILS(x...)		TRACEPOINT(IPC_CTRLXFER_ITEM_DETAILS, x)
 #define TRACE_IPC_DETAILS(x...) 		TRACEPOINT(IPC_DETAILS, x)
 #define TRACE_XIPC_DETAILS(x...)		TRACEPOINT(IPC_XCPU_DETAILS, x) 
 #define TRACE_IPC_ERROR(x...) 			TRACEPOINT(IPC_ERROR, x)
-#define TRACE_IRQ_DETAILS(x...)			TRACEPOINT(INTERRUPT_DETAILS, x)
+#define TRACE_IRQ_DETAILS(x...)			\
+    if (tp_irq_mask & (1ULL << irq)) TRACEPOINT(INTERRUPT_DETAILS, x);
 
 // avoid including api/smp.h for non-SMP case
 #if !defined(CONFIG_SMP)

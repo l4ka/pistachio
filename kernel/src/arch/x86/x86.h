@@ -99,7 +99,7 @@
 #define X86_CR0_ET 	(__UL(1) <<  4)   /* extension type (always 1)        */
 #define X86_CR0_NE 	(__UL(1) <<  5)   /* numeric error reporting mode     */
 #define X86_CR0_WP 	(__UL(1) << 16)   /* force write protection on user
-                                    read only pages for kernel       */
+					     read only pages for kernel       */
 #define X86_CR0_AM	(__UL(1) << 3)	  /* alignment mask		      */
 #define X86_CR0_NW 	(__UL(1) << 29)   /* not write through                */
 #define X86_CR0_CD 	(__UL(1) << 30)   /* cache disabled                   */
@@ -110,7 +110,7 @@
 
 #define X86_CR4_VME    	(__UL(1) <<  0)   /* virtual 8086 mode extension  */
 #define X86_CR4_PVI    	(__UL(1) <<  1)   /* enable protected mode
-                                        virtual interrupts           */
+					     virtual interrupts           */
 #define X86_CR4_TSD    	(__UL(1) <<  2)   /* time stamp disable           */
 #define X86_CR4_DE     	(__UL(1) <<  3)   /* debug extensions             */
 #define X86_CR4_PSE    	(__UL(1) <<  4)   /* page size extension (4MB)    */
@@ -119,8 +119,8 @@
 #define X86_CR4_PGE    	(__UL(1) <<  7)   /* enable global pages          */
 #define X86_CR4_PCE    	(__UL(1) <<  8)   /* allow user to use rdpmc      */
 #define X86_CR4_OSFXSR 	(__UL(1) <<  9)   /* enable fxsave/fxrstor + sse  */
-#define X86_CR4_OSXMMEXCPT (__UL(1) << 10)   /* support for unmsk. SIMD exc. */
-#define X86_CR4_VMXE   	(__UL(1) << 13)  /* vmx extensions                */
+#define X86_CR4_OSXMMEXCPT (__UL(1) << 10) /* support for unmsk. SIMD exc. */
+#define X86_CR4_VMXE   	(__UL(1) << 13)	  /* vmx extensions                */
 
 
 /**********************************************************************
@@ -190,7 +190,7 @@
 # define X86_MSR_PAT_UM         		0x07
 
 /* Virtual Machine Extensions (VMX) */
-#if defined(CONFIG_X_X86_VMX)
+#if defined(CONFIG_X_X86_HVM)
 # define X86_MSR_FEAT_CTR_ENABLE_VMXON (1 << 2)
 
 # define X86_MSR_VMX_BASIC         		0x480

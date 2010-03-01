@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/generic/tracepoints.cc
  * Description:   Tracepoint related commands
@@ -107,7 +107,7 @@ CMD(cmd_tp_list, cg)
     tracepoint_t * tp;
 
     printf (" Num  %28s Enb  KDB  ", "Name");
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     for (int cpu = 0; cpu < CONFIG_SMP_MAX_CPUS; cpu++)
 	printf(" CPU[%d]  ", cpu);
     printf("\n");
@@ -147,7 +147,7 @@ CMD(cmd_tp_enable, cg)
 	else if (n <= tp_list.size ())
 	{
 	    tracepoint_t * tp = tp_list.get (n - 1);
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 	    word_t cpu_mask = get_hex("Processor Mask", ~0UL, "all");
 #else	    
 	    word_t cpu_mask = ~0UL;
@@ -250,6 +250,28 @@ CMD(cmd_tp_reset, cg)
     while ((tp = tp_list.next ()) != NULL)
 	tp->reset_counter();
     
+    return CMD_NOQUIT;
+}
+
+u64_t tp_irq_mask = -1ULL;
+/**
+ * cmd_tp_disable_all: disable all tracepoints
+ */
+DECLARE_CMD (cmd_tp_irq_mask, tracepoints, 'i', "set IRQ mask",
+	     "configure IRQ mask");
+
+CMD(cmd_tp_irq_mask, cg)
+{
+    u32_t lo = (u32_t) tp_irq_mask;
+    u32_t hi = (u32_t) (tp_irq_mask >> 32);
+    
+    lo = get_hex("IRQ mask low ", lo, "all");
+    hi = get_hex("IRQ mask high", hi, "all");
+    
+    tp_irq_mask = ((u64_t) hi << 32) | (u64_t) lo;
+
+    printf("<%x:%x>\n",  (u32_t) (tp_irq_mask >> 32), (u32_t) tp_irq_mask);
+
     return CMD_NOQUIT;
 }
 

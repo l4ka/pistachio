@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/trapgate.h
  * Description:   defines macros for implementation of trap and 

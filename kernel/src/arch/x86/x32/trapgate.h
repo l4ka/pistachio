@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2010,  Karlsruhe University
  *                
  * File path:     arch/x86/x32/trapgate.h
  * Description:   defines macros for implementation of trap and 
@@ -125,7 +125,7 @@ public:
 	"pop	%%ebp			\n"			\
 	"jne	1f			\n"			\
 	"addl	$12, %%esp		\n"			\
-	"movl	(%%esp), %%esp		\n"			\
+	"movl	(%%esp), %%esp	\n"			\
 	"subl	$12, %%esp		\n"			\
 	"push	%%ebp			\n"			\
 	"mov	(tss    ), %%ebp	\n"			\

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001, 2002, 2003,  Karlsruhe University
+ * Copyright (C) 2001, 2002, 2003, 2009,  Karlsruhe University
  *                
  * File path:     l4/schedule.h
  * Description:   Interfaces for doing scheduling
@@ -52,6 +52,12 @@ L4_INLINE L4_Word_t L4_Set_Priority (L4_ThreadId_t tid, L4_Word_t prio)
     return L4_Schedule(tid, ~0UL, ~0UL, prio, ~0UL, &dummy);
 }
 
+L4_INLINE L4_Word_t L4_Set_Stride (L4_ThreadId_t tid, L4_Word_t stride)
+{
+    L4_Word_t dummy;
+    return L4_Schedule(tid, ~0UL, ~0UL, (stride << 16) | 0xffff, ~0UL, &dummy);
+}
+
 L4_INLINE L4_Word_t L4_Set_ProcessorNo (L4_ThreadId_t tid, L4_Word_t cpu_no)
 {
     L4_Word_t dummy;
@@ -80,6 +86,16 @@ L4_INLINE L4_Word_t L4_Set_PreemptionDelay (L4_ThreadId_t tid, L4_Word_t sensiti
     L4_Word_t pctrl = ((sensitivePrio & 0xff) << 16) | (maxDelay & 0xffff);
     return L4_Schedule(tid, ~0UL, ~0UL, ~0UL, pctrl, &dummy);
 }
+
+L4_INLINE L4_Word_t L4_HS_Schedule (L4_ThreadId_t tid, L4_Word_t control, L4_ThreadId_t domain, L4_Word_t prio, L4_Word_t stride, L4_Word_t *old_control)
+{
+    L4_Word_t preemption_control = ((control & 0x3f) << 26) | (1 << 25);
+    L4_Word_t time_control = domain.raw;
+    L4_Word_t prio_control = (stride << 16) | (prio & 0x1ff);
+    
+    return L4_Schedule(tid, time_control, ~0UL, prio_control, preemption_control, old_control);
+}
+
 
 
 /*

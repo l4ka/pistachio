@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2005, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/generic/entry.cc
  * Description:   The kernel debugger entry point.
@@ -62,6 +62,7 @@ DECLARE_CMD_GROUP (statistics);
 /* Wrapper to call KDB's entry method */
 void SECTION(SEC_KDEBUG) kdebug_entry (void * param) { kdb.entry(param); }
 
+
 /**
  * kdebug_entry: Entry point for the kernel debugger.
  */
@@ -70,7 +71,9 @@ void kdb_t::entry (void * param)
     cmd_ret_t r;
 
     kdb_param = param;
-
+    last_space = NULL;
+    last_dump = 0;
+    
     /* XXX probably not generic enough */
     kdb_current = addr_to_tcb ((addr_t) param);
 

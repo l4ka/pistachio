@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2007,  Karlsruhe University
+ * Copyright (C) 2002-2010,  Karlsruhe University
  *                
  * File path:     api/v4/tcb.h
  * Description:   V4 TCB
@@ -44,23 +44,25 @@
 #include INC_API(preempt.h)
 #include INC_API(fpage.h)
 #include INC_API(ipc.h)
+#include INC_API(sktcb.h)
+
+/* implementation specific functions */
+#if defined(CONFIG_X_CTRLXFER_MSG)
+#include INC_GLUE(ipc.h)
+class arch_ktcb_t;
+typedef word_t (arch_ktcb_t::*get_ctrlxfer_regs_t)(word_t id, word_t mask, tcb_t *dst_utcb, word_t &dst_mr);
+typedef word_t (arch_ktcb_t::*set_ctrlxfer_regs_t)(word_t id, word_t mask, tcb_t *src_utcb, word_t &src_mr);
+#endif
 
 /* implementation specific functions */
 #include INC_GLUE(ktcb.h)
 #include INC_GLUE(utcb.h)
+#if defined(CONFIG_X_CTRLXFER_MSG)
+#include INC_GLUE(ipc.h)
+#endif
 
-typedef int prio_t;
-typedef void (*requeue_callback_t)(tcb_t* tcb);
+
 class space_t;
-class prio_queue_t;
-
-template <class T> class ringlist_t
-{
-public:
-    T * next;
-    T * prev;
-};
-
 
 /**
  * tcb_t: kernel thread control block
@@ -80,13 +82,17 @@ public:
      */
     enum flags_e {
 	has_xfer_timeout	= 0,
+	schedule_in_progress	= 1,
+#if defined(CONFIG_X_CTRLXFER_MSG)
+	kernel_ctrlxfer_msg	= 2,
+#endif
     };
 
     /* public functions */
     bool activate(void (*startup_func)(), threadid_t pager);
     
-    void create_inactive(threadid_t dest, threadid_t scheduler);
-    void create_kernel_thread(threadid_t dest, utcb_t * utcb);
+    void create_inactive(threadid_t dest, threadid_t scheduler, sktcb_type_e type);
+    void create_kernel_thread(threadid_t dest, utcb_t * utcb, sktcb_type_e type);
     
     void delete_tcb();
     bool migrate_to_space(space_t * space);
@@ -99,7 +105,7 @@ public:
     void unwind (unwind_reason_e reason);
     
     /* queue manipulations */
-    void enqueue_send(tcb_t * tcb);
+    void enqueue_send(tcb_t * tcb, const bool head=false);
     void dequeue_send(tcb_t * tcb);
     void enqueue_present();
     void dequeue_present();
@@ -145,10 +151,20 @@ public:
 
     msg_tag_t do_ipc(threadid_t to_tid, threadid_t from_tid, timeout_t timeout);
     void send_pagefault_ipc(addr_t addr, addr_t ip, space_t::access_e access);
-    bool send_preemption_ipc(u64_t abstime);
+    bool send_preemption_ipc();
     void return_from_ipc (void);
     void return_from_user_interruption (void);
 
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    void set_fault_ctrlxfer_items(word_t fault, ctrlxfer_mask_t mask);
+    ctrlxfer_mask_t get_fault_ctrlxfer_items(word_t fault);
+    word_t append_ctrlxfer_item(msg_tag_t tag, word_t offset);
+    word_t ctrlxfer( tcb_t *dst, msg_item_t item, word_t src_idx, word_t dst_idx, bool src_mr, bool dst_mr);
+#if defined(CONFIG_DEBUG)
+    void dump_ctrlxfer_state(bool extended);
+#endif
+#endif
+ 
     /* synchronization */
     void lock() { tcb_lock.lock(); }
     void unlock() { tcb_lock.unlock(); }
@@ -168,7 +184,6 @@ public:
 
     /* thread switching */
     void switch_to(tcb_t * current);
-    void switch_to_idle();
 
     /* space */
     space_t * get_space() { return space; }
@@ -191,17 +206,18 @@ public:
 
     /* utcb access functions */
     utcb_t * get_utcb()
-        const { return this->utcb; }
-
+	const { return this->utcb; }
+    void set_utcb(utcb_t *utcb)
+	{ this->utcb = utcb; }
+    
 public:
-    void set_scheduler(const threadid_t tid);
     void set_pager(const threadid_t tid);
     void set_exception_handler(const threadid_t tid);
     void set_user_handle(const word_t handle);
     void set_user_flags(const word_t flags);
 
     threadid_t get_pager();
-    threadid_t get_scheduler();
+
     threadid_t get_exception_handler();
     word_t get_user_handle();
     word_t get_user_flags();
@@ -221,7 +237,7 @@ public:
 
 private:
     void create_tcb(const threadid_t dest);
-    void init(threadid_t dest);
+    void init(threadid_t dest, sktcb_type_e type);
     
     /* stack manipulation */
 public:
@@ -237,17 +253,24 @@ public:
 
     typedef union {
 	struct {
-	    /* IPC copy */
-	    word_t		saved_mr[IPC_NUM_SAVED_MRS];
-	    word_t		saved_br0;
-	    word_t		saved_error;
+	    struct 
+	    {
+		/* IPC copy */
+		word_t		mr[IPC_NUM_SAVED_MRS];
+		word_t		br0;
+		threadid_t	partner;
+		threadid_t	vsender;
+		word_t		state;
+		word_t		error;
+	    } saved_state[IPC_NESTING_LEVEL];
 
-	    word_t		copy_length;
-	    addr_t		copy_start_src;
-	    addr_t		copy_start_dst;
-	    addr_t		copy_fault;
-	} ipc_copy;
-
+	    struct {
+		word_t		copy_length;
+		addr_t		copy_start_src;
+		addr_t		copy_start_dst;
+		addr_t		copy_fault;
+	    } ipc_copy;
+	};
 	struct {
 	    /* Exchange registers */
 	    word_t		control;
@@ -258,17 +281,13 @@ public:
 	    word_t		user_handle;
 	} exregs;
     } misc_tcb_t;
-
-    threadid_t get_saved_partner (void) { return saved_partner; }
-    void set_saved_partner (threadid_t t) { saved_partner = t; }
-
-    thread_state_t get_saved_state (void)
-	{ return saved_state; }
-    void set_saved_state (thread_state_t s)
-	{ saved_state = s; }
-    void set_saved_state (thread_state_t::thread_state_e s)
-	{ saved_state = (thread_state_t) s; }
-
+    
+    void init_saved_state();
+    threadid_t get_saved_partner (word_t level = 0);
+    void set_saved_partner (threadid_t t, word_t level = 0);
+    thread_state_t get_saved_state (word_t level = 0);
+    void set_saved_state (thread_state_t s, word_t level = 0);
+    
     /* do not delete this TCB_START_MARKER */
 
     // have relatively static values here
@@ -282,8 +301,8 @@ private:
     thread_state_t 	thread_state;
     threadid_t		partner;
 
-    resource_bits_t	resource_bits;
 public:
+    resource_bits_t	resource_bits;
     word_t *		stack;
 private:
     /* VU: pdir_cache should be architecture-specific!!! */
@@ -292,42 +311,28 @@ private:
 public:
     queue_state_t	queue_state;
 
-    /* queues */
+    /* queues and scheduling state */
     ringlist_t<tcb_t>	present_list;
-    ringlist_t<tcb_t>	ready_list;
-    ringlist_t<tcb_t>	wait_list;
     ringlist_t<tcb_t>	send_list;
     tcb_t *		send_head;
+    sched_ktcb_t	sched_state;
 
     spinlock_t		tcb_lock;
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     ringlist_t<tcb_t>	xcpu_list;
     cpuid_t		xcpu;
     word_t		xcpu_status;
-    
     lockstate_t		lock_state;
-    tcb_t		*requeue;
-    requeue_callback_t	requeue_callback;
 #endif
-
-public:
-    /* scheduling */
-    u64_t		total_quantum;
-    u64_t		timeslice_length;
-    s64_t		current_timeslice;
-    u64_t		absolute_timeout;
-    prio_t		priority;
-
-    /* delayed preemption */
-    prio_t		sensitive_prio;
-    u16_t		current_max_delay;
-    u16_t		max_delay;
 
 private:
     /* pager etc */
-    threadid_t		scheduler;
     space_t *		space;
+
+#if defined(CONFIG_X_CTRLXFER_MSG)
+    ctrlxfer_mask_t	fault_ctrlxfer[4+arch_ktcb_t::fault_max];
+#endif
 
 public:
     bitmask_t<word_t>	flags;
@@ -335,8 +340,6 @@ public:
 
 public:
     misc_tcb_t		misc;
-    threadid_t		saved_partner;
-    thread_state_t	saved_state;
     thread_resources_t	resources;
 
 private:
@@ -344,7 +347,7 @@ private:
     /* do not delete this TCB_END_MARKER */
 
     /* class friends */
-    friend void dump_tcb(tcb_t *);
+    friend void dump_tcb(tcb_t *, bool extended);
     friend void handle_ipc_error (void);
     friend class thread_resources_t;
 };
@@ -382,24 +385,15 @@ INLINE threadid_t tcb_t::get_local_id()
     return myself_local;
 }
 
-INLINE void tcb_t::set_scheduler(const threadid_t tid)
-{
-    this->scheduler = tid;
-}
-
-INLINE threadid_t tcb_t::get_scheduler()
-{
-    return this->scheduler;
-}
 
 INLINE void tcb_t::set_irq_handler(const threadid_t tid)
 {
-    set_scheduler(tid);
+    sched_state.set_scheduler(tid);
 }
 
 INLINE threadid_t tcb_t::get_irq_handler()
 {
-    return get_scheduler();
+    return sched_state.get_scheduler();
 }
 
 
@@ -431,6 +425,39 @@ INLINE threadid_t tcb_t::get_partner()
 INLINE tcb_t* tcb_t::get_partner_tcb()
 {
     return this->get_space()->get_tcb(partner);
+}
+
+INLINE void tcb_t::init_saved_state()
+{
+    for (int l = 0; l < IPC_NESTING_LEVEL; l++)
+    {	
+	set_saved_state (thread_state_t::aborted, l);
+	set_saved_partner (threadid_t::nilthread(), l);
+    }
+}
+
+INLINE threadid_t tcb_t::get_saved_partner (word_t level) 
+{ 
+    ASSERT(level < IPC_NESTING_LEVEL); 
+    return misc.saved_state[level].partner; 
+}
+
+INLINE void tcb_t::set_saved_partner (threadid_t t, word_t level) 
+{ 
+    ASSERT(level < IPC_NESTING_LEVEL); 
+    misc.saved_state[level].partner = t; 
+}
+
+INLINE thread_state_t tcb_t::get_saved_state (word_t level)
+{ 
+    ASSERT(level < IPC_NESTING_LEVEL); 
+    return (thread_state_t) misc.saved_state[level].state; 
+}
+
+INLINE void tcb_t::set_saved_state (thread_state_t s, word_t level)
+{ 
+    ASSERT(level < IPC_NESTING_LEVEL); 
+    misc.saved_state[level].state = s; 
 }
 
 /**
@@ -568,8 +595,7 @@ INLINE u8_t tcb_t::get_cop_flags (void)
  */
 INLINE msg_tag_t tcb_t::get_tag (void)
 {
-    msg_tag_t tag;
-    tag.raw = get_mr(0);
+    msg_tag_t tag = get_mr(0);
     return tag;
 }
 
@@ -606,11 +632,14 @@ INLINE time_t tcb_t::get_xfer_timeout_rcv (void)
  * enqueues the tcb into the send queue of tcb
  * @param tcb the thread control block to enqueue
  */
-INLINE void tcb_t::enqueue_send(tcb_t * tcb)
+INLINE void tcb_t::enqueue_send(tcb_t * tcb, const bool head)
 {
+    //TRACEPOINT_TB(DEBUG, ("%t enqueue into send queue of %t", this, tcb));
     ASSERT( !queue_state.is_set(queue_state_t::send) );
-
-    ENQUEUE_LIST_TAIL(tcb->send_head, this, send_list);
+    if (head)
+	ENQUEUE_LIST_HEAD(tcb->send_head, this, send_list);
+    else
+	ENQUEUE_LIST_TAIL(tcb->send_head, this, send_list);
     queue_state.set(queue_state_t::send);
 }
 
@@ -629,14 +658,14 @@ INLINE void tcb_t::dequeue_send(tcb_t * tcb)
  * enqueue a tcb into the present list
  * the present list primarily exists for debugging reasons, since task 
  * manipulations now happen on a per-thread basis */
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
 extern tcb_t * global_present_list;
 extern spinlock_t present_list_lock;
 #endif
 
 INLINE void tcb_t::enqueue_present()
 {
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
     present_list_lock.lock();
     ENQUEUE_LIST_TAIL(global_present_list, this, present_list);
     present_list_lock.unlock();
@@ -645,7 +674,7 @@ INLINE void tcb_t::enqueue_present()
 
 INLINE void tcb_t::dequeue_present()
 {
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
     present_list_lock.lock();
     DEQUEUE_LIST(global_present_list, this, present_list);
     present_list_lock.unlock();
@@ -659,15 +688,9 @@ INLINE arch_ktcb_t *tcb_t::get_arch()
 
 INLINE tcb_t * get_idle_tcb()
 {
-    extern whole_tcb_t __idle_tcb;
-    return (tcb_t*)&__idle_tcb;
+    extern tcb_t *__idle_tcb;
+    return (tcb_t*)__idle_tcb;
 }
-
-INLINE void tcb_t::switch_to_idle()
-{
-    switch_to(get_idle_tcb());
-}
-
 
 /* 
  * include glue header file 

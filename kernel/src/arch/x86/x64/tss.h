@@ -35,14 +35,14 @@
 #include <debug.h> 
 
 #if defined(CONFIG_X86_IO_FLEXPAGES)
-#define AMD64_IOPERMBITMAP_BITS          (1 << 16)
-#define AMD64_IOPERMBITMAP_ALIGNMENT     __attribute__((aligned(4096)));
+#define X86_X64_IOPERMBITMAP_BITS          (1 << 16)
+#define X86_X64_IOPERMBITMAP_ALIGNMENT     __attribute__((aligned(4096)));
 #else
-#define AMD64_IOPERMBITMAP_BITS 0
-#define AMD64_IOPERMBITMAP_ALIGNMENT
+#define X86_X64_IOPERMBITMAP_BITS 0
+#define X86_X64_IOPERMBITMAP_ALIGNMENT
 #endif
 
-#define IOPERMBITMAP_SIZE		(AMD64_IOPERMBITMAP_BITS / 8)
+#define IOPERMBITMAP_SIZE		(X86_X64_IOPERMBITMAP_BITS / 8)
 
 
 class x86_x64_tss_t 
@@ -61,7 +61,7 @@ private:
     u64_t	reserved2;
     u16_t	reserved3;
     u16_t	iopbm_offset;    
-    u8_t	io_bitmap[IOPERMBITMAP_SIZE] AMD64_IOPERMBITMAP_ALIGNMENT;
+    u8_t	io_bitmap[IOPERMBITMAP_SIZE] X86_X64_IOPERMBITMAP_ALIGNMENT;
     u8_t	stopper;
 } __attribute__((packed));
 

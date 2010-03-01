@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
  *                
  * File path:     generic/kmemory.cc
  * Description:   very simple kernel memory allocator
@@ -106,8 +106,6 @@ void kmem_t::free(void * address, word_t size)
     word_t* p;
     word_t* prev, *curr;
 
-    spinlock.lock();
-
     FREE_TRACE("kmem_free(%p, %x)\n", address, size);
     TRACEPOINT (KMEM_FREE,
 		"kmem_free (%p, %d [%d%c]), ip: %p\n",
@@ -116,6 +114,8 @@ void kmem_t::free(void * address, word_t size)
 		size >= MB (1) ? size >> 20 : size >> 10,
 		size >= GB (1) ? 'G' : size >= MB (1) ? 'M' : 'K',
 		__builtin_return_address (0));
+
+    spinlock.lock();
 
     KMEM_CHECK;
 
@@ -312,7 +312,6 @@ void * kmem_t::alloc_aligned(word_t size, word_t alignment, word_t mask)
 #endif
 
 		spinlock.unlock();
-
 		return curr;
 	    }
 	}

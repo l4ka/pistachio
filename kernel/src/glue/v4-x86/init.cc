@@ -42,6 +42,7 @@
 #include INC_GLUE(timer.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(cpu.h)
+#include INC_GLUE(logging.h)
 
 #include INC_ARCH(apic.h)
 #include INC_ARCH(amdhwcr.h)
@@ -58,6 +59,9 @@
 #include INC_GLUE_SA(x32comp/init.h)
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
+#if defined(CONFIG_X_EVT_LOGGING)
+#include INC_GLUE_SA(logging.h)
+#endif
 
 // from either glue/v4-ia32/ or glue/v4-x86/
 void setup_msrs();
@@ -65,6 +69,9 @@ void SECTION(SEC_INIT) init_meminfo();
 void SECTION(".init.cpu") check_cpu_features();
 cpuid_t SECTION(".init.cpu") init_cpu();
 void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid);
+#if defined(CONFIG_X_X86_HVM)
+void SECTION(".init.cpu") setup_vmx (cpuid_t cpuid);
+#endif
 
 #if defined(CONFIG_TRACEBUFFER)
 tracebuffer_t * tracebuffer;
@@ -144,7 +151,7 @@ extern "C" void SECTION(SEC_INIT) startup_processor (void)
     TRACE_INIT("\tAP processor is alive\n");
     x86_mmu_t::set_active_pagetable((word_t) get_kernel_space()->get_top_pdir_phys());
     TRACE_INIT("\tAP switched to kernel ptab\n");
-
+    
     // first thing -- check CPU features
     check_cpu_features();
 
@@ -217,6 +224,7 @@ void SECTION(SEC_INIT) add_more_kmem (void)
          i++)
     {
         memdesc_t* md = get_kip()->memory_info.get_memdesc(i);
+	
         if (!md->is_virtual() &&
             (md->type() == memdesc_t::reserved) &&
             (word_t) md->high() <= KERNEL_AREA_END)
@@ -225,6 +233,10 @@ void SECTION(SEC_INIT) add_more_kmem (void)
 		       md->size() / (1024*1024), md->low(), md->high(), 
 		       phys_to_virt(md->low()), phys_to_virt(md->high()));
 	    
+#if defined(CONFIG_X_EVT_LOGGING)
+	    add_logging_kmem(md);
+#endif
+
 	    // Align to kernel page size
 	    mem_region_t alloc = { addr_align_up(md->low(), KERNEL_PAGE_SIZE),
 				   addr_align(addr_offset(md->low(),md->size()), KERNEL_PAGE_SIZE) };
@@ -242,7 +254,7 @@ void SECTION(SEC_INIT) add_more_kmem (void)
 		
 
 		// Map region kernel writable 
-		//TRACEF("add %x %x\n", alloc.low, allocsize);
+		//TRACE("\tadd %x %dM\n", alloc.low, allocsize / (1024 * 1024));
 		get_kernel_space()->remap_area(
 		    phys_to_virt(alloc.low), alloc.low,
 		    PGSIZE_KERNEL,
@@ -297,6 +309,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     TRACE_INIT("\tActivating TSS (CPU %d)se\n", cpuid);
     tss.setup(X86_KDS);
 
+   
     TRACE_INIT("\tInitializing GDT (CPU %d)\n", cpuid);
     setup_gdt(tss, cpuid);
 
@@ -304,11 +317,11 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
      * idt is initialized via a constructor */
     TRACE_INIT("\tActivating IDT (CPU %d)\n", cpuid);;
     idt.activate();
-
+    
 #if defined(CONFIG_PERFMON)
-
-#if defined(CONFIG_TBUF_PERFMON)
-    /* initialize tracebuffer */
+    
+#if defined(CONFIG_TBUF_PERFMON) 
+    /* initialize performance monitoring counters */
     TRACE_INIT("\tInitializing Tracebuffer PMCs (CPU %d)\n", cpuid);
     setup_perfmon_cpu(cpuid);
 #endif
@@ -336,6 +349,13 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     TRACE_INIT("\tActivating MSRS (CPU %d)\n", cpuid);
     setup_msrs();
 
+
+#if defined(CONFIG_X_X86_HVM)
+    /* initialize virtualization extensions */
+    TRACE_INIT("\tInitializing VMX (CPU %d)\n", cpuid);
+    setup_vmx(cpuid);
+#endif
+
     TRACE_INIT("\tInitializing Timer (CPU %d)\n", cpuid);
     get_timer()->init_cpu(cpuid);
 
@@ -346,6 +366,13 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
 
     /* CPU specific mappings */
     get_kernel_space()->init_cpu_mappings(cpuid);
+
+    /* initialize logging */
+#if defined(CONFIG_X_EVT_LOGGING)
+    TRACE_INIT("\tInitializing EVT logging (CPU %d)\n", cpuid);
+    init_logging_cpu(cpuid);
+#endif
+
 
     call_cpu_ctors();
 
@@ -451,7 +478,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 
 #if defined(CONFIG_TRACEBUFFER)
     /* allocate and setup tracebuffer */
-    TRACE_INIT("Initializing Tracebuffer\n");
+    TRACE_INIT("Initializing Tracebuffer (%dM)\n", TRACEBUFFER_SIZE / (1024 * 1024));
     setup_tracebuffer();
 #endif
 
@@ -494,7 +521,8 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 
 	word_t apic_id = get_apic_id();
 
-	for (cpuid_t cpuid = 0; cpuid < cpu_t::count; cpuid++) {
+	for (cpuid_t cpuid = 0; cpuid < cpu_t::count; cpuid++) 
+        {
 	    cpu_t* cpu = cpu_t::get(cpuid);
 
 	    // don't start ourselfs
@@ -505,9 +533,10 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 	    TRACE_INIT("Sending startup IPI to CPU#%d APIC %d\n", 
 		       cpuid, cpu->get_apic_id());
 	    local_apic.send_init_ipi(cpu->get_apic_id(), true);
-	    for (int i = 0; i < 200000; i++);
+            x86_wait_cycles(1000000);
 	    local_apic.send_init_ipi(cpu->get_apic_id(), false);
 	    local_apic.send_startup_ipi(cpu->get_apic_id(), (void(*)(void))SMP_STARTUP_ADDRESS);
+
 #warning VU: time out on AP call in
 	}
     }
@@ -517,16 +546,14 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
     /* Initialize CPU */
     cpuid_t cpuid = init_cpu();
     
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     smp_bp_commence ();
 #else
     cpu_t::add_cpu(0);
 #endif
-
-
+    
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
-    TRACE_INIT("Initializing 32-bit kernel interface page (%p)\n",
-	       x32::get_kip());
+    TRACE_INIT("\tInitializing 32-bit kernel interface page (%p)\n", x32::get_kip());
     x32::get_kip()->init();
     init_kip_32();
 #endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */

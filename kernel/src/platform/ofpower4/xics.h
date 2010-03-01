@@ -40,7 +40,7 @@ public:
     word_t size;
 };
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
  #define NUM_XICS    CONFIG_SMP_MAX_CPUS
 #else
  #define NUM_XICS    32

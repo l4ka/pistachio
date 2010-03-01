@@ -273,7 +273,8 @@
 /* Exception Settings */
 #define EXC_INTERRUPT(name)	X86_EXCNO_ERRORCODE(name, 0)
 #define NUM_EXC_REGS		20	 
-    
+#define NUM_CTRLXFER_GPREGS     18
+
 
 /* 1.953ms per timer tick
  * VU: the hardware clock can only be configured to tick in 2^n Hz

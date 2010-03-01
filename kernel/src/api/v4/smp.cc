@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006, 2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2008-2009,  Karlsruhe University
  *                
  * File path:     api/v4/smp.cc
  * Description:   Multiprocessor handling for cross-processor 
@@ -39,9 +39,8 @@
 #include INC_API(queueing.h)
 
 //#define TRACE_IPI(x...) do { printf("CPU %d: ", get_current_cpu()); printf(x); } while(0)
-#define TRACE_IPI(x...)
 
-#ifdef CONFIG_SMP_SYNC_REQUEST
+#if defined(CONFIG_SMP_SYNC_REQUEST)
 
 /*
  * VU: Synchronous XCPU handling
@@ -80,6 +79,7 @@ void sync_xcpu_request(cpuid_t dstcpu, xcpu_handler_t handler, tcb_t * tcb,
 	// Avoid KDB deadlock
 	return;
 #endif
+
     sync_entry_t * entry = &sync_xcpu_entry[get_current_cpu()];
 
     entry->ack_mask = 0;
@@ -123,32 +123,32 @@ void cpu_mb_t::walk_mailbox()
 	first_alloc = (first_alloc + 1) % MAX_MAILBOX_ENTRIES;
 	lock.unlock();
 	ASSERT(entry.handler);
+	
 	//printf("CPU%d: XCPU-entry (handler: %t)\n", get_current_cpu(), entry.handler);
 	entry.handler(&entry);
     }
 }
 
 
-void cpu_mb_t::dump_mailbox()
+void cpu_mb_t::dump_mailbox(word_t cpu)
 {
+    printf("CPU%d Mailbox first alloc %d first free %d\n", cpu, first_alloc, first_free);
     for (word_t e=0; e < MAX_MAILBOX_ENTRIES; e++)
     {
-        lock.lock();
         cpu_mb_entry_t entry = entries[e];
-        if (entry.handler != NULL)
-            printf("CPU%d: XCPU-entry %d\n\t\thandler:%t,"
+	if (entry.handler != NULL)
+            printf("\tXCPU-entry %d\n\t\thandler:%t,"
 		   "tcb %t\n\t\tparams %x:%x:%x:%x:%x:%x:%x:%x\n",
-                   get_current_cpu(), e, entry.handler, entry.tcb,
+                   cpu, e, entry.handler, entry.tcb,
                    entry.param[0], entry.param[1], entry.param[2], entry.param[3],
                    entry.param[4], entry.param[5], entry.param[6], entry.param[7]);
-        lock.unlock();
     }
 }
 
 
 void process_xcpu_mailbox()
 {
-#ifdef CONFIG_SMP_SYNC_REQUEST
+#if defined(CONFIG_SMP_SYNC_REQUEST)
     sync_xcpu_entry[get_current_cpu()].handle_sync_requests();
 #endif
     get_cpu_mailbox (get_current_cpu())->walk_mailbox();

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/tcb.h
  * Description:   TCB related functions for Version 4, AMD64
@@ -123,16 +123,9 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
     /* modify stack in tss */
     tss.set_rsp0((u64_t)dest->get_stack_top());
 
-#if 0
-    TRACEF("\ncurr=%t (sp=%p, pdc=%p, spc=%p)\ndest=%t (sp=%p, pdc=%p, spc=%p)\n",
-	   this, this->stack, this->pdir_cache, this->space,
-	   dest, dest->stack, dest->pdir_cache, dest->space);
-    //enter_kdebug("hmm");
-#endif
-    if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
-	tbuf_record_event (TB_DEFAULT, 0, "switch %t => %t", (word_t)this, (word_t)dest);
+    tbuf_record_event (TP_DETAIL, 0, "switch %t => %t", (word_t)this, (word_t)dest);
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     active_cpu_space.set(get_cpu(), dest->space);
 #endif
     __asm__ __volatile__ (
@@ -205,7 +198,7 @@ INLINE msg_tag_t tcb_t::do_ipc (threadid_t to_tid, threadid_t from_tid,
 {
     msg_tag_t tag;
     sys_ipc (timeout, to_tid, from_tid);
-    tag.raw = get_mr (0);
+    tag = get_mr (0);
 
     return tag;
 }
@@ -292,6 +285,7 @@ INLINE void NORETURN tcb_t::return_from_ipc (void)
 	"d" (get_tag ().raw)
 	);	
     
+    while (1);
 }
 
 

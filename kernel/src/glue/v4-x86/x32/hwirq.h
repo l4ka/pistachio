@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008, 2010,  Karlsruhe University
  *                
- * File path:     glue/v4-ia32/hwirq.h
+ * File path:     glue/v4-x86/x32/hwirq.h
  * Description:   Macros to define interrupt handler stubs for IA32
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,44 +32,59 @@
 #ifndef __GLUE_V4_X86__X32__HWIRQ_H__
 #define __GLUE_V4_X86__X32__HWIRQ_H__
 
-#define HW_IRQ(num)	                                        \
-extern "C" void hwirq_##num();                                  \
-    __asm__ (                                                   \
-        "	.section .text					\n"\
-        "	.align 16					\n"\
-        "	.global hwirq_"#num"				\n"\
-        "	.type hwirq_"#num",@function			\n"\
-        "hwirq_"#num":						\n"\
-        "	pusha			/* save regs    */	\n"\
-	"	pushl	%ds					\n"\
-	"	pushl	%es					\n"\
-        "	pushl	$"#num"		/* irq number   */      \n"\
-        "	jmp	hwirq_common	/* common stuff */      \n");
+#if defined(CONFIG_X_CTRLXFER_MSG)
+#define __ADJUST_FRAME							\
+    "       subl	$4, %esp	/* CTRLXFER_MSG */      \n"	
+#define __ADJUST_FRAME_RET						\
+    "       addl	$4, %esp	/* CTRLXFER_MSG */      \n"	
+#else
+#define __ADJUST_FRAME
+#define __ADJUST_FRAME_RET
+#endif
 
 
 #if defined(CONFIG_X86_SMALL_SPACES)
-#define __SET_KDS						\
-	"	mov	$" MKSTR(X86_KDS) ", %eax		\n"\
-	"	mov	%eax, %ds				\n"
+#define __SET_KDS							\
+    "	mov	$" MKSTR(X86_KDS) ", %eax		\n"		\
+    "	mov	%eax, %ds				\n"
 #else
 #define __SET_KDS
 #endif
 
 
-#define HW_IRQ_COMMON()						\
-    __asm__(							\
-	"	.section .text					\n"\
-	"	.align 16					\n"\
-	"	.globl hwirq_common				\n"\
-	"hwirq_common:						\n"\
-	"	pushl	$intctrl	/* this pointer */	\n"\
-	__SET_KDS						\
-	"	call	intctrl_t_handle_irq			\n"\
-	"	addl	$8,%esp		/* clear stack  */	\n"\
-	"	popl	%es					\n"\
-	"	popl	%ds					\n"\
-	"	popa			/* restore regs */	\n"\
-	"	iret						\n"\
+
+#define HW_IRQ(num)							\
+    extern "C" void hwirq_##num();					\
+    __asm__ (								\
+        "	.section .text					\n"	\
+        "	.align 16					\n"	\
+        "	.global hwirq_"#num"				\n"	\
+        "	.type hwirq_"#num",@function			\n"	\
+        "hwirq_"#num":						\n"	\
+	__ADJUST_FRAME							\
+        "	pusha			/* save regs    */	\n"	\
+	"	pushl	%ds					\n"	\
+	"	pushl	%es					\n"	\
+        "	pushl	$"#num"		/* irq number   */      \n"	\
+        "	jmp	hwirq_common	/* common stuff */      \n");
+
+
+
+#define HW_IRQ_COMMON()							\
+    __asm__(								\
+	"	.section .text					\n"	\
+	"	.align 16					\n"	\
+	"	.globl hwirq_common				\n"	\
+	"hwirq_common:						\n"	\
+	"	pushl	$intctrl	/* this pointer */	\n"	\
+	__SET_KDS							\
+	"	call	intctrl_t_handle_irq			\n"	\
+	"	addl	$8,%esp		/* clear stack  */	\n"	\
+	"	popl	%es					\n"	\
+	"	popl	%ds					\n"	\
+	"	popa			/* restore regs */	\n"	\
+	__ADJUST_FRAME_RET						\
+	"	iret						\n"	\
 	);
 
 #endif /* !__GLUE_V4_X86__X32__HWIRQ_H__ */

@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2007,  Karlsruhe University
+## Copyright (C) 2003-2008, 2010,  Karlsruhe University
 ##                
 ## File path:     config/x86.cml
 ## Description:   IA32 specific rules
@@ -43,7 +43,7 @@ SUBARCH_X64			'64-Bit  x86 Processors (AMD64/EM64T)'
 
 CPU_X86_I486			'486'
 CPU_X86_I586			'Pentium1'
-CPU_X86_I686			'Pentium2/3'
+CPU_X86_I686			'Pentium2,Pentium3,Core'
 CPU_X86_P4			'Pentium4'
 CPU_X86_K8			'AMD K8'
 CPU_X86_C3      		'VIA C3'
@@ -173,3 +173,4 @@ derive X86_PAT from CPU_X86_I686 or CPU_X86_P4 or CPU_X86_K8
 
 derive X86_EM64T from SUBARCH_X64 and CPU_X86_P4
 derive MULTI_ARCHITECTURE from SUBARCH_X64 and X86_COMPATIBILITY_MODE
+derive X86_HVM from CPU_X86_P4 

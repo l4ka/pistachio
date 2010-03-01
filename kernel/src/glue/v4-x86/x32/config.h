@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/config.h
  * Description:   configuration of IA32 architecture
@@ -64,10 +64,13 @@
 #define KTCB_SIZE		(1 << KTCB_BITS)
 #define KTCB_MASK		(~(KTCB_SIZE-1))
 
+#if defined(CONFIG_X_X86_HVM)
+#include INC_GLUE_SA(hvm-config.h)
+#else
+
 #define VALID_THREADNO_BITS	(17)
 #define VALID_THREADNO_SHIFT	(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
 #define VALID_THREADNO_MASK	((__UL(1) << VALID_THREADNO_BITS) - 1)
-
 
 /**********************************************************************
  *                  Virtual Address Space Layout
@@ -124,6 +127,8 @@
 #define KERNEL_AREA_END		(0xFF000000UL)
 #define KERNEL_AREA_SIZE	(KERNEL_AREA_END - KERNEL_AREA_START)
 
+#endif /* defined(CONFIG_X_X86_HVM) */
+
 /* address of UTCB and KIP for root servers, at end of user-AS */
 #define ROOT_UTCB_START		(0xBF000000)
 #define ROOT_KIP_START		(0xBFF00000)
@@ -135,7 +140,8 @@
 #define ADDITIONAL_KMEM_SIZE	(0x01000000)
 
 /* defines the granularity kernel code and data is mapped */
-#if !defined(CONFIG_SMP) && !defined(CONFIG_X86_IO_FLEXPAGES) && defined (CONFIG_X86_PSE) 
+#if !defined(CONFIG_IOAPIC) && !defined(CONFIG_X86_IO_FLEXPAGES) \
+    && defined (CONFIG_X86_PSE) && !defined(CONFIG_X_EVT_LOGGING)
 #define KERNEL_PAGE_SIZE	(X86_SUPERPAGE_SIZE)
 #else
 #define KERNEL_PAGE_SIZE	(X86_PAGE_SIZE)
@@ -172,6 +178,9 @@
 #define X86_USER_FLAGMASK   (X86_FLAGS_CF | X86_FLAGS_PF | X86_FLAGS_AF | X86_FLAGS_ZF | X86_FLAGS_SF | X86_FLAGS_OF)
 #endif
 
+/* kernel mode e-flags */
+#define X86_KERNEL_FLAGS   (X86_USER_FLAGS & (~X86_FLAGS_IF)) 
+
 
 /* IDT, GDT, etc. */
 #define IDT_SIZE		256
@@ -194,9 +203,10 @@
 
 #define EXC_INTERRUPT(name)	X86_EXCNO_ERRORCODE(name, 0)				
 #define NUM_EXC_REGS		13	      
+#define NUM_CTRLXFER_GPREGS     10
 
 /* timer frequency */
-#ifdef CONFIG_IOAPIC
+#if defined(CONFIG_IOAPIC)
 # define TIMER_TICK_LENGTH	(CONFIG_APIC_TIMER_TICK)
 #else
 /* 1.953ms per timer tick
@@ -207,7 +217,6 @@
 
 /* enable synchronous XCPU-requests, for TLB shoot-downs */
 #define CONFIG_SMP_SYNC_REQUEST
-
 
 
 /**********************************************************************

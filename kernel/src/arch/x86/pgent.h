@@ -140,6 +140,9 @@ public:
     bool is_kernel (space_t * s, pgsize_e pgsize)
 	{ return pgent.is_kernel(); }
 
+    bool is_global (space_t * s, pgsize_e pgsize)
+	{ return pgent.is_global(); }
+
     bool is_cpulocal (space_t * s, pgsize_e pgsize)
 	{ return pgent.is_cpulocal (); }
 
@@ -177,7 +180,6 @@ public:
 	}
 
 
-    
     word_t attributes (space_t * s, pgsize_e pgsize)
 	{
 	    return (pgent.is_write_through() ? 1 : 0) |
@@ -215,7 +217,7 @@ public:
 	{
 	    word_t size = 
 		(!kernel && (pgsize == size_4k || pgsize == size_superpage))
-		? 2* X86_PTAB_BYTES : X86_PTAB_BYTES;
+		? 2 * X86_PTAB_BYTES : X86_PTAB_BYTES;
 	    
 	    pgent.set_ptab_entry
 		(virt_to_phys
@@ -268,7 +270,6 @@ public:
 	    if ((! kernel) && is_smallspace(s))
 		pgent.set_global (true);
 #endif
-
 	    sync(s, pgsize);
 
 	} 

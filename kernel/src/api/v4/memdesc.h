@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2008,  Karlsruhe University
  *                
  * File path:     api/v4/memdesc.h
  * Description:   Memory descriptors for kernel interface page
@@ -60,7 +60,9 @@ public:
 	reserved	= 0x2,
 	dedicated	= 0x3,
 	shared		= 0x4,
-	max_type
+	boot_specific	= 0xe,
+	arch_specific	= 0xf,
+	max_type	= 0x10
     };
 
     /**

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2008,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/tcb.h
  * Description:   TCB related functions for Version 4, IA-32
@@ -36,6 +36,7 @@
 #include INC_ARCH(trapgate.h)
 #include INC_API(syscalls.h)
 #include INC_GLUE(resource_functions.h)
+#include INC_GLUE(logging.h)
 
 
 
@@ -61,7 +62,6 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 #if defined(CONFIG_X86_SMALL_SPACES)
     asm volatile ("mov %0, %%es" : : "r" (X86_KDS));
 #endif
-
     /* use optimized IA32 copy loop -- uses complete cacheline
        transfers */
     __asm__ __volatile__ (
@@ -76,6 +76,7 @@ INLINE void tcb_t::copy_mrs(tcb_t * dest, word_t start, word_t count)
 #if defined(CONFIG_X86_SMALL_SPACES)
     asm volatile ("mov %0, %%es" : : "r" (X86_UDS));
 #endif
+   
 }
 
 
@@ -109,7 +110,7 @@ INLINE void NORETURN initial_switch_to (tcb_t * tcb)
 /**
  * tcb_t::switch_to: switches to specified tcb
  */
-INLINE void tcb_t::switch_to(tcb_t * dest)
+INLINE SECTION(".text") void tcb_t::switch_to(tcb_t * dest) 
 {
     word_t dummy;
     
@@ -117,25 +118,26 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	resources.save(this);
 
     /* modify stack in tss */
-    if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
-    {
-
-	ASSERT(dest->stack);
-	ASSERT(dest != this);
-	ASSERT(get_cpu() == dest->get_cpu());
+    ASSERT(dest->stack);
+    ASSERT(dest != this);
+    ASSERT(get_cpu() == dest->get_cpu());
 	
-	tss.set_esp0((u32_t)dest->get_stack_top());
-	tbuf_record_event(TP_DEFAULT, 0, "switch %wt (pdir=%p) ->  %wt (pdir=%p)\n",
-			  this, this->pdir_cache, dest, dest->pdir_cache);
-	
-    }
+    tss.set_esp0((u32_t)dest->get_stack_top());
 
+    LOG_PMC(this, dest);
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_TRACEBUFFER)
+        if (this != get_kdebug_tcb() && dest != get_kdebug_tcb())
+            tbuf_record_event(TP_DETAIL, 0, "switch %wt (pdir=%p) ->  %wt (pdir=%p, kip=%p)\n",
+                              this, this->pdir_cache, dest, dest->pdir_cache, *dest->stack);
+#endif
+    
+#if defined(CONFIG_SMP)
     active_cpu_space.set(get_cpu(), dest->space);
 #endif
 
 #if defined(CONFIG_X86_SMALL_SPACES)
+    
     __asm__ __volatile__ (
 	"/* switch_to_thread */				\n"
 	"	pushl	%%ebp				\n"
@@ -261,7 +263,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	"popl	%%ebp		\n\t"
 	"/* switch_to_thread */	\n\t"
 	: /* trash everything */
-	"=a" (dummy)				// 0
+	  "=a" (dummy)				// 0
 	:
 	"b" (this),				// 1
 	"S" (dest),				// 2
@@ -277,7 +279,7 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 #endif
 	: "edx", "memory"
 	);
-
+    
 #endif /* CONFIG_X86_SMALL_SPACES */
 
     if ( EXPECT_FALSE(resource_bits) )
@@ -301,23 +303,21 @@ INLINE msg_tag_t tcb_t::do_ipc(threadid_t to_tid, threadid_t from_tid, timeout_t
 {
     msg_tag_t tag;
     word_t mr1, mr2, dummy;
-    asm volatile
-       ("pushl	%%ebp		\n"
-	"pushl	%%ecx		\n"
-	"call	sys_ipc		\n"
-	"addl	$4, %%esp	\n"
-	"movl	%%ebp, %%ecx	\n"
-	"popl	%%ebp		\n"
-	: "=S"(tag.raw),
-	  "=b"(mr1),
-	  "=c"(mr2),
-	  "=a"(dummy),
-	  "=d"(dummy)
-	: "a"(to_tid.get_raw()),
-	  "d"(from_tid.get_raw()),
-	  "c"(timeout.raw)
-	: "edi",
-	  "memory");    
+    __asm__ __volatile__("pushl	%%ebp		\n"
+                         "pushl	%%ecx		\n"
+                         "call	sys_ipc		\n"
+                         "addl	$4, %%esp	\n"
+                         "movl	%%ebp, %%ecx	\n"
+                         "popl	%%ebp		\n"
+                         : "=S"(tag.raw),
+                           "=b"(mr1),
+                           "=c"(mr2),
+                           "=a"(dummy),
+                           "=d"(dummy)
+                         : "a"(to_tid.get_raw()),
+                           "d"(from_tid.get_raw()),
+                           "c"(timeout.raw)
+                         : "edi", "memory");
     set_mr(1, mr1);
     set_mr(2, mr2);
     return tag;
@@ -357,6 +357,11 @@ INLINE void tcb_t::notify(void (*func)(word_t, word_t), word_t arg1, word_t arg2
 
 INLINE void tcb_t::return_from_ipc (void)
 {
+#if defined(CONFIG_X_X86_HVM)
+    if (EXPECT_FALSE(resource_bits.have_resource(HVM)))
+	return;
+#endif
+    
     asm("movl %0, %%esp\n"
 	"mov  %3, %%ebp\n"
 	"ret\n"
@@ -404,6 +409,73 @@ INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
 			(word_t) addr & (COPY_AREA_SIZE-1));
 }
 
+/**********************************************************************
+ *
+ *                        ctrlxfer tcb functions
+ *
+ **********************************************************************/
+#if defined(CONFIG_X_CTRLXFER_MSG)
+
+EXTERN_TRACEPOINT(IPC_CTRLXFER_ITEM_DETAILS);
+
+INLINE x86_exceptionframe_t *get_user_frame(tcb_t *tcb)
+{
+    return ((x86_exceptionframe_t*) (tcb->get_stack_top()) - 1);
+    
+}
+
+INLINE void tcb_t::set_fault_ctrlxfer_items(word_t fault, ctrlxfer_mask_t mask)
+{ 
+    // Fault n corresponds to message label -n; faults 0,1,5,6,7 are not defined
+    if (fault >= 2 && fault <= 5)
+	// Pagefault, Preemption, Exception, Archexception
+	fault_ctrlxfer[fault - 2] = mask;
+    else if (fault >= 9 && fault < 9 + arch_ktcb_t::fault_max) 
+	// HVM Faults
+	fault_ctrlxfer[fault - 5] = mask;
+    else 
+    {
+	printf("Strange set fault id mask %d\n", fault);
+	enter_kdebug("BUG?");
+    }
+}
+
+INLINE ctrlxfer_mask_t tcb_t::get_fault_ctrlxfer_items(word_t fault)
+{  
+    // Fault n corresponds to message label -n; faults 0,1,5,6,7 are not defined
+    if (fault >= 2 && fault <= 5)
+	// Pagefault, Preemption, Exception, Archexception
+	return fault_ctrlxfer[fault - 2];
+    else if (fault >= 9 && fault < 9 + arch_ktcb_t::fault_max) 
+	// HVM Faults
+	return fault_ctrlxfer[fault - 5];
+    else 
+    {
+	printf("Strange get fault id mask %d\n", fault);
+	enter_kdebug("BUG?");
+    }
+    
+    return (ctrlxfer_mask_t) 0;
+}
+
+INLINE word_t tcb_t::append_ctrlxfer_item(msg_tag_t tag, word_t offset)
+{
+    word_t fault = 0x1000 - (tag.get_label() >> 4);
+    ASSERT ((fault >= 2 && fault <= 5) || 
+	    (fault >= 9 && fault < 9 + arch_ktcb_t::fault_max));
+    
+    if (get_fault_ctrlxfer_items(fault))
+    { 
+	TRACE_CTRLXFER_DETAILS( "append ctrlxfer item %d", fault); 
+	flags += kernel_ctrlxfer_msg;
+	msg_item_t item = ctrlxfer_item_t::kernel_fault_item(fault);
+	set_mr( offset++, item.raw );
+	return 1;
+    }
+    return 0;
+}
+
+#endif /* defined(CONFIG_X_CTRLXFER_MSG) */
 #endif /* !defined(BUILD_TCB_LAYOUT) */
 
 

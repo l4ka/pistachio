@@ -182,7 +182,7 @@ INLINE void thread_resources_t::release_copy_area (tcb_t * tcb,
 
 
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 /**
  * Toggle X-CPU pagetable allocation
  *

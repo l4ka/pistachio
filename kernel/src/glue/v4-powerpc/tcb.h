@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
  *                
  * File path:     glue/v4-powerpc/tcb.h
  * Description:   TCB related functions for Version 4, PowerPC
@@ -458,8 +458,7 @@ INLINE msg_tag_t tcb_t::do_ipc( threadid_t to_tid, threadid_t from_tid, timeout_
 
     this->resources.clr_kernel_ipc( this );
 
-    msg_tag_t tag;
-    tag.raw = this->get_mr(0);
+    msg_tag_t tag = this->get_mr(0);
     return tag;
 }
 

@@ -80,7 +80,7 @@ SECTION(".init") void intctrl_t::init_arch()
 	enter_kdebug( "No external interrupt presentation node found" );
 
     xics_valid.low = 0;
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
     xics_valid.high = CONFIG_SMP_MAX_CPUS;
 #else
     xics_valid.high = 32;

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  Karlsruhe University
+ * Copyright (C) 2004, 2008,  Karlsruhe University
  *                
  * File path:     bench/pingpong/powerpc64.h
  * Description:   PowerPC64 specific pingpong functions
@@ -34,13 +34,13 @@
 
 #define UTCB_ADDRESS	(0x0fe00000ul)
 
-L4_INLINE L4_Word_t read_cycles (void)
+L4_INLINE L4_Word64_t read_cycles (void)
 {
     L4_Word_t ret;
 
     asm volatile ("mftb %0;" : "=r" (ret)); 
 
-    return ret * 8;
+    return (L4_Word64_t) (ret * 8);
 }
 
 L4_INLINE L4_Word_t pingpong_ipc (L4_ThreadId_t dest, L4_Word_t untyped)

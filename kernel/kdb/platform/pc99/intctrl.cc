@@ -43,7 +43,7 @@ CMD(cmd_apic, cg)
     printf("\nInterrupt controller dump (%d IRQs)\n", 
 	   ctrl->get_number_irqs());
 
-#ifdef CONFIG_IOAPIC
+#if defined(CONFIG_IOAPIC)
     for (unsigned idx = 0; idx < NUM_REDIR_ENTRIES; idx++)
     {
 	if (!ctrl->redir[idx].is_valid())

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/generic/cmd.cc
  * Description:   Command dialogs and standard command functions.

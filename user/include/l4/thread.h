@@ -46,7 +46,6 @@
 #define L4_ERROR_KIP_AREA		(7)
 #define L4_ERROR_NO_MEM			(8)
 
-
 /*
  * Thread states
  */
@@ -172,6 +171,7 @@ L4_INLINE const char *L4_ErrorCode_String(L4_Word_t err)
 
    
 };
+
 
 L4_INLINE L4_Word_t L4_XferTimeouts (void)
 {

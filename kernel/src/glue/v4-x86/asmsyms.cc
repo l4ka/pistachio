@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2007-2009,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/asmsyms.cc
  * Description:   Various asm definitions for x86
@@ -35,6 +35,7 @@
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(queuestate.h)
+
 MKASMSYM (TSTATE_POLLING, (word_t) thread_state_t::polling);
 MKASMSYM (TSTATE_WAITING_FOREVER, (word_t) thread_state_t::waiting_forever);
 MKASMSYM (TSTATE_RUNNING, (word_t) thread_state_t::running);

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2007-2008,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-x86/resources.cc
  * Description:   resource dumping
@@ -52,4 +52,9 @@ void thread_resources_t::dump (tcb_t * tcb)
     if (tcb->resource_bits.have_resource(COMPATIBILITY_MODE))
 	printf("COMPATIBILITY_MODE ");
 #endif
+#if defined(CONFIG_X_X86_HVM)
+    if (tcb->resource_bits.have_resource (HVM))
+	printf("HVM");
+#endif
+
 }

@@ -49,13 +49,13 @@ public:
 	{ maskvalue = initvalue; }    
     
     // Modification 
-    
     bitmask_t clear()
 	{
-           maskvalue = 0;
-           return (bitmask_t) maskvalue;
+	    maskvalue = 0;
+	    return (bitmask_t) maskvalue;
 	}
   
+
     inline bitmask_t operator = (const int &n) 
 	{
 	    maskvalue = (1UL << n);
@@ -108,11 +108,11 @@ public:
 #if defined(CONFIG_DEBUG)
     char *string()
 	{
-	    static const char *d = "0123456789";
+	    static const char *d = "0123456789abcdef";
 	    static char s[3+masksize];
 	    s[0] = '['; s[1+masksize]=']'; s[2+masksize]=0;
 	    for (word_t i=0; i< masksize; i++)
-		s[masksize-i] = is_set(i) ? d[i%10] : '~';
+		s[masksize-i] = is_set(i) ? d[i%16] : '~';
 	    return s;
 	}
 #endif    

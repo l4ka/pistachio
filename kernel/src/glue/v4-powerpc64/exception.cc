@@ -32,7 +32,7 @@
 
 #include <debug.h>
 #include <kdb/tracepoints.h>
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
 #include <kdb/console.h>
 #endif
 #include INC_ARCH(msr.h)
@@ -123,7 +123,7 @@ INLINE void halt_user_thread( void )
     tcb_t *current = get_current_tcb();
 
     current->set_state( thread_state_t::halted );
-    current->switch_to_idle();
+    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
 }
 
 /* except_return() short circuits the C code return path.
@@ -205,7 +205,7 @@ extern "C" void dsi_handler( word_t dar, word_t dsisr, powerpc64_irq_context_t *
 		printf( "[%p%s] Data exception @ %p from %p\n", tcb,
 		is_kernel ? " (kernel)" : "", dar, context->srr0 ) );
 
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
     // Do we have a DABR hit?
     if( EXPECT_FALSE( EXCEPT_IS_DSI_DABR_MATCH(dsisr) ) )
     {
@@ -305,7 +305,7 @@ extern "C" void dsi_handler( word_t dar, word_t dsisr, powerpc64_irq_context_t *
 
 extern "C" void program_check_handler( word_t vect, powerpc64_irq_context_t *context )
 {
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG)
     if ( *(u32_t *)context->srr0 == KDEBUG_EXCEPT_INSTR )
     {
 	switch( context->r0 ) {

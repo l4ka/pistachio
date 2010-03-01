@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2003, 2007-2010,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/cpu.h
  * Description:   X86-64 CPUID features 

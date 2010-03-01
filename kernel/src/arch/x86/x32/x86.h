@@ -63,15 +63,15 @@
 #define X86_TOP_PDIR_BITS	X86_X32_PDIR_BITS
 #define X86_TOP_PDIR_SIZE	X86_X32_PDIR_SIZE
 #define X86_TOP_PDIR_IDX(x)	X86_X32_PDIR_IDX(x)
-
 #define X86_PAGEFAULT_BITS	(X86_PAGE_WRITABLE)
 
 /**********************************************************************
  *    CPU features (CPUID)  
  **********************************************************************/
+
 #define X86_X32_FEAT_FPU	(1 << 0)
 #define X86_X32_FEAT_VME	(1 << 1)
-#define X86_X32_FEAT_DE	(1 << 2)
+#define X86_X32_FEAT_DE		(1 << 2)
 #define X86_X32_FEAT_PSE	(1 << 3)
 #define X86_X32_FEAT_TSC	(1 << 4)
 #define X86_X32_FEAT_MSR	(1 << 5)
@@ -88,11 +88,14 @@
 #define X86_X32_FEAT_PSE36	(1 << 17)
 #define X86_X32_FEAT_PSN	(1 << 18)
 #define X86_X32_FEAT_CLFLH	(1 << 19)
-#define X86_X32_FEAT_DS	(1 << 21)
+#define X86_X32_FEAT_DS		(1 << 21)
 #define X86_X32_FEAT_ACPI	(1 << 22)
 #define X86_X32_FEAT_MMX	(1 << 23)
 #define X86_X32_FEAT_FXSR	(1 << 24)
 #define X86_X32_FEAT_XMM	(1 << 25)
+
+/* CPUID.1 ECX */
+#define X86_X32_FEAT2_VMX  (1 << 5)
 
 
 /**********************************************************************
@@ -124,7 +127,5 @@
 #else
 # error unknown architecture - specify cache line size
 #endif
-
-
 
 #endif /* !__ARCH__X86__X32__X86_X32_H__ */

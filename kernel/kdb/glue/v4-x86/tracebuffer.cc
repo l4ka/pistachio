@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2007-2010,  Karlsruhe University
  *                
  * File path:     kdb/glue/v4-x86/tracebuffer.cc
  * Description:   Tracebuffer for PC99 platform
@@ -138,6 +138,8 @@ private:
 	    if (tsc == 0) return true;
 	    
 	    u64_t ttsc = t->tsc;
+            if (get_tbuf_config().pmon_e)
+                ttsc <<= X86_PMC_TSC_SHIFT;
 	    return (ttsc >= tsc);
 	}
 
@@ -264,7 +266,10 @@ public:
 
     word_t get_tbuf_typemask()
 	{ return get_tracebuffer()->mask; }
-    
+
+    traceconfig_t get_tbuf_config()
+	{ return get_tracebuffer()->config; }
+
     
     word_t get_tbuf_size()
 	{ return (TRACEBUFFER_SIZE / sizeof (tracerecord_t)) - 1; }
@@ -432,31 +437,59 @@ public:
 		{
 		    tid = threadid (rec->thread);
 		    tcb = space->get_tcb (tid);
-		    printf ("%6d %01d %04x %c %4d %wt ", index, rec->cpu, rec->get_type 
-			    (), rec->is_kernel_event () ? 'k' : 'u', rec->id, tid.get_raw ());
+		    printf ("%6d %01d %04x %c %4d %wt ", index, rec->cpu, rec->get_type(), 
+			    rec->is_kernel_event () ? 'k' : 'u', rec->id, tid.get_raw ());
 
 		}
 
 
-#if defined(CONFIG_TBUF_PERFMON)
-		// User and kernel instructions
-		word_t pmcdelta0 = pmc_delta(rec->pmc0, (word_t) old[cpu].pmc0);
-		word_t pmcdelta1 = pmc_delta(rec->pmc1, (word_t) old[cpu].pmc1);
-		
-		pmc_print(c_delta);
-		pmc_print(pmcdelta0);
-		pmc_print(pmcdelta1);
-		
-		sum.pmc0 += pmcdelta0;
-		sum.pmc1 += pmcdelta1;
-		
-		old[cpu].pmc0 = rec->pmc0;
-		old[cpu].pmc1 = rec->pmc1;
+                if (get_tbuf_config().pmon)
+                {
+                    u64_t pmcdelta0;		
+                    u64_t pmcdelta1;
+                    if (get_tbuf_config().pmon_e)
+                    {                
 
-#else
-		pmc_print(c_delta);
-#endif
+                        // Energy mix
+                        c_delta <<= X86_PMC_TSC_SHIFT;
+				    
+                        u64_t e_cur = ((u64_t) (rec->pmc1) << 32) | (u64_t) rec->pmc0;
+                        u64_t e_old = ((u64_t) (old[cpu].pmc1) << 32) | (u64_t) old[cpu].pmc0;
 		
+                        u64_t e_delta = pmc_delta(e_cur, e_old);
+			
+                        u64_t p_freq_mhz = get_timer()->get_proc_freq() / 1000;
+                        word_t n = (c_delta / 100) < (p_freq_mhz) ? 100 : 1;
+
+                        u64_t t_delta = (n * c_delta) / p_freq_mhz;
+                        u64_t p_delta = (t_delta ? ((n * e_delta) / t_delta) : 0);
+		
+                        pmcdelta0 = e_delta / 1000;		
+                        pmcdelta1 = p_delta / 1000;
+                    }
+                    else
+                    {
+                        // User and kernel instructions
+                        pmcdelta0 = pmc_delta(rec->pmc0, (word_t) old[cpu].pmc0);
+                        pmcdelta1 = pmc_delta(rec->pmc1, (word_t) old[cpu].pmc1);
+                    }
+                		
+                    pmc_print(c_delta);
+                    pmc_print(pmcdelta0);
+                    pmc_print(pmcdelta1);
+		
+                    sum.pmc0 += pmcdelta0;
+                    sum.pmc1 += pmcdelta1;
+		
+                    old[cpu].pmc0 = rec->pmc0;
+                    old[cpu].pmc1 = rec->pmc1;
+
+                }
+                else
+                {
+                    pmc_print(c_delta);
+                }
+            		
 		sum.tsc  += (rec->tsc - old[cpu].tsc);
 
 		old[cpu].tsc = rec->tsc;
@@ -512,10 +545,9 @@ public:
 			idx+=10;
 			if (fid) *dst++ = '%';
 		    }
-			
 		    // Turn '%s' into '%p' (i.e., avoid printing arbitrary
 		    // user strings).
-		    if (!rec->is_kernel_event() &&  *dst == 's' &&
+		    if (*dst == 's' &&
 			( *(dst-1) == '%' || 	
 			  ( *(dst-2) == '%' &&		      
 			    ((*(dst-1) >= '0' && *(dst-1) <= '9') 
@@ -579,8 +611,8 @@ void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
     word_t old_tbuf_typemask = tbuf_handler.get_tbuf_typemask();
     
     tbuf_handler.set_cpumask(cpumask);
-    tbuf_handler.set_tbuf_typemask(~0ULL);
-    tbuf_handler.set_typemask(~0ULL);
+    tbuf_handler.set_tbuf_typemask((word_t) ~0ULL);
+    tbuf_handler.set_typemask((word_t )~0ULL);
     
     for (word_t i=0; i < tbuf_handler_t::max_filters; i++)
     {

@@ -50,7 +50,7 @@ void init_interrupt_threads();
  */
 bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid);
 
-#ifdef CONFIG_SMP
+#if defined(CONFIG_SMP)
 /**
  * migration function for interrupt threads
  * deals with re-routing

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2008-2009,  Karlsruhe University
  *                
  * File path:     l4/ia32/syscalls.h
  * Description:   x86 syscall implementations
@@ -203,7 +203,7 @@ L4_INLINE void L4_ThreadSwitch (L4_ThreadId_t dest)
 L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
 				  L4_Word_t TimeControl,
 				  L4_Word_t ProcessorControl,
-				  L4_Word_t prio,
+				  L4_Word_t PrioControl,
 				  L4_Word_t PreemptionControl,
 				  L4_Word_t * old_TimeControl)
 {
@@ -225,7 +225,7 @@ L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
 
 	: /* inputs */
 	"0" (dest),
-	"1" (prio),
+	"1" (PrioControl),
 	"2" (TimeControl),
 	"3" (ProcessorControl),
 	"4" (PreemptionControl)
