@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2010,  Karlsruhe University
  *                
  * File path:     platform/generic/intctrl-pic.cc
  * Description:   Implementation of class handling the PIC cascade in
@@ -67,24 +67,24 @@ void SECTION (".init") intctrl_t::init_arch()
     /* setup the IDT */
 #if 0
     for (int i=0; i<16; i++)
-	idt.add_int_gate(base+i, (void(*)()) &hwirq_0+((hwirq1-hwirq0)*i));
+	idt.add_gate(base+i, idt_t::interrupt, (void(*)()) &hwirq_0+((hwirq1-hwirq0)*i));
 #else    
-    idt.add_int_gate(base+ 0, (void(*)()) &hwirq_0);
-    idt.add_int_gate(base+ 1, (void(*)()) &hwirq_1);
-    idt.add_int_gate(base+ 2, (void(*)()) &hwirq_2);
-    idt.add_int_gate(base+ 3, (void(*)()) &hwirq_3);
-    idt.add_int_gate(base+ 4, (void(*)()) &hwirq_4);
-    idt.add_int_gate(base+ 5, (void(*)()) &hwirq_5);
-    idt.add_int_gate(base+ 6, (void(*)()) &hwirq_6);
-    idt.add_int_gate(base+ 7, (void(*)()) &hwirq_7);
-    idt.add_int_gate(base+ 8, (void(*)()) &hwirq_8);
-    idt.add_int_gate(base+ 9, (void(*)()) &hwirq_9);
-    idt.add_int_gate(base+10, (void(*)()) &hwirq_10);
-    idt.add_int_gate(base+11, (void(*)()) &hwirq_11);
-    idt.add_int_gate(base+12, (void(*)()) &hwirq_12);
-    idt.add_int_gate(base+13, (void(*)()) &hwirq_13);
-    idt.add_int_gate(base+14, (void(*)()) &hwirq_14);
-    idt.add_int_gate(base+15, (void(*)()) &hwirq_15);
+    idt.add_gate(base+ 0, idt_t::interrupt, (void(*)()) &hwirq_0);
+    idt.add_gate(base+ 1, idt_t::interrupt, (void(*)()) &hwirq_1);
+    idt.add_gate(base+ 2, idt_t::interrupt, (void(*)()) &hwirq_2);
+    idt.add_gate(base+ 3, idt_t::interrupt, (void(*)()) &hwirq_3);
+    idt.add_gate(base+ 4, idt_t::interrupt, (void(*)()) &hwirq_4);
+    idt.add_gate(base+ 5, idt_t::interrupt, (void(*)()) &hwirq_5);
+    idt.add_gate(base+ 6, idt_t::interrupt, (void(*)()) &hwirq_6);
+    idt.add_gate(base+ 7, idt_t::interrupt, (void(*)()) &hwirq_7);
+    idt.add_gate(base+ 8, idt_t::interrupt, (void(*)()) &hwirq_8);
+    idt.add_gate(base+ 9, idt_t::interrupt, (void(*)()) &hwirq_9);
+    idt.add_gate(base+10, idt_t::interrupt, (void(*)()) &hwirq_10);
+    idt.add_gate(base+11, idt_t::interrupt, (void(*)()) &hwirq_11);
+    idt.add_gate(base+12, idt_t::interrupt, (void(*)()) &hwirq_12);
+    idt.add_gate(base+13, idt_t::interrupt, (void(*)()) &hwirq_13);
+    idt.add_gate(base+14, idt_t::interrupt, (void(*)()) &hwirq_14);
+    idt.add_gate(base+15, idt_t::interrupt, (void(*)()) &hwirq_15);
 #endif
 
     /* initialize master
@@ -100,6 +100,7 @@ void SECTION (".init") intctrl_t::init_arch()
     /* unmask the slave on the master */
     master.unmask(2);
 }
+
 
     
 void intctrl_t::handle_irq(word_t irq) 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2007, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/timer.cc
  * Description:   Implements RTC timer
@@ -75,7 +75,7 @@ X86_EXCNO_ERRORCODE(timer_interrupt, IRQLINE)
 void SECTION (".init") timer_t::init_global()
 {
     /* TODO: Should be irq_manager.register(hwirq, 8, &timer_interrupt); */
-    idt.add_int_gate(0x20+IRQLINE, timer_interrupt);
+    idt.add_gate(0x20+IRQLINE, idt_t::interrupt, timer_interrupt);
 
     rtc_t<0x70> rtc;
 

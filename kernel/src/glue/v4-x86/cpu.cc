@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2005-2003, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2005-2003, 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/cpu.cc
  * Description:   X86 CPU implementation
@@ -72,7 +72,7 @@ void smp_xcpu_trigger(cpuid_t cpu)
 
 void init_xcpu_handling ()
 {
-    idt.add_int_gate(IDT_LAPIC_XCPU_IPI, smp_trigger_ipi);
+    idt.add_gate(IDT_LAPIC_XCPU_IPI, idt_t::interrupt, smp_trigger_ipi);
 }
 
 #endif /* defined(CONFIG_SMP) */
