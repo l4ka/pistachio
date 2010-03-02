@@ -88,7 +88,7 @@ int SMALL_AS = 0;
 int LIPC = 0;
 int PRINT_TABLE = 0;
 
-bool tbuf, pmipc, hsched;
+bool tbuf, hsched;
 
 #define Dprintf(args...)                                \
 	if (tbuf) L4_Tbuf_RecordEvent (1, args);	        
@@ -459,7 +459,6 @@ int main (void)
     
     L4_ThreadId_t scheduler_tid[2] = { roottid, roottid };
     
-    pmipc  = l4_has_feature("pmscheduling");
     hsched  = l4_has_feature("hscheduling");
     
 #if defined(L4_TRACEBUFFER)
