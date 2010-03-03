@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.cc
  * Description:   
@@ -172,15 +172,15 @@ space_t * space_t::allocate_space()
 
 
 
-void space_t::free_space() 
+void space_t::free_space(space_t *space) 
 {
 #if defined(CONFIG_SMP)
     for (cpuid_t cpuid = 0; cpuid < CONFIG_SMP_MAX_CPUS; cpuid++)
-	if (data.cpu_ptab[cpuid].top_pdir)
-	    free_cpu_top_pdir(cpuid);
-    kmem.free(kmem_space, (addr_t)this, sizeof(space_t));
+	if (space->data.cpu_ptab[cpuid].top_pdir)
+	    space->free_cpu_top_pdir(cpuid);
+    kmem.free_space, (addr_t)space, sizeof(space_t));
 #else
-    kmem.free(kmem_space, (addr_t)this, sizeof(space_t) + sizeof(top_pdir_t));
+    kmem.free(kmem_space, (addr_t)space, sizeof(space_t) + sizeof(top_pdir_t));
 #endif    
 }
 
@@ -906,17 +906,6 @@ void SECTION(".init.memory") space_t::init_kernel_space()
  *                    global functions
  *
  **********************************************************************/
-
-space_t * allocate_space()
-{
-    return space_t::allocate_space();
-}
-
-void free_space(space_t * space)
-{
-    ASSERT(space);
-    space->free_space();
-}
 
 /**
  * exc_pagefault: trap gate for ia32 pagefault handler

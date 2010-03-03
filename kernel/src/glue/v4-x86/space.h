@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/space.h
  * Description:   
@@ -76,7 +76,7 @@ public:
     /* x86 specific functions */
     static void init_kernel_space();
     static space_t * allocate_space();
-    void free_space();
+    static void free_space(space_t *space);
     static space_t * top_pdir_to_space(word_t ptab);
 
     void init_kernel_mappings();

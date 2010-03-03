@@ -770,7 +770,7 @@ bool tcb_t::migrate_to_space(space_t * space)
     if (old_space->remove_tcb(this, get_current_cpu()))
     {
 	old_space->free();
-	free_space(old_space);
+        space_t::free_space(old_space);
     }
 
     // now change the space
@@ -1204,7 +1204,7 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
     ASSERT(!utcb_area.is_nil_fpage() && !(kip_area.is_nil_fpage()));
     
     tcb_t * tcb = get_current_space()->get_tcb(dest_tid);
-    space_t * space = allocate_space();
+    space_t * space = space_t::allocate_space();
 
     /* VU: we always assume these calls succeed for the root servers
      * if not - we are in deep shit anyway */
@@ -1302,7 +1302,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    {
 		// was the last thread
 		space->free();
-		free_space(space);
+                space_t::free_space(space);
 	    }
 
 	    // schedule if we've been running on this thread's timeslice
@@ -1452,7 +1452,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    if (dest_tid != space_tid)
 		space = space_tcb->get_space();
 	    else
-		space = allocate_space();
+		space = space_t::allocate_space();
 
 	    /* VU: at that point we must have a space.
 	     * do we have to handle a failing allocate_space? */

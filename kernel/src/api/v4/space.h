@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004, 2006,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2006, 2010,  Karlsruhe University
  *                
  * File path:     api/v4/space.h
  * Description:   
@@ -36,9 +36,6 @@
 #include INC_GLUE(space.h)
 
 EXTERN_KMEM_GROUP (kmem_utcb);
-
-space_t * allocate_space();
-void free_space(space_t * space);
 
 extern space_t * sigma0_space;
 extern space_t * sigma1_space;
