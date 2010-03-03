@@ -94,7 +94,7 @@ bool kdb_t::pre()
     kdb_current = param->tcb;
 
 
-#if 0 && defined(CONFIG_SMP)
+#if defined(CONFIG_SMP)
     while (!kdb_current_cpu.cmpxchg(CONFIG_SMP_MAX_CPUS, current_cpu))
     {
 	/* Execute a dummy iret to receive NMIs again, then sleep */
@@ -420,7 +420,7 @@ void kdb_t::post() {
 
     } /* switch */
 
-#if 0 && defined(CONFIG_SMP) 
+#if defined(CONFIG_SMP) 
 
     if (kdb_current_cpu == get_current_cpu())
     {
