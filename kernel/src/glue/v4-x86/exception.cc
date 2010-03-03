@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/exception.cc
  * Description:   
@@ -381,8 +381,8 @@ X86_EXCWITH_ERRORCODE(exc_gp, X86_EXC_GENERAL_PROTECTION)
     addr_t user_eip = current->get_user_ip ();
 
     if (user_eip >= (addr_t) sysexit_tramp &&
-        user_eip <  (addr_t) sysexit_tramp_end &&
-        current->get_space ()->is_small ())
+        user_eip <  (addr_t) sysexit_tramp_end)
+        
     {
         /*
          * If we faulted at the LRET instruction or otherwise was
