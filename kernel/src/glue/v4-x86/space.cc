@@ -178,7 +178,7 @@ void space_t::free_space(space_t *space)
     for (cpuid_t cpuid = 0; cpuid < CONFIG_SMP_MAX_CPUS; cpuid++)
 	if (space->data.cpu_ptab[cpuid].top_pdir)
 	    space->free_cpu_top_pdir(cpuid);
-    kmem.free_space, (addr_t)space, sizeof(space_t));
+    kmem.free(kmem_space, (addr_t)space, sizeof(space_t));
 #else
     kmem.free(kmem_space, (addr_t)space, sizeof(space_t) + sizeof(top_pdir_t));
 #endif    

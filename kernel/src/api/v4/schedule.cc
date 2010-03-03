@@ -310,7 +310,7 @@ SYS_SCHEDULE (threadid_t dest_tid, word_t time_control,
     req.preemption_control = preemption_control;
     req.processor_control = processor_control; 
 
-    word_t err, ret0, ret1;
+    word_t err, ret0 = 0 , ret1 = 0;
  
     if (dest_tid != threadid_t::nilthread())
     {
