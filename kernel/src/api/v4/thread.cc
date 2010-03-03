@@ -1072,7 +1072,7 @@ bool tcb_t::send_preemption_ipc()
     tag = msg_tag_t::preemption_tag();
 	
     /* generate preemption message */
-    to = sched_state.pre_preemption_ipc(tag);
+    to = sched_state.get_scheduler();
     
     set_mr(1, (word_t) time);
     set_mr(2, (word_t)((time >> (BITS_WORD-1)) >> 1)); // Avoid gcc warn
@@ -1091,8 +1091,6 @@ bool tcb_t::send_preemption_ipc()
 
     restore_state ();
 
-    sched_state.post_preemption_ipc();
-    
     if (tag.is_error())
     {
 	enter_kdebug("preemption IPC error");

@@ -65,12 +65,6 @@ public:
     void delete_tcb();
 
     /**
-     * hook invoked during preemption IPCs, returns destination
-     */
-    threadid_t pre_preemption_ipc(msg_tag_t &tag);
-    void post_preemption_ipc();
-
-    /**
      * sets the absolute timeout for a thread
      * @param tcb		pointer to the thread control block
      * @param absolute_time	time the timeout expires

@@ -228,16 +228,6 @@ INLINE void sched_ktcb_t::delete_tcb()
     
 }
 
-INLINE threadid_t sched_ktcb_t::pre_preemption_ipc(msg_tag_t &tag)
-{
-    return scheduler; 
-}
-
-INLINE void sched_ktcb_t::post_preemption_ipc()
-{
-}
-
-
    
 #if defined(CONFIG_DEBUG)
 INLINE void sched_ktcb_t::dump_priority() 
