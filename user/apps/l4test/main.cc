@@ -227,8 +227,8 @@ extern "C" int main (void)
         
         if (autorun)
             all_tests();
-        else
-            menu_input( &main_menu );
+        
+        menu_input( &main_menu );
 
 	assert( !"Shouldn't get here!" );
 
