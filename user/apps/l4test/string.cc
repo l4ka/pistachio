@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2002-2003, Karlsruhe University
  *
- * File path:	include/piggybacker/string.h
+ * File path:	piggybacker/common/string.cc
  * Description:	
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,18 +26,69 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: string.h,v 1.1 2003/10/29 23:11:58 cvansch Exp $
+ * $Id: string.cc,v 1.1 2003/10/29 23:11:58 cvansch Exp $
  *
  ***************************************************************************/
-#ifndef __PIGGYBACKER__INCLUDE__STRING_H__
-#define __PIGGYBACKER__INCLUDE__STRING_H__
 
-#include <l4/types.h>
+#include "string.h"
 
-extern void hex( L4_Word_t num, char str[] );
-extern unsigned strlen( const char *src );
-extern void strcpy( char *dst, const char *src );
-extern int strcmp( const char *str1, const char *str2 );
-extern int strcmp_of( const char *str_of, const char *search );
+int
+strlen( const char *str )
+{
+	int len = 0;
+	while(*str != '\0')
+		str++, len++;
 
-#endif	/* __PIGGYBACKER__INCLUDE__STRING_H__ */
+	return len;
+}
+
+int strcmp( const char *str1, const char *str2 )
+{
+    while( *str1 && *str2 ) {
+	if( *str1 < *str2 )
+	    return -1;
+	if( *str1 > *str2 )
+	    return 1;
+	str1++;
+	str2++;
+    }
+    if( *str2 )
+	return -1;
+    if( *str1 )
+	return 1;
+    return 0;
+}
+
+int strcmp_of( const char *str_of, const char *search )
+{
+    while( *str_of && *search )
+    {
+	if ((*str_of == '@') && (*search == '/'))
+	{
+	    while ( *str_of && (*str_of != '/'))
+		str_of++;
+
+	    if ( !*str_of )
+		return -1;
+	}
+	if( *str_of < *search )
+	    return -1;
+	if( *str_of > *search )
+	    return 1;
+	str_of++;
+	search++;
+    }
+
+    if( *search )
+	return -1;
+
+    if( *str_of == '@' )
+	while ( *str_of && (*str_of != '/') )
+	    str_of++;
+
+    if( *str_of )
+	return 1;
+
+    return 0;
+}
+

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 2003, 2010,  Karlsruhe University
  *                
  * File path:     l4test/l4test.h
  * Description:   Some genetic macros and defs
@@ -34,6 +34,8 @@
 
 /* define this for ANSI menus */
 //#define USE_ANSI 1
+#include "string.h"
+#include <l4/kip.h>
 
 
 #define ESC "\e["
@@ -118,6 +120,18 @@ void start_thread (L4_ThreadId_t tid, void (*func)(void));
 void get_startup_values (void (*func)(void), L4_Word_t * ip, L4_Word_t * sp);
 void *code_addr( void *addr );
 void setup_exreg( L4_Word_t *ip, L4_Word_t *sp, void (*func)(void) );
+
+L4_INLINE bool l4_has_feature( const char *feature_name )
+{
+    void *kip = L4_GetKernelInterface();
+    char *name;
+
+    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
+	if( !strcmp(feature_name, name) )
+	    return true;
+    return false;
+}
+
 
 
 #endif /* !__L4TEST_H__ */

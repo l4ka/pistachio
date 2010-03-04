@@ -47,35 +47,6 @@ void exc3 (void)
     while (1);
 }
 
-int strcmp( const char *str1, const char *str2 )
-{
-    while( *str1 && *str2 ) {
-	if( *str1 < *str2 )
-	    return -1;
-	if( *str1 > *str2 )
-	    return 1;
-	str1++;
-	str2++;
-    }
-    if( *str2 )
-	return -1;
-    if( *str1 )
-	return 1;
-    return 0;
-}
-
-bool l4_has_feature( const char *feature_name )
-{
-    void *kip = L4_GetKernelInterface();
-    char *name;
-
-    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
-	if( !strcmp(feature_name, name) )
-	    return true;
-    return false;
-}
-
-
 void exception_test(void)
 
 {

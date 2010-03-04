@@ -55,7 +55,7 @@ extern void exreg_test(void);
 extern void tcontrol_test(void);
 extern void schedule_test(void);
 
-static bool bailout_fail = true;
+static bool autorun = false;
 
 /* where to start allocating RAM */
 static char *free_page = (char*) SCRATCHMEM_START;
@@ -68,18 +68,6 @@ set_colour( const char *col )
 	printf( "%s", col );
 #endif
 }
-
-/* global functions */
-int
-strlen( const char *str )
-{
-	int len = 0;
-	while(*str != '\0')
-		str++, len++;
-
-	return len;
-}
-
 
 void 
 print_uline( const char *msg, char c )
@@ -116,7 +104,7 @@ print_result (const char * str, bool test)
     for (int __i = 60 - strlen (str); __i > 0; __i--)
 	putc (' ');
     printf ("  %s\n", (test) ? STR_OK : STR_FAILED);
-    if (! test && bailout_fail)
+    if (! test && !autorun)
 	L4_KDB_Enter ("test failed");
 }
 
@@ -236,8 +224,11 @@ static struct menu main_menu =
 extern "C" int main (void)
 {
 	printf( "L4/Pistachio test suite ready to go.\n\n" );
-
-	menu_input( &main_menu );
+        
+        if (autorun)
+            all_tests();
+        else
+            menu_input( &main_menu );
 
 	assert( !"Shouldn't get here!" );
 
