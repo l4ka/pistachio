@@ -1301,7 +1301,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    if (space->remove_tcb(dest_tcb, cpu))
 	    {
 		// was the last thread
-		space->free();
+                space->free();
                 space_t::free_space(space);
 	    }
 

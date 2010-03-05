@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2008,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/space.h
  * Description:   ia32-specific space implementation
@@ -137,9 +137,6 @@ public:
     word_t smallspace_offset (void);
     word_t smallspace_size (void);
     
-#   define HAVE_ARCH_FREE_SPACE
-    void arch_free (void);
-    
     smallspace_id_t *smallid (void)
 	{ return &data.smallid; }
     
@@ -181,13 +178,6 @@ INLINE word_t x86_space_t::smallspace_size (void)
 {
     return smallid ()->size ();
 }
-
-INLINE void x86_space_t::arch_free (void)
-{
-    make_large ();
-    dequeue_polluted ();
-}
-
 
 #endif /* CONFIG_X86_SMALL_SPACES */
 

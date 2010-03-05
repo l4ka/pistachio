@@ -641,9 +641,11 @@ bool space_t::sync_io_bitmap()
     return false;
 }
 
+#endif /* defined(CONFIG_X86_IO_FLEXPAGES) */
 
 void space_t::arch_free (void)
 {
+#if defined(CONFIG_X86_IO_FLEXPAGES)
     //TRACEF("unmap %x in %x (%x)\n", fpage_t::complete_arch (), this, this->get_io_space());
     if (get_io_space())
     {
@@ -653,10 +655,13 @@ void space_t::arch_free (void)
 	get_io_space()->mapctrl (fpage_t::complete_arch (), ctrl, 0, 0);
 	free_io_bitmap();
     }
+#endif
+#if defined(CONFIG_X86_SMALL_SPACES)
+    make_large ();
+    dequeue_polluted ();
+#endif
     
 }
-
-#endif
 
 /**********************************************************************
  *

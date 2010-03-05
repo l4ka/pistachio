@@ -134,14 +134,14 @@ public:
     void free_io_bitmap(void);
     bool sync_io_bitmap();
     addr_t get_io_bitmap(cpuid_t cpu = current_cpu);
-    #   define HAVE_ARCH_FREE_SPACE
-    void arch_free (void);
     void set_io_space(io_space_t *n)
 	{  data.io_space = n; n->set_space(this); }
     io_space_t *get_io_space(void) 
 	{ return data.io_space; }
 #endif
 
+    #   define HAVE_ARCH_FREE_SPACE
+    void arch_free (void);
 
 #if defined(CONFIG_X_X86_HVM)
     x86_hvm_space_t *get_hvm_space ()
