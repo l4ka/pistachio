@@ -192,6 +192,7 @@ INLINE tracebuffer_t * get_tracebuffer (void)
             "   shl     $16, %%edx                      \n"     \
             "   mov     __idle_tcb, %3                  \n"     \
             "   movw    "MKSTR(OFS_TCB_CPU)"(%3), %%dx  \n"     \
+            "   movl    %%edx, %%fs:1*%c9(%0)            \n"     \
             TBUF_RDPMCS                                         \
             TBUF_SP                                             \
             "7:                                         \n"     \
