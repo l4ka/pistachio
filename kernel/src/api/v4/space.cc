@@ -408,10 +408,6 @@ SYSCALL_ATTR("unmap") void sys_unmap(word_t control)
 	if (fpage.is_mempage ())
 	{
 	    space_t *space = get_current_space();
-#if 0 && defined(CONFIG_X_X86_HVM)
-	    if (space->is_hvm_space())
-		space->get_hvm_space()->get_gpas()->unmap_fpage(fpage, flush, false);
-#endif
 	    fpage = space->unmap_fpage(fpage, flush, false);
 	}
 	else if (fpage.is_archpage ())
