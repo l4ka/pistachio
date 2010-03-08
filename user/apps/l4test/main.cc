@@ -55,7 +55,11 @@ extern void exreg_test(void);
 extern void tcontrol_test(void);
 extern void schedule_test(void);
 
+#if defined(L4TEST_AUTORUN)
+static bool autorun = true;
+#else
 static bool autorun = false;
+#endif
 
 /* where to start allocating RAM */
 static char *free_page = (char*) SCRATCHMEM_START;
