@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2009,  Karlsruhe University
+## Copyright (C) 2003, 2009-2010,  Karlsruhe University
 ##                
 ## File path:     l4.base.mk
 ## Description:   Generic settings for Pistachio user-level build
@@ -40,7 +40,7 @@ ECHO_MSG=	$(ECHO) ===\>
 MKDIRHIER=	$(top_srcdir)/../tools/mkdirhier
 
 CPPFLAGS+=	$(CPPFLAGS_$(ARCH))
-CFLAGS+=	-Wall -Wshadow  -Wconversion \
+CFLAGS+=	-O2 -g -Wall -Wshadow  -Wconversion \
 		$(CFLAGS_$(ARCH))
 LDFLAGS+=	$(LDFLAGS_$(ARCH))
 
