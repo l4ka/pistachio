@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     l4test/threads.cc
- * Description:   Basic thread/address space management
+ * File path:     apps/l4test/threads.cc
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: threads.cc,v 1.5 2003/09/24 19:05:54 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #include <l4/kip.h>
@@ -53,7 +54,7 @@ get_new_tid (void)
 
 
 L4_ThreadId_t
-create_thread (bool new_space, int cpu)
+create_thread (bool new_space, int cpu, L4_Word_t spacectrl)
 {
     static L4_Fpage_t kip_area, utcb_area;
     static L4_Word_t utcb_base;
@@ -82,32 +83,32 @@ create_thread (bool new_space, int cpu)
     L4_ThreadId_t tid = get_new_tid ();
 
     L4_Word_t utcb_location =
-	utcb_base + L4_UtcbSize (kip) * L4_ThreadNo (tid);
+	utcb_base + L4_UtcbSize (kip) * ( L4_ThreadNo (tid) - L4_ThreadIdUserBase (kip) + 1 );
 
     if (new_space)
     {
 	// Create inactive thread
 	int res = L4_ThreadControl (tid, tid, me, L4_nilthread, (void *) -1);
 	if (res != 1)
-	    printf ("ERROR: ThreadControl returned %d\n", res);
+	    printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
 
 	L4_Word_t control;
-	res = L4_SpaceControl (tid, 0, kip_area, utcb_area,
+	res = L4_SpaceControl (tid, spacectrl, kip_area, utcb_area,
 			       L4_nilthread, &control);
 	if (res != 1)
-	    printf ("ERROR: SpaceControl returned %d\n", res);
+	    printf ("ERROR: SpaceControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
 
 	// Activate thread
 	res = L4_ThreadControl (tid, tid, me, me, (void *) utcb_location);
 	if (res != 1)
-	    printf ("ERROR: ThreadControl returned %d\n", res);
+	    printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
     }
     else
     {
 	// Create active thread
 	int res = L4_ThreadControl (tid, me, me, me, (void *) utcb_location);
 	if (res != 1)
-	    printf ("ERROR: ThreadControl returned %d\n", res);
+	    printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
     }
 
     if (cpu != -1)
@@ -118,13 +119,12 @@ create_thread (bool new_space, int cpu)
 
 
 L4_ThreadId_t
-create_thread (void (*func)(void), bool new_space, int cpu)
+create_thread (void (*func)(void), bool new_space, int cpu, L4_Word_t spacectrl)
 {
-    L4_ThreadId_t tid = create_thread (new_space, cpu);
+    L4_ThreadId_t tid = create_thread (new_space, cpu, spacectrl);
     start_thread (tid, func);
     return tid;
 }
-
 
 L4_Word_t 
 kill_thread (L4_ThreadId_t tid)

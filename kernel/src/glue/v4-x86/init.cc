@@ -450,6 +450,9 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
     TRACE_INIT("Initializing kernel space\n");
     space_t::init_kernel_space();
 
+    TRACE_INIT("Initializing TCBs\n");
+    tcb_t::init_tcbs();
+
     TRACE_INIT("Activating TSS (Preliminary)\n");
     tss.setup(X86_KDS);
 

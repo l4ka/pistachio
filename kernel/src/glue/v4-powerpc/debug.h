@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/debug.h
- * Description:	debugging
+ * File path:     src/glue/v4-powerpc/debug.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,12 +27,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: debug.h,v 1.10 2003/09/24 19:04:30 skoglund Exp $
- *
+ * $Id$
+ *                
  ********************************************************************/
 
 #ifndef __ARCH__POWERPC__DEBUG_H__
 #define __ARCH__POWERPC__DEBUG_H__
+
+class tcb_t;
 
 #define DEBUG_MAGIC_STR	"KD# "
 #define DEBUG_IS_MAGIC(instr)	((((instr) >> 26) & 0x3f) == 18)
@@ -48,6 +51,20 @@ INLINE void spin_forever( int pos=0 )
 INLINE void spin( int pos, int cpu=0 )
 {
 }
+
+class space_t;
+class tcb_t;
+
+class debug_param_t 
+{
+public:
+    word_t exception;
+    space_t * space;
+    tcb_t * tcb;
+    except_regs_t * frame;
+    word_t dar;
+    word_t dsisr;
+};
 
 #define enter_kdebug(arg...)					\
     asm volatile (						\

@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008, 2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     l4/tracebuffer.h
- * Description:   Access to L4 kernel tracebuffer
+ * File path:     include/l4/tracebuffer.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: tracebuffer.h,v 1.2 2007/01/23 14:12:50 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 
@@ -35,7 +36,6 @@
 
 /* use
  *  L4_TRACEBUFFER
- *  L4_PERFMON
  *  to enable tracebuffer and tbuf performance counting 
  */
 

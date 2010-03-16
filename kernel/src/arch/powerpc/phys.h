@@ -1,10 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/phys.h
- * Description:	PowerPC specific physical memory offsets, including 
- * 		exception handler offsets.
+ * File path:     src/arch/powerpc/phys.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: phys.h,v 1.6 2003/11/17 09:35:19 joshua Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__PHYS_H__
 #define __ARCH__POWERPC__PHYS_H__
@@ -49,34 +49,48 @@
  *
  *  The exceptions have a 256 byte window, which equates to 64 32-bit instrs.
  */
-#define EXCEPT_OFFSET_BASE		-0x0100	/* The linker already offsets
+#define EXCEPT_OFFSET_BASE		0x0100	/* The linker already offsets
 						   us by 0x100. */
-#define EXCEPT_OFFSET_SYSTEM_RESET	(EXCEPT_OFFSET_BASE + 0x0100)
-#define EXCEPT_OFFSET_MACHINE_CHECK	(EXCEPT_OFFSET_BASE + 0x0200)
-#define EXCEPT_OFFSET_DSI		(EXCEPT_OFFSET_BASE + 0x0300)
-#define EXCEPT_OFFSET_ISI		(EXCEPT_OFFSET_BASE + 0x0400)
-#define EXCEPT_OFFSET_EXTERNAL_INT	(EXCEPT_OFFSET_BASE + 0x0500)
-#define EXCEPT_OFFSET_ALIGNMENT		(EXCEPT_OFFSET_BASE + 0x0600)
-#define EXCEPT_OFFSET_PROGRAM		(EXCEPT_OFFSET_BASE + 0x0700)
-#define EXCEPT_OFFSET_FP_UNAVAILABLE	(EXCEPT_OFFSET_BASE + 0x0800)
-#define EXCEPT_OFFSET_DECREMENTER	(EXCEPT_OFFSET_BASE + 0x0900)
-#define EXCEPT_OFFSET_RESERVED1		(EXCEPT_OFFSET_BASE + 0x0a00)
-#define EXCEPT_OFFSET_RESERVED2		(EXCEPT_OFFSET_BASE + 0x0b00)
-#define EXCEPT_OFFSET_SYSCALL		(EXCEPT_OFFSET_BASE + 0x0c00)
-#define EXCEPT_OFFSET_TRACE		(EXCEPT_OFFSET_BASE + 0x0d00)
-#define EXCEPT_OFFSET_FP_ASSIST		(EXCEPT_OFFSET_BASE + 0x0e00)
-#define EXCEPT_OFFSET_PERFMON		(EXCEPT_OFFSET_BASE + 0x0f00)
+#define EXCEPT_OFFSET_SYSTEM_RESET	0x0100
+#define EXCEPT_OFFSET_MACHINE_CHECK	0x0200
+#define EXCEPT_OFFSET_DSI		0x0300
+#define EXCEPT_OFFSET_ISI		0x0400
+#define EXCEPT_OFFSET_EXTERNAL_INT	0x0500
+#define EXCEPT_OFFSET_ALIGNMENT		0x0600
+#define EXCEPT_OFFSET_PROGRAM		0x0700
+#define EXCEPT_OFFSET_FP_UNAVAILABLE	0x0800
+#define EXCEPT_OFFSET_DECREMENTER	0x0900
+#define EXCEPT_OFFSET_RESERVED1		0x0a00
+#define EXCEPT_OFFSET_RESERVED2	        0x0b00
+#define EXCEPT_OFFSET_SYSCALL		0x0c00
+#define EXCEPT_OFFSET_TRACE		0x0d00
+#define EXCEPT_OFFSET_FP_ASSIST		0x0e00
+#define EXCEPT_OFFSET_PERFMON		0x0f00
 
-#define EXCEPT_OFFSET_INSTR_BR		(EXCEPT_OFFSET_BASE + 0x1300)
-#define EXCEPT_OFFSET_SYS_MANAGE	(EXCEPT_OFFSET_BASE + 0x1400)
-#define EXCEPT_OFFSET_RESERVED3		(EXCEPT_OFFSET_BASE + 0x1500)
-#define EXCEPT_OFFSET_RESERVED4		(EXCEPT_OFFSET_BASE + 0x1600)
-#define EXCEPT_OFFSET_THERMAL		(EXCEPT_OFFSET_BASE + 0x1700)
+#ifndef CONFIG_PPC_BOOKE
+#define EXCEPT_OFFSET_INSTR_BR		0x1300
+#define EXCEPT_OFFSET_SYS_MANAGE	0x1400
+#define EXCEPT_OFFSET_RESERVED3		0x1500
+#define EXCEPT_OFFSET_RESERVED4		0x1600
+#define EXCEPT_OFFSET_THERMAL		0x1700
+#else
+#define EXCEPT_OFFSET_CRITICAL_INPUT	0x1000
+#define EXCEPT_OFFSET_AUX_UNAVAILABLE	0x1100
+#define EXCEPT_OFFSET_INTERVAL_TIMER	0x1200
+#define EXCEPT_OFFSET_WATCHDOG		0x1300
+#define EXCEPT_OFFSET_DTLB		0x1400
+#define EXCEPT_OFFSET_ITLB		0x1500
+#define EXCEPT_OFFSET_DEBUG		0x1600
+
+/* offset for secondary HVM exception handler block; lower 4 bits MBZ */
+#define EXCEPT_HVM_OFFSET		0x10000
+#endif
 
 /*  The EXCEPT_ID() macro identifies an exception, based on its physical 
  *  location as defined by the PowerPC ISA, for the exception IPC.
  */
-#define EXCEPT_ID(a) (EXCEPT_OFFSET_##a - EXCEPT_OFFSET_BASE)
+//#define EXCEPT_ID(a) (EXCEPT_OFFSET_##a - EXCEPT_OFFSET_BASE)
+#define EXCEPT_ID(a) (EXCEPT_OFFSET_##a)
 
 #endif	/* __ARCH__POWERPC__PHYS_H__ */
 

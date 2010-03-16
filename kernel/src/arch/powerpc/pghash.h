@@ -1,9 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/pghash.h
- * Description:	PowerPC page hash abstractions.
+ * File path:     src/arch/powerpc/pghash.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,16 +27,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: pghash.h,v 1.8 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__PGHASH_H__
 #define __ARCH__POWERPC__PGHASH_H__
 
 #include INC_ARCH(bat.h)
 #include INC_ARCH(page.h)
-#include INC_ARCH(pgtab.h)
 #include INC_ARCH(ibm750.h)
 
 #define POWERPC_HTABORG_SHIFT	16
@@ -43,7 +43,6 @@
 #if !defined(ASSEMBLY)
 
 #include <generic/memregion.h>
-#include INC_ARCH(pgtab.h)
 
 class ppc_sdr1_t
 {

@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	arch/powerpc/string.cc
- * Description:	String manipulation functions, and memory copy functions.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/arch/powerpc/string.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: string.cc,v 1.7 2003/09/24 19:05:30 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include INC_ARCH(string.h)
 #include INC_ARCH(cache.h)
@@ -171,5 +172,15 @@ int strncmp( const char *s1, const char *s2, word_t len )
 		len--;
 	}
 	return 0;
+}
+
+char *strchr( char *s, char c)
+{
+    while ( *s != 0 ) {
+	if ( *s == c )
+	    return s;
+	s++;
+    }
+    return NULL;
 }
 

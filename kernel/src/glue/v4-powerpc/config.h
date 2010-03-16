@@ -1,9 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, 2003, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	glue/v4-powerpc/config.h
- * Description:	Configuration of the PowerPC architecture.
+ * File path:     glue/v4-powerpc/config.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: config.h,v 1.41 2003/10/29 09:05:51 joshua Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __GLUE__V4_POWERPC__CONFIG_H__
 #define __GLUE__V4_POWERPC__CONFIG_H__
@@ -47,7 +48,9 @@
 #define TOTAL_TCB_SIZE		(KTCB_SIZE)
 
 #define VALID_THREADNO_BITS	(28 - KTCB_BITS)	// 256 MB for all KTCBs
-#define KTCB_THREADNO_MASK	((1 << VALID_THREADNO_BITS)-1)
+#define TOTAL_KTCBS		(__UL(1) << VALID_THREADNO_BITS)
+#define VALID_THREADNO_MASK	(TOTAL_KTCBS - 1)
+
 
 /****************************************************************************
  *
@@ -56,7 +59,8 @@
  ****************************************************************************/
 
 #define KERNEL_AREA_START	(KERNEL_OFFSET)
-#define KERNEL_AREA_SIZE	0x10000000
+#define KERNEL_AREA_LOG2SIZE	28 /* 256M */
+#define KERNEL_AREA_SIZE	(1 << KERNEL_AREA_LOG2SIZE)
 #define KERNEL_AREA_END		(KERNEL_AREA_START + KERNEL_AREA_SIZE)
 
 #define DEVICE_AREA_START	0xD0000000
@@ -64,22 +68,31 @@
 #define DEVICE_AREA_BAT_SIZE	BAT_256K_PAGE_SIZE
 #define DEVICE_AREA_END		(DEVICE_AREA_START + DEVICE_AREA_SIZE)
 
+#define PINNED_AREA_START	DEVICE_AREA_END
+#define PINNED_AREA_SIZE	0x01000000
+#define PINNED_AREA_END		(PINNED_AREA_START + PINNED_AREA_SIZE)
+
+#define CONSOLE_AREA_START	PINNED_AREA_END
+#define CONSOLE_AREA_SIZE	0x01000000
+#define CONSOLE_AREA_END	(CONSOLE_AREA_START + CONSOLE_AREA_SIZE)
+
 #if (KERNEL_AREA_END > DEVICE_AREA_START)
 # error "The kernel area overlaps the device area."
 #endif
 
+#define CPU_AREA_START		(KERNEL_CPU_OFFSET)
+#define CPU_AREA_SIZE		(BAT_128K_PAGE_SIZE)
+#define CPU_AREA_END		(CPU_AREA_START + CPU_AREA_SIZE)
+
+#ifdef CONFIG_PPC_MMU_SEGMENTS
 /* Keep 32MB aligned (max size of page hash) */
-#define PGHASH_AREA_START	(DEVICE_AREA_END)
+#define PGHASH_AREA_START	(CONSOLE_AREA_END)
 #define PGHASH_AREA_SIZE	(BAT_32M_PAGE_SIZE)
 #define PGHASH_AREA_END		(PGHASH_AREA_START + PGHASH_AREA_SIZE)
 
 #if ((PGHASH_AREA_START & BAT_32M_PAGE_MASK) != PGHASH_AREA_START)
 # error "The page hash area is not aligned to 32MB."
 #endif
-
-#define CPU_AREA_START		(KERNEL_CPU_OFFSET)
-#define CPU_AREA_SIZE		(BAT_128K_PAGE_SIZE)
-#define CPU_AREA_END		(CPU_AREA_START + CPU_AREA_SIZE)
 
 #if (PGHASH_AREA_END > CPU_AREA_START)
 # error "The page hash area overlaps the cpu data area."
@@ -93,8 +106,18 @@
 # error "The cpu area overlaps the KTCB area."
 #endif
 
+#elif defined(CONFIG_PPC_MMU_TLB)
+
+#define CONFIG_MAX_NUM_ASIDS	64
+/* #define CONFIG_PREEMPT_ASIDS */
+#endif
+
 #define COPY_AREA_START		0xF0000000
+#if defined(CONFIG_PPC_MMU_TLB)
+#define COPY_AREA_SIZE		0x00800000
+#else
 #define COPY_AREA_SIZE		0x10000000
+#endif
 #define COPY_AREA_END		(COPY_AREA_START + COPY_AREA_SIZE - 1)
 #define COPY_AREA_SEGMENT	(COPY_AREA_START >> 28)
 
@@ -109,7 +132,8 @@
  ****************************************************************************/
 
 #define USER_AREA_START		0x00000000
-#define USER_AREA_END		0xC0000000
+#define USER_AREA_SIZE		0xC0000000
+#define USER_AREA_END		(USER_AREA_START + USER_AREA_SIZE)
 
 #define ROOT_UTCB_START		0xBF000000
 #define ROOT_KIP_START		0xBFF00000
@@ -126,8 +150,14 @@
 #define KIP_UTCB_INFO		{SHUFFLE3(multiplier:1, alignment:9, size:12)}
 /* 4KB */
 #define KIP_KIP_AREA		{ 12 }
-#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:(1 << POWERPC_PAGE_BITS) >> 10)}
 #define KIP_MIN_MEMDESCS	(16)
+
+#ifdef CONFIG_PPC_MMU_SEGMENT
+#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:6, size_mask:(1 << POWERPC_PAGE_BITS) >> 10)}
+#else
+#define HW_VALID_PGSIZES	((1 << 12) | (1 << 22))
+#define KIP_ARCH_PAGEINFO	{SHUFFLE2(rwx:7, size_mask: HW_VALID_PGSIZES >> 10)}
+#endif
 
 /****************************************************************************
  *
@@ -145,5 +175,8 @@
 /* Temporary special purpose registers. */
 #define SPRG_TMP0		2
 #define SPRG_TMP1		3
+
+/* Cache information */
+#define PPC_DEVICE_CACHE_COHERENT
 
 #endif /* !__GLUE__V4_POWERPC__CONFIG_H__ */

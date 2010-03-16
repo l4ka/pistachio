@@ -1,11 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	arch/powerpc/pgent.h
- * Description:	The linear ptab walker's wrapper around the platform's 
- * 		pgent structure.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/arch/powerpc/pgent.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -26,15 +26,32 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: pgent.h,v 1.14 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__PGENT_H__
 #define __ARCH__POWERPC__PGENT_H__
 
+#if defined(CONFIG_NEW_MDB)
+#define mapnode_t mdb_node_t
+#endif
+
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
+
 #include INC_GLUE(pgent.h)
 #include INC_GLUE(pgent_inline.h)
+
+#elif defined(CONFIG_PPC_MMU_TLB)
+
+#include INC_GLUE(pgent-swtlb.h)
+#include INC_GLUE(pgent-swtlb_inline.h)
+
+#endif
+
+#if defined(CONFIG_NEW_MDB)
+#undef mapnode_t
+#endif
 
 #endif	/* __ARCH__POWERPC__PGENT_H__ */

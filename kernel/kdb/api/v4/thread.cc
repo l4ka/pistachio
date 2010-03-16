@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2004, 2007-2010,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/thread.cc
  * Description:   Kdebug stuff for V4 threads
@@ -69,7 +69,7 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
     // If val is within TCB area, treat it as a tcb address.  If not,
     // treat it as a thread ID.
 
-    if (dummy->is_tcb_area ((addr_t) val) || 
+    if (tcb_t::is_tcb ((addr_t) val) || 
 	addr_to_tcb((addr_t) val) == get_idle_tcb() || 
 	addr_to_tcb((addr_t) val) == get_kdebug_tcb())
     {
@@ -79,7 +79,7 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
     else
     {
 	tid.set_raw (val);
-	tcb = dummy->get_tcb (tid);
+	tcb = tcb_t::get_tcb (tid);
     }
 
     if (kdb_tid_format.X.human)

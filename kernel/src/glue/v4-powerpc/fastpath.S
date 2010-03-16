@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002-2003, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/fastpath.S
- * Description:	IPC fastpath implementation
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     glue/v4-powerpc/fastpath.S
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: fastpath.S,v 1.17 2004/06/04 17:28:37 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 #include INC_GLUE(abi.h)
 
 /**
@@ -269,7 +270,10 @@ _ipc_start:
 	/* Preload the ASIDs. */
 	lwz	ASID, OFS_TCB_PDIR_CACHE (TO_TCB)	/* ASID of to-tcb */
 	lwz	MY_ASID, OFS_TCB_PDIR_CACHE (CURRENT_TCB)	/* ASID of current-tcb */
-
+#ifdef CONFIG_PPC_MMU_TLB
+	lwz	ASID, 0(ASID)
+	mfspr	MY_ASID, SPR_PID
+#endif
 	/* Set the return value for the IPC call: use a local TID. 
 	 * Do this before restoring the user's local ID.
 	 */
@@ -311,6 +315,7 @@ _ipc_start:
 	/* Set the return value for the IPC call: use a global TID. */
 	mr	FROM_TID, MY_TID
 
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
 	/* Switch the address space.  We use the rfi for
 	 * context synchronization, so no touching memory
 	 * after this point!!!
@@ -337,6 +342,10 @@ _ipc_start:
 	SET_SR( 9, ASID )
 	SET_SR( 10, ASID )
 	mtsr 11, ASID
+#endif
+
+#elif defined(CONFIG_PPC_MMU_TLB)
+#error not implemented
 #endif
 
 	/* Do not touch memory!!  The CPU context may be
@@ -377,16 +386,9 @@ _sc_ipc_slowpath:
 	stw	MR9, MR_OFFSET(9) (UTCB)
 
 	/* Setup parameters. */
-#if defined(CONFIG_SYSV_ABI)
-	stack_alloc  16
-	stack_store2 %r3, TO_TID, 8
-	stack_store2 %r4, FROM_TID, 12
-	stack_store2 %r5, TIMEOUTS, 16
-#else
 	mr	%r3, TO_TID
 	mr	%r4, FROM_TID
 	mr	%r5, TIMEOUTS
-#endif
 
 	/* Set the link return to the IPC slow path state restore. */
 	grab_sym TMP0, _sc_ipc_return

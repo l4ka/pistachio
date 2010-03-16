@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/except_handlers.cc
- * Description:	PowerPC exception handlers.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/glue/v4-powerpc/except_handlers.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: except_handlers.cc,v 1.56 2003/12/30 09:00:54 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kdb/tracepoints.h>
@@ -37,6 +38,7 @@
 #include INC_ARCH(except.h)
 #include INC_ARCH(msr.h)
 #include INC_ARCH(frame.h)
+#include INC_ARCH(ibm450.h)
 
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
@@ -44,44 +46,20 @@
 #include INC_API(kernelinterface.h)
 
 #include INC_GLUE(exception.h)
+#include INC_GLUE(memcfg.h)
 
 
-DECLARE_TRACEPOINT(except_isi_cnt);
-DECLARE_TRACEPOINT(except_dsi_cnt);
-DECLARE_TRACEPOINT(except_prog_cnt);
-DECLARE_TRACEPOINT(except_decr_cnt);
-
-/*  EXCDEF is a macro which helps consistantly declare exception handlers,
- *  while reducing typing :)
- */
-#define EXCDEF(n,params...) extern "C" __attribute__((noreturn)) void except_##n (word_t srr0 , word_t srr1 , except_regs_t *frame , ## params )
-
-/* except_return() short circuits the C code return path.
- * We declare the exception handlers as noreturn, to avoid
- * the C prolog (which redundantly spills registers which the assembler
- * path already spills).
- */
-#define except_return()			\
-do {					\
-    asm volatile (			\
-	    "mtlr %0 ;"			\
-	    "mr %%r1, %1 ;"		\
-	    "blr ;"			\
-	    :				\
-	    : "r" (__builtin_return_address(0)), \
-	      "b" (__builtin_frame_address(1)) \
-	    );				\
-    while(1);				\
-} while(0)
-
-
+DECLARE_TRACEPOINT(PPC_EXCEPT_PROG);
+DECLARE_TRACEPOINT(PPC_EXCEPT_DECR);
+DECLARE_TRACEPOINT(PPC_EXCEPT_EXTINT);
+DECLARE_TRACEPOINT(PPC_EXCEPT_FPU);
 
 INLINE void halt_user_thread( void )
 {
     tcb_t *current = get_current_tcb();
 
     current->set_state( thread_state_t::halted );
-    get_current_scheduler()->schedule(get_idle_tcb(), sched_handoff);
+    get_current_scheduler()->schedule(get_idle_tcb(), sched_dest);
 }
 
 static bool send_exception_ipc( word_t exc_no, word_t exc_code )
@@ -105,7 +83,7 @@ static bool send_exception_ipc( word_t exc_no, word_t exc_code )
     current->set_saved_state( current->get_state() );
 
     // Create the message tag.
-    tag.set( 0, GENERIC_EXC_MR_MAX, GENERIC_EXC_LABEL );
+    tag.set( 0, GENERIC_EXC_MR_MAX, (word_t)GENERIC_EXC_LABEL );
     current->set_tag( tag );
 
     // Create the message.
@@ -141,18 +119,27 @@ static bool send_exception_ipc( word_t exc_no, word_t exc_code )
     return !tag.is_error();
 }
 
+// XXX switch to kdebug thread model
+tcb_t *get_kdebug_tcb() { return (tcb_t*)~0; }
+
 INLINE void try_to_debug( except_regs_t *regs, word_t exc_no, word_t dar=0, word_t dsisr=0 )
 {
     if( EXPECT_TRUE(get_kip()->kdebug_entry == NULL) )
 	return;
 
-    except_info_t info;
-    info.exc_no = exc_no;
-    info.regs = regs;
-    info.dar = dar;
-    info.dsisr = dsisr;
+    debug_param_t param;
 
-    get_kip()->kdebug_entry( (void *)&info );
+    param.exception = exc_no;
+    param.frame = regs;
+    param.tcb = get_current_tcb();
+    param.space = (get_current_space() ? get_current_space() : get_kernel_space());
+    param.dar = dar;
+    param.dsisr = dsisr;
+
+    get_kip()->kdebug_entry( (void *)&param );
+#ifdef CONFIG_KDB_BREAKIN
+    kdebug_check_breakin();
+#endif
 }
 
 static void dispatch_exception( except_regs_t *regs, word_t exc_no )
@@ -171,7 +158,7 @@ static void dispatch_exception( except_regs_t *regs, word_t exc_no )
     }
 
     if( ppc_is_kernel_mode(regs->srr1_flags) )
-	panic( "exception in kernel thread.\n" );
+	panic( "exception %x in kernel thread.\n", exc_no );
 
     // Try to send the exception to the user's exception handler.
     if( !send_exception_ipc(exc_no, regs->srr1_flags) )
@@ -181,108 +168,108 @@ static void dispatch_exception( except_regs_t *regs, word_t exc_no )
     }
 }
 
-
-EXCDEF( dsi_handler, word_t dar, word_t dsisr )
+static bool emulate_instruction(word_t opcode, except_regs_t *regs)
 {
-    TRACEPOINT(except_dsi_cnt, "except_dsi_cnt");
-
-    // Let the debugger have a first shot at inspecting the data fault.
-    try_to_debug( frame, EXCEPT_ID(DSI), dar, dsisr );
-
-    tcb_t *tcb = get_current_tcb();
-    space_t *space = tcb->get_space();
-    if( EXPECT_FALSE(space == NULL) )
-	space = get_kernel_space();
-
-    // Do we have a page hash miss?
-    if( EXCEPT_IS_DSI_MISS(dsisr) )
+#if defined(CONFIG_PPC_BOOKE)
+    ppc_instr_t instr(opcode);
+    switch(instr.get_primary())
     {
-
-	// Is the page hash miss in the copy area?
-	if( EXPECT_FALSE(space->is_copy_area((addr_t)dar)) )
+    case 31:
+	switch(instr.get_secondary())
 	{
-	    // Resolve the fault using the partner's address space!
-	    tcb_t *partner = space->get_tcb( tcb->get_partner() );
-	    if( partner )
-	    {
-		addr_t real_fault = tcb->copy_area_real_address( (addr_t)dar );
-		if( partner->get_space()->handle_hash_miss(real_fault) )
-	    	    except_return();
-	    }
+	case 259: // mfdcrx
+	    regs->set_register(instr.rt(), mfdcrx(regs->get_register(instr.ra())));
+	    regs->srr0_ip += 4;
+	    return true;
+
+	case 323: // mfdcr
+	    regs->set_register(instr.rt(), mfdcrx(instr.rf()));
+	    regs->srr0_ip += 4;
+	    return true;
+
+	case 387: // mtdcrx
+	    mtdcrx(regs->get_register(instr.ra()), regs->get_register(instr.rt()));
+	    regs->srr0_ip += 4;
+	    return true;
+
+	case 451: // mtdcr
+	    mtdcrx(instr.rf(), regs->get_register(instr.rt()));
+	    regs->srr0_ip += 4;
+	    return true;
 	}
-
-	// Normal page hash miss.
-	if( EXPECT_TRUE(space->handle_hash_miss((addr_t)dar)) )
-	    except_return();
     }
-
-    space->handle_pagefault( (addr_t)dar, (addr_t)srr0, 
-	    EXCEPT_IS_DSI_WRITE(dsisr) ?  space_t::write : space_t::read,
-	    ppc_is_kernel_mode(srr1) );
-
-    except_return();
+#endif
+    return false;
 }
+
 
 EXCDEF( unknown_handler )
 {
+    TRACEF("unknown handler\n");
     try_to_debug( frame, 0 );
-    except_return();
+    return_except();
 }
 
 EXCDEF( sys_reset_handler )
 {
     try_to_debug( frame, EXCEPT_ID(SYSTEM_RESET) );
-    except_return();
+    return_except();
 }
 
 EXCDEF( machine_check_handler )
 {
+    panic("machine check\n");
     try_to_debug( frame, EXCEPT_ID(MACHINE_CHECK) );
-    except_return();
+    return_except();
 }
 
-EXCDEF( isi_handler )
+void intctrl_t::handle_irq(word_t cpu)
 {
-    TRACEPOINT(except_isi_cnt, "except_isi_cnt");
+    int irq = ctrl->get_pending_irq(cpu);
+    if (irq < 0 || irq > (int)get_number_irqs())
+    {
+        printf("spurious interrupt\n");
+        return;
+    }
 
-    // Let the debugger have a first shot at inspecting the instr fault.
-    try_to_debug( frame, EXCEPT_ID(ISI) );
+#ifdef CONFIG_SMP
+    if (irq < 32)
+    {
+        ctrl->ack_irq(irq);
+        handle_smp_ipi(irq);
+        return;
+    }
+#endif
 
-    space_t *space = get_current_tcb()->get_space();
-    if( EXPECT_FALSE(space == NULL) )
-	space = get_kernel_space();
-
-    if( EXCEPT_IS_ISI_MISS(srr1) ) 
-	if( EXPECT_TRUE(space->handle_hash_miss((addr_t)srr0)) ) 
-	    except_return();
-
-    space->handle_pagefault( (addr_t)srr0, (addr_t)srr0, 
-	    space_t::execute, ppc_is_kernel_mode(srr1) );
-
-    except_return();
+    mask(irq);
+    ::handle_interrupt( irq );
 }
 
 EXCDEF( extern_int_handler )
 {
+    TRACEPOINT(PPC_EXCEPT_EXTINT,
+	       "EXC ExtInt Handler: IP=%08x, MSR=%08x\n", srr0, srr1);
+
     if( EXPECT_FALSE(ppc_is_kernel_mode(srr1)) ) {
 	srr1 = processor_wake( srr1 );
 	frame->srr1_flags = srr1;
     }
 
-    get_interrupt_ctrl()->handle_irq( 0 );
+    get_interrupt_ctrl()->handle_irq(get_current_cpu());
 
-    except_return();
+    return_except();
 }
 
 EXCDEF( alignment_handler )
 {
     dispatch_exception( frame, EXCEPT_ID(ALIGNMENT) );
-    except_return();
+    return_except();
 }
 
 EXCDEF( program_handler )
 {
-    TRACEPOINT(except_prog_cnt, "except_prog_cnt");
+    TRACEPOINT(PPC_EXCEPT_PROG,
+	       "EXC Program Handler: IP=%p\n", srr0);
 
     space_t *space = get_current_space();
     if( EXPECT_FALSE(space == NULL) )
@@ -295,25 +282,29 @@ EXCDEF( program_handler )
 	frame->r5 = get_kip()->api_flags;
        	frame->r6 = get_kip()->get_kernel_descriptor()->kernel_id.get_raw();
 	frame->srr0_ip += 4;
-	except_return();
+	return_except();
     }
 
-    dispatch_exception( frame, EXCEPT_ID(PROGRAM) );
-    except_return();
+    if (! (is_privileged_space(space) && emulate_instruction(instr, frame)) )
+	dispatch_exception( frame, EXCEPT_ID(PROGRAM) );
+
+    return_except();
 }
 
 EXCDEF( fp_unavail_handler )
 {
     tcb_t *current_tcb = get_current_tcb();
+    TRACEPOINT(PPC_EXCEPT_FPU,   
+	       "FPU unavail IP %p, MSR %08x (curr=%p, FPU owner=%p)\n", 
+	       srr0, srr1, current_tcb, get_fp_lazy_tcb());
+
     current_tcb->resources.fpu_unavail_exception( current_tcb );
 
-    except_return();
+    return_except();
 }
 
 EXCDEF( decrementer_handler )
 {
-    extern word_t decrementer_interval;
-
     /* Don't go back to sleep if the thread was in power savings mode.
      * We will only see timer interrupts from user mode, or from the sleep
      * function in kernel mode.
@@ -323,24 +314,58 @@ EXCDEF( decrementer_handler )
 	frame->srr1_flags = srr1;
     }
 
-    TRACEPOINT(except_decr_cnt, "except_decr_cnt");
+    TRACEPOINT(PPC_EXCEPT_DECR, 
+	       "Decrementer Intr: IP=%p, MSR %08x", srr0, srr1);
 
+#ifdef CONFIG_PPC_BOOKE
+    // BookE uses auto-reload decrementer; just ack
+    ppc_tsr_t::dec_irq().write();
+#else
+    extern word_t decrementer_interval;
     ppc_set_dec( decrementer_interval );
-    get_current_scheduler()->handle_timer_interrupt();
+#endif
 
-    except_return();
+    get_current_scheduler()->handle_timer_interrupt();
+    return_except();
 }
 
 EXCDEF( trace_handler )
 {
     dispatch_exception( frame, EXCEPT_ID(TRACE) );
-    except_return();
+    return_except();
 }
 
 EXCDEF( fp_assist_handler )
 {
     dispatch_exception( frame, EXCEPT_ID(FP_ASSIST) );
-    except_return();
+    return_except();
 }
 
+#ifdef CONFIG_PPC_BOOKE
+EXCDEF( debug_handler )
+{
+    UNIMPLEMENTED();
+}
 
+SECTION(".init") void install_exception_handlers( cpuid_t cpu )
+{
+    ppc_set_spr(SPR_IVOR(0), EXCEPT_OFFSET_CRITICAL_INPUT);
+    ppc_set_spr(SPR_IVOR(1), EXCEPT_OFFSET_MACHINE_CHECK);
+    ppc_set_spr(SPR_IVOR(2), EXCEPT_OFFSET_DSI);
+    ppc_set_spr(SPR_IVOR(3), EXCEPT_OFFSET_ISI);
+    ppc_set_spr(SPR_IVOR(4), EXCEPT_OFFSET_EXTERNAL_INT);
+    ppc_set_spr(SPR_IVOR(5), EXCEPT_OFFSET_ALIGNMENT);
+    ppc_set_spr(SPR_IVOR(6), EXCEPT_OFFSET_PROGRAM);
+    ppc_set_spr(SPR_IVOR(7), EXCEPT_OFFSET_FP_UNAVAILABLE);
+    ppc_set_spr(SPR_IVOR(8), EXCEPT_OFFSET_SYSCALL);
+    ppc_set_spr(SPR_IVOR(9), EXCEPT_OFFSET_AUX_UNAVAILABLE);
+    ppc_set_spr(SPR_IVOR(10), EXCEPT_OFFSET_DECREMENTER);
+    ppc_set_spr(SPR_IVOR(11), EXCEPT_OFFSET_INTERVAL_TIMER);
+    ppc_set_spr(SPR_IVOR(12), EXCEPT_OFFSET_WATCHDOG);
+    ppc_set_spr(SPR_IVOR(13), EXCEPT_OFFSET_DTLB);
+    ppc_set_spr(SPR_IVOR(14), EXCEPT_OFFSET_ITLB);
+    ppc_set_spr(SPR_IVOR(15), EXCEPT_OFFSET_DEBUG);
+
+    ppc_set_spr(SPR_IVPR, (word_t)memcfg_start_except() & 0xffff0000);
+}
+#endif

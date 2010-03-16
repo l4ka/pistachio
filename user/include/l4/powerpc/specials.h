@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002-2003, Karlsruhe University
- *
- * File path:	l4/powerpc/specials.h
- * Description:	PowerPC specific functions and defines.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     include/l4/powerpc/specials.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: specials.h,v 1.5 2003/09/24 19:06:25 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 #ifndef __L4__POWERPC__SPECIALS_H__
 #define __L4__POWERPC__SPECIALS_H__
 
@@ -41,6 +42,11 @@ L4_INLINE int __L4_Msb( L4_Word_t w )
     asm volatile ("cntlzw %0, %1" : "=r" (zeros) : "r" (w) );
 
     return 31-zeros;
+}
+
+L4_INLINE int __L4_Lsb( L4_Word_t w )
+{
+    return __L4_Msb(w & -w);
 }
 
 #if defined(__cplusplus)

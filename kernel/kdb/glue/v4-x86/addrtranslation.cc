@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 1999-2010,  Karlsruhe University
  *                
- * File path:     glue/v4-x86/addrtranslation.cc
+ * File path:     kdb/glue/v4-x86/addrtranslation.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ CMD( cmd_virt_to_phys, cg )
     if ( space_id.get_raw() == 0x0 )
          space = get_kernel_space();
     else
-        space = get_kernel_space()->get_tcb(space_id)->get_space();
+        space = tcb_t::get_tcb(space_id)->get_space();
     
     pgent_t::pgsize_e size = pgent_t::size_max;
     word_t offset = 0;

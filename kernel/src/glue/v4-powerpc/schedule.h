@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     glue/v4-powerpc/schedule.h
- * Description:   scheduling functions
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,6 +26,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *                
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __GLUE__V4_POWERPC__SCHEDULE_H__
@@ -73,6 +76,18 @@ INLINE word_t processor_wake( word_t msr )
     msr = MSR_CLR( msr, MSR_POW );
     msr = MSR_CLR( msr, MSR_EE );
     return msr;
+}
+
+INLINE u64_t get_cpu_cycles()
+{
+    // We hope that all processors have synchronized cycle counters.
+    return ppc_get_timebase();
+}
+
+INLINE u64_t get_timestamp()
+{
+    // We hope that all processors have synchronized cycle counters.
+    return ppc_get_timebase();
 }
 
 #endif /* __GLUE__V4_POWERPC__SCHEDULE_H__ */

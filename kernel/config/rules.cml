@@ -1,9 +1,10 @@
 ######################################################################
 ##                
-## Copyright (C) 2001-2010,  Karlsruhe University
+## Copyright (C) 1999-2010,  Karlsruhe University
+## Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
 ##                
 ## File path:     config/rules.cml
-## Description:   Rules for Pistachio's CML2 configuration system
+## Description:   
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,9 +26,9 @@
 ## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
-##		 
-## $Id: rules.cml,v 1.112 2007/03/19 14:27:09 skoglund Exp $
-##		 
+##                
+## $Id$
+##                
 ######################################################################
 
 prefix "CONFIG_"	# Stripped at read time, prepended at save time
@@ -68,6 +69,7 @@ allows you to select the number of 4k pages to reserve for the kernel.
 IPC_FASTPATH	'Fast IPC path'
 DEBUG		'Enable Debugging mode'
 PERFMON         'Enable Performance Monitoring'
+
 SPIN_WHEELS	'Enable Spin Wheels' text
 
 The Spin Wheels are characters displayed by the kernel on the top right
@@ -82,6 +84,8 @@ A new more generic mapping database that supports other mappings than
 page frames, a new rights delegataion scheme, and path compression to
 save memory footprint and lookup costs.  The mapping database is not
 heavily tested yet, though.
+.
+STATIC_TCBS	'Use a non-virtual linear array for TCB management' text
 .
 experimental	'Experimental Features'
 EXPERIMENTAL	'Enable experimental features' text
@@ -120,6 +124,10 @@ Hierarchical Stride Scheduling
 X_X86_HVM 'Support for full virtualization on x86-processors' text
 Support for Intel Vanderpool Virtualization Extensions / AMD Secure
 Virtual Mode 
+.
+
+X_PPC_SOFTHVM 'Full virtualization on PPC processors' text
+Support for full virtualization on BookE PPC processors
 .
 
 X_EVT_LOGGING	'Event Logging features' text
@@ -248,6 +256,7 @@ menu hardware
 	x86_platform
 	powerpc_type
 	powerpc_platform
+	powerpc_subplatform
 	powerpc64_platform
 	powerpc64_type
 	hardware_misc
@@ -260,22 +269,8 @@ choices arch    # Basic architecture
 	ARCH_POWERPC64
 	default ARCH_X86
 
-choices powerpc_type
-	CPU_POWERPC_IBM750
-	CPU_POWERPC_PPC604
-	default CPU_POWERPC_PPC604
-
-unless ARCH_POWERPC suppress dependent powerpc_type
 unless ARCH_X86 or ARCH_POWERPC suppress dependent SMP
 unless ARCH_X86 and SMP suppress dependent SMP_IDLE_POLL
-unless ARCH_POWERPC or IOAPIC suppress SMP
-
-
-choices powerpc_platform
-	PLAT_OFPPC
-	default PLAT_OFPPC
-
-unless ARCH_POWERPC suppress dependent powerpc_platform
 
 
 menu hardware_misc
@@ -286,8 +281,6 @@ menu hardware_misc
 
 default MAX_IOAPICS from 2
 default APIC_TIMER_TICK from 1000
-default PPC_EXPOSE_OPIC from n
-unless ARCH_POWERPC suppress PPC_EXPOSE_OPIC
 when ARCH_POWERPC or ARCH_POWERPC64 suppress IOAPIC
 default BOOTMEM_PAGES from 1024
 unless ARCH_POWERPC64 suppress BOOTMEM_PAGES
@@ -304,6 +297,7 @@ menu experimental
 	X_PAGER_EXREGS
         X_CTRLXFER_MSG
         X_X86_HVM
+	X_PPC_SOFTHVM
 	X_EVT_LOGGING
 	scheduler
 
@@ -311,13 +305,13 @@ menu experimental
 default X_PAGER_EXREGS from n
 default X_CTRLXFER_MSG from n
 
-unless ARCH_X86 and SUBARCH_X32 suppress X_CTRLXFER_MSG
+unless (ARCH_X86 and SUBARCH_X32) or ARCH_POWERPC suppress X_CTRLXFER_MSG
 default X_X86_HVM from n
 unless X86_HVM suppress X_X86_HVM
 unless X_CTRLXFER_MSG suppress X_X86_HVM
 
 default X_EVT_LOGGING from n
-unless ARCH_X86 and SUBARCH_X32 suppress X_EVT_LOGGING
+unless (ARCH_X86 and SUBARCH_X32) suppress X_EVT_LOGGING
 
 menu kernel
 	EXPERIMENTAL
@@ -329,6 +323,7 @@ menu kernel
         PERFMON
 	SPIN_WHEELS
 	NEW_MDB
+        STATIC_TCBS
 	PPC_BAT_SYSCALLS
 	PPC64_TRASH_OF
 	X86_SMALL_SPACES
@@ -339,6 +334,7 @@ default EXPERIMENTAL from n
 default IPC_FASTPATH from n
 default PPC_BAT_SYSCALLS from y
 default NEW_MDB from n
+default STATIC_TCBS from n
 unless EXPERIMENTAL suppress dependent experimental
 unless ARCH_POWERPC suppress PPC_BAT_SYSCALLS
 unless ARCH_POWERPC64 suppress PPC64_TRASH_OF
@@ -371,7 +367,7 @@ default KDB_COMPORT from 0x3f8
 default KDB_COMSPEED from 115200 range 115200 57600 38400 19200 9600 4800 2400 1200 300
 unless KDB_CONS_COM suppress KDB_COMPORT KDB_COMSPEED
 unless KDB suppress dependent kdb_console KDB_COMPORT KDB_COMSPEED KDB_DISAS KDB_ON_STARTUP KDB_BREAKIN trace ppc_debug_consoles
-when ARCH_POWERPC suppress kdb_console KDB_COMPORT KDB_COMSPEED KDB_BREAKIN
+when ARCH_POWERPC suppress kdb_console KDB_COMPORT KDB_COMSPEED 
 unless ARCH_X86 suppress KDB_INPUT_HLT
 when ARCH_POWERPC64 suppress KDB_COMPORT KDB_COMSPEED
 unless ARCH_POWERPC suppress ppc_debug_consoles

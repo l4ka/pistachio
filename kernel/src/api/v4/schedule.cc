@@ -110,7 +110,7 @@ void do_xcpu_send_irq(cpu_mb_entry_t * entry)
     tcb_t * handler_tcb = entry->tcb;
     word_t irq = entry->param[0];
     threadid_t irq_tid = threadid_t::irqthread(irq);
-    tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
+    tcb_t * irq_tcb = tcb_t::get_tcb(irq_tid);
 	
     if (!handler_tcb->is_local_cpu())
     {
@@ -170,7 +170,7 @@ SYS_THREAD_SWITCH (threadid_t dest)
     /* explicit timeslice donation */
     if (!dest.is_nilthread())
     {
-	tcb_t * dest_tcb = get_current_space()->get_tcb(dest);
+	tcb_t * dest_tcb = tcb_t::get_tcb(dest);
 
 	if ( dest_tcb == current )
 	    return_thread_switch();
@@ -294,7 +294,7 @@ SYS_SCHEDULE (threadid_t dest_tid, word_t time_control,
 {
     
     tcb_t * current = get_current_tcb();
-    tcb_t * dest_tcb = get_current_space()->get_tcb(dest_tid);
+    tcb_t * dest_tcb = tcb_t::get_tcb(dest_tid);
     scheduler_t *scheduler = get_current_scheduler();
     
     TRACEPOINT(SYSCALL_SCHEDULE, 

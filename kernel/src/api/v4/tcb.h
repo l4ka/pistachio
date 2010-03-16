@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, Jan Stoess, IBM Corporation
  *                
  * File path:     api/v4/tcb.h
- * Description:   V4 TCB
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: tcb.h,v 1.76 2006/10/20 21:01:46 reichelt Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __API__V4__TCB_H__
@@ -97,6 +98,7 @@ public:
     void delete_tcb();
     bool migrate_to_space(space_t * space);
     bool migrate_to_processor(cpuid_t processor);
+    
     bool exists() 
 	{ return space != NULL; }
     bool is_activated()
@@ -232,7 +234,13 @@ public:
     bool is_interrupt_thread();
 
 public:
-    void allocate();
+    static tcb_t *allocate(const threadid_t dest);
+    static void deallocate(const threadid_t dest);
+    static void init_tcbs();
+    static tcb_t *get_tcb(threadid_t tid);
+    static bool is_tcb(addr_t addr);
+
+
     void arch_init_root_server(space_t * space, word_t ip, word_t sp);
 
 private:
@@ -350,6 +358,11 @@ private:
     friend void dump_tcb(tcb_t *, bool extended);
     friend void handle_ipc_error (void);
     friend class thread_resources_t;
+    
+#if defined(CONFIG_STATIC_TCBS)
+    static  tcb_t *tcb_array[TOTAL_KTCBS];
+#endif
+
 };
 
 /* union to allow allocation of tcb including stack */
@@ -402,6 +415,67 @@ INLINE threadid_t tcb_t::get_irq_handler()
  *                  Access functions
  *
  **********************************************************************/
+__attribute__ ((const)) INLINE tcb_t * addr_to_tcb (addr_t addr)
+{
+    return (tcb_t *) ((word_t) addr & KTCB_MASK);
+}
+
+
+#if defined(CONFIG_STATIC_TCBS)
+INLINE bool tcb_t::is_tcb(addr_t addr)
+{
+    tcb_t * tcb = addr_to_tcb(addr);
+    for (unsigned i = 0; i < TOTAL_KTCBS; i++)
+	if (tcb_array[i] == tcb)
+	    return true;
+    return false;
+}
+
+INLINE tcb_t * tcb_t::get_tcb( threadid_t tid )
+{
+    return tcb_array[tid.get_threadno() & VALID_THREADNO_MASK];
+}
+
+#else
+
+INLINE bool tcb_t::is_tcb(addr_t addr)
+{
+    return space_t::is_tcb_area(addr);
+}
+INLINE tcb_t * tcb_t::get_tcb( threadid_t tid )
+{
+    return (tcb_t *)((KTCB_AREA_START) + 
+	    ((tid.get_threadno() & VALID_THREADNO_MASK) * KTCB_SIZE));
+}
+
+/**
+ * allocate the tcb
+ * The tcb pointed to by this will be allocated.
+ */
+INLINE tcb_t* tcb_t::allocate(threadid_t dest)
+{
+    tcb_t *tcb = get_tcb(dest);
+    /**
+     * tcb_t::allocate: allocate memory for TCB
+     *
+     * Allocate memory for the given TCB.  We do this by generating a
+     * write to the TCB area.  If TCB area is not backed by writable
+     * memory (i.e., already allocated) the pagefault handler will
+     * allocate the memory and map it.
+     */
+    tcb->kernel_stack[0] = 0;
+    
+    return tcb;
+}
+
+INLINE void tcb_t::deallocate(threadid_t dest)
+{ /* Nothing to do */ }
+INLINE void tcb_t::init_tcbs()
+{ /* Nothing to do */ }
+
+#endif
+
+
 INLINE void tcb_t::set_state(thread_state_t state)
 {
     this->thread_state = state;
@@ -424,7 +498,7 @@ INLINE threadid_t tcb_t::get_partner()
 
 INLINE tcb_t* tcb_t::get_partner_tcb()
 {
-    return this->get_space()->get_tcb(partner);
+    return get_tcb(partner);
 }
 
 INLINE void tcb_t::init_saved_state()
@@ -691,6 +765,13 @@ INLINE tcb_t * get_idle_tcb()
     extern tcb_t *__idle_tcb;
     return (tcb_t*)__idle_tcb;
 }
+
+INLINE tcb_t * get_dummy_tcb()
+{
+    extern tcb_t *__dummy_tcb;
+    return (tcb_t*)__dummy_tcb;
+}
+
 
 /* 
  * include glue header file 

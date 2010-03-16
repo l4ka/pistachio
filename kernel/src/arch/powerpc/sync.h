@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	arch/powerpc/sync.h
- * Description:	PowerPC SMP synchronization primitives.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/arch/powerpc/sync.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,13 +26,11 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: sync.h,v 1.6 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
-
-#ifndef __ARCH__POWERPC__SYNC_H__
-#define __ARCH__POWERPC__SYNC_H__
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
+#pragma once
 
 class spinlock_t
 {
@@ -40,13 +39,15 @@ public:
 	{ this->_lock = val; }
     void lock();
     void unlock();
+    bool is_locked()
+	{ return _lock != 0; }
 
 public: // to allow initializers
     volatile word_t _lock;
 };
 
 #define DECLARE_SPINLOCK(name) extern spinlock_t name;
-#define DEFINE_SPINLOCK(name) spinlock_t name = ((spinlock_t) {{_lock: 0}})
+#define DEFINE_SPINLOCK(name) spinlock_t name = {_lock: 0}
 
 // TODO: do I satisfy synchronization criteria for PowerPC?
 // TODO: should i eieio when grabbing the lock?
@@ -63,7 +64,7 @@ INLINE void spinlock_t::lock()
 	bne-	1b		/* Retry the lock. */\n\
 	stwcx.	%2, 0, %1	/* Try to store the new lock. */\n\
 	bne-	1b		/* Retry if we failed to store. */\n\
-	"
+	isync\n"
 	: "=&r" (old_val)
 	: "r" (&this->_lock), "r" (1)
 	: "cr0", "memory"
@@ -142,6 +143,3 @@ INLINE word_t ppc_atomic_and( void volatile *addr, word_t mask )
 
     return tmp;
 }
-
-
-#endif 	/* __ARCH__POWERPC__SYNC_H__ */

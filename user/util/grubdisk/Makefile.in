@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2004, 2007,  Karlsruhe University
+## Copyright (C) 2004, 2007, 2010,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ## Description:   Build a bootable disk image
@@ -43,6 +43,7 @@ do-all:	bootdisk.img
 bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0  \
 		${APP} ${kerneldir}/${KERNEL}
 	@# Create a disk image
+	rm -f bootdisk.img 	
 	/sbin/mkdosfs -C bootdisk.img 1440
 	@# Make it a GRUB disk
 	dd if=grub.img of=bootdisk.img conv=notrunc > /dev/null

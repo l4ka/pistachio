@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/pgent_inline.h
- * Description:	Inlined functions for pgent_t (pgent.h).
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/glue/v4-powerpc/pgent_inline.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: pgent_inline.h,v 1.15 2007/01/14 21:36:19 uhlig Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __GLUE__V4_POWERPC__PGENT_INLINE_H__
 #define __GLUE__V4_POWERPC__PGENT_INLINE_H__
@@ -43,6 +44,7 @@ EXTERN_KMEM_GROUP (kmem_pgtab);
 
 // Page hash synchronization
 
+#ifdef CONFIG_PPC_MMU_SEGMENT
 inline void pgent_t::update_from_pghash( space_t * s, addr_t vaddr )
 {
     ppc_translation_t *pte;
@@ -59,6 +61,7 @@ inline void pgent_t::update_from_pghash( space_t * s, addr_t vaddr )
 	this->map.changed = pte->x.c;
     }
 }
+#endif
 
 // Linknode access 
 
@@ -138,8 +141,9 @@ inline word_t pgent_t::attributes ( space_t * s, pgsize_e pgsize )
 inline word_t pgent_t::reference_bits( space_t *s, pgsize_e pgsize, 
 	addr_t vaddr )
 {
+#ifdef CONFIG_PPC_MMU_SEGMENT
     this->update_from_pghash( s, vaddr );
-
+#endif
     word_t rwx = 0;
     if( this->map.referenced ) rwx = 5;
     if( this->map.changed )    rwx |= 6;
@@ -163,7 +167,9 @@ inline word_t pgent_t::get_translation( space_t *s, pgsize_e pgsize )
 inline void pgent_t::flush( space_t *s, pgsize_e pgsize, bool kernel, 
 	addr_t vaddr )
 {
-    get_pghash()->flush_4k_mapping( s, vaddr, this );
+#ifdef CONFIG_PPC_MMU_SEGMENT
+    get_pghash()->flush_mapping( s, vaddr, pgsize, this );
+#endif
 }
 
 inline void pgent_t::clear( space_t * s, pgsize_e pgsize, bool kernel, 

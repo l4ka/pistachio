@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     generic/kmemory.cc
  * Description:   very simple kernel memory allocator
@@ -35,7 +35,7 @@
 #include <kdb/tracepoints.h>
 #include <sync.h>
 
-//#define DEBUG_KMEM
+#undef DEBUG_KMEM
 
 #ifdef DEBUG_KMEM
 # define ALLOC_TRACE	TRACE

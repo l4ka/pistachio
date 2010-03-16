@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2007,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     glue/v4-powerpc/tcb.h
- * Description:   TCB related functions for Version 4, PowerPC
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,15 +27,15 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: tcb.h,v 1.94 2006/10/20 21:32:17 reichelt Exp $
- *
+ * $Id$
+ *                
  ********************************************************************/
-#ifndef __GLUE__V4_POWERPC__TCB_H__
-#define __GLUE__V4_POWERPC__TCB_H__
+#pragma once
 
 #include INC_ARCH(ppc_registers.h)
 #include INC_ARCH(msr.h)
 #include INC_API(syscalls.h)
+#include INC_API(ipc.h)
 #include INC_GLUE(resources_inline.h)
 
 #define TRACE_TCB(x...)
@@ -112,6 +113,10 @@ INLINE void tcb_t::set_cpu( cpuid_t cpu )
 {
     this->cpu = cpu;
     get_utcb()->processor_no = cpu;
+#if defined(CONFIG_PPC_MMU_TLB)
+    if (get_space() != get_kernel_space())
+	this->pdir_cache = (word_t)space->get_asid(cpu);
+#endif
 }
 
 /**
@@ -180,6 +185,7 @@ INLINE void tcb_t::set_br(word_t index, word_t value)
     get_utcb()->br[32-index] = value;
 }
 
+#ifdef CONFIG_DYNAMIC_TCBS
 INLINE void tcb_t::allocate()
 {
     // Write to the tcb, to ensure that the kernel maps this tcb
@@ -187,11 +193,17 @@ INLINE void tcb_t::allocate()
     // TODO: should we do this?  It wastes a cache line.
     *(word_t *)( (word_t)this + sizeof(tcb_t) ) = 0;
 }
+#endif
+
 
 INLINE void tcb_t::set_space(space_t * space)
 {
     this->space = space;
-    if( EXPECT_FALSE(space == NULL) )
+
+    if (!space)
+	return;
+
+    if( EXPECT_FALSE(space == get_kernel_space()) )
     {
 	/* Thread switch expects pdir_cache to be 0 for kernel threads.
 	 */
@@ -200,14 +212,15 @@ INLINE void tcb_t::set_space(space_t * space)
 	return;
     }
 
+#ifdef CONFIG_PPC_MMU_SEGMENT
     this->pdir_cache = (word_t)space->get_segment_id().raw;
     TRACE_TCB("set_space(), space 0x%p, tcb 0x%p, kernel_space 0x%p\n", 
 	      space, this, get_kernel_space() );
 
     space->sync_kernel_space( this );	/* Map this tcb into the space. */
     space->handle_hash_miss( this );	/* Install this tcb into the pg hash. */
-
     space->handle_hash_miss( space );	/* TODO: is this the solution? */
+#endif
 }
 
 INLINE word_t * tcb_t::get_stack_top()
@@ -233,6 +246,7 @@ INLINE void tcb_t::init_stack()
  *
  **********************************************************************/
 
+
 /**
  * tcb_t::switch_to: switches to specified tcb
  */
@@ -247,30 +261,12 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
     if( EXPECT_FALSE(this->resource_bits) )
 	this->resources.save( this );
 
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     /* NOTE: pdir_cache holds the segment ID. */
-
-    register word_t dummy0 asm("r25");
-    register word_t dummy1 asm("r26");
-    register word_t dummy2 asm("r27");
-    register word_t dummy3 asm("r28");
-    register word_t dummy4 asm("r29");
-
-    asm volatile (
-	    "stw %%r30, -4(%%r1) ;"	/* Preserve r30 on the stack. */
-	    "stw %%r31, -8(%%r1) ;"	/* Preserve r31 on the stack. */
-	    "mtsprg " MKSTR(SPRG_CURRENT_TCB) ", %3 ;"	/* Save the tcb pointer in sprg1. */
-	    "lis %3, 1f@ha ;"		/* Grab the return address. */
-	    "la  %3, 1f@l(%3) ;"	/* Put the return address in %3. */
-	    "stwu %3, -16(%%r1) ;"	/* Store (with update) the return address on the
-					   current stack. */
-	    "stw %%r1, 0(%2) ;"		/* Save the current stack in
-					   *old_stack. */
-
-	    "cmplw cr0, %0, %4 ;"	/* Compare the new seg ID to the old. */
-	    "cmplwi cr1, %0, 0 ;"	/* Is kernel thread? */
-	    "cror eq, cr0*4+eq, cr1*4+eq ;"	/* OR the results. */
-	    "beq 0f ;"			/* Skip addr space switch if possible. */
-	    "isync ;"		// TODO: does the kernel access user space?
+    if ( (dest->pdir_cache != current->pdir_cache) && (dest->pdir_cache != 0) )
+    {
+	word_t dummy;
+	asm volatile (
 #if defined(CONFIG_PPC_SEGMENT_LOOP)
 	    /* Here is a loop to set the segment registers.  It is 4 cycles
 	     * slower than the nonlooped version.  But it has 17 fewer
@@ -299,31 +295,57 @@ INLINE void tcb_t::switch_to(tcb_t * dest)
 	    "mtsr 10, %0 ; addi %0, %0, 1 ;"
 	    "mtsr 11, %0 ;"
 #endif
-	    "isync ;"		// TODO: can we instead rely on rfi ?
+	    "isync ;"
+	    : "=r"(dummy)
+	    : "0"(dest->pdir_cache));
+    }
+#elif defined(CONFIG_PPC_MMU_TLB)
+    if (dest->pdir_cache)
+    {
+	asid_t *asid = (asid_t*)dest->pdir_cache;
+	word_t current_pid = ppc_get_pid();
+	if (asid->get() != current_pid)
+	{
+	    // AS switch...
+	    if ( EXPECT_FALSE(!asid->is_valid()) )
+		dest->get_space()->allocate_asid();
+	    word_t dest_pid = get_asid_manager()->reference(asid);
+	    ASSERT(dest_pid);
+	    ppc_set_pid(dest_pid);
+	}
+    }
+#endif
 
-	    "0:"
-	    "addi %%r1, %1, 16 ;"	/* Install the new stack. */
-	    "lwz %%r3, -16(%%r1) ;"	/* Grab the new thread's address. */
-	    "lwz %%r30, -4(%%r1) ;"	/* Restore r30. */
-	    "lwz %%r31, -8(%%r1) ;"	/* Restore r31. */
-	    "mtctr %%r3 ;"		/* Prepare to jump. */
-	    "bctr ;"			/* Jump to the new thread. */
+    register word_t dummy0 asm("r27");
+    register word_t dummy1 asm("r28");
+    register word_t dummy2 asm("r29");
 
-	    "1:"			/* The return address. */
-
-	    : "=r" (dummy0), "=r" (dummy1), "=r" (dummy2), "=r" (dummy3),
-	      "=r" (dummy4)
-	    : "0" (dest->pdir_cache), "1" (dest->stack), "2" (&this->stack), 
-	      "3" (dest), "4" (this->pdir_cache)
+    asm volatile (
+	    "stw %%r30, -4(%%r1) ;"		/* Preserve r30 on the stack. */
+	    "stw %%r31, -8(%%r1) ;"		/* Preserve r31 on the stack. */
+	    "mtsprg " MKSTR(SPRG_CURRENT_TCB) ", %[dest_tcb] ;"	/* Save the tcb pointer in sprg1. */
+	    "lis %[dest_tcb], 1f@ha ;"		/* Grab the return address. */
+	    "la  %[dest_tcb], 1f@l(%[dest_tcb]) ;"	/* Put the return address in %3. */
+	    "stwu %[dest_tcb], -16(%%r1) ;"	/* Store (with update) the return address on the
+						   current stack. */
+	    "stw %%r1, 0(%[this_sp]) ;"		/* Save the current stack in old_stack. */
+	    "addi %%r1, %[dest_sp], 16 ;"	/* Install the new stack. */
+	    "lwz %%r3, -16(%%r1) ;"		/* Grab the new thread's address. */
+	    "lwz %%r30, -4(%%r1) ;"		/* Restore r30. */
+	    "lwz %%r31, -8(%%r1) ;"		/* Restore r31. */
+	    "mtctr %%r3 ;"			/* Prepare to jump. */
+	    "bctr ;"				/* Jump to the new thread. */
+	    "1:"				/* The return address. */
+	    : "=b" (dummy0), "=b" (dummy1), "=b" (dummy2)
+	    : [dest_sp] "0" (dest->stack),
+	      [this_sp] "1" (&this->stack),
+	      [dest_tcb] "2" (dest)
 	    : "memory", "r0", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
 	      "r10", "r11", "r12", "r13", "r14", "r15", "r16", "r17", "r18",
-	      "r19", "r20", "r21", "r22", "r23", "r24",
+	      "r19", "r20", "r21", "r22", "r23", "r24", "r25", "r26",
 	      "ctr", "lr", 
-	      "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7"
-#if (__GNUC__ >= 3)
-	      , "xer"
-#endif
-	    );
+	      "cr0", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7", "xer"
+        );
 
     if( EXPECT_FALSE(this->resource_bits) )
 	this->resources.load( this );
@@ -423,15 +445,9 @@ INLINE msg_tag_t tcb_t::do_ipc( threadid_t to_tid, threadid_t from_tid, timeout_
 {
     this->resources.set_kernel_ipc( this );
 
-#if defined(CONFIG_SYSV_ABI)
-    register word_t r3 asm("r3") = (word_t)&to_tid;
-    register word_t r4 asm("r4") = (word_t)&from_tid;
-    register word_t r5 asm("r5") = (word_t)&timeout;
-#else
     register word_t r3 asm("r3") = to_tid.get_raw();
     register word_t r4 asm("r4") = from_tid.get_raw();
     register word_t r5 asm("r5") = timeout.raw;
-#endif
 
     /* ABI stack */
     asm volatile (
@@ -471,20 +487,56 @@ INLINE msg_tag_t tcb_t::do_ipc( threadid_t to_tid, threadid_t from_tid, timeout_
 
 INLINE void tcb_t::adjust_for_copy_area( tcb_t * dst, addr_t * s, addr_t * d )
 {
-    this->resources.setup_copy_area( this, dst, *d );
-    this->resources.enable_copy_area( this );
-    *d = this->resources.copy_area_address( *d );
+    resources.setup_copy_area( this, s, dst, d );
+    resources.enable_copy_area( this );
 }
 
 INLINE void tcb_t::release_copy_area( void )
 {
-    this->resources.disable_copy_area( this );
+    resources.disable_copy_area( this );
 }
 
 INLINE addr_t tcb_t::copy_area_real_address( addr_t addr )
 {
-    return this->resources.copy_area_real_address( this, addr );
+    return resources.copy_area_real_address( this, addr );
 }
+
+/**********************************************************************
+ *
+ *                        ctrlxfer tcb functions
+ *
+ **********************************************************************/
+#if defined(CONFIG_X_CTRLXFER_MSG)
+EXTERN_TRACEPOINT(IPC_CTRLXFER_ITEM_DETAILS);
+
+INLINE void tcb_t::set_fault_ctrlxfer_items(word_t fault, ctrlxfer_mask_t mask)
+{
+    word_t idx = fault - 2;
+    if (idx < IPC_CTRLXFER_STDFAULTS + arch_ktcb_t::fault_max)
+	this->fault_ctrlxfer[idx] = mask;
+}
+
+INLINE ctrlxfer_mask_t tcb_t::get_fault_ctrlxfer_items(word_t fault)
+{  
+    word_t idx = fault - 2;
+    return (idx < IPC_CTRLXFER_STDFAULTS + arch_ktcb_t::fault_max) ?
+	this->fault_ctrlxfer[idx] : ctrlxfer_mask_t(0);
+}
+
+INLINE word_t tcb_t::append_ctrlxfer_item(msg_tag_t tag, word_t offset)
+{
+    word_t fault = (0x1000 - (tag.get_label() >> 4));
+    if (get_fault_ctrlxfer_items(fault))
+    {
+	TRACE_CTRLXFER_DETAILS( "append ctrlxfer item %d", fault);
+	flags += kernel_ctrlxfer_msg;
+	msg_item_t item = ctrlxfer_item_t::kernel_fault_item(fault);
+	set_mr( offset++, item.raw);
+	return 1;
+    }
+    return 0;
+}
+#endif /* CONFIG_X_CTRLXFER_MSG */
 
 
 /**********************************************************************
@@ -492,12 +544,6 @@ INLINE addr_t tcb_t::copy_area_real_address( addr_t addr )
  *                        global tcb functions
  *
  **********************************************************************/
-
-__attribute__ ((const)) INLINE tcb_t * addr_to_tcb (addr_t addr)
-{
-    return (tcb_t *) ((word_t) addr & KTCB_MASK);
-}
-
 INLINE void set_sprg_tcb( tcb_t *tcb )
 {
     ppc_set_sprg( SPRG_CURRENT_TCB, (word_t)tcb );
@@ -563,6 +609,4 @@ INLINE void NORETURN initial_switch_to( tcb_t *tcb )
 INLINE void tcb_t::arch_init_root_server (space_t * space, word_t ip, word_t sp)
 { 
 }
-
-#endif /* __GLUE__V4_POWERPC__TCB_H__ */
 

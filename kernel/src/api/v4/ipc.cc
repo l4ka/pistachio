@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, Jan Stoess, IBM Corporation
  *                
  * File path:     api/v4/ipc.cc
- * Description:   generic IPC path
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: ipc.cc,v 1.65 2005/01/25 20:25:02 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #include <debug.h>
@@ -82,8 +83,7 @@ INLINE bool transfer_message(tcb_t * src, tcb_t * dst, msg_tag_t tag)
 
 	fixup_propagation:
 
-	    tcb_t * virt_sender = src->get_space ()->
-		get_tcb (src->get_virtual_sender ());
+	    tcb_t * virt_sender = tcb_t::get_tcb (src->get_virtual_sender ());
 
 	    if (src->get_virtual_sender () == virt_sender->get_global_id ()
 		&& (src->get_space () == virt_sender->get_space () ||
@@ -271,6 +271,9 @@ static void do_xcpu_send_done(cpu_mb_entry_t * entry)
  **********************************************************************/
 SYS_IPC (threadid_t to_tid, threadid_t from_tid, timeout_t timeout)
 {
+#ifdef SYS_IPC_PREAMBLE
+    SYS_IPC_PREAMBLE
+#endif
     tcb_t * to_tcb = NULL;
     tcb_t * from_tcb;
     tcb_t * current = get_current_tcb();
@@ -291,7 +294,7 @@ send_path:
 
     if (! EXPECT_FALSE( to_tid.is_nilthread() ))
     {
-	to_tcb = current->get_space()->get_tcb(to_tid);
+	to_tcb = tcb_t::get_tcb(to_tid);
 	TRACE_IPC_DETAILS("ipc send phase curr=%t, to=%t", current, TID(to_tid));
 
 	if (EXPECT_FALSE( to_tcb->get_global_id() != to_tid ))
@@ -307,7 +310,7 @@ send_path:
 
 	if (EXPECT_FALSE( tag.is_propagated() ))
 	{
-	    tcb_t * virt_sender = current->get_space()->get_tcb(current->get_virtual_sender());
+	    tcb_t * virt_sender = tcb_t::get_tcb(current->get_virtual_sender());
 	    
 	    // propagation only allowed within same address space
 	    if ((current->get_virtual_sender() == virt_sender->get_global_id() 
@@ -329,6 +332,8 @@ send_path:
 	current->set_partner(to_tid);
 	current->set_state(thread_state_t::polling);
 	
+        /* VU: add smp_memory_barrier() */
+
 	if ( to_tcb->lock_state.is_active() ) 
 	    to_tcb->lock();
 #endif
@@ -543,7 +548,7 @@ send_path:
 	{
 	    /* closed wait */
 	    ASSERT(from_tid.is_global());
-	    from_tcb = current->get_space()->get_tcb(from_tid);
+	    from_tcb = tcb_t::get_tcb(from_tid);
 
 
 	    TRACE_IPC_DETAILS("ipc closed wait from %t, current=%t", TID(from_tid), current);

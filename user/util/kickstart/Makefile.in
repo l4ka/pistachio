@@ -1,8 +1,10 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2004, 2006-2007, 2010,  Karlsruhe University
+## Copyright (C) 1999-2010,  Karlsruhe University
+## Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
 ##                
 ## File path:     Makefile.in
+## Description:   
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -25,7 +27,7 @@
 ## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 ## SUCH DAMAGE.
 ##                
-## $Id: Makefile.in,v 1.19 2006/10/22 19:39:27 reichelt Exp $
+## $Id$
 ##                
 ######################################################################
 
@@ -46,6 +48,7 @@ SRCS=		crt0-$(ARCH).S kickstart.cc kipmgr.cc elf.cc lib.cc bootinfo.cc \
 		$(ARCH).cc $(SRCS_$(ARCH))
 OBJS+=		$(OBJS_$(ARCH))
 SRCS_MBI=	mbi.cc mbi-$(ARCH).cc mbi-loader.cc
+SRCS_FDT=	fdt.cc fdt-$(ARCH).cc fdt-loader.cc
 IO32FILES=	$(IO32FILES_$(ARCH))
 GENFILES=	$(GENFILES_$(ARCH))
 
@@ -77,6 +80,16 @@ IO32FILES_amd64=	get_hex.cc print.cc $(ARCH)-getc.cc $(ARCH)-putc.cc
 PROGRAM_DEPS_amd64=	$(top_builddir)/util/kickstart/libio32.a
 
 ##
+## PowerPC specifics
+##
+SRCS_powerpc=		$(SRCS_FDT) powerpc-putc.cc
+LIBS_powerpc=		$(top_builddir)/lib/io/print.o
+LDFLAGS_powerpc=	
+CFLAGS_kickstart_powerpc:= $(CFLAGS) 
+MKIMAGE=		mkimage
+POST_ALL_powerpc=	kickstart.uimage
+
+##
 ## Override CFLAGS
 ##
 CFLAGS=			$(CFLAGS_kickstart_$(ARCH))
@@ -86,6 +99,7 @@ pre-all:	.revision copy_io32files $(GENFILES)
 post-clean:
 	rm -f .revision $(GENFILES)
 	rm -f $(IO32FILES:.cc=32.o) $(IO32FILES:.cc=32.cc) libio32.a
+post-all: $(POST_ALL_$(ARCH))
 
 .revision:	$(SRCS)
 	@$(ECHO_MSG) Making  `echo $(srcdir)/ | sed s,^$(top_srcdir)/*,,`$@
@@ -114,6 +128,11 @@ bootinfo32.o: $(srcdir)/bootinfo.cc
 
 bootinfo64.o: $(srcdir)/bootinfo.cc
 	$(CC) -x c++ $(CPPFLAGS) $(CXXFLAGS) -DBOOTINFO_64on32 -c $(srcdir)/bootinfo.cc -o $@
+
+
+kickstart.uimage: kickstart
+	$(OBJCOPY) -O binary $< $<.bin
+	$(MKIMAGE) -A ppc -O linux -T kernel -C none -a $(KICKSTART_LINKBASE) -e $(KICKSTART_LINKBASE) -n "L4Ka Kickstart" -d $<.bin $@
 
 
 include $(top_srcdir)/Mk/l4.prog.mk

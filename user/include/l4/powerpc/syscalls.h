@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002-2003, Karlsruhe University
- *
- * File path:	l4/powerpc/syscalls.h
- * Description:	PowerPC system call implementations.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     include/l4/powerpc/syscalls.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: syscalls.h,v 1.32 2005/06/02 14:05:31 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 #ifndef __L4__POWERPC__SYSCALLS_H__
 #define __L4__POWERPC__SYSCALLS_H__
 
@@ -238,7 +239,7 @@ L4_INLINE L4_Word_t  L4_Schedule(
 	L4_ThreadId_t dest,
 	L4_Word_t TimeControl,
 	L4_Word_t ProcessorControl,
-	L4_Word_t PrioControl,
+	L4_Word_t prio,
 	L4_Word_t PreemptionControl,
 	L4_Word_t * old_TimeControl
 	)
@@ -246,7 +247,7 @@ L4_INLINE L4_Word_t  L4_Schedule(
     register L4_Word_t r3 asm("r3") = dest.raw;
     register L4_Word_t r4 asm("r4") = TimeControl;
     register L4_Word_t r5 asm("r5") = ProcessorControl;
-    register L4_Word_t r6 asm("r6") = PrioControl;
+    register L4_Word_t r6 asm("r6") = prio;
     register L4_Word_t r7 asm("r7") = PreemptionControl;
     
     __asm__ __volatile__ (

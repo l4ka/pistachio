@@ -1,6 +1,7 @@
 dnl ###################################################################
 dnl
-dnl Copyright (C) 2006,  Karlsruhe University
+dnl Copyright (C) 1999-2010,  Karlsruhe University
+dnl Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
 dnl
 dnl File path:     configure.in
 dnl
@@ -272,8 +273,8 @@ case $ARCH in
 	;;
   powerpc)
 	default_kickstart_linkbase=00400000
-	default_sigma0_linkbase=00200000
-	default_roottask_linkbase=00300000
+	default_sigma0_linkbase=00500000
+	default_roottask_linkbase=00600000
 	;;
   powerpc64)
 	default_sigma0_linkbase=00100000

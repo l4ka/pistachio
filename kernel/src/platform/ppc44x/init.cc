@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/smp.cc
- * Description:   PowerPC MP implementation
+ * File path:     src/platform/ppc44x/init.cc
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,22 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: smp.cc,v 1.9 2003/09/24 19:05:37 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
-#if defined(CONFIG_SMP)
+#include INC_ARCH(swtlb.h)
 
-#include INC_API(smp.h)
-#include INC_GLUE(intctrl.h)
 
-void handle_smp_ipi( intctrl_t::vector_e ipi_vec )
-{
-    process_xcpu_mailbox();
-}
-
-void smp_xcpu_trigger( cpuid_t cpu )
-{
-    get_interrupt_ctrl()->send_ipi0( get_current_cpu(), 1 << cpu );
-}
-
-#endif

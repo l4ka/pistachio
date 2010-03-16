@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  National ICT Australia (NICTA)
+ * Copyright (C) 2003-2004, 2006, 2010,  National ICT Australia (NICTA)
  *                
  * File path:     glue/v4-powerpc64/space.cc
  * Description:   address space management
@@ -352,7 +352,7 @@ void space_t::map_dummy_tcb(addr_t addr)
     /* XXX We map the dummy page (kernel/user read-only) since PPC has no
      * support for super-readonly,user-noaccess
      */
-    add_4k_mapping( addr, (addr_t)get_dummy_tcb(), false, false );
+    add_4k_mapping( addr, (addr_t)virt_to_phys(get_dummy_tcb()), false, false );
 }
 
 void space_t::map_sigma0(addr_t addr)

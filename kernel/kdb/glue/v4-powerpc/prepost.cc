@@ -1,6 +1,7 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2005,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     kdb/glue/v4-powerpc/prepost.cc
  * Description:   
@@ -34,7 +35,8 @@
 #include <kdb/kdb.h>
 #include <kdb/console.h>
 
-#include INC_ARCH(debug.h)
+#include INC_GLUE(debug.h)
+
 #include INC_ARCH(frame.h)
 #include INC_ARCH(msr.h)
 #include INC_ARCH(phys.h)
@@ -51,21 +53,21 @@ bool kdb_t::pre()
     kdb_lock.lock();
 
     tcb_t *current = get_current_tcb();
-    except_info_t *frame = (except_info_t *)kdb_param;
+    debug_param_t *param = (debug_param_t *)kdb_param;
 
-    if( EXCEPT_ID(TRACE) == frame->exc_no )
+    if( EXCEPT_ID(TRACE) == param->exception )
     {
-	word_t flags = frame->regs->srr1_flags;
+	word_t flags = param->frame->srr1_flags;
 	flags = MSR_CLR( flags, MSR_SE );	// Disable single stepping
 	flags = MSR_CLR( flags, MSR_BE );	// Disable branch tracing
-	frame->regs->srr1_flags = flags;
+	param->frame->srr1_flags = flags;
 	enter_kdb = true;
     }
 
-    else if( EXCEPT_ID(PROGRAM) == frame->exc_no )
+    else if( EXCEPT_ID(PROGRAM) == param->exception )
     {
-	if( (user_kdb_enter || ppc_is_kernel_mode(frame->regs->srr1_flags)) 
-		    && (frame->regs->r0 == L4_TRAP_KDEBUG) )
+	if( (user_kdb_enter || ppc_is_kernel_mode(param->frame->srr1_flags)) 
+		    && (param->frame->r0 == L4_TRAP_KDEBUG) )
 	{
 	    // Synchronous request to enter the kernel debugger.
 	    // It can be executed from user or kernel code.
@@ -76,91 +78,100 @@ bool kdb_t::pre()
 	    if( EXPECT_FALSE(space == NULL) )
 		space = get_kernel_space();
 
-	    instr = space->get_from_user( (addr_t)(frame->regs->srr0_ip + 4) );
+	    instr = space->get_from_user( (addr_t)(param->frame->srr0_ip + 4) );
 	    if( DEBUG_IS_MAGIC(instr) )
-		debug_msg = (char *)(frame->regs->srr0_ip + 8);
+		debug_msg = (char *)(param->frame->srr0_ip + 8);
 	    else
 		debug_msg = "debug request";
 	    printf( ">> %s\n", debug_msg );
-	    frame->regs->srr0_ip += 4;
+	    param->frame->srr0_ip += 4;
 	    enter_kdb = true;
 	}
 
-	else if( user_io && (L4_TRAP_KPUTC == frame->regs->r0) )
+	else if( user_io && (L4_TRAP_KPUTC == param->frame->r0) )
 	{
 	    // User request to print a character.
-	    putc( (char)frame->regs->r3 );
-	    frame->regs->srr0_ip += 4;
+	    putc( (char)param->frame->r3 );
+	    param->frame->srr0_ip += 4;
 	}
 
-	else if( user_io && (L4_TRAP_KGETC == frame->regs->r0) )
+	else if( user_io && (L4_TRAP_KGETC == param->frame->r0) )
 	{
 	    // User request to get a character, while blocking.
-	    frame->regs->r3 = (word_t)getc();
-	    frame->regs->srr0_ip += 4;
+	    param->frame->r3 = (word_t)getc();
+	    param->frame->srr0_ip += 4;
 	}
+#ifdef CONFIG_PLAT_440_BGP
+	else if( user_io && (L4_TRAP_KINJ == param->frame->r0) )
+	{
+	    // User request to inject character stream into KDB
+	    extern void kdb_inject(except_regs_t*);
+	    kdb_inject( param->frame );
+	    param->frame->srr0_ip += 4;
+	}
+#endif
     }
 
-    else if( EXCEPT_ID(DSI) == frame->exc_no )
+    else if( EXCEPT_ID(DSI) == param->exception )
     {
 	// Data address exception.  Look for typical symptoms of bugs.
-	if( frame->dar == 0 )
+	if( param->dar == 0 )
 	{
 	    printf( ">> %s data null dereference\n",
-		ppc_is_kernel_mode(frame->regs->srr1_flags) ? "kernel":"user" );
+		ppc_is_kernel_mode(param->frame->srr1_flags) ? "kernel":"user" );
 	    enter_kdb = true;
 	}
     }
 
-    else if( EXCEPT_ID(ISI) == frame->exc_no )
+    else if( EXCEPT_ID(ISI) == param->exception )
     {
 	// Instruction address exception.  Look for typical symptoms of bugs.
-	if( 0 == frame->regs->srr0_ip )
+	if( 0 == param->frame->srr0_ip )
 	{
 	    printf( ">> %s code null dereference\n",
-		ppc_is_kernel_mode(frame->regs->srr1_flags) ? "kernel":"user" );
+		ppc_is_kernel_mode(param->frame->srr1_flags) ? "kernel":"user" );
 	    enter_kdb = true;
 	}
-	else if( ppc_is_kernel_mode(frame->regs->srr1_flags) )
+	else if( ppc_is_kernel_mode(param->frame->srr1_flags) )
 	{
-	    if( frame->regs->srr0_ip < USER_AREA_END )
+	    if( param->frame->srr0_ip < USER_AREA_END )
 	    {
 		printf( ">> kernel execution in user area: "
 			"0x%08x (lr 0x%08x)\n",
-			frame->regs->srr0_ip, frame->regs->lr );
+			param->frame->srr0_ip, param->frame->lr );
 		enter_kdb = true;
 	    }
-	    else if( (frame->regs->srr0_ip < KERNEL_AREA_START) ||
-		     (frame->regs->srr0_ip >= KERNEL_AREA_END) )
+	    else if( (param->frame->srr0_ip < KERNEL_AREA_START) ||
+		     (param->frame->srr0_ip >= KERNEL_AREA_END) )
 	    {
 		printf( ">> kernel execution in kernel data area: "
 			"0x%08x (lr 0x%08x)\n",
-			frame->regs->srr0_ip, frame->regs->lr );
+			param->frame->srr0_ip, param->frame->lr );
 		enter_kdb = true;
 	    }
 	}
-	else if( frame->regs->srr0_ip >= USER_AREA_END )
+	else if( param->frame->srr0_ip >= USER_AREA_END )
 	{
 	    printf( ">> user attempt to execute in kernel area: "
 		    "0x%08x (lr 0x%08x)\n",
-	    	    frame->regs->srr0_ip, frame->regs->lr );
+	    	    param->frame->srr0_ip, param->frame->lr );
 	    enter_kdb = true;
 	}
     }
 
-    else if( 0 == frame->exc_no )
+    else if( 0 == param->exception )
     {
 	printf( ">> Unknown processor exception.\n" );
 	enter_kdb = true;
     }
 
-    else if( EXCEPT_ID(SYSTEM_RESET) == frame->exc_no )
+    else if( EXCEPT_ID(SYSTEM_RESET) == param->exception )
     {
 	printf( ">> Processor reset exception.\n" );
 	enter_kdb = true;
     }
 
-    else if( EXCEPT_ID(MACHINE_CHECK) == frame->exc_no )
+    else if( EXCEPT_ID(MACHINE_CHECK) == param->exception )
     {
 	printf( ">> Processor machine check exception.\n" );
 	enter_kdb = true;
@@ -173,10 +184,10 @@ bool kdb_t::pre()
 	printf( "CPU%d, ", get_current_cpu() );
 #endif
 	printf( "IP: 0x%08x, MSR: 0x%08x",
-		frame->regs->srr0_ip, frame->regs->srr1_flags );
+		param->frame->srr0_ip, param->frame->srr1_flags );
 	except_regs_t *user_regs = get_user_except_regs(current);
-	if( (user_regs->srr0_ip != frame->regs->srr0_ip) ||
-	    (user_regs->srr1_flags != frame->regs->srr1_flags) )
+	if( (user_regs->srr0_ip != param->frame->srr0_ip) ||
+	    (user_regs->srr1_flags != param->frame->srr1_flags) )
 	{
 	    printf( ", user IP: 0x%08x, user MSR: 0x%08x",
 		    user_regs->srr0_ip, user_regs->srr1_flags );

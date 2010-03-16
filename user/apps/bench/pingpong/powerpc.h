@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004, 2008, 2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     bench/pingpong/powerpc.h
- * Description:   PowerPC specific pingpong functions
+ * File path:     apps/bench/pingpong/powerpc.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: powerpc.h,v 1.2 2005/06/02 14:05:55 joshua Exp $
+ * $Id$
  *                
  ********************************************************************/
 #define HAVE_READ_CYCLES
@@ -108,8 +109,6 @@ void arch_specific (void)
     L4_Word_t cycles1, cycles2, instrs1, instrs2;
     L4_Clock_t usec1, usec2;
     int tot = 1000;
-    L4_KernelInterfacePage_t * kip =
-	(L4_KernelInterfacePage_t *) L4_KernelInterface ();
 
     usec1 = L4_SystemClock();
     cycles1 = read_cycles();

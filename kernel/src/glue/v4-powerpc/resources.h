@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/resources.h
- * Description:   powerpc specific resources
+ * File path:     src/glue/v4-powerpc/resources.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,63 +27,30 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: resources.h,v 1.9 2003/09/24 19:04:51 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __GLUE__V4_POWERPC__RESOURCES_H__
 #define __GLUE__V4_POWERPC__RESOURCES_H__
 
-class ppc_resource_bits_t
-{
-public:
-    union {
-	struct {
-	    word_t copy_area_dst_seg : 4;
-	    word_t copy_area : 1;
-	    word_t in_kernel_ipc : 1;
-	    word_t kernel_thread : 1;
-	} x;
-	word_t raw;
-    };
-
-public:
-    bool copy_area_enabled()
-    {
-	return this->x.copy_area != 0;
-    }
-
-    void disable_copy_area()
-    {
-	this->x.copy_area = 0;
-	this->x.copy_area_dst_seg = 0;
-    }
-
-    void enable_copy_area( addr_t dst_addr )
-    {
-	this->x.copy_area_dst_seg = word_t(dst_addr) >> 28;
-	this->x.copy_area = 1;
-    }
-
-    word_t get_copy_area_dst_seg()
-    {
-	return this->x.copy_area_dst_seg;
-    }
-
-    void set_kernel_ipc()
-    {
-	this->x.in_kernel_ipc = 1;
-    }
-
-    void clr_kernel_ipc()
-    {
-	this->x.in_kernel_ipc = 0;
-    }
-
-    void set_kernel_thread()
-    {
-	this->x.kernel_thread = 1;
-    }
+#define HAVE_RESOURCE_TYPE_E
+enum resource_type_e {
+    KERNEL_THREAD	= 0, /* disables fast path */
+    KERNEL_IPC		= 1, /* disables fast path */
+    FPU			= 2,
+    COPY_AREA		= 3,
+    SOFTHVM		= 4,
 };
+
+
+#define FPU_REGS	32
+
+/* support for extended floating point state like AltiVec or Double Hummer */
+#ifdef CONFIG_PLAT_440_BGP
+#define FPU_EXTRA_REGS	32
+#else
+#define FPU_EXTRA_REGS	0
+#endif
 
 class thread_resources_t : public generic_thread_resources_t
 {
@@ -97,20 +65,26 @@ public:
 public:
     void fpu_unavail_exception( tcb_t *tcb );
 
-    addr_t copy_area_address( addr_t addr );
     addr_t copy_area_real_address( tcb_t *src, addr_t addr );
-    void setup_copy_area( tcb_t *src, tcb_t *dst, addr_t dst_addr );
+    void setup_copy_area( tcb_t *src, addr_t *saddr, tcb_t *dst, addr_t *daddr);
     void enable_copy_area( tcb_t *src );
     void disable_copy_area( tcb_t *src );
+    void flush_copy_area( tcb_t *src );
 
     void set_kernel_ipc( tcb_t *tcb );
     void clr_kernel_ipc( tcb_t *tcb );
-
     void set_kernel_thread( tcb_t *tcb );
 
-private:
+#ifdef CONFIG_X_PPC_SOFTHVM
+    void enable_hvm_mode( tcb_t *tcb);
+    void disable_hvm_mode( tcb_t *tcb);
+#endif
+
     void spill_fpu( tcb_t *tcb );
     void restore_fpu( tcb_t *tcb );
+    void reown_fpu( tcb_t *tcb, tcb_t *new_owner );
+
+private:
     void deactivate_fpu( tcb_t *tcb );
     void activate_fpu( tcb_t *tcb );
 
@@ -123,8 +97,9 @@ private:
     }
 
 private:
+    word_t copy_area_offset;
     word_t fpscr;
-    u64_t fpu_state[32];
+    u64_t fpu_state[FPU_REGS + FPU_EXTRA_REGS] __attribute__((aligned(16)));
 };
 
 

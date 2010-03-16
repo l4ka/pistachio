@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2006-2007, 2009,  Karlsruhe University
+ * Copyright (C) 2002, 2006-2007, 2009-2010,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/sigma0.cc
  * Description:   Sigma0 interaction
@@ -134,7 +134,7 @@ static void sigma0_send (sigma0_request_e type, word_t arg)
     ktid.set_global_id (get_kip ()->thread_info.get_system_base (), 1);
 
     // Make kernel thread invoke IPC sending stub.
-    tcb_t * tcb = get_kernel_space ()->get_tcb (ktid);
+    tcb_t * tcb = tcb_t::get_tcb (ktid);
     tcb->init_stack ();
     tcb->notify (sigma0_ipc, (word_t) type, arg);
 

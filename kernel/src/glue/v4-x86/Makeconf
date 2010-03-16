@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2007-2008,  Karlsruhe University
+## Copyright (C) 2007-2008, 2010,  Karlsruhe University
 ##                
 ## File path:     glue/v4-x86/Makeconf
 ##                
@@ -37,10 +37,6 @@ ifeq ("$(CONFIG_IOAPIC)","y")
 SOURCES += src/glue/v4-x86/timer-apic.cc
 else
 SOURCES += src/glue/v4-x86/timer.cc
-endif
-
-ifeq ("$(CONFIG_X_CTRLXFER_MSG)","y")
-SOURCES+=	src/glue/$(API)-$(ARCH)/ipc.cc
 endif
 
 ifeq ("$(CONFIG_X_X86_HVM)","y")

@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     bench/pingpong/pingpong.cc
- * Description:   Pingpong test application
+ * File path:     apps/bench/pingpong/pingpong.cc
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: pingpong.cc,v 1.60 2007/05/29 14:10:02 joshua Exp $
+ * $Id$
  *                
  ********************************************************************/
 #include <config.h>
@@ -90,9 +91,13 @@ int PRINT_TABLE = 0;
 
 bool tbuf, hsched;
 
+#if defined(L4_TRACEBUFFER)
 #define Dprintf(args...)                                \
+
 	if (tbuf) L4_Tbuf_RecordEvent (1, args);	        
-         
+#else
+#define Dprintf(...) 
+#endif
 
 L4_ThreadId_t s0tid, roottid, pager_tid, ping_tid, pong_tid;
 L4_KernelInterfacePage_t * kip;

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/hvm-config.h
  * Description:   configuration of IA32 architecture
@@ -37,7 +37,8 @@
 
 #define VALID_THREADNO_BITS	(16)
 #define VALID_THREADNO_SHIFT	(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
-#define VALID_THREADNO_MASK	((__UL(1) << VALID_THREADNO_BITS) - 1)
+#define TOTAL_KTCBS		(__UL(1) << VALID_THREADNO_BITS)
+#define VALID_THREADNO_MASK	(TOTAL_KTCBS - 1)
 
 
 /**********************************************************************

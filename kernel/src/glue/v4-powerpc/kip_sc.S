@@ -1,13 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/kip_sc.S
- * Description:	Defines the user space syscall entry points.  
- *		They are prefixes for the actual system calls.  The linker is
- *		responsible for aligning these entry points with their
- *		respective system calls.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     glue/v4-powerpc/kip_sc.S
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -28,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: kip_sc.S,v 1.30 2004/06/04 17:29:41 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include INC_ARCH(frame.h)
 #include INC_GLUE(abi.h)
@@ -328,6 +326,8 @@ _sc_system_clock:
 	cmpl	%cr0, %r3, %r11		/* Did we witness an overflow?	*/
 	bne	1b			/* Try again if overflow.	*/
 
+#warning VU: system clock is invalid!
+#if 0
 	/* Load the bus frequency from the kernel interface page.
 	 */
 	lwz	%r10, (OFS_UTCB_PROCESSOR_NO - OFS_UTCB_MR) (%r2)	/* Get the CPU number. */
@@ -345,7 +345,7 @@ _sc_system_clock:
 
 	/* Perform the division. */
 	bl	__udivdi3
-
+#endif
 	/* Restore state and return.  %r3 and %r4 already contain the results.
 	 */
 	lwz	%r11, 12(%r1)	/* Load the old LR value.	*/

@@ -1,9 +1,10 @@
 ######################################################################
 ##                
-## Copyright (C) 2010,  Karlsruhe University
+## Copyright (C) 1999-2010,  Karlsruhe University
+## Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
 ##                
-## File path:     arch/powerpc/Makeconf
-## Description:   Generic linkser script for x86.
+## File path:     src/arch/powerpc/Makeconf
+## Description:   
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -30,3 +31,7 @@
 ##                
 ######################################################################
 SOURCES += $(addprefix src/arch/powerpc/, string.cc pghash.cc)
+
+ifeq ("$(CONFIG_X_PPC_SOFTHVM)","y")
+SOURCES += src/arch/powerpc/softhvm.cc
+endif

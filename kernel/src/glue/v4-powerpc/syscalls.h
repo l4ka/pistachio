@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/syscalls.h
- * Description:   syscall macros
+ * File path:     src/glue/v4-powerpc/syscalls.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,6 +27,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
+ * $Id$
+ *                
  ********************************************************************/
 #ifndef __GLUE__V4_POWERPC__SYSCALLS_H__
 #define __GLUE__V4_POWERPC__SYSCALLS_H__
@@ -36,6 +39,7 @@
 #define L4_TRAP_KDEBUG  (0x5afe)
 #define L4_TRAP_KPUTC   (L4_TRAP_KDEBUG + 1)
 #define L4_TRAP_KGETC   (L4_TRAP_KDEBUG + 2)
+#define L4_TRAP_KINJ	(L4_TRAP_KDEBUG + 3)
 
 //
 // System call function attributes.
@@ -49,9 +53,23 @@
 // Syscall declaration wrappers.
 //
 
+
+#if defined(CONFIG_SYSV_ABI)
+// VU: we pass the parameters as word_t and do the conversion inside
+// IPC so that we can pass the parameters by value
 #define SYS_IPC(to, from, timeout)				\
-  void SYSCALL_ATTR ("ipc") 					\
-  sys_ipc (to, from, timeout)
+  SYSCALL_ATTR ("ipc") void sys_ipc(word_t __to_tid, word_t __from_tid, word_t __timeout)
+
+#define SYS_IPC_PREAMBLE					\
+  threadid_t to_tid, from_tid; timeout_t timeout;		\
+  to_tid.set_raw(__to_tid);					\
+  from_tid.set_raw(__from_tid);					\
+  timeout.set_raw(__timeout);
+
+#else
+#define SYS_IPC(to, from, timeout)				\
+  SYSCALL_ATTR ("ipc") void sys_ipc(to, from, timeout)
+#endif
 
 #define SYS_THREAD_CONTROL(dest, space, scheduler, pager, utcb_location)\
   void SYSCALL_ATTR ("thread_control")				\
@@ -60,7 +78,7 @@
 #define SYS_SPACE_CONTROL(space, control, kip_area, utcb_area,	\
 			  redirector)				\
   void SYSCALL_ATTR ("space_control")				\
-  sys_space_control (space, control, kip_area, utcb_area,	\
+   sys_space_control (space, control, kip_area, utcb_area,	\
 		     redirector)
 
 #define SYS_SCHEDULE(dest, time_control, processor_control,	\
@@ -334,5 +352,30 @@ extern void _sc_space_ctrl( void );
 extern void _sc_perf( void );
 }
 #endif
+
+
+/*  EXCDEF is a macro which helps consistantly declare exception handlers,
+ *  while reducing typing :)
+ */
+#define EXCDEF(n,params...) extern "C" __attribute__((noreturn)) void except_##n (word_t srr0 , word_t srr1 , except_regs_t *frame , ## params )
+
+/* return_except() short circuits the C code return path.
+ * We declare the exception handlers as noreturn, to avoid
+ * the C prolog (which redundantly spills registers which the assembler
+ * path already spills).
+ */
+#define return_except()			\
+do {					\
+    asm volatile (			\
+	    "mtlr %0 ;"			\
+	    "mr %%r1, %1 ;"		\
+	    "blr ;"			\
+	    :				\
+	    : "r" (__builtin_return_address(0)), \
+	      "b" (__builtin_frame_address(1)) \
+	    );				\
+    while(1);				\
+} while(0)
+
 
 #endif /* __GLUE__V4_POWERPC__SYSCALLS_H__ */

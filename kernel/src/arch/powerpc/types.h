@@ -1,9 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/types.h
- * Description:	Fundamental 32-bit PowerPC types.
+ * File path:     src/arch/powerpc/types.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: types.h,v 1.7 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__TYPES_H__
 #define __ARCH__POWERPC__TYPES_H__
@@ -52,6 +53,13 @@ typedef signed char		s8_t;
  *	word_t - machine word wide unsigned int
  */
 typedef u32_t			word_t;
+
+#ifdef CONFIG_PLAT_PPC44X
+/* 440 supports 36 bit addressing */
+typedef u64_t			paddr_t;
+#else
+typedef u32_t			paddr_t;
+#endif
 
 
 /**
@@ -80,6 +88,28 @@ INLINE void sync( void )
 INLINE void isync( void )
 {
     asm volatile ("isync");
+}
+
+#ifdef CONFIG_PPC_BOOKE
+INLINE void mbar( void )
+{
+    asm volatile ("mbar");
+}
+
+INLINE void msync( void )
+{
+    asm volatile ("msync");
+}
+
+INLINE void eieio( void )
+{
+    asm volatile ("eieio");
+}
+#endif
+
+INLINE int lsb(word_t mask)
+{
+    return (sizeof(word_t)*8) - 1 - count_leading_zeros(mask & -mask);
 }
 
 #endif /* !__ARCH__POWERPC__TYPES_H__ */

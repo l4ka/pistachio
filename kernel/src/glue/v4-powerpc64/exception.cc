@@ -261,7 +261,7 @@ extern "C" void dsi_handler( word_t dar, word_t dsisr, powerpc64_irq_context_t *
 	{
 	    enter_kdebug( "Page table needs to be fixed for copy area" );
 	    // Resolve the fault using the partner's address space!
-	    tcb_t *partner = space->get_tcb( tcb->get_partner() );
+	    tcb_t *partner = tcb_t::get_tcb( tcb->get_partner() );
 	    if( partner )
 	    {
 		addr_t real_fault = tcb->copy_area_real_address( (addr_t)dar );

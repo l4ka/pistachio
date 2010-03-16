@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2010,  Karlsruhe University
  *                
  * File path:     kickstart.cc
  * Description:   

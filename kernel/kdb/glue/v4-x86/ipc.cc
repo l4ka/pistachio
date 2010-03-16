@@ -159,7 +159,7 @@ void tcb_t::dump_ctrlxfer_state(bool extended)
 void arch_hvm_ktcb_t::dump_hvm ()
 {
     printf("\nvcpu state: %x\n\t", this);
-    tcb_t *tcb = get_tcb();
+    tcb_t *tcb = addr_to_tcb(this);
     
     // Check if this really is a VCPU.
     if (!load_vmcs())
@@ -239,7 +239,7 @@ void arch_hvm_ktcb_t::dump_hvm ()
 		       ent->x.d.sel,
 		       ent->x.d.offset_low | (ent->x.d.offset_high << 16),
 		       ent->x.d.dpl,
-		       ((char*[]){0,0,0,0,0,0,"INT ","TRAP"})[ent->x.d.type],
+		       ((const char*[]){0,0,0,0,0,0,"INT ","TRAP"})[ent->x.d.type],
 		       ent->x.raw[0], ent->x.raw[1]);
 	}
 	else 

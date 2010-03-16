@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/resources.cc
- * Description:   thread resource management
+ * File path:     src/glue/v4-powerpc/resources.cc
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,11 +27,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: resources.cc,v 1.9 2003/11/01 13:40:08 joshua Exp $
+ * $Id$
  *                
  ********************************************************************/
 
 #include INC_API(tcb.h)
+#include INC_GLUE(memcfg.h)
+#include INC_ARCH(ibm450.h)
 
 // TODO: ensure that this is initialized to NULL for each cpu, perhaps via 
 // ctors.
@@ -52,22 +55,61 @@ INLINE void thread_resources_t::activate_fpu( tcb_t *tcb )
     regs->srr1_flags = MSR_SET( regs->srr1_flags, MSR_FP );
 }
 
+void thread_resources_t::reown_fpu( tcb_t *tcb, tcb_t *new_owner )
+{
+    deactivate_fpu(tcb);
+    new_owner->resources.activate_fpu(new_owner);
+}
+
+#ifdef CONFIG_X_PPC_SOFTHVM
+#include INC_ARCH(softhvm.h)
+INLINE void thread_resources_t::enable_hvm_mode(tcb_t *tcb)
+{
+    //TRACEF("Enable HVM mode (%p)\n", tcb);
+    ppc_set_spr(SPR_IVPR, ((word_t)memcfg_start_except() & 0xffff0000) + EXCEPT_HVM_OFFSET);
+    ppc_set_pid(tcb->get_arch()->vm->get_pid_for_msr());
+    tcb->get_arch()->vm->load_guest_sprs();
+}
+
+INLINE void thread_resources_t::disable_hvm_mode(tcb_t *tcb)
+{
+    //TRACEF("Disable HVM mode (%p)\n", get_current_tcb());
+    ppc_set_spr(SPR_IVPR, (word_t)memcfg_start_except() & 0xffff0000);
+}
+#endif
+
 void thread_resources_t::dump (tcb_t * tcb)
 {
+    if (tcb->resource_bits.have_resource(COPY_AREA))
+	printf("copy ");
+    if (tcb->resource_bits.have_resource(KERNEL_IPC))
+	printf("kipc ");
+    if (tcb->resource_bits.have_resource(KERNEL_THREAD))
+	printf("kthread ");
+    if (tcb->resource_bits.have_resource(FPU))
+	printf("fpu ");
+    if (tcb->resource_bits.have_resource(SOFTHVM))
+	printf("hvm ");
 }
 
 void thread_resources_t::save( tcb_t *tcb )
 {
+    if (tcb->resource_bits.have_resource(COPY_AREA))
+	flush_copy_area(tcb);
+#ifdef CONFIG_X_PPC_SOFTHVM
+    if (tcb->resource_bits.have_resource(SOFTHVM))
+	disable_hvm_mode( tcb );
+#endif
 }
 
 void thread_resources_t::load( tcb_t *tcb )
 {
-    if( EXPECT_TRUE(tcb->resource_bits == 0) )
-	return;
-
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&tcb->resource_bits;
-    if( bits->copy_area_enabled() )
-	this->enable_copy_area( tcb );
+    if (tcb->resource_bits.have_resource(COPY_AREA))
+	enable_copy_area( tcb );
+#ifdef CONFIG_X_PPC_SOFTHVM
+    if (tcb->resource_bits.have_resource(SOFTHVM))
+	enable_hvm_mode( tcb );
+#endif
 }
 
 void thread_resources_t::purge( tcb_t *tcb )
@@ -78,8 +120,8 @@ void thread_resources_t::purge( tcb_t *tcb )
 
 void thread_resources_t::init( tcb_t *tcb )
 {
-    tcb->resource_bits = 0;
-    this->fpscr = 0;	// TODO: seed with an appropriate value!
+    tcb->resource_bits.init();
+    fpscr = 0;	// TODO: seed with an appropriate value!
 }
 
 void thread_resources_t::free( tcb_t *tcb )
@@ -92,6 +134,45 @@ void thread_resources_t::spill_fpu( tcb_t *tcb )
 {
     // Spill the registers.
     u64_t *start = this->fpu_state;
+#ifdef CONFIG_PLAT_440_BGP
+    ASSERT((reinterpret_cast<word_t>(start) & 0xf) == 0);
+    asm volatile (
+	"stfpdx	  0, 0, %[dest]\n"
+	"stfpdux  1, %[dest], %[offset]\n"
+	"stfpdux  2, %[dest], %[offset]\n"
+	"stfpdux  3, %[dest], %[offset]\n"
+	"stfpdux  4, %[dest], %[offset]\n"
+	"stfpdux  5, %[dest], %[offset]\n"
+	"stfpdux  6, %[dest], %[offset]\n"
+	"stfpdux  7, %[dest], %[offset]\n"
+	"stfpdux  8, %[dest], %[offset]\n"
+	"stfpdux  9, %[dest], %[offset]\n"
+	"stfpdux 10, %[dest], %[offset]\n"
+	"stfpdux 11, %[dest], %[offset]\n"
+	"stfpdux 12, %[dest], %[offset]\n"
+	"stfpdux 13, %[dest], %[offset]\n"
+	"stfpdux 14, %[dest], %[offset]\n"
+	"stfpdux 15, %[dest], %[offset]\n"
+	"stfpdux 16, %[dest], %[offset]\n"
+	"stfpdux 17, %[dest], %[offset]\n"
+	"stfpdux 18, %[dest], %[offset]\n"
+	"stfpdux 19, %[dest], %[offset]\n"
+	"stfpdux 20, %[dest], %[offset]\n"
+	"stfpdux 21, %[dest], %[offset]\n"
+	"stfpdux 22, %[dest], %[offset]\n"
+	"stfpdux 23, %[dest], %[offset]\n"
+	"stfpdux 24, %[dest], %[offset]\n"
+	"stfpdux 25, %[dest], %[offset]\n"
+	"stfpdux 26, %[dest], %[offset]\n"
+	"stfpdux 27, %[dest], %[offset]\n"
+	"stfpdux 28, %[dest], %[offset]\n"
+	"stfpdux 29, %[dest], %[offset]\n"
+	"stfpdux 30, %[dest], %[offset]\n"
+	"stfpdux 31, %[dest], %[offset]\n"
+	: [dest] "+b" (start)
+	: [offset] "b"(16)
+	);
+#else
     asm volatile (
 	    "stfd %%f0,    0(%0) ;"
 	    "stfd %%f1,    8(%0) ;"
@@ -129,7 +210,7 @@ void thread_resources_t::spill_fpu( tcb_t *tcb )
 	    : /* inputs */
 	      "b" (start)
 	    );
-
+#endif
     /* Spill the fpscr.  Temporarily store it to an 8-byte location,
      * so that we can store it as a double and avoid an fp-double to
      * fp-single conversion.  Then we move it to our 4-byte tcb location.
@@ -165,6 +246,45 @@ void thread_resources_t::restore_fpu( tcb_t *tcb )
 
     // Load the registers.
     u64_t *start = this->fpu_state;
+#ifdef CONFIG_PLAT_440_BGP
+    ASSERT((reinterpret_cast<word_t>(start) & 0xf) == 0);
+    asm volatile (
+	"lfpdx	 0, 0, %[src]\n"
+	"lfpdux  1, %[src], %[offset]\n"
+	"lfpdux  2, %[src], %[offset]\n"
+	"lfpdux  3, %[src], %[offset]\n"
+	"lfpdux  4, %[src], %[offset]\n"
+	"lfpdux  5, %[src], %[offset]\n"
+	"lfpdux  6, %[src], %[offset]\n"
+	"lfpdux  7, %[src], %[offset]\n"
+	"lfpdux  8, %[src], %[offset]\n"
+	"lfpdux  9, %[src], %[offset]\n"
+	"lfpdux 10, %[src], %[offset]\n"
+	"lfpdux 11, %[src], %[offset]\n"
+	"lfpdux 12, %[src], %[offset]\n"
+	"lfpdux 13, %[src], %[offset]\n"
+	"lfpdux 14, %[src], %[offset]\n"
+	"lfpdux 15, %[src], %[offset]\n"
+	"lfpdux 16, %[src], %[offset]\n"
+	"lfpdux 17, %[src], %[offset]\n"
+	"lfpdux 18, %[src], %[offset]\n"
+	"lfpdux 19, %[src], %[offset]\n"
+	"lfpdux 20, %[src], %[offset]\n"
+	"lfpdux 21, %[src], %[offset]\n"
+	"lfpdux 22, %[src], %[offset]\n"
+	"lfpdux 23, %[src], %[offset]\n"
+	"lfpdux 24, %[src], %[offset]\n"
+	"lfpdux 25, %[src], %[offset]\n"
+	"lfpdux 26, %[src], %[offset]\n"
+	"lfpdux 27, %[src], %[offset]\n"
+	"lfpdux 28, %[src], %[offset]\n"
+	"lfpdux 29, %[src], %[offset]\n"
+	"lfpdux 30, %[src], %[offset]\n"
+	"lfpdux 31, %[src], %[offset]\n"
+	: [src] "+b" (start)
+	: [offset] "b"(16)
+	);
+#else
     asm volatile (
 	    "lfd %%f0,    0(%0) ;"
 	    "lfd %%f1,    8(%0) ;"
@@ -202,7 +322,7 @@ void thread_resources_t::restore_fpu( tcb_t *tcb )
 	    : /* inputs */
 	      "b" (start)
 	    );
-
+#endif
     this->activate_fpu( tcb );
 }
 

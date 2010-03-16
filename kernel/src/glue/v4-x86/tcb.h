@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/tcb.h
  * Description:   
@@ -29,17 +29,6 @@ tcb_t * get_idle_tcb();
  *            generic tcb functions
  *
  **********************************************************************/
-
-
-INLINE void tcb_t::allocate()
-{
-    __asm__ __volatile__(
-	"or $0, %0\n"
-	: 
-	: "m"(*this));
-
-}
-
 INLINE word_t * tcb_t::get_stack_top()
 {
     return (word_t*)addr_offset(this, KTCB_SIZE);
@@ -245,11 +234,6 @@ INLINE cpuid_t get_current_cpu()
     return current_cpu;
 }
 #endif
-
-INLINE tcb_t * addr_to_tcb (addr_t addr)
-{
-    return (tcb_t *) ((word_t) addr & KTCB_MASK);
-}
 
 
 

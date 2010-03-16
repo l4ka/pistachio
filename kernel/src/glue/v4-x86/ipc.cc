@@ -130,6 +130,7 @@ const word_t *const ctrlxfer_item_t::hwregs[] =
 
 #if defined(CONFIG_X_X86_HVM)
 EXTERN_TRACEPOINT(X86_HVM_EXIT);
+
 void arch_hvm_ktcb_t::send_hvm_fault (word_t fault_id, word_t qual, word_t ilen, word_t ia_info, bool internal)
 {
     tcb_t *tcb;
@@ -139,7 +140,7 @@ void arch_hvm_ktcb_t::send_hvm_fault (word_t fault_id, word_t qual, word_t ilen,
     
     TRACEPOINT (X86_HVM_EXIT, "x86-hvm: hvm fault id %d qual %d ilen %d",  fault_id, qual, ilen);
 
-    tcb = get_tcb ();
+    tcb = addr_to_tcb(this);
     tag = x86_hvm_fault_tag(fault_id, internal);
     to   = tcb->get_pager();
     from = to;

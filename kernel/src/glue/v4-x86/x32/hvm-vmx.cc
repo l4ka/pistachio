@@ -88,7 +88,7 @@ extern word_t x86_kdb_last_ip;
 
 void x32_hvm_vmx_t::init_vmcs ()
 {
-    tcb_t         *tcb   = get_tcb ();
+    tcb_t         *tcb   = addr_to_tcb(this);
     space_t       *space = tcb->get_space ();
     vmcs_hsarea_t *hs    = &(vmcs->hs);
     vmcs_gsarea_t *gs    = &(vmcs->gs);
@@ -226,7 +226,7 @@ void x32_hvm_vmx_t::restore_guest_drs()
 	}
 	
 	x86_kdb_last_ip = vmcs->read_register (VMCS_IDX_G_CS_BASE) + 
-	    get_user_frame(get_tcb())->regs[x86_exceptionframe_t::ipreg];
+	    get_user_frame(addr_to_tcb(this))->regs[x86_exceptionframe_t::ipreg];
 
     }
 
@@ -309,7 +309,7 @@ INLINE bool x32_hvm_vmx_t::handle_debug_exit (vmcs_ei_qual_t qual)
 	    word_t dbg_ctl = GET64_VMCS_LOW(gs.dbg_ctl);
 	    SET64_VMCS_LOW(gs.dbg_ctl, dbg_ctl & ~0x3);
 	    X86_SET_DR(6, qual.raw);
-	    do_enter_kdebug(get_user_frame(get_tcb()), X86_EXC_DEBUG);
+	    do_enter_kdebug(get_user_frame(addr_to_tcb(this)), X86_EXC_DEBUG);
 	    return true;
 	}
     
@@ -324,14 +324,14 @@ INLINE bool x32_hvm_vmx_t::handle_debug_exit (vmcs_ei_qual_t qual)
 	    ASSERT(as.state != vmcs_gs_as_t::hlt);
 	    
 	    X86_SET_DR(6, qual.raw);
-	    do_enter_kdebug(get_user_frame(get_tcb()), X86_EXC_DEBUG);
+	    do_enter_kdebug(get_user_frame(addr_to_tcb(this)), X86_EXC_DEBUG);
 	    return true;
 	}
     }
     if (qual.dbg.bx)
     {
 	X86_SET_DR(6, qual.raw);
-	do_enter_kdebug(get_user_frame(get_tcb()), X86_EXC_DEBUG);
+	do_enter_kdebug(get_user_frame(addr_to_tcb(this)), X86_EXC_DEBUG);
 	return true;
     }
     
@@ -358,7 +358,7 @@ INLINE bool x32_hvm_vmx_t::handle_nomath_exit()
 	return false;
 	
     ASSERT(x86_cr0_read() & X86_CR0_TS);
-    tcb_t *tcb = get_tcb ();
+    tcb_t *tcb = addr_to_tcb (this);
     tcb->resources.x86_no_math_exception (tcb);
     return true;
 }
@@ -398,7 +398,7 @@ bool arch_hvm_ktcb_t::enable_hvm ()
 	return false;
 
 
-    tcb_t   *tcb   = get_tcb();
+    tcb_t   *tcb   = addr_to_tcb(this);
     space_t *space = tcb->get_space ();
     ASSERT (space);
 
@@ -1228,7 +1228,7 @@ word_t saved_rfl;
 
 void arch_hvm_ktcb_t::resume_hvm ()
 {
-    tcb_t *tcb		= get_tcb ();
+    tcb_t *tcb		= addr_to_tcb(this);
     x86_exceptionframe_t *frame	= get_user_frame(tcb);
     
     ASSERT(hvm_enabled);
@@ -1297,7 +1297,7 @@ void arch_hvm_ktcb_t::resume_hvm ()
 
 INLINE void arch_hvm_ktcb_t::handle_hvm_exit ()
 {
-    tcb_t *tcb	= get_tcb ();
+    tcb_t *tcb	= addr_to_tcb(this);
     vmcs_ei_reason_t reason = vmcs->exitinfo.reason;
     vmcs_ei_reason_t::basic_reason_e basic_reason = reason.basic_reason;
     vmcs_ei_qual_t qual = vmcs->exitinfo.qual;
@@ -1478,7 +1478,7 @@ INLINE void arch_hvm_ktcb_t::handle_hvm_exit ()
 
 NORETURN void arch_hvm_ktcb_t::enter_hvm_loop ()
 {
-    tcb_t *tcb = get_tcb ();
+    tcb_t *tcb = addr_to_tcb(this);
     msg_tag_t msgtag = tcb->get_tag();
     if(msgtag.get_untyped())
 	printf("Received untyped items in startup reply\n");

@@ -34,11 +34,10 @@
 #endif
 
 EXTERN_KMEM_GROUP  (kmem_space);
+EXTERN_KMEM_GROUP (kmem_tcb);
 DECLARE_KMEM_GROUP (kmem_iofp);
-DECLARE_KMEM_GROUP (kmem_tcb);
 DECLARE_KMEM_GROUP (kmem_utcb);
 
-tcb_t * dummy_tcb = NULL;
 space_t * kernel_space = NULL;
 addr_t utcb_page = NULL;
 cpuid_t	current_cpu UNIT("x86.cpulocal");;
@@ -97,6 +96,7 @@ void space_t::init (fpage_t utcb_area, fpage_t kip_area)
 
 void space_t::allocate_tcb(addr_t addr)
 {
+#if !defined(CONFIG_STATIC_TCBS)
     addr_t page = kmem.alloc(kmem_tcb, X86_PAGE_SIZE);
     ASSERT(page);
     //TRACEF("tcb=%p, page=%p\n", addr, page);
@@ -107,6 +107,7 @@ void space_t::allocate_tcb(addr_t addr)
     
     flush_tlbent (this, addr, page_shift (PGSIZE_KTCB));
     sync_kernel_space(addr);
+#endif
 }
 
 /* 
@@ -118,7 +119,6 @@ void space_t::allocate_tcb(addr_t addr)
 
 utcb_t * space_t::allocate_utcb(tcb_t * tcb)
 {
-
     ASSERT(tcb);
     
     addr_t utcb = (addr_t)tcb->get_utcb_location();
@@ -298,17 +298,6 @@ void space_t::release_kernel_mapping (addr_t vaddr, addr_t paddr,
 }
 
 
-static tcb_t * get_dummy_tcb()
-{
-    if (!dummy_tcb)
-    {
-	dummy_tcb = (tcb_t*)kmem.alloc(kmem_tcb, page_size(PGSIZE_KTCB));
-	ASSERT(dummy_tcb);
-	dummy_tcb = virt_to_phys(dummy_tcb);
-    }
-    return dummy_tcb;
-}
-
 /**
  * Install a dummy TCB
  * @param addr	address where the dummy TCB should be installed
@@ -317,12 +306,13 @@ static tcb_t * get_dummy_tcb()
  */
 void space_t::map_dummy_tcb(addr_t addr)
 {
-    //TRACEF("%p cpu %d\n", addr, get_current_cpu());
-    get_kernel_space()->add_mapping(addr, (addr_t)get_dummy_tcb(), PGSIZE_KTCB, 
-				    false, true, false);
-
+#if !defined(CONFIG_STATIC_TCBS)
+    get_kernel_space()->add_mapping(addr, (addr_t)virt_to_phys(get_dummy_tcb()), PGSIZE_KTCB, 
+                                    false, true, false);
+    
     flush_tlbent (this, addr, page_shift (PGSIZE_KTCB));
     sync_kernel_space(addr);
+#endif
 }
 
 

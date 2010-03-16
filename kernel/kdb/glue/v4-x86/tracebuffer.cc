@@ -165,7 +165,7 @@ private:
 	{
 	    tcb_t *rtcb = t->is_kernel_event() 
 		? addr_to_tcb((addr_t) t->thread)
-		: get_current_space()->get_tcb(threadid (t->thread));
+		: tcb_t::get_tcb(threadid (t->thread));
 
 	    if (tcb[0] == NULL || (tcb[0] == rtcb))
 		return true;
@@ -436,7 +436,7 @@ public:
 		else
 		{
 		    tid = threadid (rec->thread);
-		    tcb = space->get_tcb (tid);
+		    tcb = tcb_t::get_tcb (tid);
 		    printf ("%6d %01d %04x %c %4d %wt ", index, rec->cpu, rec->get_type(), 
 			    rec->is_kernel_event () ? 'k' : 'u', rec->id, tid.get_raw ());
 

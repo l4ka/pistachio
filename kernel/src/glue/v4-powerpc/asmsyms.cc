@@ -1,11 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002-2003, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/asmsyms.cc
- * Description:	Various C++ constants converted into assembler compatible 
- * 		symbols.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/glue/v4-powerpc/asmsyms.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -26,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: asmsyms.cc,v 1.5 2004/06/03 15:02:51 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <mkasmsym.h>
 
@@ -44,12 +44,6 @@ MKASMSYM( OFS_TSWITCH_FRAME_IP, offsetof(tswitch_frame_t, ip) );
 MKASMSYM( OFS_TSWITCH_FRAME_R30, offsetof(tswitch_frame_t, r30) );
 MKASMSYM( OFS_TSWITCH_FRAME_R31, offsetof(tswitch_frame_t, r31) );
 MKASMSYM( TSWITCH_FRAME_SIZE, sizeof(tswitch_frame_t) );
-
-extern utcb_t *UTCB;
-MKASMSYM( OFS_UTCB_MR, (((word_t) &UTCB->mr[0]) - ((word_t) UTCB)));
-MKASMSYM( OFS_UTCB_EXCEPTION_HANDLER, (((word_t) &UTCB->exception_handler) - ((word_t) UTCB)));
-MKASMSYM( OFS_UTCB_MY_GLOBAL_ID, (((word_t) &UTCB->my_global_id) - ((word_t) UTCB)));
-MKASMSYM( OFS_UTCB_PROCESSOR_NO, (((word_t) &UTCB->processor_no) - ((word_t) UTCB)));
 
 MKASMSYM( PROCDESC_SIZE, sizeof(procdesc_t) );
 MKASMSYM( OFS_PROCDESC_INTERNAL_FREQ, offsetof(procdesc_t, internal_freq) );

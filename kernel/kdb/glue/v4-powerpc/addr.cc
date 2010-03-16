@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/addr.cc
- * Description:	Dump address space layout info.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     kdb/glue/v4-powerpc/addr.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: addr.cc,v 1.3 2003/11/17 13:56:51 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kdb/kdb.h>
@@ -45,15 +46,19 @@ CMD(cmd_addr_space, cg)
 	    KERNEL_AREA_START, KERNEL_AREA_END );
     printf( "             kernel offset: 0x%08x\n", KERNEL_OFFSET );
 
+#ifdef CONFIG_DYNAMIC_TCBS
     printf( "ktcb area:   0x%p --> 0x%p\n", 
 	KTCB_AREA_START, KTCB_AREA_END );
     printf( "             ktcb size:  %d\n", KTCB_SIZE );
     printf( "             total ktcb: %d\n", 1 << L4_GLOBAL_THREADNO_BITS );
+#endif
 
     printf( "device area: 0x%p --> 0x%p\n",
 	    DEVICE_AREA_START, DEVICE_AREA_END );
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     printf( "pghash area: 0x%p --> 0x%p\n",
 	    PGHASH_AREA_START, PGHASH_AREA_END );
+#endif
     printf( "cpu area:    0x%p --> 0x%p\n",
 	    CPU_AREA_START, CPU_AREA_END );
     printf( "copy area:   0x%p --> 0x%p\n",
@@ -65,14 +70,6 @@ CMD(cmd_addr_space, cg)
     printf( "\nsizeof(space_t): %d\n", sizeof(space_t) );
 
     space_t *space = (space_t *)0;
-    printf( "space_t user offset: 0x%p\n", &space->x.user );
-    printf( "space_t kernel offset: 0x%p\n", &space->x.kernel );
-    printf( "space_t device offset: 0x%p\n", &space->x.device );
-    printf( "space_t phhash offset (where we store space_t members): 0x%p\n", 
-	    &space->x.kip_area );
-    printf( "space_t cpu offset: 0x%p\n", &space->x.cpu );
-    printf( "space_t tcb offset: 0x%p\n", &space->x.tcb );
-
     return CMD_NOQUIT;
 }
 

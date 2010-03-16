@@ -1,11 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/pgent.h
- * Description:	The page table entry.  Compatible with the generic linear
- * 		page table walker.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/glue/v4-powerpc/pgent.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -26,15 +26,14 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: pgent.h,v 1.15 2007/01/14 21:36:19 uhlig Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __GLUE__V4_POWERPC__PGENT_H__
 #define __GLUE__V4_POWERPC__PGENT_H__
 
-#include INC_ARCH(pgtab.h)
 #include INC_ARCH(pghash.h)
 
 class space_t;
@@ -43,7 +42,6 @@ class mapnode_t;
 #define HW_PGSHIFTS		{ 12, 22, 32 }
 #define HW_VALID_PGSIZES	(1 << 12)
 
-#define MDB_BUFLIST_SIZES	{ {12}, {8}, {4096}, {0} }
 #define MDB_PGSHIFTS		{ 12, 22, 32 }
 #define MDB_NUM_PGSIZES		(2)
 

@@ -1,9 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/page.h
- * Description:	PowerPC specific page constants.
+ * File path:     src/arch/powerpc/page.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: page.h,v 1.14 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__PAGE_H__
 #define __ARCH__POWERPC__PAGE_H__
@@ -40,5 +41,21 @@
 #define PPC_PAGEDIR_BITS	22
 #define PPC_PAGEDIR_SIZE	(1 << PPC_PAGEDIR_BITS)
 #define PPC_PAGEDIR_MASK	~(PPC_PAGEDIR_SIZE - 1)
+
+#define PPC_PAGE_GUARDED	(1 << 3)
+#define PPC_PAGE_COHERENT	(1 << 4)
+#define PPC_PAGE_CACHE_INHIBIT	(1 << 5)
+#define PPC_PAGE_WRITE_THRU	(1 << 6)
+#define PPC_PAGE_DIRTY		(1 << 7)
+#define PPC_PAGE_ACCESSED	(1 << 8)
+#define PPC_PAGE_FLAGS_MASK	0x000001fb
+#define PPC_PAGE_PTE_MASK	0xfffff1fb
+#define PPC_PAGE_REFERENCED_MASK	(PPC_PAGE_ACCESSED | PPC_PAGE_DIRTY)
+
+#if defined(CONFIG_SMP)
+#define PPC_PAGE_SMP_SAFE	PPC_PAGE_COHERENT
+#else
+#define PPC_PAGE_SMP_SAFE	0
+#endif
 
 #endif	/* __ARCH__POWERPC__PAGE_H__ */

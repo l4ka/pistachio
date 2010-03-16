@@ -63,7 +63,6 @@ INLINE bool is_privileged_space(space_t * space)
 	    is_sigma1_space(space));
 }
 
-
 INLINE bool space_t::is_mappable(addr_t addr)
 {
     return (is_user_area(addr) && 
@@ -86,6 +85,40 @@ INLINE bool space_t::is_user_area(fpage_t fpage)
 	is_user_area(addr_offset(fpage.get_address(), fpage.get_size()-1));
 }
 
+
+INLINE bool space_t::is_user_area (addr_t addr)
+{
+#if (USER_AREA_START != 0)
+    return (((word_t) sign_extend(addr)) >= USER_AREA_START &&
+	    ((word_t) sign_extend(addr)) < USER_AREA_END);
+#else
+    return (((word_t) sign_extend(addr)) < USER_AREA_END);
+#endif
+    
+}
+
+INLINE bool space_t::is_kernel_area(addr_t addr)
+{
+    return (((word_t)sign_extend(addr)) >= KERNEL_AREA_START &&
+	    ((word_t)sign_extend(addr)) < KERNEL_AREA_END);
+}
+
+INLINE bool space_t::is_tcb_area (addr_t addr)
+{
+#if defined(CONFIG_STATIC_TCBS)
+    return false;
+#else
+    return (((word_t) sign_extend(addr)) >= KTCB_AREA_START &&
+	    ((word_t) sign_extend(addr)) < KTCB_AREA_END);
+#endif
+}
+
+INLINE bool space_t::is_copy_area (addr_t addr)
+{
+    return (((word_t)sign_extend(addr)) >= COPY_AREA_START &&
+	    ((word_t)sign_extend(addr)) < COPY_AREA_END);
+}
+
 INLINE bool space_t::is_initialized()
 {
     return !get_kip_page_area().is_nil_fpage();
@@ -102,6 +135,5 @@ INLINE fpage_t space_t::unmap_fpage (fpage_t fpage, bool flush, bool all)
     fpage.set_rwx (~fpage.get_rwx ());
     return mapctrl (fpage, ctrl, 0, all);
 }
-
 
 #endif /* !__API__V4__SPACE_H__ */

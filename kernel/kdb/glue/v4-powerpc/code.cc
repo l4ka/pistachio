@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002-2003, Karlsruhe University
- *
- * File path:	kdb/glue/v4-powerpc/code.cc
- * Description:	Test out code sequences
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     kdb/glue/v4-powerpc/code.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: code.cc,v 1.2 2003/09/24 19:05:17 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kdb/kdb.h>
@@ -50,11 +51,12 @@ CMD( cmd_tid_to_tcb, cg )
 {
     threadid_t tid;
     tcb_t *tcb;
-    word_t loc;
+    word_t loc = 0;
 
     tid.set_global_id( 5, 1 );
-    tcb = get_kernel_space()->get_tcb( tid );
+    tcb = tcb_t::get_tcb( tid );
 
+#ifdef CONFIG_DYNAMIC_TCBS
     asm volatile (
 	    "rlwinm %0, %1, 32 - (%2 - %3), (%2 - %3), 31 - %3"
 	    :
@@ -63,6 +65,7 @@ CMD( cmd_tid_to_tcb, cg )
 	      "r" (tid.get_raw()), "i" (L4_GLOBAL_VERSION_BITS), "i" (KTCB_BITS)
 	    );
     loc += KTCB_AREA_START;
+#endif
 
     printf( "tid: %x, location: %x, tcb: %x\n", tid.get_raw(), loc, tcb );
 

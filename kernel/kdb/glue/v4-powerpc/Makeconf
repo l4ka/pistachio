@@ -1,9 +1,10 @@
 ######################################################################
 ##                
-## Copyright (C) 2010,  Karlsruhe University
+## Copyright (C) 1999-2010,  Karlsruhe University
+## Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
 ##                
-## File path:     glue/v4-powerpc/Makeconf
-## Description:   Generic linkser script for x86.
+## File path:     kdb/glue/v4-powerpc/Makeconf
+## Description:   
 ##                
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -29,6 +30,9 @@
 ## $Id$
 ##                
 ######################################################################
-SOURCES += $(addprefix kdb/glue/v4-powerpc/, code.cc addr.cc prepost.cc)
+SOURCES += $(addprefix kdb/glue/v4-powerpc/, code.cc addr.cc prepost.cc thread.cc)
 SOURCES += kdb/generic/linear_ptab_dump.cc
 
+ifeq ("$(CONFIG_X_CTRLXFER_MSG)","y")
+SOURCES+=	kdb/glue/v4-powerpc/ipc.cc
+endif

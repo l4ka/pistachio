@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2007,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     glue/v4-powerpc/space.cc
- * Description:   address space management
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,35 +27,28 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: space.cc,v 1.53 2007/01/14 21:36:19 uhlig Exp $
+ * $Id$
  *                
  ********************************************************************/
 
 #include <debug.h>
 #include <kmemory.h>
+#include <generic/lib.h>
 #include <linear_ptab.h>
 #include <kdb/tracepoints.h>
 
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
 
-#include INC_ARCH(page.h)
-#include INC_ARCH(pghash.h)
-#include INC_ARCH(pgtab.h)
-#include INC_ARCH(phys.h)
-
 #include INC_GLUE(space.h)
 #include INC_GLUE(pghash.h)
-#include INC_GLUE(pgent_inline.h)
-
-#include INC_PLAT(ofppc.h)
+#include INC_ARCH(swtlb.h)
 
 DECLARE_TRACEPOINT(hash_miss_cnt);
 DECLARE_TRACEPOINT(hash_insert_cnt);
 DECLARE_TRACEPOINT(ptab_4k_map_cnt);
 
 DECLARE_KMEM_GROUP(kmem_utcb);
-DECLARE_KMEM_GROUP(kmem_tcb);
 EXTERN_KMEM_GROUP(kmem_pgtab);
 EXTERN_KMEM_GROUP(kmem_space);
 
@@ -62,35 +56,71 @@ EXTERN_KMEM_GROUP(kmem_space);
 //#define TRACE_SPACE(x...)	TRACEF(x)
 
 space_t *kernel_space = NULL;
-tcb_t *dummy_tcb = NULL;
 
-static tcb_t * get_dummy_tcb()
+void space_t::allocate_tcb(addr_t addr)
 {
-    if (!dummy_tcb)
+#if !defined(CONFIG_STATIC_TCBS)
+    /* Remove the dummy tcb mapping. We could have a dummy tcb
+     * mapping due to someone sending invalid parameters to system
+     * calls
+     */
+    pgent_t *pgent = kernel_space->page_lookup( addr );
+    if( pgent && pgent->is_valid(this, pgent_t::size_4k) )
+	kernel_space->flush_mapping( addr, pgent_t::size_4k, pgent );
+
+    addr_t page = kmem.alloc( kmem_tcb, POWERPC_PAGE_SIZE );
+    ASSERT(page);
+
+    TRACE_SPACE( "new tcb, kmem virt %p, phys %p, tcb virt %p\n", page, 
+	         virt_to_phys(page), addr);
+    kernel_space->add_mapping( addr, virt_to_phys(page), pgent_t::size_4k, true, true);
+
+    sync_kernel_space( addr );
+#endif
+}
+
+void space_t::map_dummy_tcb(addr_t addr)
+{
+#if !defined(CONFIG_STATIC_TCBS)
+    add_mapping( addr, (addr_t)virt_to_phys(get_dummy_tcb()), pgent_t::size_4k, false, true );
+#endif
+}
+
+void space_t::add_mapping( addr_t vaddr, paddr_t paddr, pgent_t::pgsize_e size, 
+			   bool writable, bool kernel, word_t attrib )
+{
+    pgent_t * pg = this->pgent (page_table_index (pgent_t::size_max, vaddr), 0);
+    pgent_t::pgsize_e pgsize = pgent_t::size_max;
+
+    ASSERT(is_page_size_valid(size));
+
+    /* Lookup mapping */
+    while (pgsize > size)
     {
-	dummy_tcb = (tcb_t*)kmem.alloc( kmem_tcb, POWERPC_PAGE_SIZE );
-	ASSERT(dummy_tcb);
-	dummy_tcb = virt_to_phys(dummy_tcb);
+	if (!pg->is_valid (this, pgsize))
+	    pg->make_subtree (this, pgsize, kernel);
+	else
+	{
+	    ASSERT(pg->is_subtree(this, pgsize) );
+	}
+
+	pg = pg->subtree (this, pgsize)->next
+	    (this, pgsize-1, page_table_index (pgsize-1, vaddr));
+	pgsize--;
     }
-    return dummy_tcb;
+
+    /* Modify page table */
+    pg->set_entry( this, pgsize, paddr, writable ? 7 : 5, attrib, kernel);
+
+#ifdef CONFIG_PPC_MMU_SEGMENT
+    ASSERT(pgsize == pgent_t::size_4k);
+    get_pghash()->insert_4k_mapping( this, vaddr, pgent);
+#endif
 }
 
-bool space_t::handle_hash_miss( addr_t vaddr )
-{
-    TRACEPOINT(hash_miss_cnt, "hash_miss_cnt");
-
-    pgent_t *pgent = this->page_lookup( vaddr );
-    if( !pgent || !pgent->is_valid(this, pgent_t::size_4k) )
-	return false;
-
-    TRACEPOINT(hash_insert_cnt, "hash_insert_cnt");
-
-    get_pghash()->insert_4k_mapping( this, vaddr, pgent );
-    return true;
-}
-
-void space_t::add_4k_mapping( addr_t vaddr, addr_t paddr, 
-	bool writable, bool kernel, bool cacheable )
+#if 0
+void space_t::add_4k_mapping( addr_t vaddr, paddr_t paddr, 
+	bool writable, bool kernel, word_t attrib )
 {
     pgent_t *pgent = this->pgent( page_table_index(pgent_t::size_4m, vaddr) );
     if( !pgent->is_valid(this, pgent_t::size_4m))
@@ -100,14 +130,20 @@ void space_t::add_4k_mapping( addr_t vaddr, addr_t paddr,
 	    pgent_t::size_4k, page_table_index(pgent_t::size_4k, vaddr) );
 
     pgent->set_entry( this, pgent_t::size_4k, paddr, writable ? 7 : 5, 
-		      cacheable, kernel);
+		      attrib, kernel);
 
+#ifdef CONFIG_PPC_MMU_SEGMENT
     get_pghash()->insert_4k_mapping( this, vaddr, pgent);
+#endif
 }
+#endif
 
-void space_t::flush_4k_mapping( addr_t vaddr, pgent_t *pgent )
+void space_t::flush_mapping( addr_t vaddr, pgent_t::pgsize_e pgsize, pgent_t *pgent )
 {
+#ifdef CONFIG_PPC_MMU_SEGMENT
+    ASSERT(pgsize == pgent_t::size_4k);
     get_pghash()->flush_4k_mapping( this, vaddr, pgent );
+#endif
     ppc_invalidate_tlbe( vaddr );
 }
 
@@ -124,6 +160,22 @@ pgent_t * space_t::page_lookup( addr_t vaddr )
 }
 
 /**********************************************************************
+ *                               Allocation
+ **********************************************************************/
+
+space_t * space_t::allocate_space() 
+{
+    space_t * space = (space_t*)kmem.alloc(kmem_space, sizeof(space_t));
+    ASSERT(space);
+    return space;
+}
+
+void space_t::free_space(space_t *space) 
+{
+    kmem.free(kmem_space, (addr_t)space, sizeof(space_t));
+}
+
+/**********************************************************************
  *
  *                         System initialization 
  *
@@ -133,61 +185,13 @@ pgent_t * space_t::page_lookup( addr_t vaddr )
 # error invalid kernel page size - please adapt
 #endif
 
-void SECTION(".init.memory") init_kernel_space()
+void SECTION(".init.memory") space_t::init_kernel_space()
 {
-    ASSERT(!kernel_space);
-
-    ASSERT(sizeof(space_t) <= POWERPC_PAGE_SIZE);
-    kernel_space = (space_t *)kmem.alloc( kmem_space, sizeof(space_t) );
-    ASSERT(kernel_space);
-
-    TRACE_SPACE( "allocated space of size %x @ %p\n",
-	         sizeof(space_t), kernel_space);
-
-    ASSERT(!dummy_tcb);
-
+    kernel_space = space_t::allocate_space();
     kernel_space->init_kernel_mappings();
 }
 
-void SECTION(".init.memory") space_t::init_kernel_mappings()
-{
-#if !defined(CONFIG_PPC_BAT_SYSCALLS)
-    mem_region_t syscall_region;
-
-    /* Figure out the range of the syscall code to be mapped into the user
-     * space.
-     */
-    syscall_region.low = addr_align( (addr_t)ofppc_syscall_start(), 
-	    POWERPC_PAGE_SIZE );
-    syscall_region.high = addr_align_up( (addr_t)ofppc_syscall_end(), 
-	    POWERPC_PAGE_SIZE );
-
-    /* Create mappings for the system calls, so user space can access them
-     * (after a sync_kernel_space()).
-     */
-    addr_t page = syscall_region.low;
-    while( page < syscall_region.high ) 
-    {
-	add_4k_mapping( page, virt_to_phys(page), false, true, true );
-	page = addr_offset( page, POWERPC_PAGE_SIZE );
-    }
-#endif
-
-    /* Create user-visible mappings for the KIP, so that the SystemClock 
-     * system-call can read the processor speed from user-level.  This 
-     * mapping obviously is not intended to be directly accessed by 
-     * applications.
-     */
-    for( addr_t page = get_kip(); 
-	    page != ofppc_kip_end();
-	    page = addr_offset(page, POWERPC_PAGE_SIZE) )
-    {
-	add_4k_mapping( page, virt_to_phys(page), false, true, true );
-    }
-}
-
-SECTION(".init.memory") addr_t space_t::map_device( addr_t paddr, word_t size, 
-	bool cacheable )
+addr_t space_t::map_device( paddr_t paddr, word_t size, word_t attrib)
 {
     addr_t start_addr = (addr_t)(DEVICE_AREA_START + DEVICE_AREA_BAT_SIZE);
 
@@ -237,8 +241,8 @@ found:
 
     for( word_t page = 0; page < size; page += POWERPC_PAGE_SIZE ) 
     {
-	this->add_4k_mapping( addr_offset(start_addr, page),
-		addr_offset(paddr, page), true, true, cacheable );
+	this->add_mapping( addr_offset(start_addr, page),
+		paddr + page, pgent_t::size_4k, true, true, attrib );
     }
 
     return start_addr;
@@ -250,72 +254,6 @@ found:
  *
  **********************************************************************/
 
-bool space_t::sync_kernel_space(addr_t addr)
-{
-    if( this == kernel_space )
-	return false;
-
-    word_t pdir_idx = page_table_index( pgent_t::size_4m, addr );
-    pgent_t *our_pgent = this->pgent( pdir_idx );
-    pgent_t *kernel_pgent = get_kernel_space()->pgent( pdir_idx );
-
-    /* If the target space already has a page entry for this address,
-     * or if it is an invalid kernel page description, then
-     * return false.
-     */
-    if( our_pgent->is_valid(this, pgent_t::size_4m) || 
-	    !kernel_pgent->is_valid(get_kernel_space(), pgent_t::size_4m) )
-	return false;
-
-    /* Copy the kernel mapping to the target space.
-     */
-    our_pgent->raw = kernel_pgent->raw;
-    return true;
-}
-
-/**
- * space_t::init initializes the space_t
- *
- * maps the kernel area and initializes shadow ptabs etc.
- */
-void space_t::init(fpage_t utcb_area, fpage_t kip_area)
-{
-    /* Copy the kernel area's page directory into the user's page directory.
-     * This is an optimization.  It could be done lazily instead.
-     * TODO: how much should we precopy?  (this also preloads the page hash).
-     */
-    addr_t addr = (addr_t)KTCB_AREA_START;
-    while( addr < (addr_t)KTCB_AREA_END ) {
-	this->sync_kernel_space( addr );
-	addr = addr_offset( addr, PPC_PAGEDIR_SIZE );
-    }
-
-    this->x.utcb_area = utcb_area;
-    this->x.kip_area = kip_area;
-    this->add_4k_mapping( kip_area.get_base(), virt_to_phys(get_kip()), 
-	    false, false );
-}
-
-void space_t::allocate_tcb(addr_t addr)
-{
-    /* Remove the dummy tcb mapping. We could have a dummy tcb
-     * mapping due to someone sending invalid parameters to system
-     * calls
-     */
-    pgent_t *pgent = kernel_space->page_lookup( addr );
-    if( pgent && pgent->is_valid(this, pgent_t::size_4k) )
-	kernel_space->flush_4k_mapping( addr, pgent );
-
-    addr_t page = kmem.alloc( kmem_tcb, POWERPC_PAGE_SIZE );
-    ASSERT(page);
-
-    TRACE_SPACE( "new tcb, kmem virt %p, phys %p, tcb virt %p\n", page, 
-	         virt_to_phys(page), addr);
-//    pgent = kernel_space->add_4k_mapping( pgent, addr, virt_to_phys(page), space_t::tcb );
-    kernel_space->add_4k_mapping( addr, virt_to_phys(page), true, true);
-
-    sync_kernel_space( addr );
-}
 
 void space_t::release_kernel_mapping (addr_t vaddr, addr_t paddr,
 				      word_t log2size)
@@ -344,16 +282,10 @@ utcb_t *space_t::allocate_utcb( tcb_t *tcb )
 	    WARNING( "out of memory!\n" );
 	    return NULL;
 	}
-	add_4k_mapping( utcb, virt_to_phys(page), true, false );
+	add_mapping( utcb, (paddr_t)virt_to_phys(page), pgent_t::size_4k, true, false );
     }
 
     return (utcb_t *)addr_offset( page, (word_t)utcb & ~POWERPC_PAGE_MASK );
-}
-
-void space_t::map_dummy_tcb(addr_t addr)
-{
-//    add_4k_mapping( NULL, addr, (addr_t)get_dummy_tcb(), space_t::dummytcb );
-    add_4k_mapping( addr, (addr_t)get_dummy_tcb(), false, true );
 }
 
 void space_t::map_sigma0(addr_t addr)
@@ -366,7 +298,21 @@ void space_t::map_sigma0(addr_t addr)
 	     || (addr >= get_kip()->reserved_mem1.high)) 
 	    );
 
-//    add_4k_mapping( NULL, addr, addr, space_t::sigma0 );
-    add_4k_mapping( addr, addr, true, false );
+    add_mapping( addr, (paddr_t)addr, pgent_t::size_4k, true, false );
 }
 
+word_t space_t::space_control (word_t ctrl)
+{
+    word_t oldctrl = 0;
+#ifdef CONFIG_X_PPC_SOFTHVM
+    oldctrl |= this->hvm_mode ? 1 : 0;
+
+    /* XXX: HVM mode can only be changed when space is uninitialized */
+    if ((ctrl & 1) && !this->hvm_mode) 
+    {
+	TRACEF("Enabling HVM mode\n");
+	this->hvm_mode = true;
+    }
+#endif
+    return oldctrl;
+}

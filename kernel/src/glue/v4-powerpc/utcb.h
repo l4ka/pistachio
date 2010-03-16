@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2006,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/utcb.h
- * Description:   UTCB for PowerPC
+ * File path:     src/glue/v4-powerpc/utcb.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: utcb.h,v 1.16 2006/10/20 16:30:46 reichelt Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __GLUE__V4_POWERPC__UTCB_H__
@@ -38,6 +39,8 @@
 class utcb_t
 {
 public:
+    /* do not delete this TCB_START_MARKER */
+
     word_t		padding0[16];		/* -256 .. -196	*/
     word_t		br[IPC_NUM_BR];		/* -192 .. -64	*/
     threadid_t		my_global_id;		/* -60		*/
@@ -56,6 +59,8 @@ public:
     word_t		thread_word0;		/* -16		*/
     word_t		reserved1[3];		/* -12 .. -4	*/
     word_t		mr[IPC_NUM_MR];		/* 0 .. 252	*/
+
+   /* do not delete this TCB_END_MARKER */
 
 public:
     void set_my_global_id(threadid_t tid);

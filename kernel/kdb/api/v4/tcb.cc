@@ -343,12 +343,12 @@ tcb_t SECTION(SEC_KDEBUG) * kdb_get_tcb()
     if (val == ABORT_MAGIC)
 	return NULL;
 
-    if (!space->is_tcb_area((addr_t)val) &&
+    if (!tcb_t::is_tcb((addr_t)val) &&
 	(val != (word_t)get_idle_tcb()))
     {
 	threadid_t tid;
 	tid.set_raw(val);
-	val = (word_t)space->get_tcb(tid);
+	val = (word_t)tcb_t::get_tcb(tid);
     }
     return (tcb_t*) addr_to_tcb ((addr_t) val);
 

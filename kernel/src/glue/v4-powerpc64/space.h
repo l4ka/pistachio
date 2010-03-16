@@ -89,23 +89,21 @@ public:
     void map_dummy_tcb(addr_t addr);				// glue
     utcb_t * allocate_utcb(tcb_t * tcb);
 
-    tcb_t * get_tcb(threadid_t tid);
-    tcb_t * get_tcb(void * ptr);
-
     /* address ranges */
-    inline bool is_user_area(addr_t addr);
-    bool is_user_area(fpage_t fpage);
-    bool is_tcb_area(addr_t addr);
-    static inline bool is_kernel_area(addr_t addr);
-    bool is_cpu_area(addr_t addr);
+    static bool is_user_area(addr_t addr);
+    static bool is_user_area(fpage_t fpage);
+    static bool is_kernel_area(addr_t addr);
+    static bool is_tcb_area(addr_t addr);
+    static  bool is_copy_area (addr_t addr);
 
     bool is_mappable(addr_t addr);
     bool is_mappable(fpage_t fpage);
+    static const bool is_arch_mappable(addr_t addr, size_t size) { return true; }
+    static const addr_t sign_extend(addr_t addr) { return addr; }
 
-    bool is_arch_mappable(addr_t addr, size_t size) { return true; }
+    static bool is_cpu_area(addr_t addr);
 
     /* Copy area related methods */
-    inline bool is_copy_area (addr_t addr);
     word_t get_copy_limit (addr_t addr, word_t limit);
 
     /* kip and utcb handling */
@@ -240,31 +238,6 @@ INLINE pgent_t * space_t::pgent( word_t num, word_t cpu )
 }
 
 
-/* XXX these can be optimised */
-INLINE bool space_t::is_user_area(addr_t addr)
-{
-    return (addr >= (addr_t)USER_AREA_START &&
-	    addr < (addr_t)USER_AREA_END);
-}
-
-INLINE bool space_t::is_tcb_area(addr_t addr)
-{
-    return (addr >= (addr_t)KTCB_AREA_START &&
-	    addr < (addr_t)KTCB_AREA_END);
-}
-
-INLINE bool space_t::is_copy_area (addr_t addr)
-{
-    return (addr > (addr_t)COPY_AREA_START &&
-	    addr < (addr_t)COPY_AREA_END);
-}
-
-INLINE bool space_t::is_kernel_area(addr_t addr)
-{
-    return (addr >= (addr_t)KERNEL_AREA_START &&
-	    addr < (addr_t)KERNEL_AREA_END);
-}
-
 INLINE bool space_t::is_cpu_area(addr_t addr)
 {
     return (addr >= (addr_t)CPU_AREA_START &&
@@ -304,17 +277,6 @@ INLINE fpage_t space_t::get_utcb_page_area()
 INLINE word_t space_t::get_from_user(addr_t addr)
 {
     return *(word_t *)(addr);
-}
-
-INLINE tcb_t * space_t::get_tcb( threadid_t tid )
-{
-    return (tcb_t *)((KTCB_AREA_START) + 
-		    ((tid.get_threadno() & (VALID_THREADNO_MASK)) * KTCB_SIZE));
-}
-
-INLINE tcb_t * space_t::get_tcb(void * ptr)
-{
-   return (tcb_t*)((word_t)(ptr) & KTCB_MASK);
 }
 
 INLINE word_t space_t::get_vsid( addr_t addr )

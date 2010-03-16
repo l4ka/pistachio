@@ -1,10 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/msr.h
- * Description:	Macros which describe the Machine State Register, and
- * 		functions which manipulate the register.
+ * File path:     src/arch/powerpc/msr.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: msr.h,v 1.14 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__MSR_H__
 #define __ARCH__POWERPC__MSR_H__
@@ -40,18 +40,23 @@
 
 #define MSR_VEC	25	/* enable AltiVec */
 #define MSR_POW	18	/* power management enable */
+#define MSR_CE	17	/* critical interrupt enable */
 #define MSR_ILE	16	/* exception little-endian mode */
 #define MSR_EE	15	/* extern interrupt enable */
 #define MSR_PR	14	/* privilege level */
 #define MSR_FP	13	/* floating point available */
 #define MSR_ME	12	/* machine check enable */
 #define MSR_FE0	11	/* floating point exception mode 0 */
-#define MSR_SE	10	/* single-step trace enable */
-#define MSR_BE	 9	/* brance trace enable */
+#define MSR_SE	10	/* single-step trace enable (DWE) */
+#define MSR_DWE 10
+#define MSR_BE	 9	/* branch trace enable (DE)*/
+#define MSR_DE	 9
 #define MSR_FE1	 8	/* floating point exception mode 1 */
 #define MSR_IP	 6	/* exception prefix */
 #define MSR_IR	 5	/* instruction address translation */
+#define MSR_IS	 5	/* bookE: instruction space 0/1 */
 #define MSR_DR	 4	/* data address translation */
+#define MSR_DS	 4	/* bookE: data space 0/1 */
 #define MSR_PE	 3	/* protection enable */
 #define MSR_PX	 2	/* protection exclusive mode */
 #define MSR_RI	 1	/* recoverable exception */
@@ -93,27 +98,46 @@
 #define MSR_LE_BIG_ENDIAN	0
 #define MSR_LE_LITTLE_ENDIAN	1
 
+
+
+#ifdef CONFIG_PPC_BOOKE
+#define MSR_TRANSLATION 0
+#define MSR_SOFTHVM_TRANSLATION ((1 << MSR_IS) | (1 << MSR_DS))
+#else
+#define MSR_TRANSLATION	((MSR_IR_ENABLED << MSR_IR) | (MSR_DR_ENABLED << MSR_DR) \
+	| (MSR_IP_RAM << MSR_IP))
+#define MSR_SOFTHVM_TRANSLATION	0
+#endif
+
 #define MSR_KERNEL_INIT ((MSR_PR_KERNEL << MSR_PR) 			\
 	| (MSR_FP_ENABLED << MSR_FP) 					\
-	| (MSR_ME_ENABLED << MSR_ME) | (MSR_IP_RAM << MSR_IP)		\
-	| (MSR_IR_ENABLED << MSR_IR) | (MSR_DR_ENABLED << MSR_DR))
+	| (MSR_ME_ENABLED << MSR_ME)					\
+	| (MSR_TRANSLATION))
 
-#define MSR_KERNEL (MSR_KERNEL_INIT | (MSR_RI_IS_RECOVERABLE << MSR_RI))
+//#define MSR_KERNEL (MSR_KERNEL_INIT | (MSR_RI_IS_RECOVERABLE << MSR_RI))
+#define MSR_KERNEL (MSR_KERNEL_INIT)
 
 #define MSR_EXCEPTION ((MSR_PR_KERNEL << MSR_PR) | (MSR_FP_DISABLED << MSR_FP) \
-	| (MSR_ME_ENABLED << MSR_ME) | (MSR_IP_RAM << MSR_IP)		\
-	| (MSR_IR_ENABLED << MSR_IR) | (MSR_DR_ENABLED << MSR_DR))
+	| (MSR_ME_ENABLED << MSR_ME) | 		\
+	| MSR_TRANSLATION)
 
+#if 1
 #define MSR_USER  ((MSR_EE_ENABLED << MSR_EE) | (MSR_PR_USER << MSR_PR)	\
 	| (MSR_FP_DISABLED << MSR_FP) | (MSR_ME_ENABLED << MSR_ME)	\
-	| (MSR_IP_RAM << MSR_IP) | (MSR_IR_ENABLED << MSR_IR)		\
-	| (MSR_DR_ENABLED << MSR_DR) | (MSR_RI_IS_RECOVERABLE << MSR_RI))
+	| MSR_TRANSLATION)
+#else
+#define MSR_USER  ((MSR_PR_USER << MSR_PR)	\
+	| (MSR_FP_DISABLED << MSR_FP) | (MSR_ME_ENABLED << MSR_ME)	\
+	| MSR_TRANSLATION)
+#endif
 
 #define MSR_REAL ((MSR_PR_KERNEL << MSR_PR) | (MSR_FP_ENABLED << MSR_FP) \
 	| (MSR_IP_RAM << MSR_IP))
 
 #define MSR_USER_MASK ((1 << MSR_LE) | (1 << MSR_FE1) | (1 << MSR_BE) \
 	| (1 << MSR_SE) | (1 << MSR_FE0))
+
+#define MSR_SOFTHVM	(MSR_USER | MSR_SOFTHVM_TRANSLATION)
 
 
 #ifndef ASSEMBLY

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/sched-hs/schedule.h
  * Description:   
@@ -362,8 +362,8 @@ protected:
             }
             
             TRACEPOINT (SCHEDULE_DETAILS, "cdt %t (d %t prio %x pass %d) - %t (d %t prio %x pass %d)\n",
-                        stcb, ssktcb->get_tcb(), ssktcb->get_priority(), (word_t) ssktcb->get_pass(),
-                        dtcb, dsktcb->get_tcb(), dsktcb->get_priority(), (word_t) dsktcb->get_pass());
+                        stcb, addr_to_tcb(ssktcb), ssktcb->get_priority(), (word_t) ssktcb->get_pass(),
+                        dtcb, addr_to_tcb(dsktcb), dsktcb->get_priority(), (word_t) dsktcb->get_pass());
 
             if (ssktcb->get_priority() == dsktcb->get_priority())
                 return ssktcb->get_pass() < dsktcb->get_pass();

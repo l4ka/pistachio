@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     l4test/l4test.h
- * Description:   Some genetic macros and defs
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: l4test.h,v 1.9 2003/09/24 19:05:54 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __L4TEST_H__
@@ -36,7 +37,6 @@
 //#define USE_ANSI 1
 #include "string.h"
 #include <l4/kip.h>
-
 
 #define ESC "\e["
 #define LIGHT_RED    ESC "31;1m"
@@ -92,9 +92,6 @@ void print_h1( const char *msg );
 void print_h2( const char *msg );
 void print_result (const char * str, bool test);
 
-/* libc-esque */
-int strlen( const char *str );
-
 /* good for lazy debugging :) */
 void msec_sleep( L4_Word_t msec );
 
@@ -109,9 +106,9 @@ void start_thread( L4_ThreadId_t tid, L4_Word_t ip, L4_Word_t sp );
 
 /* Thread/address space management */
 L4_ThreadId_t get_new_tid (void);
-L4_ThreadId_t create_thread (bool new_space = false, int cpu = -1);
+L4_ThreadId_t create_thread (bool new_space = false, int cpu = -1, L4_Word_t spacectrl = 0);
 L4_ThreadId_t create_thread (void (*func)(void), bool new_space = false,
-			     int cpu = -1);
+			     int cpu = -1, L4_Word_t spacectrl = 0);
 L4_Word_t kill_thread (L4_ThreadId_t tid);
 void start_thread (L4_ThreadId_t tid, void (*func)(void));
 
@@ -120,6 +117,7 @@ void start_thread (L4_ThreadId_t tid, void (*func)(void));
 void get_startup_values (void (*func)(void), L4_Word_t * ip, L4_Word_t * sp);
 void *code_addr( void *addr );
 void setup_exreg( L4_Word_t *ip, L4_Word_t *sp, void (*func)(void) );
+
 
 L4_INLINE bool l4_has_feature( const char *feature_name )
 {
@@ -131,6 +129,7 @@ L4_INLINE bool l4_has_feature( const char *feature_name )
 	    return true;
     return false;
 }
+
 
 
 

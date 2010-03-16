@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	arch/powerpc/frame.h
- * Description:	Exception and system call register state.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/arch/powerpc/frame.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ *                
  * $Id$
- *
- ***************************************************************************/
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__FRAME_H__
 #define __ARCH__POWERPC__FRAME_H__
@@ -82,6 +83,27 @@ struct except_regs_t
     word_t lr;
     word_t srr0_ip;
     word_t srr1_flags;
+
+public:
+    void set_register(int reg, word_t val)
+	{
+	    if (reg == 0)
+		this->r0 = val;
+	    else if (reg < 3)
+		((word_t*)&this->r1_stack)[reg - 1] = val;
+	    else
+		((word_t*)&this->r3)[reg - 3] = val;
+	}
+
+    word_t get_register(int reg)
+	{
+	    if (reg == 0)
+		return this->r0;
+	    else if (reg < 3)
+		return ((word_t*)&this->r1_stack)[reg - 1];
+	    else
+		return ((word_t*)&this->r3)[reg - 3];
+	}
 };
 
 struct syscall_regs_t
@@ -94,14 +116,6 @@ struct syscall_regs_t
     word_t lr;
     word_t srr0_ip;
     word_t srr1_flags;
-};
-
-struct except_info_t
-{
-    word_t exc_no;
-    except_regs_t *regs;
-    word_t dar;
-    word_t dsisr;
 };
 
 #endif	/* !ASSEMBLY */

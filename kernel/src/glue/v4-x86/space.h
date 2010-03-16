@@ -44,23 +44,24 @@ public:
     void map_dummy_tcb(addr_t addr);
     utcb_t *  allocate_utcb(tcb_t * tcb);
 
-    tcb_t * get_tcb(threadid_t tid);
-    tcb_t * get_tcb(void * ptr);
-
     /* address ranges */
-    bool is_user_area(addr_t addr);
-    bool is_user_area(fpage_t fpage);
-    bool is_tcb_area(addr_t addr);
+    static bool is_user_area(addr_t addr);
+    static bool is_user_area(fpage_t fpage);
+    static bool is_kernel_area(addr_t addr);
+    static bool is_tcb_area(addr_t addr);
+    static  bool is_copy_area (addr_t addr);
+
     bool is_mappable(addr_t addr);
     bool is_mappable(fpage_t fpage);
     bool is_arch_mappable(addr_t addr, size_t size);
+   
+    
 #if defined(CONFIG_X_EVT_LOGGING)
     bool is_log_area(addr_t addr);
     bool is_log_area(fpage_t fpage);
 #endif
 
     /* Copy area related methods */
-    bool is_copy_area (addr_t addr);
     word_t get_copy_limit (addr_t addr, word_t limit);
     void delete_copy_area (word_t n, cpuid_t cpu);
     void populate_copy_area (word_t n, tcb_t *tcb, space_t *partner, cpuid_t cpu);
@@ -164,25 +165,6 @@ public:
  *                      inline functions
  *
  **********************************************************************/
-
-INLINE bool space_t::is_user_area (addr_t addr)
-{
-    return (((word_t) sign_extend(addr)) >= USER_AREA_START &&
-	    ((word_t) sign_extend(addr)) < USER_AREA_END);
-}
-        
-INLINE bool space_t::is_tcb_area (addr_t addr)
-{
-    return (((word_t) sign_extend(addr)) >= KTCB_AREA_START &&
-	    ((word_t) sign_extend(addr)) < KTCB_AREA_END);
-}
-
-INLINE bool space_t::is_copy_area (addr_t addr)
-{
-    return (((word_t)sign_extend(addr)) >= COPY_AREA_START &&
-	    ((word_t)sign_extend(addr)) < COPY_AREA_END);
-}
-
 INLINE bool space_t::is_arch_mappable (addr_t addr, size_t size)
 {
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
@@ -316,25 +298,6 @@ INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
 
     return (data.thread_count == 0);
 }
-
-
-/**
- * translates a threadid into a tcb pointer
- * @param tid thread id of the thread
- * @return pointer to thread control block
- */
-INLINE tcb_t * space_t::get_tcb(threadid_t tid)
-{ 
-    extern tcb_t *__idle_tcb;
-    return (tid == threadid_t::idlethread() ? __idle_tcb :
-	    (tcb_t*) ((KTCB_AREA_START) + ((tid.get_threadno() & VALID_THREADNO_MASK) * KTCB_SIZE))); 
-}
-
-INLINE tcb_t * space_t::get_tcb(void * ptr)
-{
-   return (tcb_t*)((word_t)(ptr) & KTCB_MASK);
-}
-
 
 
 INLINE pgent_t * space_t::pgent (word_t num, word_t cpu)

@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/except.S
- * Description:	Exception handler entry and exit points.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     glue/v4-powerpc/except.S
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ *                
  * $Id$
- *
- ***************************************************************************/
+ *                
+ ********************************************************************/
 
 /*
  *  WARNING: to coexist with Open Firmware, the exception code is linked
@@ -104,30 +105,38 @@
 // TODO: detect stack size ... if too small, switch to debug
 //       stack and enter debugger!
 
+.macro get_spill_phys reg
+	mfsprg \reg, SPRG_SPILL
+#ifdef CONFIG_PPC_MMU_TLB
+	addis  \reg, \reg, KERNEL_OFFSET@ha
+#endif
+.endm
+
+.macro get_spill_virt reg
+	mfsprg \reg, SPRG_SPILL
+	addis  \reg, \reg, KERNEL_OFFSET@ha
+.endm
+
 #define EXCEPT_STACK							\
 	mtsprg	SPRG_R12, %r12 ;	/* preserve r12			*/\
 	mtsprg	SPRG_R1, %r1 ;		/* preserve the stack		*/\
 	mfcr	%r1 ;			/* grab the cr			*/\
-	mfsprg	%r12, SPRG_SPILL ;	/* grab the spill location	*/\
+	get_spill_phys %r12;		/* grab the spill location	*/\
 	stw	%r1, SPILL_CR(%r12) ;	/* temp spill cr		*/\
 	stw	%r3, SPILL_R3(%r12) ;	/* temp spill r3		*/\
 	mfspr	%r3, SPR_SRR0 ;		/* put srr0 in the 1st argument	*/\
 	stw	%r4, SPILL_R4(%r12) ;	/* temp spill r4		*/\
 	mfspr	%r4, SPR_SRR1 ;		/* grab srr1			*/\
-	\
 	andi.	%r4, %r4, (MSR_PR_USER << MSR_PR) ; /* What priv level? */\
 	mfspr	%r4, SPR_SRR1 ;		/* put srr1 in the 2nd argument	*/\
 	bne 0f ;		/* Jump to kernel stack allocation.	*/\
 	mfsprg	%r1, SPRG_R1 ;	/* Grab the interrupted kernel stack.	*/\
 	addi	%r1, %r1, -(EXCEPT_FRAME_SIZE+EABI_STACK_SIZE); /* allocate stack space.	*/\
 	b 1f ;			/* Skip kernel stack allocation.	*/\
-	\
 	0: \
 	mfsprg	%r1, SPRG_KSP ;		/* Switch to the kernel stack.	*/\
 	addi	%r1, %r1, KTCB_SIZE-(EXCEPT_FRAME_SIZE+EABI_STACK_SIZE); /* allocate stack space */\
-	\
 	1: 	/* Safe to switch to virtual addressing mode.		*/
-
 
 #define EXCEPT_PROLOG							\
 	li	%r12, MSR_KERNEL ;					\
@@ -167,9 +176,7 @@
 	stw	%r0, EXC_REG(R0)(%r1) ;	/* spill r0			*/\
 	stw	%r5, EXC_REG(R5)(%r1) ;	/* spill r5			*/\
 	stw	%r6, EXC_REG(R6)(%r1) ;	/* spill r6			*/\
-	mfsprg	%r5, SPRG_SPILL ;	/* Grab the spill location.	*/\
-	lis	%r6, KERNEL_OFFSET@ha ;	/* Get the kernel offset.	*/\
-	add	%r5, %r5, %r6 ;		/* Calc va of spill location.	*/\
+	get_spill_virt %r5	;	/* get spill location		*/\
 	lwz	%r0, SPILL_CR(%r5) ;	/* Grab cr.			*/\
 	lwz	%r6, SPILL_R3(%r5) ;	/* Grab r3.			*/\
 	stw	%r7, EXC_REG(R7)(%r1) ;	/* spill r7			*/\
@@ -251,6 +258,7 @@
 	rfi ;
 
 
+#ifdef CONFIG_PPC_MMU_SEGMENTS
 #define CALL_UNKNOWN_HANDLER						\
 	grab_sym %r14, except_unknown_handler ;				\
 	grab_sym %r15, _except_return ;					\
@@ -262,6 +270,36 @@
 	grab_sym %r15, _except_return ;					\
 	mtctr	%r15 ;							\
 	bctr ;
+#else
+#define CALL_UNKNOWN_HANDLER						\
+	grab_sym %r14, except_unknown_handler ;				\
+	b	_except_return
+
+#define CALL_HANDLER( handler )						\
+	grab_sym %r14, handler ;					\
+	b	_except_return
+#endif
+
+#define EXCEPTION(name, offset)						\
+	.section ".except", "ax";					\
+	.align 2		;					\
+	.type	_except_##name,@function;				\
+	.globl	_except_##name 	;					\
+	. = offset - EXCEPT_OFFSET_BASE	;				\
+_except_##name:
+
+#define EXCEPTION_HANDLER(name, offset)					\
+	EXCEPTION(name, offset)						\
+	EXCEPT_STACK							\
+	EXCEPT_PROLOG							\
+	CALL_HANDLER( except_##name##_handler )
+	
+#define EXCEPTION_HANDLER_UNKN(name, offset)				\
+	EXCEPTION(name, offset)						\
+	EXCEPT_STACK							\
+	EXCEPT_PROLOG							\
+	CALL_UNKNOWN_HANDLER
+	
 
 /* The exception return path.
  * Most exceptions will share this return path.  Hopefully
@@ -273,8 +311,6 @@
 	.global _except_return_shortcircuit
 _except_return:
 	EXCEPT_SPILL
-	mfspr	%r6, SPR_DAR
-	mfspr	%r7, SPR_DSISR
 	mtctr	%r14	/* Prepare to jump to the C handler. */
 	bctrl		/* Call C code. */
 _except_return_shortcircuit:
@@ -297,69 +333,22 @@ _except_return_shortcircuit:
  * - all instructions prior to SRR0 appear to have completed with respect
  *   to the executing processor.
  */
-	.section ".except", "ax"
-	.align	2
-	.global	_start_except
-	.global _except_system_reset
-	. = EXCEPT_OFFSET_SYSTEM_RESET
-_except_system_reset:
+EXCEPTION(system_reset, EXCEPT_OFFSET_SYSTEM_RESET)
+	.globl _start_except
 _start_except:
 	EXCEPT_STACK
 	EXCEPT_PROLOG
 	CALL_HANDLER( except_sys_reset_handler )
 
-
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_MACHINE_CHECK
-_except_machine_check:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_machine_check_handler )
-
-
-/* DSI exception:
- * - read the DSISR register to determine the reason for the DSI.
- *   The DSISR register is SPR 18, and readable by mfspr.
- * - the effective address of the addressed memory element is stored in DAR.
- *   Not necessarily the actual memory addressed.
- */
-	.section ".except"
-	.globl	_except_dsi
-	.type	_except_dsi,@function
-	. = EXCEPT_OFFSET_DSI
-_except_dsi:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_dsi_handler )
-.Ldsi:
-	.size	_except_dsi,.Ldsi-_except_dsi
-
-
-/* ISI exception:
- * - SRR0 contains the address of the instruction that the processor would
- *   have executed next.  If a branch instruction, then the branch target.
- * - SRR1 contains bits that indicate the reason for the exception.
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_ISI
-_except_isi:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_isi_handler )
-
-
-/* external interrupt:
- * - context synchronizing
- * - SRR0 addresses the instruction that would have been executed.
- * - disables further interrupts (clears MSR[EE])
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_EXTERNAL_INT
-_except_ipi:
-
+EXCEPTION_HANDLER(machine_check, EXCEPT_OFFSET_MACHINE_CHECK)
+EXCEPTION_HANDLER(dsi, EXCEPT_OFFSET_DSI)
+EXCEPTION_HANDLER(isi, EXCEPT_OFFSET_ISI)
+#ifdef CONFIG_PPC_BOOKE
+EXCEPTION_HANDLER(extern_int, EXCEPT_OFFSET_EXTERNAL_INT)
+#else
+EXCEPTION(extern_int, EXCEPT_OFFSET_EXTERNAL_INT)
+	/* For non bookE processors the handler is overwritten after
+	 * releasing the APs */
 #if !defined(CONFIG_SMP)
 	/* Give some sentinel values.  They will eventually be overwritten
 	 * when the kernel installs the external interrupt handler.
@@ -391,77 +380,27 @@ _except_ipi:
 	rfi				/* Enter the kernel. */
 #endif	/* CONFIG_SMP */
 
-
-/* alignment exception:
- * - reference DSISR to determine the source of the exception.
- * - DAR contains the effective address of the data access.
+/*****************************************************************************
+ * The external interrupt handler, to be copied into place after
+ * ipi initialization.
  */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_ALIGNMENT
-_except_alignment:
+	.section ".init"
+	.global	_except_extern_int
+	.global _except_extern_int_end
+	.balign	4
+_except_extern_int:
 	EXCEPT_STACK
 	EXCEPT_PROLOG
-	CALL_HANDLER( except_alignment_handler )
+	CALL_HANDLER( except_extern_int_handler )
+_except_extern_int_end:
+#endif  /* CONFIG_PPC_BOOK */
 
-
-/* program exception:
- *
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_PROGRAM
-_except_program:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_program_handler )
-
-
-/* floating point unavailable exception:
- * - imprecise
- * - SRR0 contains the address of either the instruction that caused
- *   the exception, or some instruction following that instruction.
- * - the instruction addressed by SRR0 may be partially executed.
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_FP_UNAVAILABLE
-_except_fp_unavailable:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_fp_unavail_handler )
-
-
-/* decrementer exception:
- * - context synchronizing
- * - SRR0 addresses the instruction that would have been executed.
- * - disables further interrupts (clears MSR[EE])
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_DECREMENTER
-_except_decrementer:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_decrementer_handler )
-
-
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_RESERVED1
-_except_reserved1:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
-
-
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_RESERVED2
-_except_reserved2:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
+EXCEPTION_HANDLER(alignment, EXCEPT_OFFSET_ALIGNMENT)
+EXCEPTION_HANDLER(program, EXCEPT_OFFSET_PROGRAM)
+EXCEPTION_HANDLER(fp_unavail, EXCEPT_OFFSET_FP_UNAVAILABLE)
+EXCEPTION_HANDLER(decrementer, EXCEPT_OFFSET_DECREMENTER)
+EXCEPTION_HANDLER_UNKN(reserved1, EXCEPT_OFFSET_RESERVED1)
+EXCEPTION_HANDLER_UNKN(reserved2, EXCEPT_OFFSET_RESERVED2)
 
 
 /* system call exception:
@@ -470,10 +409,7 @@ _except_reserved2:
  *  3. If yes, install kernel MSR into srr1 and rfi.
  *  4. Preserve some state, and jump to syscall emulation.
  */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_SYSCALL
-_except_syscall:
+EXCEPTION(syscall, EXCEPT_OFFSET_SYSCALL)
 	/* Security check.  Is the user IP in the kernel address space?
 	 * Preserve SVR4 calling convention registers until we know whether
 	 * this is an L4 system call.
@@ -570,6 +506,7 @@ _except_syscall:
 	li	IPC_ABI_TIMEOUTS, 0			/* We never time-out. */
 	grab_sym IPC_ABI_MR0, SC_EXC_TAG		/* Construct the message tag. */
 	lwz	IPC_ABI_FROM_TID, OFS_UTCB_EXCEPTION_HANDLER (%r21)	/* Get the exception handler TID. */
+
 	globalize_tid IPC_ABI_FROM_TID			/* Globalize the TID. */
 	mr	IPC_ABI_TO_TID, IPC_ABI_FROM_TID	/* Copy the TID to the TO parameter. */
 
@@ -621,95 +558,74 @@ _sc_emul_return:
 	rfi					/* Return to user. */
 
 
-/* trace exception:
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_TRACE
-_except_trace:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_trace_handler )
+EXCEPTION_HANDLER(trace, EXCEPT_OFFSET_TRACE)
+EXCEPTION_HANDLER(fp_assist, EXCEPT_OFFSET_FP_ASSIST)
 
-
-/* floating point assist exception:
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_FP_ASSIST
-_except_fp_assist:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_fp_assist_handler )
-
-
+#ifndef CONFIG_PPC_BOOKE
 /* Performance monitor exception.
  */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_PERFMON
-_except_perfmon:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
+EXCEPTION_HANDLER_UNKN(perfmon, EXCEPT_OFFSET_PERFMON)
+EXCEPTION_HANDLER_UNKN(sys_manage, EXCEPT_OFFSET_SYS_MANAGE)
+EXCEPTION_HANDLER_UNKN(reserved3, EXCEPT_OFFSET_RESERVED3)
+EXCEPTION_HANDLER_UNKN(reserved4, EXCEPT_OFFSET_RESERVED4)
+EXCEPTION_HANDLER_UNKN(thermal, EXCEPT_OFFSET_THERMAL)
+#endif
 
-
-/* System management interrupt.
+#ifdef CONFIG_PPC_BOOKE
+/* Book-E specific exceptions
  */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_SYS_MANAGE
-_except_sys_manage:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
+EXCEPTION_HANDLER_UNKN(critical_input, EXCEPT_OFFSET_CRITICAL_INPUT)
+EXCEPTION_HANDLER_UNKN(aux_unavailable, EXCEPT_OFFSET_AUX_UNAVAILABLE)
+EXCEPTION_HANDLER_UNKN(interval_timer, EXCEPT_OFFSET_INTERVAL_TIMER)
+EXCEPTION_HANDLER_UNKN(watchdog, EXCEPT_OFFSET_WATCHDOG)
+EXCEPTION_HANDLER(dtlb_miss, EXCEPT_OFFSET_DTLB)
+EXCEPTION_HANDLER(itlb_miss, EXCEPT_OFFSET_ITLB)
+EXCEPTION_HANDLER(debug, EXCEPT_OFFSET_DEBUG)
+
+#ifdef CONFIG_X_PPC_SOFTHVM
+/* we make use of the 440s IVPR to reduce overhead, IVPR provides
+ * upper 16bit... */
+#undef EXCEPTION_HANDLER
+#undef EXCEPTION_HANDLER_UNKN
+
+/* HVM specific exception handlers */
+#define EXCEPTION_HANDLER_HVM(name, offset)				\
+	EXCEPTION(hvm_##name, offset + EXCEPT_HVM_OFFSET )		\
+	EXCEPT_STACK							\
+	EXCEPT_PROLOG							\
+	CALL_HANDLER( except_hvm_##name##_handler )
+
+/* default exception handlers */
+#define EXCEPTION_HANDLER(name, offset)					\
+	EXCEPTION(hvm_##name, offset + EXCEPT_HVM_OFFSET)		\
+	EXCEPT_STACK							\
+	EXCEPT_PROLOG							\
+	CALL_HANDLER( except_##name##_handler )
+	
+#define EXCEPTION_HANDLER_UNKN(name, offset)				\
+	EXCEPTION(hvm_##name, offset  + EXCEPT_HVM_OFFSET)		\
+	EXCEPT_STACK							\
+	EXCEPT_PROLOG							\
 	CALL_UNKNOWN_HANDLER
-
-
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_RESERVED3
-_except_reserved3:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
-
-
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_RESERVED4
-_except_reserved4:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
-
-
-
-/* Thermal assist exception.
- */
-	.section ".except"
-	.align	2
-	. = EXCEPT_OFFSET_THERMAL
-_except_sys_thermal:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_UNKNOWN_HANDLER
-
+	
+EXCEPTION_HANDLER(machine_check, EXCEPT_OFFSET_MACHINE_CHECK)
+EXCEPTION_HANDLER_HVM(dsi, EXCEPT_OFFSET_DSI)
+EXCEPTION_HANDLER_HVM(isi, EXCEPT_OFFSET_ISI)
+EXCEPTION_HANDLER(extern_int, EXCEPT_OFFSET_EXTERNAL_INT)
+EXCEPTION_HANDLER_HVM(alignment, EXCEPT_OFFSET_ALIGNMENT)
+EXCEPTION_HANDLER_HVM(program, EXCEPT_OFFSET_PROGRAM)
+EXCEPTION_HANDLER_HVM(fp_unavail, EXCEPT_OFFSET_FP_UNAVAILABLE)
+EXCEPTION_HANDLER_HVM(decrementer, EXCEPT_OFFSET_DECREMENTER)
+EXCEPTION_HANDLER_HVM(syscall, EXCEPT_OFFSET_SYSCALL)
+EXCEPTION_HANDLER_UNKN(critical_input, EXCEPT_OFFSET_CRITICAL_INPUT)
+EXCEPTION_HANDLER_UNKN(aux_unavailable, EXCEPT_OFFSET_AUX_UNAVAILABLE)
+EXCEPTION_HANDLER_UNKN(interval_timer, EXCEPT_OFFSET_INTERVAL_TIMER)
+EXCEPTION_HANDLER_UNKN(watchdog, EXCEPT_OFFSET_WATCHDOG)
+EXCEPTION_HANDLER_HVM(dtlb_miss, EXCEPT_OFFSET_DTLB)
+EXCEPTION_HANDLER_HVM(itlb_miss, EXCEPT_OFFSET_ITLB)
+EXCEPTION_HANDLER_HVM(debug, EXCEPT_OFFSET_DEBUG)
+#endif
+#endif /* CONFIG_PPC_BOOKE */
 
 	.global _end_except
 _end_except:
-
-
-/*****************************************************************************
- * The external interrupt handler, to be copied into place after
- * ipi initialization.
- */
-	.section ".init"
-	.global	_except_extern_int
-	.global _except_extern_int_end
-	.balign	4
-_except_extern_int:
-	EXCEPT_STACK
-	EXCEPT_PROLOG
-	CALL_HANDLER( except_extern_int_handler )
-_except_extern_int_end:
-

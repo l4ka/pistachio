@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006, 2008,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     l4/message.h
- * Description:   Message construction functions
+ * File path:     include/l4/message.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: message.h,v 1.31 2006/06/08 11:13:49 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __L4__MESSAGE_H__
@@ -861,11 +862,13 @@ typedef union {
     struct {
 #if defined(L4_BIG_ENDIAN)
 	L4_Word_t	RcvWindow:28 __PLUS32;
-	L4_Word_t	__zeros:3;
+	L4_Word_t	__zeros:2;
+	L4_Word_t	CtrlXfer : 1;
 	L4_Word_t	s:1;
 #else
 	L4_Word_t	s:1;
-	L4_Word_t	__zeros:3;
+	L4_Word_t	CtrlXfer : 1;
+	L4_Word_t	__zeros:2;
 	L4_Word_t	RcvWindow:28 __PLUS32;
 #endif
     } X;
@@ -878,6 +881,7 @@ typedef union {
 
 #define L4_UntypedWordsAcceptor		((L4_Acceptor_t) { raw: 0 })
 #define L4_StringItemsAcceptor		((L4_Acceptor_t) { raw: 1 })
+#define L4_CtrlXferAcceptor		((L4_Acceptor_t) { raw: 2 })
 
 L4_INLINE L4_Acceptor_t L4_MapGrantItems (L4_Fpage_t RcvWindow)
 {
@@ -989,7 +993,7 @@ L4_INLINE void L4_Accept (const L4_Acceptor_t a)
     L4_LoadBR (0, a.raw);
 }
 L4_INLINE void L4_AcceptStrings (const L4_Acceptor_t a,
-				 const L4_MsgBuffer_t * b)
+				 L4_MsgBuffer_t * b)
 {
     L4_StringItem_t *prev, *t, *s = (L4_StringItem_t *) &b->string[0];
     int n, i = 1;
@@ -1007,7 +1011,7 @@ L4_INLINE void L4_AcceptStrings (const L4_Acceptor_t a,
     } while (prev->X.C);
 }
 #if defined(__cplusplus)
-L4_INLINE void L4_Accept (const L4_Acceptor_t a, const L4_MsgBuffer_t * b)
+L4_INLINE void L4_Accept (const L4_Acceptor_t a, L4_MsgBuffer_t * b)
 {
     L4_AcceptStrings (a, b);
 }

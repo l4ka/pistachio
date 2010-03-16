@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, Jan Stoess, IBM Corporation
  *                
  * File path:     api/v4/space.cc
- * Description:   architecture independent parts of space_t
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: space.cc,v 1.68 2007/01/22 21:08:32 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 
@@ -275,7 +276,6 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
 		allocate_tcb(addr);
 	    else
 		map_dummy_tcb(addr);
-	    
 	    return;
 	    
 	}
@@ -289,7 +289,7 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
 	    // into waiting for partner.
 	    current->set_state (thread_state_t::waiting_tunneled_pf);
 
-	    tcb_t * partner = get_tcb (current->get_partner ());
+	    tcb_t * partner = tcb_t::get_tcb (current->get_partner ());
 	    word_t faddr = (word_t) current->copy_area_real_address (addr);
 	    scheduler_t *scheduler = get_current_scheduler();
 	    
@@ -347,7 +347,7 @@ SYS_SPACE_CONTROL (threadid_t space_tid, word_t control, fpage_t kip_area,
 	return_space_control(0, 0);
     }
 
-    tcb_t * space_tcb = get_current_space()->get_tcb(space_tid);
+    tcb_t * space_tcb = tcb_t::get_tcb(space_tid);
     if (EXPECT_FALSE (space_tcb->get_global_id() != space_tid))
     {
 	get_current_tcb ()->set_error_code (EINVALID_SPACE);

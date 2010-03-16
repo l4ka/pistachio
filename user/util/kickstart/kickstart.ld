@@ -1,8 +1,9 @@
 /*********************************************************************
  *                
  * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     kickstart/kickstart.ld
+ * File path:     util/kickstart/kickstart.ld
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -31,12 +32,15 @@
  ********************************************************************/
 SECTIONS
 {
+         _kickstart_begin = .;
         .text : {
-	_kickstart_begin = .;
-        *(.mbh)
-        *(.text)
-        *(.*data*)
-        _edata = .;
+               	*(.mbh)
+                *(.text*)
+        	*(.rodata*)
+        	*(.data*)
+        	*(.bss)
+        	*(.sbss)
+                _edata = .;
         }
         _end = .;
 	_kickstart_end = .;

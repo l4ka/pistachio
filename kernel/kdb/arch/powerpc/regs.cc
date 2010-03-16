@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	kdb/arch/powerpc/regs.cc
- * Description:	Dump info about the register state.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     kdb/arch/powerpc/regs.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: regs.cc,v 1.21 2003/11/17 09:37:24 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kdb/kdb.h>
@@ -47,25 +48,36 @@ DECLARE_CMD (cmd_except_regs, arch, 'r', "excregs", "Exception registers");
 DECLARE_CMD (cmd_user_except_regs, arch, 'u', "userregs", "User exception registers");
 DECLARE_CMD (cmd_print_msr, arch, 'm', "printmsr", "Print msr");
 DECLARE_CMD (cmd_print_except_msr, arch, 'e', "printmsr", "Print exception msr");
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
 DECLARE_CMD (cmd_print_bats, arch, 'b', "printbats", "Print bat registers");
+#elif defined(CONFIG_PPC_MMU_TLB)
+DECLARE_CMD (cmd_print_tlb, arch, 'T', "printtlb", "Print TLB");
+#endif
 
 static void dbg_print_sysregs( void )
 {
-    int i, j;
-
     printf( " srr0: 0x%08x  srr1: 0x%08x\n", ppc_get_srr0(), ppc_get_srr1() );
     printf( "  msr: 0x%08x  sdr1: 0x%08x\n", ppc_get_msr(), ppc_get_sdr1() );
 
-    for( j = 0; j < 4; j++ ) {
-    	for( i = 0; i < 4; i++ )
+#ifndef CONFIG_PPC_BOOKE
+    for( int j = 0; j < 4; j++ ) {
+    	for( int i = 0; i < 4; i++ )
     	    printf( "%s sr%02d: 0x%08x", i ? " ":"", j*4+i, 
 		    ppc_get_sr(j*4+i) );
 	printf( "\n" );
     }
-
+#endif
     printf( "  dar: 0x%08x dsisr: 0x%08x\n", ppc_get_dar(), ppc_get_dsisr() );
     printf( "sprg0: 0x%08x sprg1: 0x%08x sprg2: 0x%08x sprg3: 0x%08x\n",
 	    ppc_get_sprg(0), ppc_get_sprg(1), ppc_get_sprg(2), ppc_get_sprg(3));
+#ifdef CONFIG_PPC_BOOKE
+    printf( "sprg4: 0x%08x sprg5: 0x%08x sprg6: 0x%08x sprg7: 0x%08x\n",
+	    ppc_get_sprg(4), ppc_get_sprg(5), ppc_get_sprg(6), ppc_get_sprg(7));
+    ppc_mmucr_t mmucr; mmucr.read();
+    printf( "  pid: 0x%08x mmucr: 0x%08x [sid: 0x%02x, spc=%d]\n", 
+	    ppc_get_pid(), mmucr.read().raw, mmucr.search_id, 
+	    mmucr.search_translation_space);
+#endif
     printf( "  tbl: 0x%08x   tbu: 0x%08x\n", ppc_get_tbl(), ppc_get_tbu() );
     printf( " dabr: 0x%08x   ear: 0x%08x   dec: 0x%08x\n",
 	    ppc_get_dabr(), ppc_get_ear(), ppc_get_dec() );
@@ -95,7 +107,8 @@ static void dbg_print_except_regs( except_regs_t *cpu )
 	    cpu->ctr, cpu->xer, cpu->cr, cpu->lr );
 }
 
-static void dbg_print_bat_regs( void )
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
+CMD(cmd_print_bats, cg)
 {
     printf( "dbat0l: 0x%08x dbat0u: 0x%08x\n",
 	    ppc_get_dbat0l(), ppc_get_dbat0u() );
@@ -114,7 +127,46 @@ static void dbg_print_bat_regs( void )
 	    ppc_get_ibat2l(), ppc_get_ibat2u() );
     printf( "ibat3l: 0x%08x ibat3u: 0x%08x\n",
 	    ppc_get_ibat3l(), ppc_get_ibat3u() );
+
+    return CMD_NOQUIT;
 }
+#endif
+
+#if defined(CONFIG_PPC_MMU_TLB)
+
+#include INC_ARCH(swtlb.h)
+
+CMD(cmd_print_tlb, cg)
+{
+    for (int i = 0; i < PPC_MAX_TLB_ENTRIES; i++)
+    {
+	ppc_tlb0_t tlb0;
+	ppc_tlb1_t tlb1;
+	ppc_tlb2_t tlb2;
+	ppc_mmucr_t mmucr;
+	tlb0.read(i);
+	tlb1.read(i);
+	tlb2.read(i);
+
+	printf("%02d: %c [%02x:%d] %08x sz:%08x [%04x:%08x] U:%c%c%c S:%c%c%c C:[%c%c%c%c%c U:%c%c%c%c L1:%c%c%c L2:%c%c]\n",
+	       i, tlb0.is_valid() ? 'V' : 'I', mmucr.read().get_search_id(),
+	       tlb0.trans_space, tlb0.get_vaddr(), tlb0.get_size(),
+	       (word_t)(tlb1.get_paddr() >> 32), (word_t)(tlb1.get_paddr()),
+	       tlb2.user_execute ? 'X' : '-', tlb2.user_write ? 'W' : '-', 
+	       tlb2.user_read ? 'R' : '-', tlb2.super_execute ? 'X' : '-', 
+	       tlb2.super_write ? 'W' : '-', tlb2.super_read ? 'R' : '-',
+	       tlb2.write_through ? 'W' : '-', tlb2.inhibit ? 'I' : '-',
+	       tlb2.mem_coherency ? 'M' : '-', tlb2.guarded ? 'G' : '-',
+	       tlb2.endian ? 'E' : '-',
+	       tlb2.user0 ? '0' : '-', tlb2.user1 ? '1' : '-',
+	       tlb2.user2 ? '2' : '-', tlb2.user3 ? '3' : '-',
+	       tlb2.inhibit_l1i ? 'i' : '-', tlb2.inhibit_l1d ? 'd' : '-', tlb2.wt_l1 ? 'W' : '-',
+	       tlb2.inhibit_l2i ? 'i' : '-', tlb2.inhibit_l2d ? 'd' : '-' );
+    }
+	
+    return CMD_NOQUIT;
+}
+#endif
 
 void dbg_dump_msr( word_t msr )
 {
@@ -162,9 +214,9 @@ CMD(cmd_sysregs, cg)
 
 CMD(cmd_except_regs, cg)
 {
-    except_info_t *frame = (except_info_t *)kdb.kdb_param;
-    if( frame != NULL )
-	dbg_print_except_regs( frame->regs );
+    debug_param_t *param = (debug_param_t *)kdb.kdb_param;
+    if( param != NULL )
+	dbg_print_except_regs( param->frame );
     return CMD_NOQUIT;
 }
 
@@ -184,15 +236,18 @@ CMD(cmd_print_msr, cg)
 
 CMD(cmd_print_except_msr, cg)
 {
-    except_info_t *frame = (except_info_t *)kdb.kdb_param;
-    if( frame != NULL )
-	dbg_dump_msr( frame->regs->srr1_flags );
+    debug_param_t *param = (debug_param_t *)kdb.kdb_param;
+    if( param != NULL )
+	dbg_dump_msr( param->frame->srr1_flags );
     return CMD_NOQUIT;
 }
 
-CMD(cmd_print_bats, cg)
+#ifdef CONFIG_PLAT_PPC44X
+#include INC_GLUE(intctrl.h)
+DECLARE_CMD (cmd_print_irqctrl, arch, 'i', "printirq", "Print IRQ controller status");
+CMD(cmd_print_irqctrl, cg)
 {
-    dbg_print_bat_regs();
+    get_interrupt_ctrl()->dump();
     return CMD_NOQUIT;
 }
-
+#endif

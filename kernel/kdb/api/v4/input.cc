@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2009,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2010,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/input.cc
  * Description:   Version 4 specific input functions
@@ -59,16 +59,15 @@ space_t SECTION(SEC_KDEBUG) * get_space (const char * prompt)
 
     val = (addr_t) get_hex (prompt, (word_t) kdb.last_space, "last");
 
-    tcb_t * tidtcb = kdb.last_space->get_tcb (threadid ((word_t) val));
+    tcb_t * tidtcb = tcb_t::get_tcb (threadid ((word_t) val));
 
-    if (kdb.last_space->is_tcb_area (val))
+    if (tcb_t::is_tcb (val))
     {
 	// Pointer into the TCB area
 	tcb_t * tcb = addr_to_tcb (val);
 	kdb.last_space = tcb->get_space ();
     }
-    else if (kdb.last_space->is_tcb_area(tidtcb) && 
-	     tidtcb->myself_global == threadid ((word_t) val))
+    else if (tcb_t::is_tcb((addr_t) tidtcb) && tidtcb->myself_global == threadid ((word_t) val))
     {
 	// A valid thread ID
 	kdb.last_space = tidtcb->get_space ();
@@ -301,7 +300,7 @@ tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
 
     printf ("\n");
 
-    if (dummy->is_tcb_area ((addr_t) val) || 
+    if (tcb_t::is_tcb ((addr_t) val) || 
 	(addr_t) val == (addr_t) get_idle_tcb() || 
 	(addr_t) val  == (addr_t)  get_kdebug_tcb())
 	return addr_to_tcb ((addr_t) val); 
@@ -310,5 +309,5 @@ tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
 	return addr_to_tcb ((addr_t) val); 
 #endif
     else
-	return dummy->get_tcb (threadid (val));
+	return tcb_t::get_tcb (threadid (val));
 }

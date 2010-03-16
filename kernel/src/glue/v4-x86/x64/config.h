@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/config.h
  * Description:   
@@ -93,7 +93,8 @@
  */
 #define VALID_THREADNO_BITS	(18)
 #define VALID_THREADNO_SHIFT	(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
-#define VALID_THREADNO_MASK	((__UL(1) << VALID_THREADNO_BITS) - 1)
+#define TOTAL_KTCBS		(__UL(1) << VALID_THREADNO_BITS)
+#define VALID_THREADNO_MASK	(TOTAL_KTCBS - 1)
 
 
 /**

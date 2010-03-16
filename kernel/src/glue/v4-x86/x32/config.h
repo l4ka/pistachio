@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/config.h
  * Description:   configuration of IA32 architecture
@@ -29,8 +29,6 @@
  * $Id: config.h,v 1.47 2006/06/07 15:34:09 skoglund Exp $
  *                
  ********************************************************************/
-
-
 #ifndef __GLUE__V4_X86__X32__CONFIG_H__
 #define __GLUE__V4_X86__X32__CONFIG_H__
 
@@ -70,7 +68,8 @@
 
 #define VALID_THREADNO_BITS	(17)
 #define VALID_THREADNO_SHIFT	(L4_GLOBAL_VERSION_BITS - KTCB_BITS)
-#define VALID_THREADNO_MASK	((__UL(1) << VALID_THREADNO_BITS) - 1)
+#define TOTAL_KTCBS		(__UL(1) << VALID_THREADNO_BITS)
+#define VALID_THREADNO_MASK	(TOTAL_KTCBS - 1)
 
 /**********************************************************************
  *                  Virtual Address Space Layout

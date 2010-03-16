@@ -33,10 +33,16 @@
 #include <tcb_layout.h>
 #include <asmsyms.h>
 
-.macro TID_TO_TCB reg
-	shr	$VALID_THREADNO_SHIFT, \reg
-	andl	$(VALID_THREADNO_MASK << KTCB_BITS), \reg
-	add	$KTCB_AREA_START, \reg
+       
+.macro TID_TO_TCB tid
+        shr	$VALID_THREADNO_SHIFT, \tid
+#if defined(CONFIG_STATIC_TCBS)
+        andl    $VALID_THREADNO_MASK, \tid
+        add     static_tcb_array, \tid
+#else
+	andl	$(VALID_THREADNO_MASK << KTCB_BITS), \tid
+	add	$KTCB_AREA_START, \tid
+#endif
 .endm
 
 .macro CURRENT_TCB reg

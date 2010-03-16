@@ -381,7 +381,7 @@ static inline bool has_exregs_perms(tcb_t * dst, threadid_t dst_tid)
 #if defined(CONFIG_X_PAGER_EXREGS)
     // all threads in pager address space can ex-regs
     threadid_t pager_tid = dst->get_pager(); // make copy
-    tcb_t * pager = dst->get_space()->get_tcb(pager_tid);
+    tcb_t * pager = tcb_t::get_tcb(pager_tid);
 
     if ( pager->myself_global == pager_tid &&
 	 pager->get_space() == space )
@@ -414,9 +414,7 @@ SYS_EXCHANGE_REGISTERS (threadid_t dst_tid, word_t control,
     // thread ID before kernel entry.  If user somehow tricked kernel
     // entry with a local ID this will be handled in the test case
     // below.
-
-    space_t * space = get_current_space();
-    tcb_t * dst = space->get_tcb(dst_tid);
+    tcb_t * dst = tcb_t::get_tcb(dst_tid);
 
     // Only allow exregs on:
     //  - active threads
@@ -426,7 +424,7 @@ SYS_EXCHANGE_REGISTERS (threadid_t dst_tid, word_t control,
     if ((! dst->is_activated ()) || (! has_exregs_perms(dst, dst_tid)) )
     {
     
-	get_current_tcb ()->set_error_code (EINVALID_THREAD);
+	current->set_error_code (EINVALID_THREAD);
 	return_exchange_registers (threadid_t::nilthread (), 0, 0, 0, 0,
 				   threadid_t::nilthread (), 0);
     }

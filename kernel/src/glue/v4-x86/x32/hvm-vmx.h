@@ -86,10 +86,6 @@ class x86_exceptionframe_t;
 
 class x32_hvm_vmx_t
 {
-public:
-    /* Get TCB belonging to this VCPU. */
-    tcb_t *get_tcb () { return (tcb_t *) ((word_t) this & KTCB_MASK); };
-
 protected:
     bool load_vmcs()
 	{ return (vmcs && vmcs->load()); }

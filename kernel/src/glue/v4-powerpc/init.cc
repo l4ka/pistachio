@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/init.cc
- * Description:	Kernel second stage initialization.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     glue/v4-powerpc/init.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,14 +26,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: init.cc,v 1.62 2003/12/11 13:09:41 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kmemory.h>
 #include <mapping.h>
+#include <generic/ctors.h>
 
 #include INC_ARCH(page.h)
 #include INC_ARCH(phys.h)
@@ -41,9 +43,17 @@
 #include INC_ARCH(cache.h)
 #include INC_ARCH(ibm750.h)
 #include INC_ARCH(pvr.h)
+#include INC_ARCH(swtlb.h)
 
+#ifdef CONFIG_PLAT_OFPPC
 #include INC_PLAT(1275tree.h)
 #include INC_PLAT(ofppc.h)
+#endif
+#ifdef CONFIG_PLAT_PPC44X
+#include INC_PLAT(fdt.h)
+#endif
+
+#include INC_PLAT(platform.h)
 
 #include INC_API(tcb.h)
 #include INC_API(space.h)
@@ -55,7 +65,9 @@
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(space.h)
 #include INC_GLUE(bat.h)
+#include INC_GLUE(memcfg.h)
 
+EXTERN_KMEM_GROUP(kmem_misc);
 
 word_t decrementer_interval = 0;
 word_t cpu_count = 1;
@@ -67,14 +79,15 @@ static SECTION(".init.data") volatile cpuid_t cpu_start_id;
 
 
 // Debug consoles
-#if defined(CONFIG_KDB_CONS_OF1275)
-extern void init_of1275_console( word_t entry );
-#endif
 #if defined(CONFIG_KDB_CONS_PSIM_COM)
 extern void init_psim_com_console();
 #endif
+#if defined(CONFIG_KDB_CONS_OF1275)
+extern void init_of1275_console( word_t entry );
+#endif
 
-static void fatal( char *msg )
+__attribute__((unused)) 
+static void fatal( char *msg ) 
 {
     printf( "Fatal error: %s\n", msg );
     while( 1 ) ;
@@ -84,8 +97,8 @@ SECTION(".init") void timer_init( word_t cpu_hz, word_t bus_hz )
 {
     word_t decrementer_hz;
 
-    decrementer_hz = bus_hz / 4;
-    decrementer_interval = TIMER_TICK_LENGTH * decrementer_hz / 1000000; 
+    decrementer_hz = bus_hz / 1;
+    decrementer_interval = TIMER_TICK_LENGTH * (decrementer_hz / 1000) / 1000; 
     TRACE_INIT( "Decrementer %d (KHz), timer tick %d (us), "
 	        "decrementer ticks %d\n", decrementer_hz/1000, 
 	        TIMER_TICK_LENGTH, decrementer_interval );
@@ -97,22 +110,15 @@ SECTION(".init") void timer_init( word_t cpu_hz, word_t bus_hz )
  *
  *****************************************************************************/
 
-SECTION(".init") void of1275_map( addr_t low, addr_t high )
-    /* Map the position-independent device tree, and install.
-     */
-{
-    word_t size = (word_t)high - (word_t)low;
+#if defined(CONFIG_PLAT_OFPPC)
 
-    addr_t vaddr = get_kernel_space()->map_device( low, size, true );
-
-    get_of1275_tree()->init( (char *)vaddr );
-}
-
-SECTION(".init") void of1275_init( kernel_interface_page_t *kip )
+SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
     /* Finds and installs the position-independent copy of the
      * OpenFirmware device tree.
      */
 {
+    addr_t vaddr = NULL;
+
     // Look for the position-independent copy of the OpenFirmware device tree
     // in the kip's memory descriptors.
     for( word_t i = 0; i < kip->memory_info.get_num_descriptors(); i++ ) 
@@ -121,17 +127,62 @@ SECTION(".init") void of1275_init( kernel_interface_page_t *kip )
 	if( (mdesc->type() == OF1275_KIP_TYPE) && 
 		(mdesc->subtype() == OF1275_KIP_SUBTYPE) )
 	{
-	    of1275_map( mdesc->low(), mdesc->high() );
-	    return;
+	    vaddr = get_kernel_space()->map_device( mdesc->low(), mdesc->size(), pgent_t::cache_standard);
+	    break;
 	}
     }
 
     // Not found.  Things won't work, but ...
-    printf( "*** Error: the boot loader didn't supply a copy of the\n"
-	    "*** Open Firmware device tree!\n" );
-    get_of1275_tree()->init( NULL );
+    if (!vaddr)
+	printf( "*** Error: the boot loader didn't supply a copy of the\n"
+		"*** Open Firmware device tree!\n" );
+    get_of1275_tree()->init( vaddr );
+
+#if defined(CONFIG_KDB_CONS_PSIM_COM)
+    init_psim_com_console();
+#endif
 }
 
+#elif defined(CONFIG_PLAT_PPC44X)
+
+static fdt_t *fdt = NULL;
+fdt_t *get_fdt()
+{
+    if (fdt)
+	return fdt;
+    else
+	return (fdt_t*)get_kip()->boot_info;
+}
+
+SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
+{
+    fdt_t *fdtmapping;
+    int size = KERNEL_PAGE_SIZE * 8;
+#warning VU: FDT mapping is a hard-coded hack
+    if (!kip->boot_info)
+	panic("*** Error: FDT not set\n");
+
+    // XXX: get fdt size!!!
+    addr_t page = get_kernel_space()->
+	map_device( kip->boot_info, size, pgent_t::cache_standard );
+
+    fdtmapping = (fdt_t*)addr_offset(page, kip->boot_info & (KERNEL_PAGE_SIZE - 1));
+    TRACE_INIT("Remapping FDT from %p to %p (sz=%x, magic=%x)\n", kip->boot_info, 
+	       fdtmapping, fdtmapping->size, fdtmapping->magic);
+    if (!fdtmapping->is_valid())
+	panic("Invalid FDT (%p)--can't continue\n");
+
+    fdt = (fdt_t*)kmem.alloc(kmem_misc, size);
+    memcpy(fdt, fdtmapping, size);
+    // XXX: unmap FDT
+}
+
+void intctrl_t::map()
+{
+    ctrl = (bgic_t*)get_kernel_space()->
+	map_device(phys_addr, mem_size, pgent_t::cache_inhibited);
+}
+#endif
 
 /*****************************************************************************
  *
@@ -168,7 +219,7 @@ SECTION(".init") static void kip_mem_init( kernel_interface_page_t *kip, word_t 
     // Since the system calls are exposed to the users, define
     // a region of the uppger 1gig as accessible to the user.
     kip->memory_info.insert( memdesc_t::shared, true,
-	    ofppc_syscall_start(), ofppc_syscall_end() );
+	    memcfg_syscall_start(), memcfg_syscall_end() );
 
     // Define the area reserved for the exception vectors.
     kip->memory_info.insert( memdesc_t::reserved, false, 
@@ -176,12 +227,12 @@ SECTION(".init") static void kip_mem_init( kernel_interface_page_t *kip, word_t 
 
     // Define the area reserved for kernel code.
     kip->memory_info.insert( memdesc_t::reserved, false,
-	    virt_to_phys(ofppc_start_code()), 
-	    virt_to_phys(ofppc_end_code()) );
+	    virt_to_phys(memcfg_start_code()), 
+	    virt_to_phys(memcfg_end_code()) );
 
     // Define the area reserved for kernel data.
     kip->memory_info.insert( memdesc_t::reserved, false,
-	    virt_to_phys(ofppc_start_data()), 
+	    virt_to_phys(memcfg_start_data()), 
 	    (addr_t)bootmem_phys_high );
 }
 
@@ -193,7 +244,7 @@ SECTION(".init") static void kip_cpu_init( kernel_interface_page_t *kip )
     if( cpu_khz == 0 ) 
     {
     	word_t cpu_hz, bus_hz;
-	if( !ofppc_get_cpu_speed(&cpu_hz, &bus_hz) )
+	if( !get_cpu_speed(get_current_cpu(), &cpu_hz, &bus_hz) )
 	{
 	    printf( "Error: unable to obtain the cpu and bus speeds.\n" );
 	    cpu_hz = bus_hz = 0;
@@ -234,16 +285,17 @@ SECTION(".init") static void kip_sc_init( kernel_interface_page_t *kip )
  *                More init functions, run on the boot stack
  *
  *****************************************************************************/
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
 INLINE word_t cpu_phys_area( cpuid_t cpu )
 {
-    word_t cpu_phys = (word_t)ofppc_start_cpu_phys();
+    word_t cpu_phys = (word_t)memcfg_start_cpu_phys();
     ASSERT( (cpu_phys & BAT_128K_PAGE_MASK) == cpu_phys );
     return cpu_phys + cpu*KB(128);
 }
 
 INLINE word_t cpu_area_size( void )
 {
-    return (word_t)ofppc_end_cpu_phys() - (word_t)ofppc_start_cpu_phys();
+    return (word_t)memcfg_end_cpu_phys() - (word_t)memcfg_start_cpu_phys();
 }
 
 #if defined(CONFIG_SMP)
@@ -280,25 +332,51 @@ SECTION(".init") static word_t do_kmem_init()
 #else
     bootmem_high = bootmem_low + KB(512);
 #endif
+    TRACE_INIT("kmem init %x-%x\n", bootmem_low, bootmem_high);
     kmem.init( (addr_t)bootmem_low, (addr_t)bootmem_high );
     tot = bootmem_high - bootmem_low;
 
     // Claim the memory used by the exception vector code.
-    size = (word_t)ofppc_start_kernel() - phys_to_virt(PHYS_START_AVAIL);
+    size = (word_t)memcfg_start_kernel() - phys_to_virt(PHYS_START_AVAIL);
     if( size )
 	kmem.add( (addr_t)phys_to_virt(PHYS_START_AVAIL), size );
     tot += size;
 
     // Claim the memory between the end of the kernel data section and
     // the start of the cpu data page.
-    size = cpu_phys_area(0) - (word_t)ofppc_end_data_phys();
+    size = cpu_phys_area(0) - (word_t)memcfg_end_data_phys();
+    TRACE_INIT("kmem add %x/ %x\n", phys_to_virt(memcfg_end_data_phys()), size);
     if( size )
-	kmem.add( phys_to_virt(ofppc_end_data_phys()), size );
+	kmem.add( phys_to_virt(memcfg_end_data_phys()), size );
     tot += size;
 
     TRACE_INIT( "Kernel boot mem: %d bytes\n", tot );
     return virt_to_phys(bootmem_high);
 }
+
+#elif defined(CONFIG_PPC_MMU_TLB)
+SECTION(".init") static void reclaim_cpu_kmem()
+{
+}
+
+SECTION(".init") static word_t do_kmem_init()
+{
+    addr_t bootmem_low, bootmem_high;
+    word_t tot;
+
+    // Allocate some initial boot mem, using pages after the first
+    // cpu data area.
+    bootmem_low = phys_to_virt( memcfg_end_cpu_phys() );
+    bootmem_high = addr_offset(bootmem_low, KB(3584));
+
+    TRACE_INIT("kmem init %p-%p\n", bootmem_low, bootmem_high);
+    kmem.init( bootmem_low, bootmem_high );
+    tot = (word_t)bootmem_high - (word_t)bootmem_low;
+
+    TRACE_INIT( "Kernel boot mem: %d bytes\n", tot );
+    return virt_to_phys((word_t)bootmem_high);
+}
+#endif
 
 /****************************************************************************
  *
@@ -326,6 +404,14 @@ static SECTION(".init") void perfmon_init( void )
 
 static SECTION(".init") void timer_start( void )
 {
+#ifdef CONFIG_PPC_BOOKE
+    ppc_tcr_t tcr;
+    tcr.auto_reload = 1;
+    tcr.dec_irq_enable = 1;
+    tcr.write();
+    ppc_set_decar( decrementer_interval );
+#endif
+
     ppc_set_dec( decrementer_interval );
 }
 
@@ -339,6 +425,11 @@ static SECTION(".init") void cpu_init( cpuid_t cpu )
 #if (CACHE_LINE_SIZE < 32)
 # error "Expecting a cache line size of 32-bytes or larger."
 #endif
+    install_exception_handlers(cpu);
+
+    get_kernel_space()->init_cpu_mappings(cpu);
+
+    call_cpu_ctors();
 
     /* Give the cpu some extra storage to spill state during an exception.
      * The storage must be safe to access at any time via a physical address.
@@ -347,12 +438,17 @@ static SECTION(".init") void cpu_init( cpuid_t cpu )
     static char spill_area[CPU_SPILL_SIZE] __attribute__ ((aligned(CACHE_LINE_SIZE)));
 
     char *cpu_spill = &spill_area[ cpu * CACHE_LINE_SIZE ];
-    ppc_set_sprg( SPRG_CPU, virt_to_phys((word_t)cpu_spill) );
+    ppc_set_sprg( SPRG_CPU, (word_t)virt_to_phys(cpu_spill) );
 
+#if 0
     // Initialize the time base to 0. */
     ppc_set_tbl( 0 );	// Make sure that tbu won't be upset by a carry.
     ppc_set_tbu( 0 );	// Clear the tbu.
     ppc_set_tbl( 0 );	// Clear the tbl.
+#else
+    /* don't reset time base but rather synchronize the cores */
+    ON_CONFIG_SMP(printf("Unsynchronized time base for CPU %d\n", cpu));
+#endif
 
     if( powerpc_version_t::read().is_750() )
 	ppc750_configure();
@@ -361,34 +457,20 @@ static SECTION(".init") void cpu_init( cpuid_t cpu )
 }
 
 #if defined(CONFIG_SMP)
-
-SECTION(".init") static void bat_map_cpu_data( cpuid_t cpu )
-{
-     ppc_bat_t bat;
-     bat.raw.upper = bat.raw.lower = 0;
-     bat.x.bepi = KERNEL_CPU_OFFSET >> BAT_BEPI;
-     bat.x.bl = BAT_BL_128K;
-     bat.x.vs = 1;
-     bat.x.brpn = cpu_phys_area(cpu) >> BAT_BRPN;
-     bat.x.m = 0;	/* We don't need memory coherency. */
-     bat.x.pp = BAT_PP_READ_WRITE;
-     ppc_set_cpu_dbat( l, bat.raw.lower );
-     ppc_set_cpu_dbat( u, bat.raw.upper );
-     isync();
-}
-
 /**
  * Continue initializing now that we have a tcb stack.
  */
 SECTION(".init") static void finish_cpu_init( void )
 {
+    TRACE_INIT("CPU %d initialized--enter wait loop\n", get_current_cpu());
+
     // Release the boot stack.
     cpu_start_lock.unlock();
 
     // Enable recoverable exceptions (for this cpu).
     ppc_set_msr( MSR_KERNEL );
 
-    get_interrupt_ctrl()->bat_map();
+    //get_interrupt_ctrl()->map();
     kip_cpu_init( get_kip() );
 
     // Wait for kernel initialization to quiesce, and then enter the idle
@@ -401,28 +483,37 @@ SECTION(".init") static void finish_cpu_init( void )
     TRACE_INIT( "Going to idle cpu %d.\n", get_current_cpu() );
 }
 
-extern "C" SECTION(".init") void l4_powerpc_cpu_start( void )
+void dump_tlb();
+extern "C" SECTION(".init") NORETURN void l4_powerpc_cpu_start( cpuid_t cpu )
 {
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     /* NOTE: do not perform i/o until the page hash is activated!
      * NOTE: do not cause any exceptions that will expect a valid tcb stack!
      *       i/o must not cause exceptions.
+     * NOTE: cpu parameter is invalid for non-TLB based systems, fetch
+     *	     from cpu_start_id 
      */
-    cpuid_t cpu = cpu_start_id;
+    cpu = cpu_start_id;
+#endif
 
-    bat_map_cpu_data( cpu );
     cpu_init( cpu );
 
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     get_pghash()->get_htab()->bat_map();
     get_pghash()->get_htab()->activate( get_kernel_space()->get_segment_id() );
     /* i/o is now possible. */
+#elif defined(CONFIG_PPC_MMU_TLB)
+    /* kick startup mappings */
+    setup_kernel_mappings();
+#endif
 
     get_current_scheduler()->init( false );
     get_idle_tcb()->notify( finish_cpu_init );
     get_current_scheduler()->start( cpu );
 
+    /* not reached */
     while( 1 );
 }
-
 #endif	/* CONFIG_SMP */
 
 /****************************************************************************
@@ -433,6 +524,7 @@ extern "C" SECTION(".init") void l4_powerpc_cpu_start( void )
 
 static SECTION(".init") void install_extern_int_handler( void )
 {
+#ifndef CONFIG_PPC_BOOKE
     extern word_t _except_extern_int[], _except_extern_int_end[];
     word_t dst;
 
@@ -441,6 +533,7 @@ static SECTION(".init") void install_extern_int_handler( void )
     dst = KERNEL_OFFSET + PHYS_EXCEPT_START + EXCEPT_OFFSET_EXTERNAL_INT;
     memcpy_cache_flush( (word_t *)dst, (word_t *)_except_extern_int,
 	    (word_t)_except_extern_int_end - (word_t)_except_extern_int );
+#endif
 }
 
 #if defined(CONFIG_SMP)
@@ -449,6 +542,7 @@ SECTION(".init") static void start_all_cpus( void )
     for( cpuid_t cpu = 1; cpu < cpu_count; cpu++ )
     {
 	cpu_start_lock.lock();	// Unlocked by the target cpu in l4_powerpc_cpu_start().
+	printf("CPU0: starting CPU %d\n", cpu);
 	cpu_start_id = cpu;	// cpu_start_id must be protected by the lock.
 	get_interrupt_ctrl()->start_new_cpu( cpu );
     }
@@ -462,13 +556,11 @@ SECTION(".init") static void finish_api_init( void )
     ppc_set_msr( MSR_KERNEL );
 
     // We now have a valid stack and can handle page faults.
-    init_kernel_space();
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     get_pghash()->get_htab()->activate( get_kernel_space()->get_segment_id() );
-
-    of1275_init( get_kip() );
-#if defined(CONFIG_KDB_CONS_PSIM_COM)
-    init_psim_com_console();
 #endif
+
+    firmware_init( get_kip() );
 
     kip_cpu_init( get_kip() );
     kip_sc_init( get_kip() );
@@ -476,7 +568,7 @@ SECTION(".init") static void finish_api_init( void )
     get_interrupt_ctrl()->init_arch();
 
 #if defined(CONFIG_SMP)
-    cpu_count = ofppc_get_cpu_count();
+    cpu_count = get_cpu_count();
     TRACE_INIT( "Detected %d processors\n", cpu_count );
 
     reclaim_cpu_kmem();
@@ -503,7 +595,12 @@ SECTION(".init") static void finish_api_init( void )
  *
  ****************************************************************************/
 
-static SECTION(".init") void validate_kernel_bats( void )
+#ifdef CONFIG_PPC_MMU_SEGMENTS
+
+/*
+ * function validates bat mappings
+ */
+static SECTION(".init") void setup_kernel_mappings( void )
 {
     ppc_bat_t bat;
     word_t size;
@@ -519,7 +616,7 @@ static SECTION(".init") void validate_kernel_bats( void )
     size = BAT_SMALL_PAGE_SIZE << (32 - count_leading_zeros(bat.x.bl));
     code_bat_end = code_bat_start + size;
 
-    size = (word_t)ofppc_end_code() - (word_t)ofppc_start_kernel();
+    size = (word_t)memcfg_end_code() - (word_t)memcfg_start_kernel();
     if( size > (code_bat_end - code_bat_start) )
 	fatal( "The kernel code size exceeds the code BAT size." );
 
@@ -532,13 +629,16 @@ static SECTION(".init") void validate_kernel_bats( void )
     size = BAT_SMALL_PAGE_SIZE << (32 - count_leading_zeros(bat.x.bl));
     data_bat_end = data_bat_start + size;
 
-    size = (word_t)ofppc_end_data() - (word_t)ofppc_start_data();
+    size = (word_t)memcfg_end_data() - (word_t)memcfg_start_data();
     if( size > (data_bat_end - data_bat_start) )
 	fatal( "The kernel data size exceeds the data BAT size." );
 }
 
-static SECTION(".init") void install_exception_handlers( void )
+static SECTION(".init") void install_exception_handlers( cpuid_t cpu )
 {
+    if (cpu != 0)
+	return;
+
     /* Deactivate machine check exceptions while we install the exception
      * vectors.  We need valid exception vectors to handle machine check
      * exceptions.
@@ -550,8 +650,8 @@ static SECTION(".init") void install_exception_handlers( void )
 
     // Copy the exceptions.
     memcpy_cache_flush( (word_t *)(KERNEL_OFFSET + PHYS_EXCEPT_START),
-	    (word_t *)ofppc_start_except(),
-	    (word_t)ofppc_end_except() - (word_t)ofppc_start_except() );
+	    (word_t *)memcfg_start_except(),
+	    (word_t)memcfg_end_except() - (word_t)memcfg_start_except() );
 
     /* Reenable machine check exceptions.
      */
@@ -559,6 +659,9 @@ static SECTION(".init") void install_exception_handlers( void )
     ppc_set_msr( msr );
     isync();
 }
+#endif /* CONFIG_PPC_MMU_SEGMENTS */
+
+
 
 /****************************************************************************
  *
@@ -568,38 +671,53 @@ static SECTION(".init") void install_exception_handlers( void )
 
 extern "C" SECTION(".init") void l4_powerpc_init( word_t r3, word_t r4, word_t r5 )
 {
+    init_console();
 #if defined(CONFIG_KDB_CONS_OF1275)
-    init_of1275_console( r5 );
+    init_of1275_console( r5 ); // XXX: use standard init routine!
 #endif
 
-    /* Primary cpu init.
+    call_global_ctors();
+    call_node_ctors();
+
+    /* Primary cpu init. */
+    init_hello();
+
+    setup_kernel_mappings();
+    install_exception_handlers(0);
+    
+    /* Init all of our memory related stuff.
      */
-    validate_kernel_bats();
-    install_exception_handlers();
+    word_t bootmem_phys_high = do_kmem_init();
+    kip_mem_init( get_kip(), bootmem_phys_high );
+    
+    TRACE_INIT("Initializing kernel space\n");
+    space_t::init_kernel_space();
+
+    TRACE_INIT("Initializing TCBs\n");
+    tcb_t::init_tcbs();
+
+    TRACE_INIT("Initializing boot CPU\n");
     cpu_init( 0 );
 
-    /* Init kdb.  It should be completely independent of the kernel.
-     */
+    TRACE_INIT("Initializing kernel debugger\n");
     if( get_kip()->kdebug_init )
 	get_kip()->kdebug_init();
 
     ASSERT( sizeof(utcb_t) == 512 );
 
-    /* Init all of our memory related stuff.
-     */
-    word_t bootmem_phys_high = do_kmem_init();
-    kip_mem_init( get_kip(), bootmem_phys_high );
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     if( !get_pghash()->init((word_t)kip_get_phys_mem(get_kip())) )
 	fatal( "unable to find a suitable location for the page hash." );
+#endif
+    TRACE_INIT("Initializing mapping database\n");
     init_mdb();
 
     /* Initialize the idle tcb, and push notify frames for starting
      * the idle thread. */
-    get_current_scheduler()->init();
+    get_current_scheduler()->init( true );
     /* Push a notify frame for the second stage of initialization, which
      * executes in the context of the idle thread.  This must execute
      * before the scheduler's notify frames. */
     get_idle_tcb()->notify( finish_api_init );
-    get_current_scheduler()->start(); /* Does not return. */
+    get_current_scheduler()->start( 0 ); /* Does not return. */
 }
-

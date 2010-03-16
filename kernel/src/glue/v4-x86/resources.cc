@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/resources.cc
  * Description:   
@@ -49,7 +49,7 @@ void thread_resources_t::load(tcb_t * tcb)
 	// interruptions, the saved_partner will be nil.
 	threadid_t ptid = tcb->get_saved_partner ().is_nilthread () ?
 	    tcb->get_partner () : tcb->get_saved_partner ();
-	tcb_t *partner = tcb->get_space()->get_tcb(ptid);
+	tcb_t *partner = tcb_t::get_tcb(ptid);
 	
 	for (word_t i = 0; i < COPY_AREA_COUNT; i++)
 	    tcb->space->populate_copy_area (i, tcb, partner->get_space(), tcb->get_cpu());
@@ -81,7 +81,7 @@ void thread_resources_t::load(tcb_t * tcb)
 	// communication partner.
 	threadid_t ptid = tcb->get_saved_partner ().is_nilthread () ?
 	    tcb->get_partner () : tcb->get_saved_partner ();
-	tcb_t * partner = tcb->get_space ()->get_tcb (ptid);
+	tcb_t * partner = tcb_t::get_tcb (ptid);
 	u32_t new_pdir = (u32_t)
 	    partner->get_space ()->get_top_pdir_phys (partner->get_cpu ());
 

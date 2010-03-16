@@ -24,7 +24,7 @@ INLINE bool rr_sched_ktcb_t::delay_preemption(tcb_t *tcb)
     bool ret; 
 	    
     // we always allow ourself to delay our preemption
-    if (get_tcb() == tcb)
+    if (addr_to_tcb(this) == tcb)
 	ret = true;
     else if ( sensitive_prio < tcb->sched_state.get_priority() )
 	ret = false;
@@ -78,7 +78,7 @@ INLINE void sched_ktcb_t::set_timeout(u64_t absolute_time, const bool enqueue)
     absolute_timeout = absolute_time;
     
     if (enqueue)
-        get_current_scheduler()->enqueue_timeout(get_tcb());
+        get_current_scheduler()->enqueue_timeout(addr_to_tcb(this));
 }
 
 INLINE void sched_ktcb_t::set_timeout(time_t time)
@@ -91,10 +91,10 @@ INLINE void sched_ktcb_t::set_timeout(time_t time)
 
 INLINE void sched_ktcb_t::cancel_timeout()
 {
-    if (EXPECT_TRUE( !get_tcb()->queue_state.is_set(queue_state_t::wakeup)) )
+    if (EXPECT_TRUE( !addr_to_tcb(this)->queue_state.is_set(queue_state_t::wakeup)) )
 	return;
 	
-    get_current_scheduler()->dequeue_timeout(get_tcb());
+    get_current_scheduler()->dequeue_timeout(addr_to_tcb(this));
 }
 
 INLINE void sched_ktcb_t::sys_thread_switch()
@@ -103,16 +103,16 @@ INLINE void sched_ktcb_t::sys_thread_switch()
     /* user cooperatively preempts */
     if (get_maximum_delay() < get_init_maximum_delay() )
     {
-	get_tcb()->set_preempt_flags( get_tcb()->get_preempt_flags().clear_pending() );
+	addr_to_tcb(this)->set_preempt_flags( addr_to_tcb(this)->get_preempt_flags().clear_pending() );
 	/* refresh max delay */
 	set_maximum_delay(get_init_maximum_delay());
-	TRACEPOINT(SCHEDULE_PM_DELAY_REFRESH, "delayed preemption refresh for %t\n", get_tcb());
+	TRACEPOINT(SCHEDULE_PM_DELAY_REFRESH, "delayed preemption refresh for %t\n", addr_to_tcb(this));
     }
     
     /* eat up timeslice - we get a fresh one */
     sched_ktcb_t *tsched_state = &scheduler->get_accounted_tcb()->sched_state;
     tsched_state->account_timeslice(tsched_state->get_timeslice());
-    scheduler->end_of_timeslice (get_tcb());
+    scheduler->end_of_timeslice (addr_to_tcb(this));
     scheduler->schedule();
 
 }
@@ -357,7 +357,7 @@ INLINE bool scheduler_t::is_scheduler(tcb_t *tcb, tcb_t *dest_tcb)
 
     // are we in the same address space as the scheduler of the thread?
     threadid_t scheduler_tid = dest_tcb->sched_state.get_scheduler();
-    tcb_t * scheduler_tcb = tcb->get_space()->get_tcb(scheduler_tid);
+    tcb_t * scheduler_tcb = tcb_t::get_tcb(scheduler_tid);
     
     if (tcb->get_global_id() != scheduler_tid || 
 	(tcb->get_space()    != scheduler_tcb->get_space()))

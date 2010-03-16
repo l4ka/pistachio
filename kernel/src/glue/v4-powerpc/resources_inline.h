@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     glue/v4-powerpc/resources_inline.h
- * Description:   powerpc specific resources
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: resources_inline.h,v 1.7 2003/09/24 19:04:51 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #ifndef __GLUE__V4_POWERPC__RESOURCES_INLINE_H__
@@ -49,67 +50,69 @@ INLINE void thread_resources_t::fpu_unavail_exception( tcb_t *tcb )
     this->restore_fpu( tcb );
 }
 
-INLINE addr_t thread_resources_t::copy_area_address( addr_t addr )
-{
-    addr = change_segment( addr, COPY_AREA_SEGMENT );
-    return addr;
-}
-
 INLINE addr_t thread_resources_t::copy_area_real_address( tcb_t *src, addr_t addr )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&src->resource_bits;
-
-    addr =  change_segment( addr, bits->get_copy_area_dst_seg() );
-    return addr;
+    return addr_offset(addr, copy_area_offset - COPY_AREA_START);
 }
 
-INLINE void thread_resources_t::setup_copy_area( tcb_t *src, tcb_t *dst, 
-	addr_t dst_addr )
+INLINE void thread_resources_t::setup_copy_area( tcb_t *src, addr_t *saddr, 
+						 tcb_t *dst, addr_t *daddr )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&src->resource_bits;
-    bits->enable_copy_area( dst_addr );
+    copy_area_offset = (word_t)*daddr & ~(COPY_AREA_SIZE - 1);
+    *daddr = addr_offset((addr_t)COPY_AREA_START, (word_t)*daddr & (COPY_AREA_SIZE - 1));
+    //TRACEF("copy area: offset: %08x, dst: %p\n", copy_area_offset, *daddr);
+    src->resource_bits += COPY_AREA;
 }
 
+#ifdef CONFIG_PPC_MMU_SEGMENTS
 INLINE void thread_resources_t::enable_copy_area( tcb_t *src )
 {
     ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&src->resource_bits;
 
-    tcb_t *partner = src->get_space()->get_tcb( src->get_partner() );
+    tcb_t *partner = tcb_t::get_tcb( src->get_partner() );
     ppc_segment_t partner_seg = partner->get_space()->get_segment_id();
 
     // Change the copy area segment register to point into the target space.
+#warning VU: copy area code is inorrect for tunnelled PFs
     isync();
     ppc_set_sr( COPY_AREA_SEGMENT, 
-	    partner_seg.raw | bits->get_copy_area_dst_seg() );
+		partner_seg.raw | bits->get_copy_area_dst_seg() );
     isync();
 }
+INLINE void thread_resources_t::flush_copy_area( tcb_t *tcb ) { }
+
+#elif defined(CONFIG_PPC_MMU_TLB)
+INLINE void thread_resources_t::enable_copy_area( tcb_t *src ) { }
+INLINE void thread_resources_t::flush_copy_area( tcb_t *tcb )
+{
+    space_t *space = tcb->get_space();
+    space->flush_tlb(space, (addr_t)COPY_AREA_START, (addr_t)COPY_AREA_END);
+}
+#endif
 
 INLINE void thread_resources_t::disable_copy_area( tcb_t *tcb )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&tcb->resource_bits;
-
-    bits->disable_copy_area();
+    if (tcb->resource_bits.have_resource(COPY_AREA))
+    {
+	//TRACEF("disable copy area\n");
+	flush_copy_area(tcb);
+	tcb->resource_bits -= COPY_AREA;
+    }
 }
 
 INLINE void thread_resources_t::set_kernel_ipc( tcb_t *tcb )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&tcb->resource_bits;
-
-    bits->set_kernel_ipc();
+    tcb->resource_bits += KERNEL_IPC;
 }
 
 INLINE void thread_resources_t::clr_kernel_ipc( tcb_t *tcb )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&tcb->resource_bits;
-
-    bits->clr_kernel_ipc();
+    tcb->resource_bits -= KERNEL_IPC;
 }
 
 INLINE void thread_resources_t::set_kernel_thread( tcb_t *tcb )
 {
-    ppc_resource_bits_t *bits = (ppc_resource_bits_t *)&tcb->resource_bits;
-
-    bits->set_kernel_thread();
+    tcb->resource_bits += KERNEL_THREAD;
 }
 
 #endif /* !__GLUE__V4_POWERPC__RESOURCES_H__ */

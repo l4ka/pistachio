@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     include/glue/v4-powerpc/asm.h
- * Description:   Assembler macros
+ * File path:     src/glue/v4-powerpc/asm.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -34,6 +35,7 @@
 #define __GLUE__V4_POWERPC__ASM_H__
 
 #include <asmsyms.h>
+#include <tcb_layout.h>
 
 #define NILTHREAD	0
 #define LOCAL_TID_MASK	0x3f

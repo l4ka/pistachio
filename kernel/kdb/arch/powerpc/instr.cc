@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	kdb/arch/powerpc/instr.cc
- * Description:	Deal with instructions, such as single stepping.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     kdb/arch/powerpc/instr.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: instr.cc,v 1.18 2004/06/02 15:55:56 joshua Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 #include <kdb/kdb.h>
@@ -87,13 +88,13 @@ void dbg_addr_disasm( word_t addr )
 
 CMD(cmd_single_step, cg)
 {
-    except_info_t *frame = (except_info_t *)kdb.kdb_param;
+    debug_param_t *param = (debug_param_t *)kdb.kdb_param;
 
-    if( frame == NULL )
+    if( param == NULL )
 	printf( "KDB error: unknown exception state, unable to single step.\n");
     else {
-	dbg_addr_disasm( frame->regs->srr0_ip );
-	frame->regs->srr1_flags = MSR_SET( frame->regs->srr1_flags, MSR_SE );
+	dbg_addr_disasm( param->frame->srr0_ip );
+	param->frame->srr1_flags = MSR_SET( param->frame->srr1_flags, MSR_SE );
 	return CMD_QUIT;
     }
 
@@ -102,14 +103,14 @@ CMD(cmd_single_step, cg)
 
 CMD(cmd_branch_trace, cg)
 {
-    except_info_t *frame = (except_info_t *)kdb.kdb_param;
+    debug_param_t *param = (debug_param_t *)kdb.kdb_param;
 
-    if( frame == NULL )
+    if( param == NULL )
 	printf( "KDB error: unknown exception state, "
 		"unable to branch trace.\n" );
     else {
-	dbg_addr_disasm( frame->regs->srr0_ip );
-	frame->regs->srr1_flags = MSR_SET( frame->regs->srr1_flags, MSR_BE );
+	dbg_addr_disasm( param->frame->srr0_ip );
+	param->frame->srr1_flags = MSR_SET( param->frame->srr1_flags, MSR_BE );
 	return CMD_QUIT;
     }
 
@@ -118,14 +119,14 @@ CMD(cmd_branch_trace, cg)
 
 CMD(cmd_srr0_disasm, cg)
 {
-    except_info_t *frame = (except_info_t *)kdb.kdb_param;
+    debug_param_t *param = (debug_param_t *)kdb.kdb_param;
 
-    if( frame == NULL ) {
+    if( param == NULL ) {
 	printf( "KDB error: no exception state to disassemble.\n" );
 	return CMD_NOQUIT;
     }
 
-    dbg_addr_disasm( frame->regs->srr0_ip );
+    dbg_addr_disasm( param->frame->srr0_ip );
     return CMD_NOQUIT;
 }
 

@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, Jan Stoess, IBM Corporation
  *                
  * File path:     api/v4/thread.cc
- * Description:   thread manipulation
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: thread.cc,v 1.96 2006/11/17 09:40:12 stoess Exp $
+ * $Id$
  *                
  ********************************************************************/
 
@@ -50,6 +51,46 @@
 #include <kdb/tracepoints.h>
 
 DECLARE_TRACEPOINT(SYSCALL_THREAD_CONTROL);
+DECLARE_KMEM_GROUP(kmem_tcb);
+
+whole_tcb_t __whole_dummy_tcb  __attribute__((aligned(sizeof(whole_tcb_t))));
+const tcb_t *__dummy_tcb = (const tcb_t *) &__whole_dummy_tcb;	    
+
+#if defined(CONFIG_STATIC_TCBS)
+tcb_t *tcb_t::tcb_array[TOTAL_KTCBS];
+addr_t static_tcb_array;
+
+#warning fixme: remove iteration over tcbs in is_tcb()
+/**
+ * Static TCBS, a linear array
+ */
+tcb_t* tcb_t::allocate(threadid_t dest)
+{
+    word_t idx = dest.get_threadno();
+    ASSERT(idx < TOTAL_KTCBS);
+    if (tcb_array[idx] == get_dummy_tcb())
+	tcb_array[idx] = (tcb_t*) kmem.alloc(kmem_tcb, KTCB_SIZE);
+    return tcb_array[idx];
+}
+
+void tcb_t::deallocate(threadid_t dest)
+{
+    word_t idx = dest.get_threadno();
+    ASSERT(idx < TOTAL_KTCBS);
+    tcb_t *tcb = tcb_array[idx];
+    tcb_array[idx] = get_dummy_tcb();
+    kmem.free(kmem_tcb, (addr_t)tcb, KTCB_SIZE);
+}
+void tcb_t::init_tcbs()
+{
+    // initialize thread array
+    for (word_t i = 0; i < TOTAL_KTCBS; i++)
+	tcb_array[i] = get_dummy_tcb();
+    
+    static_tcb_array = (addr_t) &tcb_t::tcb_array[0];
+}
+#endif /* defined(CONFIG_STATIC_TCBS) */
+
 
 
 void handle_ipc_error (void);
@@ -128,8 +169,7 @@ void thread_return()
 void tcb_t::init(threadid_t dest, sktcb_type_e type)
 {
     ASSERT(this);
-    allocate();
-
+    
     /* clear utcb and space */
     utcb = NULL;
     space = NULL;
@@ -1203,9 +1243,9 @@ create_root_server(threadid_t dest_tid, threadid_t scheduler_tid,
     ASSERT(pager_tid.is_global() || pager_tid.is_nilthread());
     ASSERT(!utcb_area.is_nil_fpage() && !(kip_area.is_nil_fpage()));
     
-    tcb_t * tcb = get_current_space()->get_tcb(dest_tid);
+    tcb_t * tcb = tcb_t::allocate(dest_tid);
     space_t * space = space_t::allocate_space();
-
+    
     /* VU: we always assume these calls succeed for the root servers
      * if not - we are in deep shit anyway */
     ASSERT(space);
@@ -1264,7 +1304,7 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	return_thread_control(0);
     }
 
-    tcb_t * dest_tcb = get_current_space()->get_tcb(dest_tid);
+    tcb_t * dest_tcb = tcb_t::get_tcb(dest_tid);
 
     /* interrupt thread id ? */
     if (dest_tid.get_threadno() < get_kip()->thread_info.get_system_base())
@@ -1301,9 +1341,11 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	    if (space->remove_tcb(dest_tcb, cpu))
 	    {
 		// was the last thread
-                space->free();
+		space->free();
                 space_t::free_space(space);
 	    }
+	    tcb_t::deallocate(dest_tid);
+
 
 	    // schedule if we've been running on this thread's timeslice
 	    if (!get_current_scheduler()->get_accounted_tcb()) 
@@ -1320,10 +1362,9 @@ SYS_THREAD_CONTROL (threadid_t dest_tid, threadid_t space_tid,
 	 * before checking it. If it already exists this is a no-op, otherwise
 	 * it saves unmapping the dummy tcb directly afterwards
 	 */
-	dest_tcb->allocate();
-
+	dest_tcb = tcb_t::allocate(dest_tid);
 	// get the tcb of the space 
-	tcb_t * space_tcb = get_current_space()->get_tcb(space_tid);
+	tcb_t * space_tcb = tcb_t::get_tcb(space_tid);
 
 	if (dest_tcb->exists())
 	{
@@ -1492,7 +1533,7 @@ void SECTION(".init") init_kernel_threads()
     // Create a dummy kernel thread.
     threadid_t ktid;
     ktid.set_global_id (get_kip ()->thread_info.get_system_base (), 1);
-    tcb_t * tcb = get_kernel_space ()->get_tcb (ktid);
+    tcb_t * tcb = tcb_t::get_tcb (ktid);
     tcb->create_kernel_thread (ktid, &kernel_utcb, sktcb_lo);
     tcb->set_state (thread_state_t::aborted);
 }

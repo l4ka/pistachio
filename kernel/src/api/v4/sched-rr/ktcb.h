@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/sched-rr/ktcb.h
  * Description:   
@@ -209,10 +209,7 @@ public:
     
 
 protected:
-    
-    tcb_t *get_tcb() 
-        { return (tcb_t *) ((word_t) this & KTCB_MASK);} 
-
+   
     u64_t		total_quantum;
     u64_t		timeslice_length;
     s64_t		current_timeslice;

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/sched-hs/ktcb.h
  * Description:   
@@ -50,9 +50,6 @@ public:
     ringlist_t<tcb_t>	ready_list;
     ringlist_t<tcb_t>	wait_list;
     
-    tcb_t *get_tcb() { return (tcb_t *) ((word_t) this & KTCB_MASK);} 
-
-   
     u64_t get_total_quantum()
 	{ return total_quantum; }
 
@@ -146,7 +143,7 @@ public:
     prio_queue_t * get_domain_prio_queue()
 	{ 
 #if !defined(BUILD_TCB_LAYOUT)
-            return (prio_queue_t *) ((word_t) get_tcb() + OFS_TCB_KERNEL_STACK);
+            return (prio_queue_t *) (((word_t) this & KTCB_MASK) + OFS_TCB_KERNEL_STACK);
 #endif
         }
     

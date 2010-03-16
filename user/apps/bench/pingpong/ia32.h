@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004-2010,  Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, Jan Stoess, IBM Corporation
  *                
  * File path:     bench/pingpong/ia32.h
- * Description:   IA32 specific pingpong functions
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,13 +27,12 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: ia32.h,v 1.4 2006/06/08 11:11:29 skoglund Exp $
+ * $Id$
  *                
  ********************************************************************/
 #include <l4/arch.h>
 
 #define L4_TRACEBUFFER
-#include <l4/tracebuffer.h>
 
 #define HAVE_HANDLE_ARCH_PAGEFAULT
 #define HAVE_READ_CYCLES

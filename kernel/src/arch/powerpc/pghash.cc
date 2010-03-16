@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	arch/powerpc/page.cc
- * Description:	Manipulates the ppc page hash table.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/arch/powerpc/pghash.cc
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,10 +26,10 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: pghash.cc,v 1.8 2003/09/24 19:05:30 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #include <debug.h>
 
@@ -125,7 +126,7 @@ SECTION(".init.memory") void ppc_htab_t::init( word_t phys_base,
 extern "C" void ppc_htab_install_real( void );
 extern "C" void ppc_htab_install_real_exit( void );
 
-SECTION(".init.memory") void ppc_htab_install( ppc_sdr1_t sdr1, ppc_segment_t segment_val )
+static inline void ppc_htab_install( ppc_sdr1_t sdr1, ppc_segment_t segment_val )
 {
     word_t real_entry;
     word_t msr_off_mask, msr_on_mask;

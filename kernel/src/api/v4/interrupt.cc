@@ -68,8 +68,7 @@ static void irq_thread()
     
     while(1)
     {
-	tcb_t * handler_tcb = 
-	    get_current_space()->get_tcb(current->get_irq_handler());
+	tcb_t * handler_tcb = tcb_t::get_tcb(current->get_irq_handler());
 
 	/* VU: when we are in the send queue the IRQ thread was busy
 	 * and the IRQ could not be delivered. Hence, we actually
@@ -127,7 +126,7 @@ void handle_interrupt(word_t irq)
     spin(76, get_current_cpu());
 
     threadid_t irq_tid = threadid_t::irqthread(irq);
-    tcb_t * irq_tcb = get_kernel_space()->get_tcb(irq_tid);
+    tcb_t * irq_tcb = tcb_t::get_tcb(irq_tid);
     scheduler_t *scheduler = get_current_scheduler();
     
     // some sanity checks
@@ -159,7 +158,7 @@ void handle_interrupt(word_t irq)
 
     // get the handler thread id
     threadid_t handler_tid = irq_tcb->get_irq_handler();
-    tcb_t * handler_tcb = get_kernel_space()->get_tcb(handler_tid);
+    tcb_t * handler_tcb = tcb_t::get_tcb(handler_tid);
 
     // if the handler TID is not valid -- abort the IRQ thread
     if (EXPECT_FALSE( handler_tcb->get_global_id() != handler_tid ))
@@ -232,14 +231,14 @@ static void do_xcpu_thread_control_interrupt(cpu_mb_entry_t * entry)
 bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 {
     // interrupt thread
-    tcb_t * irq_tcb = get_current_space()->get_tcb(irq_tid);
+    tcb_t * irq_tcb = tcb_t::get_tcb(irq_tid);
     word_t irq = irq_tid.get_irqno();
 
     TRACEPOINT (SYSCALL_THREAD_CONTROL_IRQ, "SYS_THREAD_CONTROL for IRQ%d (IRQ=%t, handler=%t)",
 		irq, TID(irq_tid), TID(handler_tid));
 
     // check for valid handler tid
-    tcb_t * handler_tcb = get_current_space()->get_tcb(handler_tid);
+    tcb_t * handler_tcb = tcb_t::get_tcb(handler_tid);
     if ( handler_tcb->get_global_id() != handler_tid )
 	return false;
 
@@ -249,11 +248,7 @@ bool thread_control_interrupt(threadid_t irq_tid, threadid_t handler_tid)
 	return false;
 
     // allocate before usage to avoid remapping...
-#ifdef CONFIG_STATIC_TCBS
     irq_tcb = tcb_t::allocate(irq_tid);
-#else
-    irq_tcb->allocate();
-#endif
 
     /* VU: IRQ TCBs always "exist" -- so we check whether they 
      * already have a UTCB */

@@ -19,7 +19,7 @@ EXTERN_TRACEPOINT(SCHEDULE_IDLE);
 
 INLINE void hs_sched_ktcb_t::account_pass() 
 {
-    tcb_t *tcb = get_tcb();
+    tcb_t *tcb = addr_to_tcb(this);
     while( tcb != get_idle_tcb() )
     {
 	ASSERT(tcb->is_local_cpu());
@@ -48,7 +48,7 @@ INLINE void hs_sched_ktcb_t::set_prio_queue( prio_queue_t *q )
 
 INLINE void hs_sched_ktcb_t::migrate_prio_queue(prio_queue_t *nq)
 {
-    tcb_t *tcb = get_tcb();
+    tcb_t *tcb = addr_to_tcb(this);
     scheduler_t *scheduler = get_current_scheduler();
     
     ASSERT(tcb->get_cpu() == get_current_cpu());
@@ -63,7 +63,7 @@ INLINE void hs_sched_ktcb_t::migrate_prio_queue(prio_queue_t *nq)
 
 INLINE bool hs_sched_ktcb_t::delay_preemption(tcb_t *dtcb)
 {	
-    tcb_t *stcb = get_tcb();
+    tcb_t *stcb = addr_to_tcb(this);
     
     if (stcb == dtcb)
 	return true;
@@ -93,8 +93,8 @@ INLINE bool hs_sched_ktcb_t::delay_preemption(tcb_t *dtcb)
     }
             
     TRACEPOINT (SCHEDULE_DETAILS, "dpm %t (d %t prio %x pass %d) - %t (d %t prio %x pass %d)\n",
-                stcb, ssktcb->get_tcb(), ssktcb->get_priority(), (word_t) ssktcb->get_pass(),
-                dtcb, dsktcb->get_tcb(), dsktcb->get_priority(), (word_t) dsktcb->get_pass());
+                stcb, addr_to_tcb(ssktcb), ssktcb->get_priority(), (word_t) ssktcb->get_pass(),
+                dtcb, addr_to_tcb(dsktcb), dsktcb->get_priority(), (word_t) dsktcb->get_pass());
 
     bool ret; 
 
@@ -105,8 +105,8 @@ INLINE bool hs_sched_ktcb_t::delay_preemption(tcb_t *dtcb)
     
     TRACEPOINT (SCHEDULE_DETAILS, "dpm %ssuccessful %t (d %t send prio %x delay %dus) - %t (d %t prio %x)\n",
                 (ret ? "un" : ""),
-                stcb, ssktcb->get_tcb(), ssktcb->sensitive_prio, current_max_delay,
-                dtcb, dsktcb->get_tcb(), dsktcb->get_priority());
+                stcb, addr_to_tcb(ssktcb), ssktcb->sensitive_prio, current_max_delay,
+                dtcb, addr_to_tcb(dsktcb), dsktcb->get_priority());
 
     return ret;
 }
@@ -162,7 +162,7 @@ INLINE void sched_ktcb_t::set_timeout(u64_t absolute_time, const bool enqueue)
     absolute_timeout = absolute_time;
     
     if (enqueue)
-	get_current_scheduler()->enqueue_timeout(get_tcb());
+	get_current_scheduler()->enqueue_timeout(addr_to_tcb(this));
 }
 
 INLINE void sched_ktcb_t::set_timeout(time_t time)
@@ -175,10 +175,10 @@ INLINE void sched_ktcb_t::set_timeout(time_t time)
 
 INLINE void sched_ktcb_t::cancel_timeout()
 {
-    if (EXPECT_TRUE( !get_tcb()->queue_state.is_set(queue_state_t::wakeup)) )
+    if (EXPECT_TRUE( !addr_to_tcb(this)->queue_state.is_set(queue_state_t::wakeup)) )
 	return;
 	
-    get_current_scheduler()->dequeue_timeout(get_tcb());
+    get_current_scheduler()->dequeue_timeout(addr_to_tcb(this));
 }
 
 INLINE void sched_ktcb_t::sys_thread_switch()
@@ -187,10 +187,10 @@ INLINE void sched_ktcb_t::sys_thread_switch()
     /* user cooperatively preempts */
     if (get_maximum_delay() < get_init_maximum_delay() )
     {
-        get_tcb()->set_preempt_flags( get_tcb()->get_preempt_flags().clear_pending() );
+        addr_to_tcb(this)->set_preempt_flags( addr_to_tcb(this)->get_preempt_flags().clear_pending() );
 	/* refresh max delay */
 	set_maximum_delay(get_init_maximum_delay());
-	TRACEPOINT(SCHEDULE_PM_DELAY_REFRESH, "delayed preemption refresh for %t\n", get_tcb());
+	TRACEPOINT(SCHEDULE_PM_DELAY_REFRESH, "delayed preemption refresh for %t\n", addr_to_tcb(this));
         
         tcb_t *atcb = get_current_scheduler()->get_accounted_tcb();
         if( atcb->is_local_cpu())
@@ -487,7 +487,7 @@ INLINE bool scheduler_t::is_scheduler(tcb_t *tcb, tcb_t *dest_tcb)
 
     // are we in the same address space as the scheduler of the thread?
     threadid_t scheduler_tid = dest_tcb->sched_state.get_scheduler();
-    tcb_t * scheduler_tcb = tcb->get_space()->get_tcb(scheduler_tid);
+    tcb_t * scheduler_tcb = tcb_t::get_tcb(scheduler_tid);
     
     if (tcb->get_global_id() != scheduler_tid || 
 	(tcb->get_space()    != scheduler_tcb->get_space()))
@@ -525,7 +525,7 @@ INLINE word_t scheduler_t::check_schedule_parameters(tcb_t *scheduler, schedule_
             if ((req.preemption_control.hs_extended_ctrl & 0xc) == req.preemption_control.hs_extended_ctrl)
                 return EOK;
         
-            tcb_t *domain_tcb = get_current_space()->get_tcb(req.time_control.tid);
+            tcb_t *domain_tcb = tcb_t::get_tcb(req.time_control.tid);
         
             /* Target and domain must be different. */
 

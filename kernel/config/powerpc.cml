@@ -1,44 +1,51 @@
 ######################################################################
-#		 
-# Copyright (C) 1999, 2000, 2001,  Karlsruhe University
-#		 
-# File path:	 config/powerpc.cml
-# Description:	 rules for Pistachio's PowerPC CML2 configuration system
-#		 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
-# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-#		 
-# $Id: powerpc.cml,v 1.10 2003/11/13 14:39:15 joshua Exp $
-#		 
+##                
+## Copyright (C) 1999-2010,  Karlsruhe University
+## Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+##                
+## File path:     config/powerpc.cml
+## Description:   
+##                
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer.
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in the
+##    documentation and/or other materials provided with the distribution.
+## 
+## THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+## ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+## ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
+## FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+## DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+## OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+## LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+## OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+## SUCH DAMAGE.
+##                
+## $Id$
+##                
 ######################################################################
 
 symbols
 
 ARCH_POWERPC	'PowerPC'
 powerpc_type	'Processor Type'
+CPU_POWERPC_PPC440	"440"
 CPU_POWERPC_IBM750	"750"
 CPU_POWERPC_PPC604	"604"
 
 powerpc_platform	'Platform'
 PLAT_OFPPC	"IEEE 1275 Open Firmware for PowerPC"
+PLAT_PPC44X	"44X Embedded Processor Platform"
+
+powerpc_subplatform	'Sub-Platform'
+PLAT_440_BGP	"BluegeneP"
+
 
 PPC_EXPOSE_OPIC	'Expose the interrupt controller to user space?' text
 The kernel initializes and configures the interrupt controller.  It walks
@@ -132,12 +139,59 @@ psim device tree file:
 If unsure about this option, answer yes.
 .
 
+KDB_CONS_BGP_JTAG	"Enable Bluegene/P JTAG console"
+KDB_CONS_BGP_TREE	"Enable Bluegene/P Tree console"
+
+
 ppc_debug_consoles	"Consoles"
 
 menu ppc_debug_consoles
 	KDB_CONS_OF1275
 	KDB_CONS_PSIM_COM
+	KDB_CONS_BGP_JTAG
+	KDB_CONS_BGP_TREE
 
-default KDB_CONS_OF1275 from y
-default KDB_CONS_PSIM_COM from y
+default KDB_CONS_OF1275 from n
+default KDB_CONS_PSIM_COM from n
 
+choices powerpc_type
+	CPU_POWERPC_PPC440
+	CPU_POWERPC_IBM750
+	CPU_POWERPC_PPC604
+	default CPU_POWERPC_PPC440
+
+choices powerpc_platform
+	PLAT_OFPPC
+	PLAT_PPC44X
+	default PLAT_OFPPC
+
+unless ARCH_POWERPC suppress dependent powerpc_platform
+unless ARCH_POWERPC suppress dependent powerpc_type
+
+choices powerpc_subplatform
+	PLAT_440_BGP
+	default PLAT_440_BGP
+
+# standard PPC arch
+unless PPC_MMU_SEGMENTS suppress PLAT_OFPPC PPC_BAT_SYSCALLS PPC_SEGMENT_LOOP
+unless PLAT_OFPPC suppress PPC_EXPOSE_OPIC KDB_CONS_OF1275 KDB_CONS_PSIM_COM
+unless PLAT_PPC44X suppress KDB_CONS_BGP_JTAG KDB_CONS_BGP_TREE
+default PPC_EXPOSE_OPIC from n
+
+unless PLAT_PPC44X suppress dependent powerpc_subplatform
+
+# Rules
+derive PPC_MMU_TLB from CPU_POWERPC_PPC440
+derive PPC_BOOKE from CPU_POWERPC_PPC440
+derive PPC_MMU_SEGMENTS from CPU_POWERPC_IBM750 or CPU_POWERPC_PPC604
+
+require CPU_POWERPC_PPC440 implies STATIC_TCBS==y
+
+# Platform-specific configurations/features
+derive PPC_CACHE_ICBI_LOCAL from PLAT_440_BGP
+derive PPC_TLB_INV_LOCAL from PLAT_440_BGP
+derive PPC_CACHE_L1_WRITETHROUGH from PLAT_440_BGP
+
+# Experimental stuff
+unless PLAT_PPC44X suppress X_PPC_SOFTHVM
+unless X_CTRLXFER_MSG suppress X_PPC_SOFTHVM

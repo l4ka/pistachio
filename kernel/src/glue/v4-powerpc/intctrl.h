@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/intctrl.h
- * Description:	
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     src/glue/v4-powerpc/intctrl.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,16 +26,14 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: intctrl.h,v 1.5 2003/09/24 19:04:51 skoglund Exp $
- *
- ***************************************************************************/
-
-#ifndef __GLUE__V4_POWERPC__INTCTRL_H__
-#define __GLUE__V4_POWERPC__INTCTRL_H__
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
+#pragma once
 
 #include <intctrl.h>
-#include INC_PLAT(opic.h)
+#include INC_PLAT(intctrl.h)
 
 INLINE intctrl_t *get_interrupt_ctrl()
 {
@@ -43,8 +42,6 @@ INLINE intctrl_t *get_interrupt_ctrl()
 }
 
 #if defined(CONFIG_SMP)
-void handle_smp_ipi( intctrl_t::vector_e ipi_vec );
+void handle_smp_ipi( int vector );
 #endif
-
-#endif	/* __GLUE__V4_POWERPC__INTCTRL_H__ */
 

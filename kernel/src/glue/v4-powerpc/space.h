@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	glue/v4-powerpc/space.h
- * Description:	
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ *                
+ * File path:     glue/v4-powerpc/space.h
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,25 +26,31 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: space.h,v 1.75 2006/11/14 18:44:56 skoglund Exp $
- *
- ***************************************************************************/
+ *                
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __GLUE__V4_POWERPC__SPACE_H__
 #define __GLUE__V4_POWERPC__SPACE_H__
 
 #include <debug.h>
+#include <asid.h>
 
-#include INC_ARCH(page.h)
-#include INC_ARCH(pgtab.h)
-#include INC_ARCH(pghash.h)
-
+#include INC_API(types.h)
 #include INC_API(fpage.h)
 #include INC_API(thread.h)
 
+#if defined(CONFIG_PPC_MMU_SEGMENTS)
 #include INC_GLUE(pgent.h)
+#else
+#include INC_GLUE(pgent-swtlb.h)
+#include INC_ARCH(swtlb.h)
+#define HAVE_ARCH_FREE_SPACE
+#include INC_ARCH(softhvm.h)
+#endif
 #include INC_GLUE(hwspace.h)
+#include INC_ARCH(atomic.h)
 
 // Even if new MDB is not used we need the mdb_t::ctrl_t
 #include <mdb.h>
@@ -62,8 +69,10 @@ public:
     };
 
     void init(fpage_t utcb_area, fpage_t kip_area);		// glue
-    void free();
+    void free();						// api
+    void arch_free();
     bool sync_kernel_space(addr_t addr);			// glue
+    static void switch_to_kernel_space(cpuid_t cpu) {}
     void handle_pagefault(addr_t addr, addr_t ip, access_e access, bool kernel); // api
     bool is_initialized();
 
@@ -80,19 +89,21 @@ public:
     void map_dummy_tcb(addr_t addr);				// glue
     utcb_t * allocate_utcb(tcb_t * tcb);
 
-    tcb_t * get_tcb(threadid_t tid);
-    tcb_t * get_tcb(void * ptr);
-
     /* address ranges */
-    bool is_user_area(addr_t addr);
-    bool is_user_area(fpage_t fpage);
-    bool is_tcb_area(addr_t addr);
+    static bool is_user_area(addr_t addr);
+    static bool is_user_area(fpage_t fpage);
+    static bool is_kernel_area(addr_t addr);
+    static bool is_tcb_area(addr_t addr);
+    static  bool is_copy_area (addr_t addr);
+
     bool is_mappable(addr_t addr);
     bool is_mappable(fpage_t fpage);
-    bool is_arch_mappable(addr_t addr, size_t size) { return true; }
+    static const bool is_arch_mappable(addr_t addr, size_t size) { return true; }
+    static const addr_t sign_extend(addr_t addr) { return addr; }
+
+    bool is_kernel_paged_area(addr_t addr);
 
     /* Copy area related methods */
-    bool is_copy_area (addr_t addr);
     word_t get_copy_limit (addr_t addr, word_t limit);
 
     /* kip and utcb handling */
@@ -100,31 +111,61 @@ public:
     fpage_t get_utcb_page_area();
 
     /* reference counting */
-    void add_tcb(tcb_t * tcb);
-    bool remove_tcb(tcb_t * tcb);
+    void add_tcb(tcb_t * tcb, cpuid_t cpu);
+    bool remove_tcb(tcb_t * tcb, cpuid_t cpu);
+    void move_tcb(tcb_t * tcb, cpuid_t src_cpu, cpuid_t dst_cpu);
+
+    /* allocation functions */
+    static space_t * allocate_space();
+    static void free_space(space_t *space);
 
     /* space control */
-    word_t space_control (word_t ctrl) { return 0; }
+    word_t space_control (word_t ctrl);
 
     /* tlb */
-    void flush_tlb( space_t *curspace );
+    void flush_tlb( space_t *curspace, addr_t start = (addr_t)0, addr_t end = (addr_t)~0U );
     void flush_tlbent( space_t *curspace, addr_t addr, word_t log2size );
     static bool does_tlbflush_pay( word_t log2size )
 	{ return log2size != POWERPC_PAGE_BITS; }
+#ifdef CONFIG_X_PPC_SOFTHVM
+    void flush_tlb_hvm( space_t *curspace, word_t start = 0, word_t end = ~0U );
+#endif
 
     /* update hooks */
     static void begin_update() {}
     static void end_update() {}
 
+    /* sigma0 translation hooks */
+    static paddr_t sigma0_translate(addr_t addr, pgent_t::pgsize_e size);
+    static word_t sigma0_attributes(pgent_t *pg, addr_t addr, pgent_t::pgsize_e size);
+
 public:
     /* powerpc specific functions */
-    void init_kernel_mappings();
-    addr_t map_device( addr_t paddr, word_t size, bool cacheable );
+    static void init_kernel_space();
 
+    void init_kernel_mappings();
+    void init_cpu_mappings(cpuid_t cpu);
+    addr_t map_device( paddr_t paddr, word_t size, word_t attrib );
+
+#ifdef CONFIG_PPC_MMU_SEGMENTS
     bool handle_hash_miss( addr_t vaddr );
+    ppc_segment_t get_segment_id();
+#endif
+
+#ifdef CONFIG_PPC_MMU_TLB
+    addr_t map_device_pinned( paddr_t paddr, word_t log2size, word_t attrib );
+    bool handle_tlb_miss( addr_t lookup_vaddr, addr_t install_vaddr, bool user, bool global = false );
+    bool handle_hvm_tlb_miss( ppc_softhvm_t*, ppc_softhvm_t::tlb_t*, word_t gvaddr, paddr_t &gpaddr );
+    asid_t *get_asid(); // asid of current cpu
+    asid_t *get_asid(cpuid_t cpu);
+    void allocate_asid();
+    void allocate_hw_asid(word_t hw_asid) {}
+    void release_hw_asid(word_t hw_asid)
+	{ flush_tlb(NULL); }
+    static asid_manager_t<space_t,CONFIG_MAX_NUM_ASIDS> *get_asid_manager();
+#endif
 
     pgent_t *get_pdir();
-    ppc_segment_t get_segment_id();
     word_t get_vsid( addr_t vaddr );
 
     pgent_t * page_lookup( addr_t vaddr );
@@ -143,62 +184,30 @@ public:
     }
 
 private:
-    // TODO: when we create a new mapping that disables the cache,
-    // we must flush the cache for that page to avoid cache paradoxes.
-#if 0
-    enum mapping_e {
-	tcb = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED |
-		PPC_PAGE_DIRTY | PPC_PAGE_SMP_SAFE),
+    void add_mapping( addr_t vaddr, paddr_t paddr, pgent_t::pgsize_e size, 
+		      bool writable, bool kernel, 
+		      word_t attrib = pgent_t::cache_standard );
+    void flush_mapping( addr_t vaddr, pgent_t::pgsize_e size, pgent_t *pgent );
 
-	dummytcb = (ppc_pgent_t::read_only | PPC_PAGE_ACCESSED),
-
-	utcb = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED |
-		PPC_PAGE_DIRTY | PPC_PAGE_SMP_SAFE),
-
-	kip = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED | 
-		PPC_PAGE_DIRTY | PPC_PAGE_SMP_SAFE),
-
-	kmap = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED |
-		PPC_PAGE_DIRTY | PPC_PAGE_SMP_SAFE),
-
-	ptab = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED |
-		PPC_PAGE_DIRTY | PPC_PAGE_SMP_SAFE),
-
-	sigma0 = (ppc_pgent_t::read_write | PPC_PAGE_SMP_SAFE),
-
-	device = (ppc_pgent_t::read_write | PPC_PAGE_ACCESSED | 
-		PPC_PAGE_DIRTY | PPC_PAGE_GUARDED | PPC_PAGE_CACHE_INHIBIT),
-
-	syscall = (ppc_pgent_t::read_only | PPC_PAGE_ACCESSED |
-		PPC_PAGE_DIRTY)
-    };
-#endif
-
-    void add_4k_mapping( addr_t vaddr, addr_t paddr, 
-	    bool writable, bool kernel, bool cacheable=true );
-//    ppc_pgent_t * add_4k_mapping( ppc_pgent_t *pgent, addr_t vaddr, addr_t paddr, mapping_e type );
-    void flush_4k_mapping( addr_t vaddr, pgent_t *pgent );
-
+    pgent_t pdir[1024];
     union {
-    	pgent_t pdir[1024];
+	word_t raw[1024];
 	struct {
-	    pgent_t user[ USER_AREA_END >> PPC_PAGEDIR_BITS ];
-	    pgent_t kernel[ KERNEL_AREA_SIZE >> PPC_PAGEDIR_BITS ];
-	    pgent_t device[ DEVICE_AREA_SIZE >> PPC_PAGEDIR_BITS ];
-
-	    /* If you add variables to this area, subtract corresponding 
-	     * space from the pghash[] region.  We put them in the pghash
-	     * region since we will never have page dir entries that
-	     * map the pghash area (it is covered by a BAT register).
-	     */
+	    word_t linknode[USER_AREA_SIZE >> PPC_PAGEDIR_BITS];
 	    fpage_t kip_area;
 	    fpage_t utcb_area;
-	    word_t thread_count;
-	    pgent_t pghash[ (PGHASH_AREA_SIZE >> PPC_PAGEDIR_BITS) - 3 ];
-
-	    pgent_t cpu[ (KTCB_AREA_START - CPU_AREA_START)>>PPC_PAGEDIR_BITS ];
-	    pgent_t tcb[ KTCB_AREA_SIZE >> PPC_PAGEDIR_BITS ];
-	} x;
+	    atomic_t thread_count;
+#ifdef CONFIG_X_PPC_SOFTHVM
+	    bool hvm_mode;
+#endif
+	    struct {
+		atomic_t thread_count;
+#ifdef CONFIG_PPC_MMU_TLB
+		asid_t asid;
+		pgent_t cpulocal;
+#endif
+	    } cpu[CONFIG_SMP_MAX_CPUS];
+	};
     };
 
     friend class kdb_t;
@@ -234,22 +243,10 @@ INLINE pgent_t * space_t::get_pdir()
     return this->pdir;
 }
 
-INLINE bool space_t::is_user_area(addr_t addr)
+INLINE bool space_t::is_kernel_paged_area(addr_t addr)
 {
-    return (addr >= (addr_t)USER_AREA_START &&
-	    addr < (addr_t)USER_AREA_END);
-}
-
-INLINE bool space_t::is_tcb_area(addr_t addr)
-{
-    return (addr >= (addr_t)KTCB_AREA_START &&
-	    addr < (addr_t)KTCB_AREA_END);
-}
-
-INLINE bool space_t::is_copy_area (addr_t addr)
-{
-    return (addr > (addr_t)COPY_AREA_START &&
-	    addr < (addr_t)COPY_AREA_END);
+    return (addr > (addr_t)DEVICE_AREA_START &&
+	    addr < (addr_t)DEVICE_AREA_END);
 }
 
 INLINE word_t space_t::get_copy_limit (addr_t addr, word_t len)
@@ -274,12 +271,12 @@ INLINE word_t space_t::get_copy_limit (addr_t addr, word_t len)
 
 INLINE fpage_t space_t::get_kip_page_area()
 {
-    return this->x.kip_area;
+    return this->kip_area;
 }
 
 INLINE fpage_t space_t::get_utcb_page_area()
 {
-    return this->x.utcb_area;
+    return this->utcb_area;
 }
 
 INLINE word_t space_t::get_from_user(addr_t addr)
@@ -287,17 +284,7 @@ INLINE word_t space_t::get_from_user(addr_t addr)
     return *(word_t *)(addr);
 }
 
-INLINE tcb_t * space_t::get_tcb( threadid_t tid )
-{
-    return (tcb_t *)((KTCB_AREA_START) + 
-	    ((tid.get_threadno() & KTCB_THREADNO_MASK) * KTCB_SIZE));
-}
-
-INLINE tcb_t * space_t::get_tcb(void * ptr)
-{
-   return (tcb_t*)((word_t)(ptr) & KTCB_MASK);
-}
-
+#ifdef CONFIG_PPC_MMU_SEGMENTS
 INLINE word_t space_t::get_vsid( addr_t addr )
 {
     // TODO: get_vsid() needs optimisation
@@ -315,40 +302,59 @@ INLINE ppc_segment_t space_t::get_segment_id()
     seg.raw = ((word_t)this >> POWERPC_PAGE_BITS) << 4;
     return seg;
 }
+#elif defined(CONFIG_PPC_MMU_TLB)
+INLINE asid_manager_t<space_t, CONFIG_MAX_NUM_ASIDS> *get_asid_manager()
+{
+    extern asid_manager_t<space_t, CONFIG_MAX_NUM_ASIDS> asid_manager;
+    return &asid_manager;
+}
+
+INLINE asid_t *space_t::get_asid(cpuid_t cpu)
+{
+#if defined(CONFIG_X_PPC_SOFTHVM)
+    return hvm_mode ? NULL : &this->cpu[cpu].asid;
+#else
+    return &this->cpu[cpu].asid;
+#endif
+}
+#endif
 
 /**
- * adds a thread to the space
- * @param tcb pointer to thread control block
+ * add a thread to the space
+ * @param tcb	pointer to thread control block
  */
 INLINE void space_t::add_tcb(tcb_t * tcb, cpuid_t cpu)
 {
-    /* Make sure the valid bit does not get set */
-    x.thread_count += 16;
+    thread_count++;
+#ifdef CONFIG_SMP
+    this->cpu[cpu].thread_count++;
+#endif
 }
 
 /**
- * removes a thread from a space
- * @param tcb_t thread control block
- * @return true if it was the last thread
+ * remove a thread from a space
+ * @param tcb	thread control block
+ * @return	true if it was the last thread
  */
 INLINE bool space_t::remove_tcb(tcb_t * tcb, cpuid_t cpu)
 {
-    ASSERT(x.thread_count != 0);
-    /* Make sure the valid bit does not get set */
-    x.thread_count -= 16;
-    return (x.thread_count == 0);
+    ASSERT (thread_count !=  0);
+#ifdef CONFIG_SMP
+    this->cpu[cpu].thread_count--;
+#endif
+    thread_count--;
+    return thread_count == 0;
 }
 
-INLINE void space_t::flush_tlb( space_t *curspace )
+INLINE void space_t::move_tcb(tcb_t * tcb, cpuid_t src_cpu, cpuid_t dst_cpu)
 {
-    // TODO: flush the tlb for a given address space.
-    ppc_invalidate_tlb();
+    cpu[dst_cpu].thread_count++;
+    cpu[src_cpu].thread_count--;
 }
 
-INLINE void space_t::flush_tlbent( space_t *curspace, addr_t addr, 
-	word_t log2size )
-{
-    ppc_invalidate_tlbe( addr );
-}
+#if defined(CONFIG_PPC_MMU_TLB)
+void setup_kernel_mappings( void );
+void install_exception_handlers( cpuid_t cpu );
+#endif
 
 #endif /* __GLUE__V4_POWERPC__SPACE_H__ */

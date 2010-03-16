@@ -1,10 +1,10 @@
-/****************************************************************************
+/*********************************************************************
  *                
- * Copyright (C) 2002, Karlsruhe University
+ * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:	arch/powerpc/string.h
- * Description:	String and memory manipulation functions.  Why are these
- * 		necessary?  Other platforms don't seem to need them.
+ * File path:     src/arch/powerpc/string.h
+ * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,9 +27,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: string.h,v 1.5 2003/09/24 19:04:30 skoglund Exp $
- *
- ***************************************************************************/
+ * $Id$
+ *                
+ ********************************************************************/
 
 #ifndef __ARCH__POWERPC__STRING_H__
 #define __ARCH__POWERPC__STRING_H__
@@ -47,5 +47,6 @@ extern void sstrncpy( char *dst, const char *src, word_t n );
 extern word_t strlen( const char *src );
 extern int strcmp( const char *s1, const char *s2 );
 extern int strncmp( const char *s1, const char *s2, word_t len );
+extern char *strchr( char *s, char c);
 
 #endif	/* __ARCH__POWERPC__STRING_H__ */

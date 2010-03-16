@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006-2007,  National ICT Australia (NICTA)
+ * Copyright (C) 2003-2004, 2006-2007, 2010,  National ICT Australia (NICTA)
  *                
  * File path:     glue/v4-powerpc64/tcb.h
  * Description:   TCB related functions for Version 4, PowerPC 64
@@ -108,24 +108,6 @@ INLINE void tcb_t::set_br(word_t index, word_t value)
     get_utcb()->br[index] = value;
 }
 
-
-/**
- * allocate the tcb
- * The tcb pointed to by this will be allocated.
- */
-INLINE void tcb_t::allocate()
-{
-/**
- * tcb_t::allocate: allocate memory for TCB
- *
- * Allocate memory for the given TCB.  We do this by generating a
- * write to the TCB area.  If TCB area is not backed by writable
- * memory (i.e., already allocated) the pagefault handler will
- * allocate the memory and map it.
- */
-
-    this->kernel_stack[0] = 0;
-}
 
 
 /**
@@ -629,12 +611,6 @@ INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
  *                        global tcb functions
  *
  **********************************************************************/
-
-__attribute__ ((const)) INLINE tcb_t * addr_to_tcb (addr_t addr)
-{
-    return (tcb_t *) ((word_t) addr & KTCB_MASK);
-}
-
 /**
  * Locate current TCB by using current stack pointer and return it.
  */
