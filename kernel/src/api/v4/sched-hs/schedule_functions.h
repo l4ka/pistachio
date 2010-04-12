@@ -427,40 +427,7 @@ INLINE bool scheduler_t::schedule(tcb_t *dest1, tcb_t *dest2, const sched_flags_
 
 INLINE bool scheduler_t::schedule_interrupt(tcb_t *irq, tcb_t *handler)
 {
-    
     threadid_t irq_tid = irq->get_global_id();
-    
-    if (EXPECT_TRUE(handler->get_state().is_waiting() ))
-    {
-	// thread is waiting for IPC -- we use a shortcut
-	threadid_t partner = handler->get_partner();
-
-	if (EXPECT_TRUE( partner == irq_tid || partner.is_anythread() ))
-	{
-	    // set IRQ thread to be waiting for the ack IPC
-	    irq->set_partner(handler->get_global_id());
-	    irq->set_state(thread_state_t::waiting_forever);
-
-#if defined(CONFIG_SMP)
-	    if (!handler->is_local_cpu())
-	    {
-		xcpu_request( handler->get_cpu(), do_xcpu_send_irq, handler, 
-                              irq->get_global_id().get_irqno());
-		return true;
-	    }
-#endif
-	    // deliver IPC
-	    handler->set_tag(msg_tag_t::irq_tag());
-	    handler->set_partner(irq_tid);
-	    
-	    handler->set_state(thread_state_t::running);
-	    /* we enter this path only if the handler is waiting -- so
-	     * we are not currently execuing on its TCB */
-	    schedule(handler);
-	    return true;
-	}
-    }
-
     irq->set_tag(msg_tag_t::irq_tag());
     irq->set_partner(handler->get_global_id());
     irq->set_state(thread_state_t::polling);
