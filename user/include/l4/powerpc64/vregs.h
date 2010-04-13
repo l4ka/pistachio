@@ -262,7 +262,7 @@ L4_INLINE void L4_StoreBRs( int i, int k, L4_Word_t * w )
 	*w++ = *br++;
 }
 
-L4_INLINE void L4_LoadBRs( int i, int k, L4_Word_t * w )
+L4_INLINE void L4_LoadBRs( int i, int k, const L4_Word_t * w )
 {
     L4_Word_t * br = &(__L4_PPC64_Utcb())[__L4_TCR_BR_OFFSET +  i];
 

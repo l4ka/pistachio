@@ -995,7 +995,7 @@ L4_INLINE void L4_Accept (const L4_Acceptor_t a)
 L4_INLINE void L4_AcceptStrings (const L4_Acceptor_t a,
 				 L4_MsgBuffer_t * b)
 {
-    L4_StringItem_t *prev, *t, *s = (L4_StringItem_t *) &b->string[0];
+    const L4_StringItem_t *prev, *t, *s = (const L4_StringItem_t *) &b->string[0];
     int n, i = 1;
 
     L4_LoadBR (0, a.raw);
@@ -1004,7 +1004,7 @@ L4_INLINE void L4_AcceptStrings (const L4_Acceptor_t a,
 	do {
 	    t = s;
 	    n = s->X.j + 2;
-	    s = (L4_StringItem_t *) &s->X.str.substring_ptr[n-1];
+	    s = (const L4_StringItem_t *) &s->X.str.substring_ptr[n-1];
 	    L4_LoadBRs (i, n, (L4_Word_t *) t);
 	    i += n;
 	} while (t->X.c);
