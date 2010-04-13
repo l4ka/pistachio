@@ -466,12 +466,8 @@ void intctrl_t::mask(word_t irq)
 {
     if (irq >= get_number_irqs())
 	return;
+    
     ASSERT(redir[irq].is_valid());
-#if defined(DEBUG_INTCTRL_MASKS)
-    TRACEPOINT (INTCTRL_MASK, 
-		   ("INTCTRL %d mask ra %x", 
-		    irq,   __builtin_return_address((0))));
-#endif
     redir[irq].entry.mask_irq();
 
     if (redir[irq].entry.is_level_triggered())
@@ -483,12 +479,6 @@ bool intctrl_t::unmask(word_t irq)
     if (irq >= get_number_irqs())
 	return false;
     
-    ASSERT(redir[irq].is_valid());
-#if defined(DEBUG_INTCTRL_MASKS)
-    TRACEPOINT (INTCTRL_UNMASK, 
-		   ("INTCTRL %d unmask ra %x", 
-		    irq,   __builtin_return_address((0))));
-#endif
     ASSERT(redir[irq].is_valid());
 
     if (redir[irq].entry.is_edge_triggered())
