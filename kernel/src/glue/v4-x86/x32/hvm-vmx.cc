@@ -432,11 +432,6 @@ bool arch_hvm_ktcb_t::enable_hvm ()
 #if defined(CONFIG_IO_FLEXPAGES)
     set_io_pbm (virt_to_phys (space->get_io_bitmap ()));
 #endif
-    acceptor_t acceptor;
-    acceptor.clear();
-    acceptor.x.ctrlxfer = 1;
-    tcb->set_br(0, acceptor.raw);
-	
     hvm_enabled = true;
 
     return true;
