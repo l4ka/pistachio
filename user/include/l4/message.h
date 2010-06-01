@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     include/l4/message.h
+ * File path:     l4/message.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -1005,7 +1005,7 @@ L4_INLINE void L4_AcceptStrings (const L4_Acceptor_t a,
 	    t = s;
 	    n = s->X.j + 2;
 	    s = (const L4_StringItem_t *) &s->X.str.substring_ptr[n-1];
-	    L4_LoadBRs (i, n, (L4_Word_t *) t);
+	    L4_LoadBRs (i, n, (const L4_Word_t *) t);
 	    i += n;
 	} while (t->X.c);
     } while (prev->X.C);
