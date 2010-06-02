@@ -315,5 +315,3 @@ kdb_console_t kdb_consoles[] = {
     KDB_NULL_CONSOLE
 };
 
-word_t kdb_current_console = 0;
-

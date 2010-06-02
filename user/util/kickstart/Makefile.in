@@ -82,7 +82,7 @@ PROGRAM_DEPS_amd64=	$(top_builddir)/util/kickstart/libio32.a
 ##
 ## PowerPC specifics
 ##
-SRCS_powerpc=		$(SRCS_FDT) powerpc-putc.cc
+SRCS_powerpc=		$(SRCS_FDT) powerpc-uart-putc.cc
 LIBS_powerpc=		$(top_builddir)/lib/io/print.o
 LDFLAGS_powerpc=	
 CFLAGS_kickstart_powerpc:= $(CFLAGS) 

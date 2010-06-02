@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/platform/ppc44x/bic.h
+ * File path:     platform/ppc44x/bic.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without

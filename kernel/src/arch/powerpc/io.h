@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/arch/powerpc/io.h
+ * File path:     arch/powerpc/io.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -33,11 +33,43 @@
 #ifndef __ARCH__POWERPC__IO_H__
 #define __ARCH__POWERPC__IO_H__
 
+INLINE void out_8(addr_t addr, u8_t val)
+{
+    sync();
+    *(volatile u8_t*)addr = val;
+    eieio();
+}
+
+INLINE void out_be16(addr_t addr, u16_t val)
+{
+    sync();
+    *(volatile u16_t*)addr = val;
+    eieio();
+}
+
 INLINE void out_be32(addr_t addr, u32_t val)
 {
     sync();
     *(volatile u32_t*)addr = val;
     eieio();
+}
+
+INLINE u32_t in_8(addr_t addr)
+{
+    u32_t val;
+    sync();
+    val = *(volatile u8_t*)addr;
+    isync();
+    return val;
+}
+
+INLINE u32_t in_be16(addr_t addr)
+{
+    u32_t val;
+    sync();
+    val = *(volatile u16_t*)addr;
+    isync();
+    return val;
 }
 
 INLINE u32_t in_be32(addr_t addr)

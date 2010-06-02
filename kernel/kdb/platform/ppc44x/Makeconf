@@ -30,5 +30,10 @@
 ## $Id$
 ##                
 ######################################################################
+ifeq ("$(CONFIG_PLAT_440_BGP)","y")
 SOURCES += $(addprefix kdb/platform/ppc44x/, bluegene.cc bgtree.cc)
+endif
+ifeq ("$(CONFIG_PLAT_440_EBONY_)","y")
+SOURCES += $(addprefix kdb/platform/ppc44x/, ebony.cc
+endif
 

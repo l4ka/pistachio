@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     kdb/generic/console.cc
  * Description:   Generic console functionality
@@ -37,10 +37,20 @@
 
 //#define CONFIG_SMP_OUTPUTPREFIX 1
 
+word_t kdb_current_console;
+
 void init_console (void)
 {
+    for (kdb_current_console=0; kdb_current_console < CONFIG_KDB_BOOT_CONS; kdb_current_console++)
+    {
+        if (kdb_consoles[kdb_current_console].name == NULL)
+        {
+            kdb_current_console = 0;
+            break;
+        }
+    }        
     if (kdb_consoles[kdb_current_console].init)
-	kdb_consoles[kdb_current_console].init ();
+        kdb_consoles[kdb_current_console].init ();
 }
 
 
@@ -60,6 +70,7 @@ CMD (cmd_toggle_cpuprefix, cg)
 
 void SECTION(SEC_KDEBUG) putc (char c)
 {
+
     kdb_console_t * cons = &kdb_consoles[kdb_current_console];
 
 

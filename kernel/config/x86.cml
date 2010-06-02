@@ -160,7 +160,7 @@ choices x86_platform
 	PLAT_PC99
 	default PLAT_PC99
 
-unless ARCH_X86 suppress dependent x86_platform
+unless ARCH_X86 suppress dependent x86_platform 
 
 derive X86_SYSENTER from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_K8
 derive X86_FXSR from CPU_X86_P4 or CPU_X86_I686 or CPU_X86_K8

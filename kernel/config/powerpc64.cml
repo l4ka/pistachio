@@ -67,11 +67,6 @@ that no OpenFirmware services will be available after boot (Dissasembler etc).
 .
 
 
-ppc64_debug_consoles	"Consoles"
-
-menu ppc64_debug_consoles
-	KDB_CONS_RTAS
-
 choices powerpc64_type
 	CPU_POWERPC64_POWER3
 	CPU_POWERPC64_POWER3p
@@ -90,6 +85,7 @@ choices powerpc64_platform
 	default PLAT_OFG5
 
 unless ARCH_POWERPC64 suppress dependent powerpc64_platform
+unless ARCH_POWERPC64 suppress dependent KDB_CONS_RTAS
 
 unless PLAT_OFPOWER3 suppress CPU_POWERPC64_POWER3 CPU_POWERPC64_POWER3p
 unless PLAT_OFPOWER4 suppress CPU_POWERPC64_POWER4 CPU_POWERPC64_POWER4p

@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/platform/ppc44x/intctrl.h
+ * File path:     platform/ppc44x/intctrl.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,8 @@
 
 #ifdef CONFIG_PLAT_440_BGP
 # include INC_PLAT(bic.h)
+#ifdef CONFIG_PLAT_440_EBONY
+# include INC_PLAT(uic.h)
 #else
 # error undefined interrupt controller
 #endif

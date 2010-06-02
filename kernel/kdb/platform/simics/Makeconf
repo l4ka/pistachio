@@ -2,7 +2,7 @@
 ##                
 ## Copyright (C) 2010,  Karlsruhe University
 ##                
-## File path:     platform/simics/Makeconf
+## File path:     kdb/platform/simics/Makeconf
 ## Description:   Generic linkser script for x86.
 ##                
 ## Redistribution and use in source and binary forms, with or without

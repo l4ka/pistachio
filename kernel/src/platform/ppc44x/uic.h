@@ -1,11 +1,12 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2010,  Karlsruhe University
- * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
+ * Copyright (C) 2010,  Karlsruhe University
  *                
- * File path:     arch/powerpc/ibm450.h
+ * Filename:      uic.h
+ * Author:        Jan Stoess <stoess@froschkoenig>
  * Description:   
  *                
+ * $Id:$
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -26,30 +27,4 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *                
- * $Id$
- *                
  ********************************************************************/
-#ifndef __ARCH__POWERPC__IBM450_H__
-#define __ARCH__POWERPC__IBM450_H__
-
-#ifndef __ASSEMBLY__
-asm(".macro lfpdx   frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(462<<1)); .endm");
-asm(".macro lfpdux  frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(494<<1)); .endm");
-asm(".macro stfpdx  frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(974<<1)); .endm");
-asm(".macro stfpdux frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(1006<<1)); .endm");
-
-extern inline word_t mfdcrx(word_t dcrn)
-{
-    word_t value;
-    asm volatile ("mfdcrx %0,%1": "=r" (value) : "r" (dcrn) : "memory");
-    return value;
-}
-
-extern inline void mtdcrx(word_t dcrn, word_t value)
-{
-    asm volatile("mtdcrx %0,%1": :"r" (dcrn), "r" (value) : "memory");
-}
-#endif
-
-#endif /* !__ARCH__POWERPC__IBM450_H__*/

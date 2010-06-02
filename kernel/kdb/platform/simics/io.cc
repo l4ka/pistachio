@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007, 2010,  Karlsruhe University
  *                
  * File path:     kdb/platform/simics/io.cc
  * Description:   Simics specific I/O functions
@@ -71,11 +71,6 @@ kdb_console_t kdb_consoles[] = {
     KDB_NULL_CONSOLE
 };
 
-#if defined(CONFIG_KDB_CONS_COM)
-word_t kdb_current_console = 1;
-#else
-word_t kdb_current_console = 0;
-#endif
 
 /*
 **

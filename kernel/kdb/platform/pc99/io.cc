@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001, 2003-2009,  Karlsruhe University
+ * Copyright (C) 2001, 2003-2010,  Karlsruhe University
  *                
  * File path:     kdb/platform/pc99/io.cc
  * Description:   PC99 specific I/O functions
@@ -70,17 +70,15 @@ void kdebug_check_breakin (void) SECTION (SEC_PC99_IO);
 
 
 kdb_console_t kdb_consoles[] = {
-    { "screen", NULL, &putc_screen, &getc_screen },
+#if defined(CONFIG_KDB_CONS_COM)
     { "serial", &init_serial, &putc_serial, &getc_serial },
+#endif 
+#if defined(CONFIG_KDB_CONS_KBD)
+    { "screen", NULL, &putc_screen, &getc_screen },
+#endif 
     KDB_NULL_CONSOLE
 };
     
-#if defined(CONFIG_KDB_CONS_COM)
-word_t kdb_current_console = 1;
-#else
-word_t kdb_current_console = 0;
-#endif
-
 
 
 /*

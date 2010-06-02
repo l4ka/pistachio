@@ -45,6 +45,7 @@ PLAT_PPC44X	"44X Embedded Processor Platform"
 
 powerpc_subplatform	'Sub-Platform'
 PLAT_440_BGP	"BluegeneP"
+PLAT_440_EBONY	"AMCC Ebony Evaluation Board"
 
 
 PPC_EXPOSE_OPIC	'Expose the interrupt controller to user space?' text
@@ -142,15 +143,6 @@ If unsure about this option, answer yes.
 KDB_CONS_BGP_JTAG	"Enable Bluegene/P JTAG console"
 KDB_CONS_BGP_TREE	"Enable Bluegene/P Tree console"
 
-
-ppc_debug_consoles	"Consoles"
-
-menu ppc_debug_consoles
-	KDB_CONS_OF1275
-	KDB_CONS_PSIM_COM
-	KDB_CONS_BGP_JTAG
-	KDB_CONS_BGP_TREE
-
 default KDB_CONS_OF1275 from n
 default KDB_CONS_PSIM_COM from n
 
@@ -170,12 +162,13 @@ unless ARCH_POWERPC suppress dependent powerpc_type
 
 choices powerpc_subplatform
 	PLAT_440_BGP
+	PLAT_440_EBONY
 	default PLAT_440_BGP
 
 # standard PPC arch
 unless PPC_MMU_SEGMENTS suppress PLAT_OFPPC PPC_BAT_SYSCALLS PPC_SEGMENT_LOOP
 unless PLAT_OFPPC suppress PPC_EXPOSE_OPIC KDB_CONS_OF1275 KDB_CONS_PSIM_COM
-unless PLAT_PPC44X suppress KDB_CONS_BGP_JTAG KDB_CONS_BGP_TREE
+unless PLAT_440_BGP suppress KDB_CONS_BGP_JTAG KDB_CONS_BGP_TREE
 default PPC_EXPOSE_OPIC from n
 
 unless PLAT_PPC44X suppress dependent powerpc_subplatform

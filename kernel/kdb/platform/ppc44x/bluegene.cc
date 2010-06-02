@@ -236,11 +236,14 @@ public:
 
     bool check_breakin()
 	{
+            bool ret = false;
+#if defined(CONFIG_KDB_BREAKIN_ESCAPE)
 	    lock.lock();
 	    poll();
-	    bool ret = in_len != 0 && in_buf[in_head] == 0x1b;
+	    ret = in_len != 0 && in_buf[in_head] == 0x1b;
 	    lock.unlock();
-	    return ret;
+#endif
+            return ret;
 	}
 } tree_console;
 
@@ -416,4 +419,3 @@ void kdb_inject(except_regs_t* frame)
 #endif
 }
 
-word_t kdb_current_console = 0;

@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     util/kickstart/fdt-loader.cc
+ * File path:     fdt-loader.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,10 @@ static bool fdt_load_image(fdt_t *fdt, char *name, module_t &module)
 {
     fdt_property_t *image = fdt->find_property_node(name);
     if (!image)
+    {
+        printf("Could'nt find FDT entry %s\n", name);
 	return false;
-
+    }
     if (image->len != sizeof(L4_Word_t)) {
 	printf("Invalid FDT entry size, (expected %d, found %d)\n",
 	       sizeof(L4_Word_t), image->len);
