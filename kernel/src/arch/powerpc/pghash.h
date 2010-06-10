@@ -36,7 +36,7 @@
 
 #include INC_ARCH(bat.h)
 #include INC_ARCH(page.h)
-#include INC_ARCH(ibm750.h)
+#include INC_ARCH(ppc750.h)
 
 #define POWERPC_HTABORG_SHIFT	16
 

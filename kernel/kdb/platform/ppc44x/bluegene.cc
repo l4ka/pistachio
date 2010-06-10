@@ -37,7 +37,7 @@
 #include <sync.h>
 #include INC_ARCH(cache.h)
 #include INC_ARCH(ppc_registers.h)
-#include INC_ARCH(ibm450.h)
+#include INC_ARCH(ppc44x.h)
 #include INC_PLAT(fdt.h)
 
 extern addr_t setup_console_mapping(paddr_t paddr, int log2size);

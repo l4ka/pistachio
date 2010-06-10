@@ -249,7 +249,7 @@ public:
     };
 };
 
-INLINE void ppc_ibm750_configure( void )
+INLINE void ppc_ppc750_configure( void )
 {
     ppc_hid0_t hid0;
     hid0.read();

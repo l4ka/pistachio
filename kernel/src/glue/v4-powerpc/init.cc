@@ -41,7 +41,7 @@
 #include INC_ARCH(bat.h)
 #include INC_ARCH(string.h)
 #include INC_ARCH(cache.h)
-#include INC_ARCH(ibm750.h)
+#include INC_ARCH(ppc750.h)
 #include INC_ARCH(pvr.h)
 #include INC_ARCH(swtlb.h)
 
@@ -177,11 +177,6 @@ SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
     // XXX: unmap FDT
 }
 
-void intctrl_t::map()
-{
-    ctrl = (bgic_t*)get_kernel_space()->
-	map_device(phys_addr, mem_size, pgent_t::cache_inhibited);
-}
 #endif
 
 /*****************************************************************************

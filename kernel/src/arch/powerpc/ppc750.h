@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2002, Karlsruhe University
  *
- * File path:	arch/powerpc/ibm750.h
+ * File path:	arch/powerpc/ppc750.h
  * Description:	Types and functions specific to the IBM PowerPC 750.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: ibm750.h,v 1.5 2003/12/11 12:46:36 joshua Exp $
+ * $Id: ppc750.h,v 1.5 2003/12/11 12:46:36 joshua Exp $
  *
  ***************************************************************************/
 

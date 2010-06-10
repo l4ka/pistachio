@@ -33,11 +33,11 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 
-#include INC_ARCH(ibm750.h)
+#include INC_ARCH(ppc750.h)
 
-DECLARE_CMD( cmd_ibm750_hid0, arch, 'h', "hid0", "Dump HID0" );
+DECLARE_CMD( cmd_ppc750_hid0, arch, 'h', "hid0", "Dump HID0" );
 
-CMD( cmd_ibm750_hid0, cg )
+CMD( cmd_ppc750_hid0, cg )
 {
     class ppc750_hid0_t hid0;
 

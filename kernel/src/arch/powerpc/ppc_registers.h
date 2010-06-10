@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/arch/powerpc/ppc_registers.h
+ * File path:     arch/powerpc/ppc_registers.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,8 @@
 #define SPR_DBDR	0x3f3
 #endif /* BOOKE */
 
+
+
 #ifndef ASSEMBLY
 
 INLINE word_t ppc_get_sprg( const int which )
@@ -262,8 +264,6 @@ INLINE word_t ppc_get_ear( void )
     return val;
 }
 
-#ifdef CONFIG_PLAT_440_BGP
-/* 450 extensions */
 
 INLINE void ppc_set_spr(const word_t spr, word_t val)
 {
@@ -385,7 +385,8 @@ public:
 	}
 
 } __attribute__((packed));
-#endif
+
+
 
 
 #endif	/* ASSEMBLY */

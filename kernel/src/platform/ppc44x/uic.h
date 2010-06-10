@@ -1,12 +1,11 @@
 /*********************************************************************
  *                
- * Copyright (C) 2010,  Karlsruhe University
+ * Copyright (C) 2010,  Karlsruhe Institute of Technology
  *                
  * Filename:      uic.h
- * Author:        Jan Stoess <stoess@froschkoenig>
+ * Author:        Jan Stoess <stoess@kit.edu>
  * Description:   
- *                
- * $Id:$
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -27,4 +26,73 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
+ *                
  ********************************************************************/
+#ifndef __PLATFORM__PPC44X__UIC_H__
+#define __PLATFORM__PPC44X__UIC_H__
+
+
+
+class intctrl_t : public generic_intctrl_t
+{
+public:
+    void init_arch();
+    void init_cpu(int cpu);
+
+    word_t get_number_irqs() 
+	{ UNIMPLEMENTED(); return 0; }
+
+    bool is_irq_available(word_t irq)
+	{ UNIMPLEMENTED(); return false; }
+
+    void mask(word_t irq)
+	{ UNIMPLEMENTED(); }
+
+    bool unmask(word_t irq)
+	{ UNIMPLEMENTED(); return false; }
+
+    bool is_masked(word_t irq)
+	{ UNIMPLEMENTED(); return false; }
+
+    bool is_pending(word_t irq)
+	{ UNIMPLEMENTED(); return false; }
+
+    void enable(word_t irq)
+	{ UNIMPLEMENTED(); }
+
+    void disable(word_t irq)
+	{ UNIMPLEMENTED(); }
+
+    bool is_enabled(word_t irq)
+	{ UNIMPLEMENTED(); return false; }
+
+    void set_cpu(word_t irq, word_t cpu)
+	{ UNIMPLEMENTED(); }
+
+
+    /* handler invoked on interrupt */
+    void handle_irq(word_t cpu)
+        { UNIMPLEMENTED(); }
+
+
+    /* map routine provided by glue */
+    void map()
+	{ UNIMPLEMENTED(); }
+
+    /* SMP support functions */
+    void start_new_cpu(word_t cpu)
+        { UNIMPLEMENTED(); }
+
+    void send_ipi(word_t cpu)
+	{ UNIMPLEMENTED(); }
+
+    /* debug */
+    void dump() 
+	{ UNIMPLEMENTED(); }
+
+private:
+
+
+};
+
+#endif /* !__PLATFORM__PPC44X__UIC_H__ */

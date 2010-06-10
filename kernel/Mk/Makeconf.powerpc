@@ -50,6 +50,6 @@ CFLAGS_powerpc	+= -mno-multiple
 endif
 
 CFLAGS_ppc440	+= -mcpu=440
-CFLAGS_ibm750	+= -mcpu=750
+CFLAGS_ppc750	+= -mcpu=750
 CFLAGS_ppc604	+= -mcpu=604
 LIBS_powerpc	= -lgcc

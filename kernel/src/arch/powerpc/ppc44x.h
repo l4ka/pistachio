@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     platform/ppc44x/platform.h
+ * File path:     arch/powerpc/ppc44x.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,26 @@
  * $Id$
  *                
  ********************************************************************/
-#ifndef __PLATFORM__PPC44X__PLATFORM_H__
-#define __PLATFORM__PPC44X__PLATFORM_H__
+#ifndef __ARCH__POWERPC__IBM450_H__
+#define __ARCH__POWERPC__IBM450_H__
 
-#if defined(CONFIG_PLAT_440_BGP)
-# include INC_PLAT(bluegene.h)
-#elif defined(CONFIG_PLAT_440_EBONY)
-# include INC_PLAT(ebony.h)
+#ifndef __ASSEMBLY__
+asm(".macro lfpdx   frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(462<<1)); .endm");
+asm(".macro lfpdux  frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(494<<1)); .endm");
+asm(".macro stfpdx  frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(974<<1)); .endm");
+asm(".macro stfpdux frt, idx, reg; .long ((31<<26)|((\\frt)<<21)|(\\idx<<16)|(\\reg<<11)|(1006<<1)); .endm");
+
+extern inline word_t ppc_get_dcrx(word_t dcrn)
+{
+    word_t value;
+    asm volatile ("mfdcrx %0,%1": "=r" (value) : "r" (dcrn) : "memory");
+    return value;
+}
+
+extern inline void ppc_set_dcrx(word_t dcrn, word_t value)
+{
+    asm volatile("mtdcrx %0,%1": :"r" (dcrn), "r" (value) : "memory");
+}
 #endif
 
-
-#endif /* !__PLATFORM__PPC44X__PLATFORM_H__ */
+#endif /* !__ARCH__POWERPC__IBM450_H__*/

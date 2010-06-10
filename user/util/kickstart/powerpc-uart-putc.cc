@@ -218,7 +218,6 @@ int serial_getc_dev (unsigned long base)
 	return (0x000000ff & (int) in_8((L4_Word8_t *)base));
 }
 
-
 class cons_t {
 public:
     bool verbose;
@@ -240,12 +239,24 @@ public:
 
 cons_t cons;
 
-bool initialize_console(fdt_t *fdt)
-{
-    return cons.init();
-}
-
 extern "C" void putc(int c)
 {
     cons.putc(c);
 }
+
+
+bool initialize_console(fdt_t *fdt)
+{
+    cons.init();
+    
+    fdt_property_t *prop;
+    fdt_node_t *node = fdt->find_subtree("/aliases");
+
+    if (! (prop = fdt->find_property_node(node, "serial0")) )
+        putc('1');
+
+    putc('2');
+    
+    return true;
+}
+

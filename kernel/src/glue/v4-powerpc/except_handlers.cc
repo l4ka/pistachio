@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/except_handlers.cc
+ * File path:     glue/v4-powerpc/except_handlers.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #include INC_ARCH(except.h)
 #include INC_ARCH(msr.h)
 #include INC_ARCH(frame.h)
-#include INC_ARCH(ibm450.h)
+#include INC_ARCH(ppc44x.h)
 
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
@@ -178,22 +178,22 @@ static bool emulate_instruction(word_t opcode, except_regs_t *regs)
 	switch(instr.get_secondary())
 	{
 	case 259: // mfdcrx
-	    regs->set_register(instr.rt(), mfdcrx(regs->get_register(instr.ra())));
+	    regs->set_register(instr.rt(), ppc_get_dcrx(regs->get_register(instr.ra())));
 	    regs->srr0_ip += 4;
 	    return true;
 
 	case 323: // mfdcr
-	    regs->set_register(instr.rt(), mfdcrx(instr.rf()));
+	    regs->set_register(instr.rt(), ppc_get_dcrx(instr.rf()));
 	    regs->srr0_ip += 4;
 	    return true;
 
 	case 387: // mtdcrx
-	    mtdcrx(regs->get_register(instr.ra()), regs->get_register(instr.rt()));
+	    ppc_set_dcrx(regs->get_register(instr.ra()), regs->get_register(instr.rt()));
 	    regs->srr0_ip += 4;
 	    return true;
 
 	case 451: // mtdcr
-	    mtdcrx(instr.rf(), regs->get_register(instr.rt()));
+	    ppc_set_dcrx(instr.rf(), regs->get_register(instr.rt()));
 	    regs->srr0_ip += 4;
 	    return true;
 	}
@@ -223,27 +223,6 @@ EXCDEF( machine_check_handler )
     return_except();
 }
 
-void intctrl_t::handle_irq(word_t cpu)
-{
-    int irq = ctrl->get_pending_irq(cpu);
-    if (irq < 0 || irq > (int)get_number_irqs())
-    {
-        printf("spurious interrupt\n");
-        return;
-    }
-
-#ifdef CONFIG_SMP
-    if (irq < 32)
-    {
-        ctrl->ack_irq(irq);
-        handle_smp_ipi(irq);
-        return;
-    }
-#endif
-
-    mask(irq);
-    ::handle_interrupt( irq );
-}
 
 EXCDEF( extern_int_handler )
 {

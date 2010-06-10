@@ -120,12 +120,12 @@ bool bgtree_t::init(fdt_t *fdt)
 			     prop->get_word(chnidx * 3 + 2));
 
     /* disable send and receive IRQs */
-    mtdcrx(dcr_base + 0x45, 0);
-    mtdcrx(dcr_base + 0x49, 0);
+    ppc_set_dcrx(dcr_base + 0x45, 0);
+    ppc_set_dcrx(dcr_base + 0x49, 0);
 
     /* clear anything that may be pending */
-    mfdcrx(dcr_base + 0x44);
-    mfdcrx(dcr_base + 0x48);
+    ppc_get_dcrx(dcr_base + 0x44);
+    ppc_get_dcrx(dcr_base + 0x48);
 
     return true;
 }

@@ -33,7 +33,7 @@
 #ifndef __PLATFORM__PPC44X__BGTREE_H__
 #define __PLATFORM__PPC44X__BGTREE_H__
 
-#include INC_ARCH(ibm450.h)
+#include INC_ARCH(ppc44x.h)
 #include INC_ARCH(io.h)
 #include INC_PLAT(fdt.h)
 

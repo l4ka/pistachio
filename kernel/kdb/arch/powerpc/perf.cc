@@ -33,7 +33,7 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 
-#include INC_ARCH(ibm750.h)
+#include INC_ARCH(ppc750.h)
 
 DECLARE_CMD_GROUP( perf );
 DECLARE_CMD( cmd_perf, arch, 'p', "perf", "Performance menu" );

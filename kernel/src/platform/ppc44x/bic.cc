@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/platform/ppc44x/bic.cc
+ * File path:     platform/ppc44x/bic.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -138,6 +138,34 @@ void SECTION(".init") intctrl_t::init_cpu(int cpu)
     /* map IPIs */
     set_irq_routing(get_ipi_irq(cpu, 0), cpu);
     enable(get_ipi_irq(cpu, 0));
+}
+
+void intctrl_t::handle_irq(word_t cpu)
+{
+    int irq = ctrl->get_pending_irq(cpu);
+    if (irq < 0 || irq > (int)get_number_irqs())
+    {
+        printf("spurious interrupt\n");
+        return;
+    }
+
+#ifdef CONFIG_SMP
+    if (irq < 32)
+    {
+        ctrl->ack_irq(irq);
+        handle_smp_ipi(irq);
+        return;
+    }
+#endif
+
+    mask(irq);
+    ::handle_interrupt( irq );
+}
+
+void intctrl_t::map()
+{
+    ctrl = (bgic_t*)get_kernel_space()->
+	map_device(phys_addr, mem_size, pgent_t::cache_inhibited);
 }
 
 void intctrl_t::start_new_cpu(word_t cpu)

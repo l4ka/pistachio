@@ -21,31 +21,14 @@
  * MA 02111-1307 USA
  */
 
-/*
- * This source code is dual-licensed.  You may use it under the terms of the
- * GNU General Public License version 2, or under the license below.
- *
- * This source code has been made available to you by IBM on an AS-IS
- * basis.  Anyone receiving this source is licensed under IBM
- * copyrights to use it in any way he or she deems fit, including
- * copying it, modifying it, compiling it, and redistributing it either
- * with or without modifications.  No license under IBM patents or
- * patent applications is to be implied by the copyright license.
- *
- * Any user of this software should understand that IBM cannot provide
- * technical support for this software and will not be responsible for
- * any consequences resulting from the use of this software.
- *
- * Any person who transfers this source code or any derivative work
- * must include the IBM copyright notice, this paragraph, and the
- * preceding two paragraphs in the transferred software.
- *
- * COPYRIGHT   I B M   CORPORATION 1995
- * LICENSED MATERIAL  -  PROGRAM PROPERTY OF I B M
- */
-
-#include "fdt.h"
-#include "powerpc.h"
+#include <debug.h>
+#include <lib.h>
+#include <kdb/console.h>
+#include <sync.h>
+#include INC_ARCH(cache.h)
+#include INC_ARCH(ppc_registers.h)
+#include INC_ARCH(ppc44x.h)
+#include INC_PLAT(fdt.h)
 
 /*-----------------------------------------------------------------------
  * High Level Configuration Options
@@ -79,6 +62,8 @@
 #define CONFIG_SYS_BAUDRATE_TABLE  \
     {300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400}
 
+
+
 #define CNTRL_DCR_BASE 0x0b0
 #define CPC0_CR0		(CNTRL_DCR_BASE+0x3b)	/* Control 0 register */
 #define CPC0_CR1		(CNTRL_DCR_BASE+0x3a)	/* Control 1 register */
@@ -90,8 +75,6 @@
 #define CR0_UDIV_POS    16
 #define UDIV_SUBTRACT	1
 #define UART0_SDR	CPC0_CR0
-#define MFREG(a, d)	d = mfdcr(a)
-#define MTREG(a, d)	mtdcr(a, d)
 
 
 #define UART_RBR    0x00
@@ -126,15 +109,23 @@
  * as serial console interface.
  */
 
-int serial_init_dev(unsigned long base)
+void init_serial() 
 {
+#if 0
     unsigned long reg;
     unsigned long udiv;
     unsigned short bdiv;
     unsigned long tmp;
-    L4_Word8_t val;
+    u8_t val;
 
-    MFREG(UART0_SDR, reg);
+    fdt_t *fdt = get_fdt();
+
+    fdt_header_t *hdr = fdt->find_subtree("/serial");
+    if (!hdr)
+	panic("Couldn't find interrupt controller in FDT\n");
+
+
+    ppc_get_dcr(UART0_SDR, reg);
     reg &= ~CR0_MASK;
 
     reg |= CR0_EXTCLK_ENA;
@@ -148,54 +139,51 @@ int serial_init_dev(unsigned long base)
      * Configure input clock to baudrate generator for all
      * available serial ports here
      */
-    MTREG(UART0_SDR, reg);
+    ppc_set_dcr(UART0_SDR, reg);
 
     
-    out_8((L4_Word8_t *)base + UART_LCR, 0x80);	/* set DLAB bit */
-    out_8((L4_Word8_t *)base + UART_DLL, bdiv);	/* set baudrate divisor */
-    out_8((L4_Word8_t *)base + UART_DLM, bdiv >> 8); /* set baudrate divisor */
-    out_8((L4_Word8_t *)base + UART_LCR, 0x03);	/* clear DLAB; set 8 bits, no parity */
-    out_8((L4_Word8_t *)base + UART_FCR, 0x00);	/* disable FIFO */
-    out_8((L4_Word8_t *)base + UART_MCR, 0x00);	/* no modem control DTR RTS */
-    val = in_8((L4_Word8_t *)base + UART_LSR);	/* clear line status */
-    val = in_8((L4_Word8_t *)base + UART_RBR);	/* read receive buffer */
-    out_8((L4_Word8_t *)base + UART_SCR, 0x00);	/* set scratchpad */
-    out_8((L4_Word8_t *)base + UART_IER, 0x00);	/* set interrupt enable reg */
+    out_8((u8_t *)base + UART_LCR, 0x80);	/* set DLAB bit */
+    out_8((u8_t *)base + UART_DLL, bdiv);	/* set baudrate divisor */
+    out_8((u8_t *)base + UART_DLM, bdiv >> 8); /* set baudrate divisor */
+    out_8((u8_t *)base + UART_LCR, 0x03);	/* clear DLAB; set 8 bits, no parity */
+    out_8((u8_t *)base + UART_FCR, 0x00);	/* disable FIFO */
+    out_8((u8_t *)base + UART_MCR, 0x00);	/* no modem control DTR RTS */
+    val = in_8((u8_t *)base + UART_LSR);	/* clear line status */
+    val = in_8((u8_t *)base + UART_RBR);	/* read receive buffer */
+    out_8((u8_t *)base + UART_SCR, 0x00);	/* set scratchpad */
+    out_8((u8_t *)base + UART_IER, 0x00);	/* set interrupt enable reg */
 
 
-    return (0);
+#endif
 }
 
-
-void serial_putc_dev(unsigned long base, const char c)
+void putc_serial(char c)
 {
-	int i;
+#if 0
+    int i;
 
 	if (c == '\n')
 		serial_putc_dev(base, '\r');
 
 	/* check THRE bit, wait for transmiter available */
 	for (i = 1; i < 3500; i++) {
-		if ((in_8((L4_Word8_t *)base + UART_LSR) & 0x20) == 0x20)
+		if ((in_8((u8_t *)base + UART_LSR) & 0x20) == 0x20)
 			break;
-		//udelay (100);
+6		//udelay (100);
 	}
 
-	out_8((L4_Word8_t *)base + UART_THR, c);	/* put character out */
+	out_8((u8_t *)base + UART_THR, c);	/* put character out */
+
+#endif
 }
 
-void serial_puts_dev (unsigned long base, const char *s)
+char getc_serial (bool block)
 {
-	while (*s)
-		serial_putc_dev (base, *s++);
-}
-
-int serial_getc_dev (unsigned long base)
-{
+#if 0
 	unsigned char status = 0;
 
 	while (1) {
-		status = in_8((L4_Word8_t *)base + UART_LSR);
+		status = in_8((u8_t *)base + UART_LSR);
 		if ((status & asyncLSRDataReady1) != 0x0)
 			break;
 
@@ -203,7 +191,7 @@ int serial_getc_dev (unsigned long base)
 				asyncLSROverrunError1 |
 				asyncLSRParityError1  |
 				asyncLSRBreakInterrupt1 )) != 0) {
-			out_8((L4_Word8_t *)base + UART_LSR,
+			out_8((u8_t *)base + UART_LSR,
 			      asyncLSRFramingError1 |
 			      asyncLSROverrunError1 |
 			      asyncLSRParityError1  |
@@ -211,40 +199,11 @@ int serial_getc_dev (unsigned long base)
 		}
 	}
 
-	return (0x000000ff & (int) in_8((L4_Word8_t *)base));
+	return (0x000000ff & (int) in_8((u8_t *)base));
+#endif
+        return 0;
 }
 
-
-class cons_t {
-public:
-    bool verbose;
-
-
-    bool init()
-	{
-            serial_init_dev(UART0_BASE);
-            serial_init_dev(UART1_BASE);
-            return true;
-        }
-
-    void putc(int c)
-	{
-            serial_putc_dev(UART0_BASE,c);
-            serial_putc_dev(UART1_BASE,c);
-	}
-};
-
-cons_t cons;
-
-bool initialize_console(fdt_t *fdt)
-{
-    return cons.init();
-}
-
-extern "C" void putc(int c)
-{
-    cons.putc(c);
-}
 
 kdb_console_t kdb_consoles[] = {
 #if defined(CONFIG_KDB_CONS_COM)

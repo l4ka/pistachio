@@ -33,7 +33,7 @@
 
 #include INC_API(tcb.h)
 #include INC_GLUE(memcfg.h)
-#include INC_ARCH(ibm450.h)
+#include INC_ARCH(ppc44x.h)
 
 // TODO: ensure that this is initialized to NULL for each cpu, perhaps via 
 // ctors.

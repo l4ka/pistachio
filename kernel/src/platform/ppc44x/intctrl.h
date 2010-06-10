@@ -35,7 +35,7 @@
 
 #ifdef CONFIG_PLAT_440_BGP
 # include INC_PLAT(bic.h)
-#ifdef CONFIG_PLAT_440_EBONY
+#elif CONFIG_PLAT_440_EBONY
 # include INC_PLAT(uic.h)
 #else
 # error undefined interrupt controller

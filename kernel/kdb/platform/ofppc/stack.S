@@ -34,7 +34,7 @@
 
 #if defined(CONFIG_KDB_CONS_OF1275)
 
-#include INC_ARCH(ibm750.h)
+#include INC_ARCH(ppc750.h)
 #include INC_ARCH(msr.h)
 #include INC_ARCH(page.h)
 #include INC_GLUE(offsets.h)
