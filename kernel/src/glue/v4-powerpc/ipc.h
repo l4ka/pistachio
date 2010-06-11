@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/ipc.h
+ * File path:     glue/v4-powerpc/ipc.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 #ifndef __GLUE__V4_POWERPC__IPC_H__
 #define __GLUE__V4_POWERPC__IPC_H__
 
-#define IPC_NUM_SAVED_MRS	4
 
 class arch_ctrlxfer_item_t
 { 
