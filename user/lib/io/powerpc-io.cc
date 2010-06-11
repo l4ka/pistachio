@@ -30,8 +30,6 @@
  ********************************************************************/
 #include <config.h>
 #include <l4/types.h>
-#include <l4/sigma0.h>
-#include <l4/kip.h>
 #include <l4/types.h>
 #include <l4/powerpc/kdebug.h>
 
@@ -42,99 +40,170 @@ extern "C" int getc( void ) __attribute__ ((weak, alias("__l4_getc")));
 extern "C" void __l4_putc( int c );
 extern "C" void putc( int c ) __attribute__ ((weak, alias("__l4_putc")));
 
-#if defined CONFIG_HAVE_DEVICE_TREE
-/****************************************************************************
- *
- *  Use this switch to avoid the lib go fishing for device trees (FDT/1275)
- *  Instead, declare a variable.
- *
- ***************************************************************************/
-void *__l4_powerpc_device_tree = NULL; 
-#endif
-
 /****************************************************************************
  *
  *  Console I/O using UART or PSIM interface.
  *
  ***************************************************************************/
 #if defined(CONFIG_COMPORT)
-static int io_init( void )
+
+#include <l4/sigma0.h>
+#include "powerpc-port.h"
+#include "fdt.h"
+#include "1275tree.h"
+
+static volatile L4_Word8_t *comport = CONFIG_COMPORT;
+static bool io_initialized = false;
+
+fdt_t *__l4_fdt_ptr = 0;
+
+#define IER     (comport+1)
+#define EIR     (comport+2)
+#define LCR     (comport+3)
+#define MCR     (comport+4)
+#define LSR     (comport+5)
+#define MSR     (comport+6)
+#define DLLO    (comport+0)
+#define DLHI    (comport+1)
+
+
+static void io_init( void )
 {
-    of1275_device_t *dev;
+
+    if (io_initialized)
+        return;
+
+    io_initialized = true;
+
+#if CONFIG_COMPORT == 1
+    /* PSIM via 1275 tree */
     char *alias;
     L4_Word_t *reg, len;
+    of1275_device_t *dev;
+    of1275_tree_t *of1275_tree =  (of1275_tree_t *) L4_Sigma0_GetSpecial(OF1275_KIP_TYPE, 0, 4096);
 
     
-   /* 1275 tree */
-    of1275_tree_t *of1275_tree =  L4_Sigma0_GetSpecial(OF1275_KIP_TYPE, NULL, 4096);
-    
     if( of1275_tree == 0 )
-	return 0;
+        return;
 
     dev = of1275_tree->find( "/aliases" );
     if( dev == 0 )
-	return 0;
+        return;
     if( !dev->get_prop("com", &alias, &len) )
-	return 0;
+        return;
 
     dev = of1275_tree->find( alias );
     if( dev == 0 )
-	return 0;
+        return;
     if( !dev->get_prop("reg", (char **)&reg, &len) )
-	return 0;
+        return;
 
     if( (len != 3*sizeof(L4_Word_t)) || !reg[1] )
-	return 0;
+        return;
 
-    /* Request the device page from sigma0.
+    /* 
+     * Request the device page from sigma0.
      */
-
     L4_ThreadId_t sigma0 = L4_GlobalId( L4_ThreadIdUserBase(L4_GetKernelInterface()), 1);
     if( sigma0 == L4_Myself() )
-	return 0;
+        return;
 
     // Install it as the 2nd page in our address space.  
     // Hopefully it is free!
     L4_Fpage_t target = L4_Fpage( 4096, 4096 );	
-
     L4_Fpage_t fpage = L4_Fpage( reg[1], 4096 );
     fpage.X.rwx = L4_ReadWriteOnly;
     fpage = L4_Sigma0_GetPage( sigma0, fpage, target );
     if( L4_IsNilFpage(fpage) )
-	return 0;
+        return;
 
-    __l4_com_registers = (char *)L4_Address(target);
-    __l4_com_registers[3] = 0;	// Some initialization ...
+    comport = (volatile L4_Word8_t *)L4_Address(target);
+    comport[3] = 0;	// Some initialization ...
 
-    return 1;
+#else
+
+#if CONFIG_COMPORT == 0
+    /*  FDT  */
+    fdt_property_t *prop;
+    fdt_node_t *node;
+    fdt_t *fdt;    
+
+    if (!(fdt = __l4_fdt_ptr))
+        return;
+    
+    if (!(node = fdt->find_subtree("/aliases")))
+        return;
+
+    if (! (prop = fdt->find_property_node(node, "serial0")) )
+        return;
+
+
+    if (!(node = fdt->find_subtree(prop->get_string())))
+        return;
+    
+    if (! (prop = fdt->find_property_node(node, "virtual-reg")) )
+        return;
+
+    comport = (volatile L4_Word8_t *) prop->get_word(0);
+#endif /* CONFIG_COMPORT == 0 */
+    if (comport)
+    {
+        outb(LCR, 0x80);          /* select bank 1        */
+        for (volatile int i = 10000000; i--; );
+        outb(DLLO, (((115200/CONFIG_COMSPEED) >> 0) & 0x00FF));
+        outb(DLHI, (((115200/CONFIG_COMSPEED) >> 8) & 0x00FF));
+        outb(LCR, 0x03);          /* set 8,N,1            */
+        outb(IER, 0x00);          /* disable interrupts   */
+        outb(EIR, 0x07);          /* enable FIFOs */
+        inb(IER);
+        inb(EIR);
+        inb(LCR);
+        inb(MCR);
+        inb(LSR);
+        inb(MSR);
+        
+        //extern "C" int printf (const char *fmt, ...);
+        //printf("Serial port %x initialized\n", comport);
+
+    }
+#endif
 }
+
 
 extern "C" int __l4_getc( void )
 {
-    if( __l4_com_registers == 0 )
+    io_init();
+    
+    if ( comport )
     {
-	if( __l4_io_enabled )
-	    return 0;
-	if( !__l4_io_init() )
-	    return 0;
+#if CONFIG_COMPORT == 1
+            return comport[0];
+#else
+            while ((inb(comport+5) & 0x01) == 0);
+            return inb(comport);
     }
-
-    return __l4_com_registers[0];
+#endif
+    return 0;
 }
+
 
 extern "C" void __l4_putc( int c )
 {
-    if( __l4_com_registers == 0 )
+    io_init();
+
+    if ( comport )
     {
-	if( __l4_io_enabled )
-	    return;
-	if( !__l4_io_init() )
-	    return;
+#if CONFIG_COMPORT == 1
+        comport[0] = c;
+#else
+        while (!(inb(comport+5) & 0x20));
+        outb(comport,c);
+        while (!(inb(comport+5) & 0x40));
+        if (c == '\n')
+            __l4_putc('\r');
+#endif
     }
-
-    __l4_com_registers[0] = c;
 }
-
 #else	/* CONFIG_COMPORT */
 
 

@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2010,  Karlsruhe University
  *                
- * File path:     pistachio.current/user/lib/io/ia32-getc.cc
+ * File path:     ia32-getc.cc
  * Description:   getc() for x86-based PCs
  *                
  * Redistribution and use in source and binary forms, with or without

@@ -36,46 +36,6 @@
 
 static const char *indent = "                    ";
 
-void fdt_t::dump()
-{
-    if (!is_valid())
-	printf("Invalid FDT\n");
-
-    int ilen = strlen(indent);
-
-    int level = 0;
-    fdt_node_t *node = get_root_node();
-
-    do {
-	if (node->is_begin_node()) 
-	{
-	    fdt_header_t* hdr = (fdt_header_t*)node;
-	    printf("%s%s {\n", &indent[ilen - level * 2], 
-		   level == 0 ? "/" : hdr->name);
-	    level++;
-	    node = get_next_node(hdr);
-	} 
-	else if (node->is_property_node()) 
-	{
-	    fdt_property_t* prop = (fdt_property_t*)node;
-	    printf("%s%s\n", &indent[ilen - level * 2], prop->get_name(this));
-	    node = get_next_node(prop);
-	}	    
-	else if (node->is_end_node()) 
-	{
-	    level--;
-	    printf("%s}\n", &indent[ilen - level * 2]);
-	    node++;
-	}
-	else 
-	{
-	    printf("unknown node type %d\n", node->tag);
-	    break;
-	}
-    } while(level > 0);
-}
-
-
 fdt_header_t *fdt_t::find_subtree_node(fdt_node_t *node, char *name)
 {
     int level = 0;
@@ -100,7 +60,6 @@ fdt_header_t *fdt_t::find_subtree_node(fdt_node_t *node, char *name)
 	}
 	else 
 	{
-	    printf("unknown node type %d\n", node->tag);
 	    break;
 	}
     } while(level > 0);
@@ -131,7 +90,6 @@ fdt_property_t *fdt_t::find_property_node(fdt_node_t *node, char *name)
 	}
 	else 
 	{
-	    printf("unknown node type %d\n", node->tag);
 	    break;
 	}
     } while(level > 0);

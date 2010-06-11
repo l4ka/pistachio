@@ -47,7 +47,6 @@ SRCS=		get_hex.cc  print.cc $($(ARCH)_SRCS)
 
 include $(top_srcdir)/Mk/l4.lib.mk
 
-
 test:
 	@echo SRCS=${SRCS}
 	@echo OBJS=${OBJS}

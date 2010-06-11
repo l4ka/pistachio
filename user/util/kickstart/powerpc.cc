@@ -132,14 +132,11 @@ bgp_cons_t bgp_cons;
 
 extern "C" void putc(int c)
 {
-    static bool do_init = true;
-
-    if( do_init )
-    {
-	do_init = false;
-        bgp_cons.init(get_fdt_ptr());
-    }
     bgp_cons.putc(c);
+#if defined(CONFIG_COMPORT)
+    extern void __l4_putc(int c);
+    __l4_putc(c);
+#endif
 }
 
 
@@ -195,6 +192,9 @@ extern "C" void __loader(L4_Word_t r3, L4_Word_t r4, L4_Word_t r5,
 			 L4_Word_t r6, L4_Word_t r7)
 {
     fdt_ptr = (fdt_t*)r3;
-
+    extern fdt_t *__l4_fdt_ptr;
+    __l4_fdt_ptr = fdt_ptr;
+    
+    bgp_cons.init(fdt_ptr);
     loader();
 }

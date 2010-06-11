@@ -34,41 +34,8 @@
 #include <config.h>
 
 #if defined(CONFIG_COMPORT)
-
-#include "powerpc-io.h"
-
-static int of1275_strcmp( const char *s1, const char *s2 )
-{
-    while( 1 )
-    {
-	if( !*s1 && !*s2 )
-	    return 0;
-	if( (!*s1 && *s2) || (*s1 < *s2) )
-	    return -1;
-	if( (*s1 && !*s2) || (*s1 > *s2) )
-	    return 1;
-	s1++;
-	s2++;
-    }
-}
-
-static int of1275_strncmp( const char *s1, const char *s2, L4_Word_t len )
-{
-    while( len > 0 ) 
-    {
-	if( !*s1 && !*s2 )
-	    return 0;
-	if( (!*s1 && *s2) || (*s1 < *s2) )
-	    return -1;
-	if( (*s1 && !*s2) || (*s1 > *s2) )
-	    return 1;
-	s1++;
-	s2++;
-	len--;
-    }
-    return 0;
-}
-
+#include "1275tree.h"
+#include "lib.h"
 
 int of1275_device_t::get_depth()
 {
@@ -93,7 +60,7 @@ bool of1275_device_t::get_prop( const char *prop_name, char **data, L4_Word_t *d
 
     for( L4_Word_t i = 0; i < this->get_prop_count(); i++ )
     {
-	if( !of1275_strcmp(item_name->data, prop_name) )
+	if( !strcmp(item_name->data, prop_name) )
 	{
 	    *data = item_data->data;
 	    *data_len = item_data->len;
@@ -137,7 +104,7 @@ of1275_device_t * of1275_tree_t::find( const char *name )
 
     while( dev->is_valid() )
     {
-	if( !of1275_strcmp(dev->get_name(), name) )
+	if( !strcmp(dev->get_name(), name) )
 	    return dev;
 	dev = dev->next();
     }
@@ -190,7 +157,7 @@ of1275_device_t * of1275_tree_t::get_parent( of1275_device_t *dev )
     of1275_device_t *parent = this->first();
     while( parent->is_valid() )
     {
-	if( !of1275_strncmp(parent->get_name(), dev->get_name(), cnt) )
+	if( !strncmp(parent->get_name(), dev->get_name(), cnt) )
 	    if( parent->get_depth() == (depth-1) )
 		return parent;
 	parent = parent->next();
@@ -212,7 +179,7 @@ of1275_device_t * of1275_tree_t::find_device_type( const char *device_type )
     while( dev->is_valid() )
     {
 	if( dev->get_prop("device_type", &type, &len) )
-	    if( !of1275_strcmp(type, device_type) )
+	    if( !strcmp(type, device_type) )
 		return dev;
 	dev = dev->next();
     }

@@ -59,7 +59,6 @@ extern "C" int __l4_putchar (int c);
 extern "C" int putchar (int c)
     __attribute__ ((weak, alias ("__l4_putchar")));
 
-
 static void print_string (const char * s);
 
 int __l4_puts (const char * str)
