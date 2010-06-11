@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2009,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2009-2010,  Karlsruhe University
  *                
  * File path:     lib.cc
  * Description:   

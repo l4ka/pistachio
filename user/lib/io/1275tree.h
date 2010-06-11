@@ -126,52 +126,6 @@ public:
 };
 
 
-/**
- *  get_of1275_tree_from_sigma0()
- *
- *  Searches the KIP's memory descriptors for the canonical form of
- *  the 1275 device tree installed by the boot loader.  It requests
- *  sigma0 to map the relevant pages into the current address space 1:1,
- *  and returns the device tree encapsulated as an of1275_tree_t *.
- *  The device tree is mapped 1:1 because the bootloader ensures
- *  that the device tree won't collide with any of the roottasks'
- *  initial memory layout.
- */
-L4_INLINE of1275_tree_t * get_of1275_tree_from_sigma0()
-{
-    void *kip = L4_GetKernelInterface();
-    L4_ThreadId_t sigma0 = L4_GlobalId(L4_ThreadIdUserBase(kip), 1);
 
-    // Search for the memory descriptor for the 1275 tree.
-    for( L4_Word_t i = 0; i < L4_NumMemoryDescriptors(kip); i++ )
-    {
-	L4_MemoryDesc_t *mdesc = L4_MemoryDesc( kip, i );
-	if( L4_MemoryDescType(mdesc) == OF1275_KIP_TYPE )
-	{
-	    L4_Word_t start = L4_MemoryDescLow(mdesc);
-	    L4_Word_t end = L4_MemoryDescHigh(mdesc) + 1;
-
-	    if( L4_Myself() == sigma0 )
-		return (of1275_tree_t *)start;
-
-	    // Request mappings for the pages.
-	    L4_Word_t pagesize = 4096;
-	    while( start < end )
-	    {
-		L4_Fpage_t fpage = L4_Fpage( start, pagesize );
-		fpage.X.rwx = L4_ReadWriteOnly;
-		fpage = L4_Sigma0_GetPage( sigma0, fpage, fpage );
-		if( L4_IsNilFpage(fpage) )
-		    return 0;
-
-		start += pagesize;
-	    }
-	    
-	    return (of1275_tree_t *)L4_MemoryDescLow(mdesc);
-	}
-    }
-
-    return 0;
-}
 
 #endif	/* __USER__LIB__IO__1275TREE_H__ */

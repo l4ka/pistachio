@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2007  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007, 2010  Karlsruhe University
  *                
  * File path:     print.cc
  * Description:   fully featured printf
@@ -32,6 +32,7 @@
 #include <l4/types.h>
 #include <stdarg.h>
 #include <l4io.h>
+#include "lib.h"
 
 #ifndef NULL
 #define NULL ((void *) 0)
@@ -59,8 +60,6 @@ extern "C" int putchar (int c)
     __attribute__ ((weak, alias ("__l4_putchar")));
 
 
-
-static int strlen (const char * s);
 static void print_string (const char * s);
 
 int __l4_puts (const char * str)
@@ -76,23 +75,6 @@ int __l4_putchar (int c)
     return c;
 }
 
-
-/*
- * Function strlen (s)
- *
- *    Return the length of string `s', not including the terminating
- *    `\0' character.
- *
- */
-static int strlen (const char * s)
-{	
-    int n;
-
-    for ( n = 0; *s++ != '\0'; n++ )
-	;
-
-    return n;
-}
 
 
 /*

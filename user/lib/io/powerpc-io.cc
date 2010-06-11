@@ -1,10 +1,11 @@
-/****************************************************************************
- *
- * Copyright (C) 2002, Karlsruhe University
- *
- * File path:	lib/io/powerpc-ofppc-io.cc
- * Description:	Comport getc() for PowerPC-L4.
- *
+/*********************************************************************
+ *                
+ * Copyright (C) 2010,  Karlsruhe Institute of Technology
+ *                
+ * Filename:      powerpc-io.cc
+ * Author:        Jan Stoess <stoess@kit.edu>
+ * Description:   
+ *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -25,12 +26,15 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * $Id: powerpc-ofppc-io.cc,v 1.1 2004/01/16 11:25:10 joshua Exp $
- *
- ***************************************************************************/
-
+ *                
+ ********************************************************************/
 #include <config.h>
+#include <l4/types.h>
+#include <l4/sigma0.h>
+#include <l4/kip.h>
+#include <l4/types.h>
+#include <l4/powerpc/kdebug.h>
+
 
 extern "C" int __l4_getc( void );
 extern "C" int getc( void ) __attribute__ ((weak, alias("__l4_getc")));
@@ -38,57 +42,32 @@ extern "C" int getc( void ) __attribute__ ((weak, alias("__l4_getc")));
 extern "C" void __l4_putc( int c );
 extern "C" void putc( int c ) __attribute__ ((weak, alias("__l4_putc")));
 
-
+#if defined CONFIG_HAVE_DEVICE_TREE
 /****************************************************************************
  *
- *  Console I/O using kernel debugger traps.
+ *  Use this switch to avoid the lib go fishing for device trees (FDT/1275)
+ *  Instead, declare a variable.
  *
  ***************************************************************************/
-#if !defined(CONFIG_COMPORT)
-
-#include <l4/types.h>
-#include <l4/powerpc/kdebug.h>
-
-extern "C" int __l4_getc()
-{
-    return L4_KDB_ReadChar_Blocked();
-}
-
-extern "C" void __l4_putc( int c )
-{
-    L4_KDB_PrintChar( c );
-    if( c == '\n' )
-	L4_KDB_PrintChar( '\r' );
-}
-
-#endif	/* !CONFIG_COMPORT */
+void *__l4_powerpc_device_tree = NULL; 
+#endif
 
 /****************************************************************************
  *
- *  Console I/O using psim's comport interface.
+ *  Console I/O using UART or PSIM interface.
  *
  ***************************************************************************/
 #if defined(CONFIG_COMPORT)
-
-#include <l4/types.h>
-#include <l4/sigma0.h>
-#include <l4/kip.h>
-
-#include "1275tree.h"
-
-
-static bool __l4_io_enabled = false;
-static char *__l4_com_registers = 0;
-
-extern "C" int __l4_io_init( void )
+static int io_init( void )
 {
     of1275_device_t *dev;
     char *alias;
     L4_Word_t *reg, len;
 
-    __l4_io_enabled = true;
-
-    of1275_tree_t *of1275_tree = get_of1275_tree_from_sigma0();
+    
+   /* 1275 tree */
+    of1275_tree_t *of1275_tree =  L4_Sigma0_GetSpecial(OF1275_KIP_TYPE, NULL, 4096);
+    
     if( of1275_tree == 0 )
 	return 0;
 
@@ -154,6 +133,21 @@ extern "C" void __l4_putc( int c )
     }
 
     __l4_com_registers[0] = c;
+}
+
+#else	/* CONFIG_COMPORT */
+
+
+extern "C" int __l4_getc()
+{
+    return L4_KDB_ReadChar_Blocked();
+}
+
+extern "C" void __l4_putc( int c )
+{
+    L4_KDB_PrintChar( c );
+    if( c == '\n' )
+	L4_KDB_PrintChar( '\r' );
 }
 
 #endif	/* CONFIG_COMPORT */

@@ -11,7 +11,6 @@
  *                
  ********************************************************************/
 #include <l4/types.h>
-
 #define stringify(s)	tostring(s)
 #define tostring(s)	#s
 
@@ -119,3 +118,5 @@ L4_INLINE void out_be32(volatile unsigned *addr, int val)
 {
 	__asm__ __volatile__("sync; stw%U0%X0 %1,%0" : "=m" (*addr) : "r" (val));
 }
+
+

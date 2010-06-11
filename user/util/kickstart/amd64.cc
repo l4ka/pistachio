@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2004, 2006,  Karlsruhe University
+ * Copyright (C) 2003-2004, 2006, 2010,  Karlsruhe University
  *                
  * File path:     amd64.cc
  * Description:   AMD64 specific implementation fragments of kickstart
@@ -71,10 +71,6 @@ void launch_kernel(L4_Word_t entry)
 {
     __asm__ __volatile__ ("jmp *%0" : : "r"(entry));
 }
-
-
-
-
 
 #if defined(CONFIG_COMPORT)
 

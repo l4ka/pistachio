@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     include/l4/powerpc/specials.h
+ * File path:     l4/powerpc/specials.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without

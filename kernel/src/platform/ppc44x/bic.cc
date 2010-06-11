@@ -35,7 +35,7 @@
 
 #include <lib.h>
 #include INC_ARCH(string.h)
-
+#include INC_GLUE(space.h)
 #include INC_PLAT(bic.h)
 #include INC_PLAT(fdt.h)
 #include INC_API(kernelinterface.h)

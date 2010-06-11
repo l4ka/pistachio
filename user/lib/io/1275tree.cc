@@ -35,7 +35,7 @@
 
 #if defined(CONFIG_COMPORT)
 
-#include "1275tree.h"
+#include "powerpc-io.h"
 
 static int of1275_strcmp( const char *s1, const char *s2 )
 {

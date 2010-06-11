@@ -32,11 +32,116 @@
  ********************************************************************/
 #include <config.h>
 #include <l4io.h>
+#include <l4/arch.h>
 
 #include "kickstart.h"
 #include "fdt.h"
 
-bool initialize_console(fdt_t *fdt);
+extern inline void dcbi(void* ptr)
+{
+    asm volatile ("dcbi  0,%0" : : "r" (ptr) : "memory");
+}
+
+
+extern inline void mtdcrx(unsigned int dcrn, unsigned int value)
+{
+    asm volatile("mtdcrx %0,%1": :"r" (dcrn), "r" (value) : "memory");
+}
+
+
+
+class bgp_mailbox_t 
+{
+public:
+    volatile unsigned short command;	// comand; upper bit=ack
+    unsigned short len;			// length (does not include header)
+    unsigned short result;		// return code from reader
+    unsigned short crc;			// 0=no CRC
+    char data[0];
+};
+
+class bgp_cons_t {
+public:
+    bgp_mailbox_t *mb;
+    unsigned size;
+    unsigned dcr_set;
+    unsigned dcr_clear;
+    unsigned dcr_mask;
+    bool verbose;
+
+    void send_command(int command)
+	{ 
+	    mb->command = command;
+	    asm volatile("sync");
+	    mtdcrx(dcr_set, dcr_mask);
+	    
+	    do {
+		dcbi((void*)&mb->command);
+	    } while(!(mb->command & 0x8000));
+	}
+
+    bool init(fdt_t *fdt)
+	{
+	    fdt_property_t *prop;
+	    fdt_node_t *node = fdt->find_subtree("/jtag/console0");
+
+	    if (! (prop = fdt->find_property_node(node, "reg")) )
+		return false;
+
+	    // addr is 64 bit with upper part 0
+	    mb = (bgp_mailbox_t*)prop->get_word(1);
+	    size = prop->get_word(2);
+	    
+	    if (! (prop = fdt->find_property_node(node, "dcr-reg")) )
+		return false;
+
+	    dcr_set = prop->get_word(0);
+	    dcr_clear = prop->get_word(1);
+	    
+	    if (! (prop = fdt->find_property_node(node, "dcr-mask")) )
+		return false;
+	    dcr_mask = prop->get_word(0);
+
+	    verbose = false;
+	    fdt_node_t *l4node = fdt->find_subtree("/l4");
+	    if ((prop = fdt->find_property_node(l4node, "kickstart")))
+	    {
+		if (strstr(prop->get_string(), "verbose"))
+		    verbose = true;
+	    }
+
+	    return true;
+	}
+
+    void putc(int c)
+	{
+	    if (!mb || !verbose)
+		return;
+
+	    mb->data[mb->len++] = c;
+	
+	    if (mb->len >= size || c == '\n')
+	    {
+		send_command(2);
+		mb->len = 0;
+	    }
+	}
+};
+
+bgp_cons_t bgp_cons;
+
+extern "C" void putc(int c)
+{
+    static bool do_init = true;
+
+    if( do_init )
+    {
+	do_init = false;
+        bgp_cons.init(get_fdt_ptr());
+    }
+    bgp_cons.putc(c);
+}
+
 
 /*
  * Loader formats supported for PowerPC
@@ -90,9 +195,6 @@ extern "C" void __loader(L4_Word_t r3, L4_Word_t r4, L4_Word_t r5,
 			 L4_Word_t r6, L4_Word_t r7)
 {
     fdt_ptr = (fdt_t*)r3;
-
-    if (!initialize_console(fdt_ptr))
-	while(1);
 
     loader();
 }
