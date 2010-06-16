@@ -50,6 +50,8 @@ extern inline void ppc_set_dcrx(word_t dcrn, word_t value)
 {
     asm volatile("mtdcrx %0,%1": :"r" (dcrn), "r" (value) : "memory");
 }
+
+
 #endif
 
 #endif /* !__ARCH__POWERPC__IBM450_H__*/

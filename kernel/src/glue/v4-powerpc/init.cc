@@ -663,7 +663,6 @@ static SECTION(".init") void install_exception_handlers( cpuid_t cpu )
  *                  The kernel's C entry point.
  *
  ****************************************************************************/
-
 extern "C" SECTION(".init") void l4_powerpc_init( word_t r3, word_t r4, word_t r5 )
 {
     init_console();

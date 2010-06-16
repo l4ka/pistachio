@@ -144,21 +144,15 @@ KDB_BOOT_CONS	'Kernel Debugger console used at boot time'
 KDB_CONS_COM	'Serial Port'
 KDB_CONS_KBD	'Keyboard'
 KDB_COMPORT	'Kernel Debugger Serial Port' text
-The comport base to use for serial I/O.  Typical values for comport
-base are:
-
+The port to use for serial I/O. Directly enter the comport or
+use the predefined placeholders 0..3. 
+For x86, the placeholders denote ports as follows:
   Port 0 - 0x3f8 
   Port 1 - 0x2f8
   Port 2 - 0x3e8
   Port 3 - 0x2e8
-.
-KDB_COMBASE	'Kernel Debugger Serial Port Base' text
-
-The comport base to use for serial I/O.  Typical values for comport
-base are:
-
-  Port 0 - 0x200 
-  Port 1 - 0x300  
+For powerpc, the placeholders denote ports as follows:
+  Port 0 - Retrieve via FDT 
 .
 KDB_COMSPEED	'Kernel Debugger Serial Port Speed'
 KDB_ON_STARTUP	'Enter kernel debugger on startup'
@@ -349,23 +343,20 @@ unless ARCH_X86 suppress NEW_MDB
 unless NEW_MDB suppress X86_IO_FLEXPAGES
 
 menu kdb_console
-        KDB_CONS_COM {	KDB_COMPORT@ KDB_COMBASE@ KDB_COMSPEED% }
+	KDB_CONS_BGP_JTAG
+	KDB_CONS_BGP_TREE
+        KDB_CONS_COM {	KDB_COMPORT@ KDB_COMSPEED% }
         KDB_CONS_KBD 
 	KDB_CONS_OF1275
 	KDB_CONS_PSIM_COM
-	KDB_CONS_BGP_JTAG
-	KDB_CONS_BGP_TREE
 	KDB_CONS_RTAS
         KDB_BOOT_CONS%
 
 unless ARCH_X86 suppress KDB_CONS_KBD 
-unless ARCH_X86 or PLAT_440_EBONY suppress KDB_CONS_COM 
-unless ARCH_X86 suppress KDB_COMPORT
-unless PLAT_440_EBONY suppress KDB_COMBASE
+unless ARCH_X86 or ARCH_POWERPC suppress KDB_CONS_COM 
 
 default KDB_CONS_COM from y
-default KDB_COMPORT from 0x3f8
-default KDB_COMBASE from 0x200
+default KDB_COMPORT from 0
 default KDB_COMSPEED from 115200 range 115200 57600 38400 19200 9600 4800 2400 1200 300
 
 
