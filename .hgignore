@@ -6,3 +6,17 @@ configure
 .depend
 *~
 build
+
+syntax: regexp
+^amd64-build$
+syntax: regexp
+^bluegene-build$
+syntax: regexp
+^ebony-build$
+syntax: regexp
+^x86-build$
+syntax: regexp
+^.[c]?project$
+
+syntax: regexp
+^.settings
