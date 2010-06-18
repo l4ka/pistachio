@@ -43,11 +43,23 @@
 #include <linear_ptab.h>
 
 #if !defined(CONFIG_KDB_COMPORT)
-#define CONFIG_KDB_COMPORT 0x3f8
+#define COMPORT 0x3f8
+#elif CONFIG_KDB_COMPORT == 0
+# define COMPORT 0x3f8
+#elif CONFIG_KDB_COMPORT == 1
+# define COMPORT 0x2f8
+#elif CONFIG_KDB_COMPORT == 2
+# define COMPORT 0x3e8
+#elif CONFIG_KDB_COMPORT == 3
+# define COMPORT 0x2e8
+#else
+#define COMPORT CONFIG_KDB_COMPORT
 #endif
 
 #if !defined(CONFIG_KDB_COMSPEED)
-#define CONFIG_KDB_COMSPEED 115200
+#define RATE		115200
+#else
+#define RATE		CONFIG_KDB_COMSPEED
 #endif
 
 #define KERNEL_VIDEO		(KERNEL_OFFSET + 0xb8000)
@@ -287,8 +299,6 @@ static char getc_screen (bool block)
 **
 */
 
-#define COMPORT		CONFIG_KDB_COMPORT
-#define RATE		CONFIG_KDB_COMSPEED
 
 static void init_serial (void)
 {
