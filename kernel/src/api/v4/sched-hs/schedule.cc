@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/sched-hs/schedule.cc
  * Description:   
@@ -93,7 +93,7 @@ prio_queue_t * prio_queue_t::add_prio_domain(schedule_ctrl_t prio_control)
 	ASSERT(domain_tcb->sched_state.flags.is_set(sched_ktcb_t::is_schedule_domain));
 
 	domain_tcb->sched_state.set_prio_queue(this);
-	if( cpu != get_current_cpu() )
+ 	if( cpu != get_current_cpu() )
 	    domain_tcb->migrate_to_processor(cpu);
         
         TRACEPOINT (SCHEDULE_PRIO_DOMAIN, "new prio domain tcb %t, cpu %d, prio %d, stride %d\n", 
@@ -107,8 +107,9 @@ prio_queue_t *prio_queue_t::domain_partner( cpuid_t cpu )
 {
     ASSERT(domain_tcb);
     
-    if( domain_tcb->is_local_cpu() )
+    if( domain_tcb->get_cpu() == cpu )
         return this;
+
 #if defined(CONFIG_SMP)
     
     prio_queue_t *partner_queue = cpu_head;
@@ -577,6 +578,7 @@ static void xcpu_integrate_thread(tcb_t * tcb)
     
     scheduler_t *scheduler = get_current_scheduler();
     sched_ktcb_t *sched_state = &tcb->sched_state;
+    
     /* VU: the thread may have received an IPC meanwhile hence we
      * check whether the thread is already running again.  to make it
      * fully working the waiting timeout must be set more carefull! */
@@ -608,19 +610,23 @@ void scheduler_t::move_tcb(tcb_t *tcb, cpuid_t cpu)
 
     tcb->set_cpu(cpu);
     unlock_requeue();
-    
+
+    prio_queue_t *new_prio_queue = tcb->sched_state.get_prio_queue()->domain_partner(cpu);
+    tcb->sched_state.set_pass(0);  // Force tcb to use the pass of the target domain.
+    tcb->sched_state.set_prio_queue(new_prio_queue);
+
+
     if (need_xcpu) 
     {
         tcb->sched_state.requeue_callback = xcpu_integrate_thread;
         remote_schedule(tcb);
     }
     
-    prio_queue_t *new_prio_queue = tcb->sched_state.get_prio_queue()->domain_partner(cpu);
-    tcb->sched_state.set_pass(0);  // Force tcb to use the pass of the target domain.
-    tcb->sched_state.set_prio_queue(new_prio_queue);
-
     tcb->unlock();
 
+    TRACE_SCHEDULE_DETAILS("move_tcb: %t (s=%s) cpu %d pq %p dtcb %t", tcb, 
+                           tcb->get_state().string(), cpu, new_prio_queue, 
+                           new_prio_queue->get_domain_tcb());
 
 }    
 

@@ -663,9 +663,14 @@ static SECTION(".init") void install_exception_handlers( cpuid_t cpu )
  *                  The kernel's C entry point.
  *
  ****************************************************************************/
+
+#include <generic/simics.h>
 extern "C" SECTION(".init") void l4_powerpc_init( word_t r3, word_t r4, word_t r5 )
 {
+    MAGIC_BREAKPOINT;
+    
     init_console();
+    MAGIC_BREAKPOINT;
 #if defined(CONFIG_KDB_CONS_OF1275)
     init_of1275_console( r5 ); // XXX: use standard init routine!
 #endif

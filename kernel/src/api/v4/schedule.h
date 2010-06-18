@@ -319,6 +319,7 @@ private:
     void commit_schedule_parameters(schedule_req_t &req);
 
     static schedule_request_queue_t schedule_request_queue[CONFIG_SMP_MAX_CPUS];
+    static const word_t idle_tid = (word_t)0x1d1e1d1e1d1e1d1eULL;
 
 };
 

@@ -389,7 +389,7 @@ void SECTION(".init") scheduler_t::init( bool bootcpu )
     /* set idle-magic */
     get_idle_tcb()->create_kernel_thread(NILTHREAD, &__idle_utcb, sktcb_lo);
     get_idle_tcb()->set_space(get_kernel_space());
-    get_idle_tcb()->myself_global.set_raw((word_t)0x1d1e1d1e1d1e1d1eULL);
+    get_idle_tcb()->myself_global.set(IDLETHREAD);
     get_idle_tcb()->create_startup_stack(idle_thread);
     
     if( bootcpu )

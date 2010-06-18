@@ -246,7 +246,7 @@ public:
 	    tcb->sched_state.requeue = NULL;
 		
 	    TRACE_SCHEDULE_DETAILS("smp_requeue:dequeue_head %t (s=%s) cpu %d (head %t)", 
-	    	    tcb, tcb->get_state().string(), tcb->get_cpu(), tcb_list);
+                                   tcb, tcb->get_state().string(), tcb->get_cpu(), tcb_list);
 
 	    return (tcb_t *) tcb;
 		
@@ -287,10 +287,14 @@ public:
 	}
     void enqueue_ready(tcb_t * tcb, bool head = false)
 	{
-            while (tcb != get_idle_tcb())
+            while (tcb->get_global_id() !=  IDLETHREAD )
             {
                 ASSERT(tcb);
                 ASSERT(tcb->sched_state.get_prio_queue());
+                TRACE_SCHEDULE_DETAILS("enqueue_ready %t () pq %t dtcb %t idle %p\n", tcb, 
+                                       tcb->sched_state.get_prio_queue(), tcb->sched_state.get_prio_queue()->get_domain_tcb(),
+                                       get_idle_tcb());
+                
                 tcb->sched_state.get_prio_queue()->enqueue(tcb, head);
                 tcb = tcb->sched_state.get_prio_queue()->get_domain_tcb();
             }
@@ -299,7 +303,7 @@ public:
     void dequeue_ready(tcb_t * tcb)
 	{
             ASSERT(tcb);
-            while (tcb != get_idle_tcb())
+            while (tcb->get_global_id() !=  IDLETHREAD )
             {
                 ASSERT(tcb);
                 ASSERT(tcb->sched_state.get_prio_queue());

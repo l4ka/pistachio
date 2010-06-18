@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                
  * File path:     api/v4/thread.h
  * Description:   thread ids
@@ -78,7 +78,7 @@ public:
     static const threadid_t idlethread()
 	{
 	    threadid_t tid;
-	    tid.raw = 0x1d1e1d1e;
+            tid.raw = (word_t)0x1d1e1d1e1d1e1d1eULL;
 	    return tid;
 	}
     
@@ -107,6 +107,7 @@ public:
 
     word_t get_raw()		{ return this->raw; }
     void set_raw(word_t raw)	{ this->raw = raw; }
+    void set(threadid_t tid)	{ this->raw = tid.raw; }
 
     /* operators */
     bool operator == (const threadid_t & tid)
@@ -118,6 +119,7 @@ public:
     {
 	return this->raw != tid.raw;
     }
+
 
 private:
     union {
@@ -154,6 +156,7 @@ INLINE threadid_t threadid(word_t rawid)
 #define NILTHREAD	(threadid_t::nilthread())
 #define ANYTHREAD	(threadid_t::anythread())
 #define ANYLOCALTHREAD	(threadid_t::anylocalthread())
+#define IDLETHREAD	(threadid_t::idlethread())
 
 
 #endif /* !__API__V4__THREAD_H__ */
