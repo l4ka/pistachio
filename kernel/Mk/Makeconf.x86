@@ -1,6 +1,6 @@
 ################ -*- mode: Makefile; -*- #############################
 ##
-## Copyright (C) 2007-2008,  Karlsruhe University
+## Copyright (C) 2007-2008, 2010,  Karlsruhe University
 ##
 ## File path:     Mk/Makeconf.x86
 ##
@@ -39,8 +39,7 @@ DEFINES	 += __SUBARCH__=$(SUBARCH)
 
 CFLAGS_x86_x32	+= -O2 -mpreferred-stack-boundary=2 
 CFLAGS_x86_x64  += -O2 -m64 -mcmodel=kernel -mno-red-zone 
-CFLAGS_x86	+= $(CFLAGS_x86_$(SUBARCH))
-
+CFLAGS_x86	+= $(CFLAGS_x86_$(SUBARCH)) -mno-mmx -mno-sse -mno-sse2 -mno-sse3
 LDFLAGS_x86_x64	+= -melf_x86_64 -n -z max-page-size=4096
 LDFLAGS_x86	+= $(LDFLAGS_x86_$(SUBARCH))
 
