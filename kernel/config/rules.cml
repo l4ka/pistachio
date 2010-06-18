@@ -153,6 +153,7 @@ For x86, the placeholders denote ports as follows:
   Port 3 - 0x2e8
 For powerpc, the placeholders denote ports as follows:
   Port 0 - Retrieve via FDT 
+  Port 1 - Use PSIM debug comport 
 .
 KDB_COMSPEED	'Kernel Debugger Serial Port Speed'
 KDB_ON_STARTUP	'Enter kernel debugger on startup'
