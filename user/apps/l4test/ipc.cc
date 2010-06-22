@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4test/ipc.cc
  * Description:   Various IPC tests
@@ -45,6 +45,7 @@
 
 L4_ThreadId_t ipc_t1;
 L4_ThreadId_t ipc_t2;
+bool ipc_ok;
 
 L4_Word_t ipc_pf_block_address = 0;
 L4_Word_t ipc_pf_abort_address = 0;
@@ -169,22 +170,35 @@ static void simple_ipc_t1_l (void)
     L4_MsgTag_t tag;
     L4_Word_t i, w;
     L4_ThreadId_t tid;
-    bool ok;
 
     // Correct message contents
-    ok = true;
+    ipc_ok = true;
+    
     for (L4_Word_t n = 0; n <= 63; n++)
     {
 	for (L4_Word_t k = 1; k <= 63; k++)
 	    L4_LoadMR (k, 0);
 	tag = L4_Receive (ipc_t2);
+        
+        if (!L4_IpcSucceeded (tag))
+	{
+            printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
+		    ipc_errorcode (L4_ErrorCode ()),
+		    ipc_errorphase (L4_ErrorCode ()));
+	    ipc_ok = false;
+            break;
+	}
+
 	L4_Store (tag, &msg);
 	if (L4_Label (tag) != 0xf00f)
 	{
+            L4_KDB_Enter("1 label");
 	    printf ("Xfer %d words -- wrong label: 0x%lx != 0xf00f\n",
 		    (int) n, (long) L4_Label (tag));
-	    ok = false;
+	    ipc_ok = false;
+            break;
 	}
+
 	for (i = 1; i <= n; i++)
 	{
 	    L4_Word_t val = L4_Get (&msg, i - 1);
@@ -193,26 +207,39 @@ static void simple_ipc_t1_l (void)
 		printf ("Xfer %d words -- wrong value in MR[%d]: "
 			"0x%lx != 0x%lx\n",
 			(int) n, (int) i, (long) val, (long) i);
-		ok = false;
-		break;
+		ipc_ok = false;
 	    }
+            if (!L4_IpcSucceeded (tag))
+            {
+                printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
+                        ipc_errorcode (L4_ErrorCode ()),
+                        ipc_errorphase (L4_ErrorCode ()));
+                ipc_ok = false;
+            }
+            
+            if (!ipc_ok) 
+                break;
 	}
+        if (!ipc_ok) 
+            break;
     }
-    print_result ("Send Message transfer", ok);
-
-    L4_Send (ipc_t2);
+    
+    print_result ("Send Message transfer", ipc_ok);
 
     // Correct message contents
-    ok = true;
-    tag = L4_Wait (&tid);
+    ipc_ok = true;
+    tag = L4_Call (ipc_t2);
+    
     for (L4_Word_t n = 0; n <= 63; n++)
     {
 	L4_Store (tag, &msg);
 	if (L4_Label (tag) != 0xf00d)
 	{
+            L4_KDB_Enter("2 label");
 	    printf ("Xfer %d words -- wrong label: 0x%lx != 0xf00d\n",
 		    (int) n, (long) L4_Label (tag));
-	    ok = false;
+                ipc_ok = false;
+                break;
 	}
 	for (i = 1; i <= n; i++)
 	{
@@ -222,24 +249,42 @@ static void simple_ipc_t1_l (void)
 		printf ("Xfer %d words -- wrong value in MR[%d]: "
 			"0x%lx != 0x%lx\n",
 			(int) n, (int) i, (long) val, (long) i);
-		ok = false;
-		break;
-	    }
+		ipc_ok = false;
+                break;
+            }
+            if (!ipc_ok) 
+                break;
+            
 	}
+        
+        if (n == 63)
+            break;
+        
 	for (L4_Word_t k = 1; k <= 63; k++)
 	    L4_LoadMR (k, 0);
 	tag = L4_ReplyWait (ipc_t2, &tid);
+
+        if (!L4_IpcSucceeded (tag))
+        {
+	    L4_KDB_Enter("xxx");
+            printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
+                    ipc_errorcode (L4_ErrorCode ()),
+                    ipc_errorphase (L4_ErrorCode ()));
+            ipc_ok = false;
+            break;
+        }
+
     }
-    print_result ("ReplyWait Message transfer", ok);
+    print_result ("ReplyWait Message transfer", ipc_ok);
 
     // Send timeout
     L4_Set_MsgTag (L4_Niltag);
     tag = L4_Send (ipc_t2, L4_TimePeriod (1000*1000));
-    ok = true;
+    ipc_ok = true;
     if (L4_IpcSucceeded (tag))
     {
 	printf ("SND: IPC send incorrectly succeeded\n");
-	ok = false;
+	ipc_ok = false;
     }
     else
     {
@@ -248,19 +293,19 @@ static void simple_ipc_t1_l (void)
 	    printf ("SND: Incorrect error code: %s %s\n",
 		    ipc_errorcode (L4_ErrorCode ()),
 		    ipc_errorphase (L4_ErrorCode ()));
-	    ok = false;
+	    ipc_ok = false;
 	}
     }
-    print_result ("Send timeout", ok);
+    print_result ("Send timeout", ipc_ok);
     L4_Receive (ipc_t2);
 
     // Receive timeout
     tag = L4_Receive (ipc_t2, L4_TimePeriod (1000*1000));
-    ok = true;
+    ipc_ok = true;
     if (L4_IpcSucceeded (tag))
     {
 	printf ("RCV: IPC receive incorrectly succeeded\n");
-	ok = false;
+	ipc_ok = false;
     }
     else
     {
@@ -270,10 +315,10 @@ static void simple_ipc_t1_l (void)
 	    printf ("RCV: Incorrect error code: %s %s\n",
 		    ipc_errorcode (L4_ErrorCode ()),
 		    ipc_errorphase (L4_ErrorCode ()));
-	    ok = false;
+	    ipc_ok = false;
 	}
     }
-    print_result ("Receive timeout", ok);
+    print_result ("Receive timeout", ipc_ok);
     L4_Set_MsgTag (L4_Niltag);
     L4_Send (ipc_t2);
 
@@ -286,11 +331,11 @@ static void simple_ipc_t1_l (void)
     // Send cancel
     L4_Set_MsgTag (L4_Niltag);
     tag = L4_Send (ipc_t2);
-    ok = true;
+    ipc_ok = true;
     if (L4_IpcSucceeded (tag))
     {
 	printf ("SND: IPC send incorrectly succeeded\n");
-	ok = false;
+	ipc_ok = false;
     }
     else
     {
@@ -299,19 +344,19 @@ static void simple_ipc_t1_l (void)
 	    printf ("SND: Incorrect error code: %s %s\n",
 		    ipc_errorcode (L4_ErrorCode ()),
 		    ipc_errorphase (L4_ErrorCode ()));
-	    ok = false;
+	    ipc_ok = false;
 	}
     }
-    print_result ("Send cancelled", ok);
+    print_result ("Send cancelled", ipc_ok);
     L4_Receive (ipc_t2);
 
     // Receive cancel
     tag = L4_Call(ipc_t2);
-    ok = true;
+    ipc_ok = true;
     if (L4_IpcSucceeded (tag))
     {
 	printf ("RCV: IPC receive incorrectly succeeded\n");
-	ok = false;
+	ipc_ok = false;
     }
     else
     {
@@ -321,10 +366,10 @@ static void simple_ipc_t1_l (void)
 	    printf ("RCV: Incorrect error code: %s %s\n",
 		    ipc_errorcode (L4_ErrorCode ()),
 		    ipc_errorphase (L4_ErrorCode ()));
-	    ok = false;
+	    ipc_ok = false;
 	}
     }
-    print_result ("Receive cancelled", ok);
+    print_result ("Receive cancelled", ipc_ok);
     L4_Set_MsgTag (L4_Niltag);
     L4_Send (ipc_t2);
 
@@ -340,7 +385,7 @@ static void simple_ipc_t1_l (void)
 
     *buf = 0xff;
 
-    ok = true;
+    ipc_ok = true;
     for (i = 0; i <= 63; i++)
     {
 	L4_StoreMR (i, &w);
@@ -348,23 +393,23 @@ static void simple_ipc_t1_l (void)
 	{
 	    printf ("Wrong value in MR[%d]: 0x%lx != 0x%lx\n", (int) i,
 		    (long) w, (long) i+1);
-	    ok = false;
+	    ipc_ok = false;
 	    break;
 	}
     }
-    print_result ("Pagefault cancelled", ok);
+    print_result ("Pagefault cancelled", ipc_ok);
 
     // From parameter (local)
     L4_ThreadId_t from;
     tag = L4_Wait (&from);
-    ok = true;
+    ipc_ok = true;
     if (from != L4_LocalId (ipc_t2))
     {
 	printf ("Returned Id %lx != %lx (local) [%lx (global)]\n",
 		Word (from), Word (L4_LocalId (ipc_t2)), Word (ipc_t2));
-	ok = false;
+	ipc_ok = false;
     }
-    print_result ("From parameter (local)", ok);
+    print_result ("From parameter (local)", ipc_ok);
     L4_Set_MsgTag (L4_Niltag);
     L4_Send (ipc_t2);
 
@@ -376,18 +421,17 @@ static void simple_ipc_t1_l (void)
 static void simple_ipc_t1_g (void)
 {
     L4_MsgTag_t tag;
-    bool ok;
 
     // From parameter (global)
     L4_ThreadId_t from;
     tag = L4_Wait (&from);
-    ok = true;
+    ipc_ok = true;
     if (from != ipc_t2)
     {
 	printf ("Returned Id %lx != %lx\n", Word (from), Word (ipc_t2));
-	ok = false;
+	ipc_ok = false;
     }
-    print_result ("From parameter (global)", ok);
+    print_result ("From parameter (global)", ipc_ok);
 
     // Get oneself killed
     L4_Set_MsgTag (L4_Niltag);
@@ -399,6 +443,8 @@ static void simple_ipc_t2_l (void)
     L4_Msg_t msg;
     L4_Word_t dw;
     L4_ThreadId_t dt;
+    L4_MsgTag_t tag;
+        
 
     // Message contents
     for (L4_Word_t n = 0; n <= 63; n++)
@@ -409,6 +455,16 @@ static void simple_ipc_t2_l (void)
 	    L4_Append (&msg, i);
 	L4_Load (&msg);
 	L4_Send (ipc_t1);
+
+        if (!L4_IpcSucceeded (tag))
+        {
+            printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
+                    ipc_errorcode (L4_ErrorCode ()),
+                    ipc_errorphase (L4_ErrorCode ()));
+            ipc_ok = false;
+            break;
+        }
+
     }
 
     L4_Receive (ipc_t1);
@@ -422,9 +478,20 @@ static void simple_ipc_t2_l (void)
 	    L4_Append (&msg, i);
 	L4_Load (&msg);
 	if (n == 63)
-	    L4_Send(ipc_t1);
+	    tag = L4_Send(ipc_t1);
 	else
-	    L4_ReplyWait (ipc_t1, &dt);
+	    tag = L4_ReplyWait (ipc_t1, &dt);
+        
+        if (!L4_IpcSucceeded (tag))
+        {
+	    L4_KDB_Enter("yyy");
+            printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
+                    ipc_errorcode (L4_ErrorCode ()),
+                    ipc_errorphase (L4_ErrorCode ()));
+            ipc_ok = false;
+            break;
+        }
+        
     }
 
     // Send timeout
