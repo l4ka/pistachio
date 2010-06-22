@@ -47,18 +47,18 @@ bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstar
 	/sbin/mkdosfs -C bootdisk.img 1440
 	@# Make it a GRUB disk
 	dd if=grub.img of=bootdisk.img conv=notrunc > /dev/null
-	#@ Strip binaries
-	strip ${top_builddir}/*/*/{kickstart,sigma0} 
-	strip ${APP}
-	cp ${kerneldir}/${KERNEL} ${kerneldir}/${KERNEL}.stripped
-	strip ${kerneldir}/${KERNEL}.stripped 
-	cat ${srcdir}/menu.lst | sed -e "s/APP/`basename ${APP}`/" > menu.lst
+	#@ Strip and zip binaries
+	cp -u ${top_builddir}/*/*/{kickstart,sigma0} ${kerneldir}/${KERNEL}  ${APP} .
+	strip ${notdir ${APP}} sigma0 kickstart ${KERNEL}
+	gzip -f ${notdir ${APP}} sigma0 kickstart ${KERNEL}
+	cat ${srcdir}/menu.lst | sed -e "s/APP/${notdir ${APP}}/" > menu.lst
 	@# Copy the binaries to it
 	export MTOOLSRC=mtoolsrc ; \
-	 mcopy -m menu.lst y:boot/grub ; \
-	 mcopy -m ${top_builddir}/*/*/{kickstart,sigma0} y: ; \
-	 mcopy -m ${APP} y: ; \
-	 mcopy -m ${kerneldir}/${KERNEL}.stripped y:kernel
+	mcopy -m menu.lst y:boot/grub ; \
+	mcopy -m kickstart.gz y: ; \
+	mcopy -m ${KERNEL}.gz y:kernel.gz ; \
+	mcopy -m sigma0.gz y: ; \
+	mcopy -m ${notdir ${APP}}.gz y: ; 
 
 grub.img:
 	# Fetch GRUB disk image from web if not local
@@ -69,4 +69,4 @@ mtoolsrc:
 
 
 do-clean:
-	@$(RM) bootdisk.img mtoolsrc ${KERNEL}.stripped
+	$(RM) bootdisk.img mtoolsrc ${notdir ${APP}}.gz sigma0.gz kickstart.gz ${KERNEL}.gz
