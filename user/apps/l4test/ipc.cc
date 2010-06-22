@@ -209,14 +209,6 @@ static void simple_ipc_t1_l (void)
 			(int) n, (int) i, (long) val, (long) i);
 		ipc_ok = false;
 	    }
-            if (!L4_IpcSucceeded (tag))
-            {
-                printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
-                        ipc_errorcode (L4_ErrorCode ()),
-                        ipc_errorphase (L4_ErrorCode ()));
-                ipc_ok = false;
-            }
-            
             if (!ipc_ok) 
                 break;
 	}
@@ -266,7 +258,6 @@ static void simple_ipc_t1_l (void)
 
         if (!L4_IpcSucceeded (tag))
         {
-	    L4_KDB_Enter("xxx");
             printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
                     ipc_errorcode (L4_ErrorCode ()),
                     ipc_errorphase (L4_ErrorCode ()));
@@ -484,7 +475,6 @@ static void simple_ipc_t2_l (void)
         
         if (!L4_IpcSucceeded (tag))
         {
-	    L4_KDB_Enter("yyy");
             printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
                     ipc_errorcode (L4_ErrorCode ()),
                     ipc_errorphase (L4_ErrorCode ()));
