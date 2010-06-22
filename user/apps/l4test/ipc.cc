@@ -179,7 +179,6 @@ static void simple_ipc_t1_l (void)
 	for (L4_Word_t k = 1; k <= 63; k++)
 	    L4_LoadMR (k, 0);
 	tag = L4_Receive (ipc_t2);
-        
         if (!L4_IpcSucceeded (tag))
 	{
             printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
@@ -192,7 +191,6 @@ static void simple_ipc_t1_l (void)
 	L4_Store (tag, &msg);
 	if (L4_Label (tag) != 0xf00f)
 	{
-            L4_KDB_Enter("1 label");
 	    printf ("Xfer %d words -- wrong label: 0x%lx != 0xf00f\n",
 		    (int) n, (long) L4_Label (tag));
 	    ipc_ok = false;
@@ -445,8 +443,7 @@ static void simple_ipc_t2_l (void)
 	for (L4_Word_t i = 1; i <= n; i++)
 	    L4_Append (&msg, i);
 	L4_Load (&msg);
-	L4_Send (ipc_t1);
-
+	tag = L4_Send (ipc_t1);
         if (!L4_IpcSucceeded (tag))
         {
             printf ("Xfer %d words -- IPC failed %s %s\n", (int) n,
