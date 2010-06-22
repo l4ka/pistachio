@@ -42,6 +42,7 @@
 
 
 #define SEC_PPC44X_IO		".kdebug"
+extern addr_t setup_console_mapping(paddr_t paddr, int log2size);
 
 
 /* Section assignements */
@@ -131,10 +132,12 @@ static void init_serial (void)
     if (!(node = fdt->find_subtree(prop->get_string())))
         return;
     
-    if (! (prop = fdt->find_property_node(node, "virtual-reg")) )
+    if (! (prop = fdt->find_property_node(node, "reg")) )
         return;
 
-    comport = (u8_t *) prop->get_word(0);
+    //comport = (u8_t *) prop->get_word(0);
+    comport = (u8_t*)setup_console_mapping(0x140000200ULL, 12);
+
 #endif /* CONFIG_COMPORT == 0 */
 
     if (comport)
@@ -153,9 +156,6 @@ static void init_serial (void)
         in_8(LSR);
         in_8(MSR);
         
-        //extern "C" int printf (const char *fmt, ...);
-        //printf("Serial port %x initialized\n", comport);
-
     }
 
 }
@@ -314,7 +314,6 @@ static void putc_jtag(char c)
 
 #if defined(CONFIG_KDB_CONS_BGP_TREE)
 
-extern addr_t setup_console_mapping(paddr_t paddr, int log2size);
 // tree ifc memory offsets
 #define BGP_TRx_DI		(0x00U)
 #define BGP_TRx_HI		(0x10U)
