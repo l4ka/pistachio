@@ -45,7 +45,7 @@ SRCS=		crt0-$(ARCH).S grabmem.cc
 LIBS+=		-ll4 -lio
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
-CFLAGS_powerpc+=	-fno-builtin
+CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
 
 include $(top_srcdir)/Mk/l4.prog.mk

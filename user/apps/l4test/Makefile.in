@@ -57,7 +57,7 @@ LIBS+=		-ll4 -lio
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 CPPFLAGS+=	-I$(srcdir)/$(ARCH)
 
-CFLAGS_powerpc+=	-fno-builtin
+CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
 
 pre-all:

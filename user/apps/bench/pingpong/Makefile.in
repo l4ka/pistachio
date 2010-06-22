@@ -46,7 +46,7 @@ SRCS=		crt0-$(ARCH).S pingpong.cc $($(ARCH)_SRCS)
 LIBS+=		-ll4 -lio
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
-CFLAGS_powerpc+=	-fno-builtin
+CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
 
 CCFLAGS_pingpong-amd64-32 = $(subst -m64,-m32,$(CCFLAGS)) -m32 -fno-exceptions

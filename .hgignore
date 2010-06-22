@@ -20,3 +20,10 @@ syntax: regexp
 
 syntax: regexp
 ^.settings
+syntax: regexp
+^user-build$
+syntax: regexp
+^Makefile$
+syntax: regexp
+^user-install$
+
