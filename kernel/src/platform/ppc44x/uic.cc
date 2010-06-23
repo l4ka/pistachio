@@ -53,7 +53,8 @@ void SECTION (".init") intctrl_t::init_arch()
 
     prop = fdt->find_property_node(hdr, "compatible");
 
-    if (!prop || strcmp(prop->get_string(), "ibm,uic") || strcmp(prop->get_string(), "ibm,uic-440gp") != 0)
+    if (!prop || strcmp(prop->get_string(), "ibm,uic") || 
+        strcmp(prop->get_string(), "ibm,uic-440gp") != 0)
 	panic("UIC0: Couldn't find compatible node in FDT\n");
 
     prop = fdt->find_property_node(hdr, "dcr-reg");

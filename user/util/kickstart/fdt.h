@@ -120,7 +120,7 @@ public:
     L4_Word_t get_word(int index)
 	{ return data[index]; }
     L4_Word64_t get_u64(int index)
-	{ return *(reinterpret_cast<L4_Word64_t*>(&data[index])); }
+	{ return ((L4_Word64_t)data[index]) << 32 | ((L4_Word64_t)data[index + 1]); }
     char *get_string()
 	{ return (char*)data; }
 
