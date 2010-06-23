@@ -521,9 +521,11 @@ void hs_scheduler_t::smp_requeue(bool holdlock)
                 tcb->sched_state.requeue_callback(tcb);
                 tcb->sched_state.requeue_callback = NULL;
             }
-            else {
+            else
+            {
                 tcb->sched_state.cancel_timeout ();
-                enqueue_ready( tcb );
+                if (tcb->get_state().is_runnable())
+                    enqueue_ready( tcb );
             }
         }
         if (!holdlock) 

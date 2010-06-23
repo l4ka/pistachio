@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     api/v4/sched-rr/schedule.cc
  * Description:   
@@ -268,10 +268,12 @@ void rr_scheduler_t::smp_requeue(bool holdlock)
 		tcb->sched_state.requeue_callback(tcb);
 		tcb->sched_state.requeue_callback = NULL;
 	    }
-	    else {
-		tcb->sched_state.cancel_timeout ();
-		enqueue_ready( tcb );
-	    }
+            else
+            {
+                tcb->sched_state.cancel_timeout ();
+                if (tcb->get_state().is_runnable())
+                    enqueue_ready( tcb );
+            }
 	}
 	if (!holdlock) 
 	    rq->lock.unlock();
