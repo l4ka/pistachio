@@ -183,7 +183,6 @@ void launch_kernel(L4_Word_t entry)
 
     entry_secondary = kernel; /* release APs */
     asm("msync; dcbi 0, %0" : : "b"(&entry_secondary));
-
     (*kernel)();
 }
 

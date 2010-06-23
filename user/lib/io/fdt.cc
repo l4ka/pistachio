@@ -34,7 +34,6 @@
 #include "fdt.h"
 #include "lib.h"
 
-static const char *indent = "                    ";
 
 fdt_header_t *fdt_t::find_subtree_node(fdt_node_t *node, char *name)
 {

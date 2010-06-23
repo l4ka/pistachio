@@ -128,16 +128,16 @@ static void init_serial (void)
     if (! (prop = fdt->find_property_node(node, "serial0")) )
         return;
 
-
     if (!(node = fdt->find_subtree(prop->get_string())))
         return;
     
     if (! (prop = fdt->find_property_node(node, "reg")) )
         return;
-
-    //comport = (u8_t *) prop->get_word(0);
-    comport = (u8_t*)setup_console_mapping(0x140000200ULL, 12);
-
+    
+    // Serial bus is beyond 4GB
+    u64_t comport_phys = 0x100000000ULL | (u64_t) prop->get_word(0);
+    comport = (u8_t*)setup_console_mapping(comport_phys, 12);
+    
 #endif /* CONFIG_COMPORT == 0 */
 
     if (comport)
