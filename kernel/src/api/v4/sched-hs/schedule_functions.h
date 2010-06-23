@@ -20,13 +20,13 @@ EXTERN_TRACEPOINT(SCHEDULE_IDLE);
 INLINE void hs_sched_ktcb_t::account_pass() 
 {
     tcb_t *tcb = addr_to_tcb(this);
-    while( tcb != get_idle_tcb() )
+    while (tcb->get_global_id() !=  IDLETHREAD )
     {
 	ASSERT(tcb->is_local_cpu());
         sched_ktcb_t *sktcb = &tcb->sched_state; 
 
         TRACEPOINT (SCHEDULE_DETAILS, "account pass %t %U += %d\n",
-                    tcb, sktcb->get_pass(), sktcb->get_stride());
+                  tcb, sktcb->get_pass(), sktcb->get_stride());
         
 	sktcb->set_pass(sktcb->get_pass() + sktcb->get_stride());
 
