@@ -333,7 +333,6 @@ send_path:
 	current->set_state(thread_state_t::polling);
 	
         /* VU: add smp_memory_barrier() */
-
 	if ( to_tcb->lock_state.is_active() ) 
 	    to_tcb->lock();
 #endif
@@ -341,20 +340,23 @@ send_path:
 	// not waiting || (not waiting for me && not waiting for any && not waiting for anylocal)
 	// optimized for receive and wait any
 	if (EXPECT_FALSE(
-		(!to_tcb->get_state().is_waiting())  ||
-		(   // Not waiting for sender (may be virtual sender)?
-		    to_tcb->get_partner() != sender_id &&
-		    // Not open wait?
-		    !to_tcb->get_partner().is_anythread() &&
-		    // Not open local wait?
-		    !(to_tcb->get_partner().is_anylocalthread() && 
-		      to_tcb->get_space() == current->get_space()) &&
-		    // Not waiting for actual sender (if propagating IPC)?
-		    to_tcb->get_partner() != current->get_global_id()   )))
+                ((!to_tcb->get_state().is_waiting())  ||
+                 (   // Not waiting for sender (may be virtual sender)?
+                     to_tcb->get_partner() != sender_id &&
+                     // Not open wait?
+                     !to_tcb->get_partner().is_anythread() &&
+                     // Not open local wait?
+                     !(to_tcb->get_partner().is_anylocalthread() && 
+                       to_tcb->get_space() == current->get_space()) &&
+                     // Not waiting for actual sender (if propagating IPC)?
+                     to_tcb->get_partner() != current->get_global_id()   ))
+#if defined(CONFIG_SMP)
+                && (!to_tcb->get_state().is_locked_waiting() || (to_tcb->get_partner() != current->get_global_id()))
+#endif
+                ))
 	{
 	    TRACE_IPC_DETAILS("ipc blocking send (curr=%t, to=%t s=%s)", 
 		       current, TID(to_tid), to_tcb->get_state().string());
-	    //enter_kdebug("blocking send");
 
 	    /* thread is not receiving */
 	    if (EXPECT_FALSE( !timeout.get_snd().is_never() ))
@@ -441,7 +443,6 @@ send_path:
 #endif
 
 	// The partner must be told who the IPC originated from.
-	
 	to_tcb->set_partner(sender_id);
 
 	if (EXPECT_FALSE( !transfer_message(current, to_tcb, tag) ))
@@ -532,10 +533,7 @@ send_path:
 	TRACE_IPC_DETAILS("ipc receive phase curr=%t, from=%t", current, TID(from_tid));
 
 #if defined(CONFIG_SMP)
-	/* VU: set thread state early to catch races */
-	current->set_partner(from_tid);
-	current->set_state(thread_state_t::waiting_forever);
-	if (current->lock_state.is_active())
+        if (current->lock_state.is_active())
 	    current->lock();
 #endif
 
@@ -664,7 +662,6 @@ send_path:
 	{
 
 	    TRACE_IPC_DETAILS("ipc perform receive from %t",  from_tcb);
-	    //enter_kdebug("do receive");
 
 	    // both threads on the same CPU?
 	    if (EXPECT_TRUE( from_tcb->is_local_cpu() ))
@@ -693,8 +690,9 @@ send_path:
 		TRACE_XIPC_DETAILS("ipc xcpu receive curr=%t:%d -> from=%t:%d",
 			   current, current->get_cpu(), from_tcb, from_tcb->get_cpu());
 		
+                current->set_partner(from_tid);
 		current->set_state(thread_state_t::locked_waiting);
-
+		current->set_state(thread_state_t::locked_waiting);
 		if (EXPECT_TRUE (current->lock_state.is_enabled())) 
 		{
 		    from_tcb->set_state(thread_state_t::locked_running);
