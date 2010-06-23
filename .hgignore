@@ -27,3 +27,6 @@ syntax: regexp
 syntax: regexp
 ^user-install$
 
+
+syntax: regexp
+^kernel/src/generic/simics\.h$

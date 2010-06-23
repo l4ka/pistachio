@@ -30,6 +30,7 @@
  ********************************************************************/
 #include <debug.h>
 #include <kdb/tracepoints.h>
+#include <generic/simics.h>
 
 #include <lib.h>
 #include INC_ARCH(string.h)
@@ -47,124 +48,116 @@ void SECTION (".init") intctrl_t::init_arch()
     fdt_property_t *prop;
 
     //Controller 0
+    printf("Looking for interrupt controller 0... ");
     hdr = fdt->find_subtree("/interrupt-controller0");
     if (!hdr)
 	panic("Couldn't find interrupt controller 0 in FDT\n");
+    else
+    	printf("found!\n");
 
+    printf("Checking whether UIC0 is compatible... ");
     prop = fdt->find_property_node(hdr, "compatible");
 
-    if (!prop || strcmp(prop->get_string(), "ibm,uic") || strcmp(prop->get_string(), "ibm,uic-440gp") != 0)
-	panic("UIC0: Couldn't find compatible node in FDT\n");
+    if ((!prop) || ((strcmp(prop->get_string(), "ibm,uic") != 0) && (strcmp(prop->get_string(), "ibm,uic-440gp") != 0)))
+    	panic("UIC0: Couldn't find compatible node in FDT\ncompatibility string was %s",prop->get_string());
+    else
+    	printf("it is!\n");
 
+    printf("Looking for UIC0's DCR base address... ");
     prop = fdt->find_property_node(hdr, "dcr-reg");
-    //FIXME: What is the right size?
     if (!prop) // || prop->get_len() != 2 * sizeof(u32_t))
 	panic("UIC0: Couldn't find 'dcr-reg' node in FDT (%p, %d)\n",
 	      prop, prop->get_len());
 
-    UIC0_DCR_BASE = prop->get_word(0); //FIXME: Is this really a full word or just 6 bits?
+    if (UIC0_DCR_BASE == prop->get_word(0))
+    	printf("Found at 0x%x\n",UIC0_DCR_BASE);
+    else
+    	panic("UIC0 is not at its expected DCR base address!");
 
-    //FIXME: Check if lengh is 9
-#if 0
-    mem_size = prop->get_word(2);
-#endif
+    if (prop->get_word(1) != 9)
+    	panic("Invalid number of control registers found (%d)",prop->get_word(1));
 
-    //TODO: What is this? Only one controller has it.
-#if 0
-    prop = fdt->find_property_node(hdr, "interrupts");
-    if (!prop || prop->get_len() != sizeof(u32_t))
-	panic("UIC0: Couldn't find valid 'interrupts' node in FDT\n");
-
-    num_irqs = prop->get_word(0);
-    if (num_irqs > BGP_MAX_IRQS)
-	panic("UIC0: reported number IRQs of %d exceeds specification\n", num_irqs);
+#if defined(PPC440EPx)
+    num_irqs=30;
 #else
-    num_irqs=31; //FIXME
+    num_irqs=31;
 #endif
 
-    TRACE_INIT("UIC0: %x, %d interrupts\n",
+    TRACE_INIT("UIC0: DCR base 0x%x, %d interrupts\n",
 	       UIC0_DCR_BASE, num_irqs);
 
     //Controller 1
+    printf("Looking for interrupt controller 1... ");
     hdr = fdt->find_subtree("/interrupt-controller1");
     if (!hdr)
-	panic("Couldn't find interrupt controller 1 in FDT\n");
+    	panic("Couldn't find interrupt controller 1 in FDT\n");
+    else
+    	printf("found!\n");
 
+    printf("Checking whether UIC1 is compatible... ");
     prop = fdt->find_property_node(hdr, "compatible");
 
-    if (!prop || strcmp(prop->get_string(), "ibm,uic") || strcmp(prop->get_string(), "ibm,uic-440gp") != 0)
-	panic("UIC1: Couldn't find compatible node in FDT\n");
+    if ((!prop) || ((strcmp(prop->get_string(), "ibm,uic") != 0) && (strcmp(prop->get_string(), "ibm,uic-440gp") != 0)))
+    	panic("UIC1: Couldn't find compatible node in FDT\ncompatibility string was %s",prop->get_string());
+    else
+    	printf("it is!\n");
 
+    printf("Looking for UIC1's DCR base address... ");
     prop = fdt->find_property_node(hdr, "dcr-reg");
-    //FIXME: What is the right size?
     if (!prop) // || prop->get_len() != 2 * sizeof(u32_t))
 	panic("UIC1: Couldn't find 'dcr-reg' node in FDT (%p, %d)\n",
 	      prop, prop->get_len());
 
-    UIC1_DCR_BASE = prop->get_word(0); //FIXME: Is this really a full word or just 6 bits?
+    if (UIC1_DCR_BASE == prop->get_word(0))
+    	printf("Found at 0x%x\n",UIC1_DCR_BASE);
+    else
+    	panic("UIC1 is not at its expected DCR base address!");
 
-    //FIXME: Check if lengh is 9
-#if 0
-    mem_size = prop->get_word(2);
-#endif
+    if (prop->get_word(1) != 9)
+    	panic("UIC1: Invalid number of control registers found (%d)",prop->get_word(1));
 
-    //TODO: What is this? Only one controller has it.
-#if 0
-    prop = fdt->find_property_node(hdr, "interrupts");
-    if (!prop || prop->get_len() != sizeof(u32_t))
-	panic("UIC1: Couldn't find valid 'interrupts' node in FDT\n");
+    num_irqs=32;
 
-    num_irqs = prop->get_word(0);
-    if (num_irqs > BGP_MAX_IRQS)
-	panic("UIC1: reported number IRQs of %d exceeds specification\n", num_irqs);
-#else
-    num_irqs=32; //FIXME
-#endif
-
-    TRACE_INIT("UIC1: %x, %d interrupts\n",
+    TRACE_INIT("UIC1: DCR base 0x%x, %d interrupts\n",
 	       UIC1_DCR_BASE, num_irqs);
 
     //Controller 2
 #if defined(PPC440EPx)
+    printf("Looking for interrupt controller 2... ");
     hdr = fdt->find_subtree("/interrupt-controller2");
     if (!hdr)
-	panic("Couldn't find interrupt controller 2 in FDT\n");
+    	panic("Couldn't find interrupt controller 2 in FDT\n");
+    else
+    	printf("found!\n");
 
+    printf("Checking whether UIC2 is compatible... ");
     prop = fdt->find_property_node(hdr, "compatible");
 
-    if (!prop || strcmp(prop->get_string(), "ibm,uic") || strcmp(prop->get_string(), "ibm,uic-440gp") != 0)
-	panic("UIC2: Couldn't find compatible node in FDT\n");
+    if ((!prop) || ((strcmp(prop->get_string(), "ibm,uic") != 0) && (strcmp(prop->get_string(), "ibm,uic-440gp") != 0)))
+    	panic("UIC2: Couldn't find compatible node in FDT\ncompatibility string was %s",prop->get_string());
+    else
+    	printf("it is!\n");
 
+    printf("Looking for UIC2's DCR base address... ")
     prop = fdt->find_property_node(hdr, "dcr-reg");
-    //FIXME: What is the right size?
     if (!prop) // || prop->get_len() != 2 * sizeof(u32_t))
 	panic("UIC2: Couldn't find 'dcr-reg' node in FDT (%p, %d)\n",
 	      prop, prop->get_len());
 
-    UIC2_DCR_BASE = prop->get_word(0); //FIXME: Is this really a full word or just 6 bits?
+    if (UIC2_DCR_BASE == prop->get_word(0))
+    	printf("Found at 0x%x\n",UIC2_DCR_BASE);
+    else
+    	panic("UIC2 is not at its expected DCR base address!")
 
-    //FIXME: Check if lengh is 9
-#if 0
-    mem_size = prop->get_word(2);
-#endif
+    if (prop->get_word(1) != 9)
+    	panic("UIC2: Invalid number of control registers found (%d)",prop->get_word(1));
 
-    //TODO: What is this? Only one controller has it.
-#if 0
-    prop = fdt->find_property_node(hdr, "interrupts");
-    if (!prop || prop->get_len() != sizeof(u32_t))
-	panic("UIC2: Couldn't find valid 'interrupts' node in FDT\n");
+    num_irqs=32;
 
-    num_irqs = prop->get_word(0);
-    if (num_irqs > BGP_MAX_IRQS)
-	panic("UIC2: reported number IRQs of %d exceeds specification\n", num_irqs);
-#else
-    num_irqs=32; //FIXME
-#endif
-
-    TRACE_INIT("UIC2: %x, %d interrupts\n",
+    TRACE_INIT("UIC2: DCR base 0x%x, %d interrupts\n",
 	       UIC2_DCR_BASE, num_irqs);
 
-#endif
+#endif //PPC440EPx
 
     init_controllers();
     // route all IRQs to CPU0

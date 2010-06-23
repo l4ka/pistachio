@@ -38,15 +38,19 @@
 #define mfdcr(rn) \
           ({      \
                   unsigned long rval; \
-                  asm volatile("mfdcr %0,%1" : "=r"(rval) : "r"(rn)); \
+                  asm volatile("mfdcr %0,%1" : "=r"(rval) : "i"(rn)); \
                   rval; \
           })
-#define mtdcr(rn, val) asm volatile("mtdcr %0,%1" : : "r"(rn), "r"(val))
+#define mtdcr(rn, val) asm volatile("mtdcr %0,%1" : : "i"(rn), "r"(val))
 
 /*
  * Universal Interrupt Controller register definitions. Each is a separate
  * DCR register.
  */
+
+#define UIC0_DCR_BASE  0xc0
+#define UIC1_DCR_BASE  0xd0
+//FIXME: What is the correct base address for UIC2?
 
 #define UIC0_SR        (UIC0_DCR_BASE+0x0)  /* UIC status                  */
 #define UIC0_SRS       (UIC0_DCR_BASE+0x1)  /* UIC status register set     */
@@ -190,12 +194,6 @@ private:
     u8_t routing[BGP_MAX_IRQS / 4]; // 4 IRQs per byte
     spinlock_t lock;
     word_t num_irqs;
-
-    word_t UIC0_DCR_BASE;
-    word_t UIC1_DCR_BASE;
-#if defined(PPC440EPx)
-    word_t UIC2_DCR_BASE;
-#endif
     word_t mem_size;
 
     word_t init_controllers();
