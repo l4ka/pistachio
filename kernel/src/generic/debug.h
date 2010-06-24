@@ -171,7 +171,7 @@ void kdebug_check_breakin();
 
 bool kdebug_check_interrupt();
 
-#if 1
+#if 0
 #include <generic/simics.h>
 #endif
 

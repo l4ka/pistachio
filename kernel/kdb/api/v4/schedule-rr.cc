@@ -49,7 +49,6 @@ static void show_sched_queue(bool empty)
     int abort = 1000000;
     present_list_lock.lock();
 
-    printf("cpus %d\n", cpu_t::count);
     for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
     {
 	bool print_cpu_header = false;
@@ -63,12 +62,12 @@ static void show_sched_queue(bool empty)
             print_cpu_header = true;
         }
 
-        s16_t prio = MAX_PRIORITY;
-        printf("prio %d\n", prio);
-	for (prio = MAX_PRIORITY; prio >= 0; prio--)
+	for (s16_t prio = MAX_PRIORITY; prio >= 0; prio--)
 	{
 	    /* check whether we have something for this prio */
 	    tcb_t* walk = global_present_list;
+            printf("tcb %t\n", walk);
+
 	    do {
 		if (walk->sched_state.get_priority() == prio && walk->get_cpu() == cpu) 
 		{
