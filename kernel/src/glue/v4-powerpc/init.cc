@@ -35,6 +35,7 @@
 #include <kmemory.h>
 #include <mapping.h>
 #include <generic/ctors.h>
+#include <generic/init.h>
 
 #include INC_ARCH(page.h)
 #include INC_ARCH(phys.h)
@@ -93,7 +94,7 @@ static void fatal( char *msg )
     while( 1 ) ;
 }
 
-SECTION(".init") void timer_init( word_t cpu_hz, word_t bus_hz )
+SECTION(SEC_INIT) void timer_init( word_t cpu_hz, word_t bus_hz )
 {
     word_t decrementer_hz;
 
@@ -112,7 +113,7 @@ SECTION(".init") void timer_init( word_t cpu_hz, word_t bus_hz )
 
 #if defined(CONFIG_PLAT_OFPPC)
 
-SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
+SECTION(SEC_INIT) void firmware_init( kernel_interface_page_t *kip )
     /* Finds and installs the position-independent copy of the
      * OpenFirmware device tree.
      */
@@ -154,7 +155,7 @@ fdt_t *get_fdt()
 	return (fdt_t*)get_kip()->boot_info;
 }
 
-SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
+SECTION(SEC_INIT) void firmware_init( kernel_interface_page_t *kip )
 {
     fdt_t *fdtmapping;
     int size = KERNEL_PAGE_SIZE * 8;
@@ -185,7 +186,7 @@ SECTION(".init") void firmware_init( kernel_interface_page_t *kip )
  *
  *****************************************************************************/
 
-SECTION(".init") addr_t kip_get_phys_mem( kernel_interface_page_t *kip )
+SECTION(SEC_INIT) addr_t kip_get_phys_mem( kernel_interface_page_t *kip )
     /* Search through the kip's memory descriptors for the size
      * of physical memory.  We assume that physical memory always starts at 0.
      */
@@ -206,7 +207,7 @@ SECTION(".init") addr_t kip_get_phys_mem( kernel_interface_page_t *kip )
     return max;
 }
 
-SECTION(".init") static void kip_mem_init( kernel_interface_page_t *kip, word_t bootmem_phys_high )
+SECTION(SEC_INIT) static void kip_mem_init( kernel_interface_page_t *kip, word_t bootmem_phys_high )
 {
     // Define the user's virtual address space.
     kip->memory_info.insert( memdesc_t::conventional, true,
@@ -231,7 +232,7 @@ SECTION(".init") static void kip_mem_init( kernel_interface_page_t *kip, word_t 
 	    (addr_t)bootmem_phys_high );
 }
 
-SECTION(".init") static void kip_cpu_init( kernel_interface_page_t *kip )
+SECTION(SEC_INIT) static void kip_cpu_init( kernel_interface_page_t *kip )
     // Invoked for each processor.
 {
     static word_t cpu_khz = 0, bus_khz = 0;
@@ -259,7 +260,7 @@ SECTION(".init") static void kip_cpu_init( kernel_interface_page_t *kip )
     init_cpu( get_current_cpu(), bus_khz, cpu_khz );
 }
 
-SECTION(".init") static void kip_sc_init( kernel_interface_page_t *kip )
+SECTION(SEC_INIT) static void kip_sc_init( kernel_interface_page_t *kip )
 {
     kip->schedule_syscall	= (syscall_t)_sc_schedule;
     kip->thread_switch_syscall	= (syscall_t)_sc_thread_switch;
@@ -294,7 +295,7 @@ INLINE word_t cpu_area_size( void )
 }
 
 #if defined(CONFIG_SMP)
-SECTION(".init") static void reclaim_cpu_kmem()
+SECTION(SEC_INIT) static void reclaim_cpu_kmem()
 {
     word_t tot = 0;
 
@@ -313,7 +314,7 @@ SECTION(".init") static void reclaim_cpu_kmem()
 }
 #endif
 
-SECTION(".init") static word_t do_kmem_init()
+SECTION(SEC_INIT) static word_t do_kmem_init()
 {
     word_t bootmem_low, bootmem_high;
     word_t tot, size;
@@ -350,11 +351,11 @@ SECTION(".init") static word_t do_kmem_init()
 }
 
 #elif defined(CONFIG_PPC_MMU_TLB)
-SECTION(".init") static void reclaim_cpu_kmem()
+SECTION(SEC_INIT) static void reclaim_cpu_kmem()
 {
 }
 
-SECTION(".init") static word_t do_kmem_init()
+SECTION(SEC_INIT) static word_t do_kmem_init()
 {
     addr_t bootmem_low, bootmem_high;
     word_t tot;
@@ -379,7 +380,7 @@ SECTION(".init") static word_t do_kmem_init()
  *
  ****************************************************************************/
 
-static SECTION(".init") void perfmon_init( void )
+static SECTION(SEC_INIT) void perfmon_init( void )
 {
     if( powerpc_version_t::read().is_750() )
     {
@@ -397,7 +398,7 @@ static SECTION(".init") void perfmon_init( void )
     }
 }
 
-static SECTION(".init") void timer_start( void )
+static SECTION(SEC_INIT) void timer_start( void )
 {
 #ifdef CONFIG_PPC_BOOKE
     ppc_tcr_t tcr;
@@ -410,7 +411,7 @@ static SECTION(".init") void timer_start( void )
     ppc_set_dec( decrementer_interval );
 }
 
-static SECTION(".init") void cpu_init( cpuid_t cpu )
+static SECTION(SEC_INIT) void cpu_init( cpuid_t cpu )
 {
 #if defined(CONFIG_SMP)
 # define CPU_SPILL_SIZE	(CACHE_LINE_SIZE * CONFIG_SMP_MAX_CPUS)
@@ -455,7 +456,7 @@ static SECTION(".init") void cpu_init( cpuid_t cpu )
 /**
  * Continue initializing now that we have a tcb stack.
  */
-SECTION(".init") static void finish_cpu_init( void )
+SECTION(SEC_INIT) static void finish_cpu_init( void )
 {
     TRACE_INIT("CPU %d initialized--enter wait loop\n", get_current_cpu());
 
@@ -479,7 +480,7 @@ SECTION(".init") static void finish_cpu_init( void )
 }
 
 void dump_tlb();
-extern "C" SECTION(".init") NORETURN void l4_powerpc_cpu_start( cpuid_t cpu )
+extern "C" void SECTION(SEC_INIT) NORETURN startup_cpu ( cpuid_t cpu )
 {
 #ifdef CONFIG_PPC_MMU_SEGMENTS
     /* NOTE: do not perform i/o until the page hash is activated!
@@ -517,7 +518,7 @@ extern "C" SECTION(".init") NORETURN void l4_powerpc_cpu_start( cpuid_t cpu )
  *
  ****************************************************************************/
 
-static SECTION(".init") void install_extern_int_handler( void )
+static SECTION(SEC_INIT) void install_extern_int_handler( void )
 {
 #ifndef CONFIG_PPC_BOOKE
     extern word_t _except_extern_int[], _except_extern_int_end[];
@@ -532,20 +533,21 @@ static SECTION(".init") void install_extern_int_handler( void )
 }
 
 #if defined(CONFIG_SMP)
-SECTION(".init") static void start_all_cpus( void )
+SECTION(SEC_INIT) static void start_all_cpus( void )
 {
     for( cpuid_t cpu = 1; cpu < cpu_count; cpu++ )
     {
-	cpu_start_lock.lock();	// Unlocked by the target cpu in l4_powerpc_cpu_start().
+	cpu_start_lock.lock();	// Unlocked by the target cpu in startup_cpu
 	printf("CPU0: starting CPU %d\n", cpu);
 	cpu_start_id = cpu;	// cpu_start_id must be protected by the lock.
 	get_interrupt_ctrl()->start_new_cpu( cpu );
+        cpu_t::add_cpu(cpu);
     }
     cpu_start_lock.lock();	// Wait for last cpu to init.
 }
 #endif
 
-SECTION(".init") static void finish_api_init( void )
+SECTION(SEC_INIT) static void finish_api_init( void )
 {
     // Enable recoverable exceptions (for this cpu).
     ppc_set_msr( MSR_KERNEL );
@@ -562,9 +564,11 @@ SECTION(".init") static void finish_api_init( void )
 
     get_interrupt_ctrl()->init_arch();
 
-#if defined(CONFIG_SMP)
     cpu_count = get_cpu_count();
     TRACE_INIT( "Detected %d processors\n", cpu_count );
+    cpu_t::add_cpu(0);
+
+#if defined(CONFIG_SMP)
 
     reclaim_cpu_kmem();
     start_all_cpus();
@@ -595,7 +599,7 @@ SECTION(".init") static void finish_api_init( void )
 /*
  * function validates bat mappings
  */
-static SECTION(".init") void setup_kernel_mappings( void )
+static SECTION(SEC_INIT) void setup_kernel_mappings( void )
 {
     ppc_bat_t bat;
     word_t size;
@@ -629,7 +633,7 @@ static SECTION(".init") void setup_kernel_mappings( void )
 	fatal( "The kernel data size exceeds the data BAT size." );
 }
 
-static SECTION(".init") void install_exception_handlers( cpuid_t cpu )
+static SECTION(SEC_INIT) void install_exception_handlers( cpuid_t cpu )
 {
     if (cpu != 0)
 	return;
@@ -663,7 +667,7 @@ static SECTION(".init") void install_exception_handlers( cpuid_t cpu )
  *                  The kernel's C entry point.
  *
  ****************************************************************************/
-extern "C" SECTION(".init") void l4_powerpc_init( word_t r3, word_t r4, word_t r5 )
+extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t r5 )
 {
     init_console();
 #if defined(CONFIG_KDB_CONS_OF1275)
@@ -675,6 +679,15 @@ extern "C" SECTION(".init") void l4_powerpc_init( word_t r3, word_t r4, word_t r
 
     /* Primary cpu init. */
     init_hello();
+
+    TRACE_INIT("virtual memory layout:\n"
+	       "\tuser area     %wx - %wx\n"
+	       "\tcopy area     %wx - %wx\n"
+	       "\tktcb area     %wx - %wx\n"
+	       "\tkernel area   %wx - %wx\n",
+	       USER_AREA_START, USER_AREA_END,
+	       COPY_AREA_START, COPY_AREA_END,
+	       KERNEL_AREA_START, KERNEL_AREA_END);
 
     setup_kernel_mappings();
     install_exception_handlers(0);

@@ -94,7 +94,7 @@ BEGIN_PROC(_start_ap_32)
 
 	/* still running in 1:1 mapped area
 	   jump to the top level init function */ 
-	jmp	startup_processor
+	jmp	startup_cpu
 END_PROC(_start_ap_32)
 
         .align  16

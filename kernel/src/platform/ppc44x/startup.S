@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/platform/ppc44x/startup.S
+ * File path:     platform/ppc44x/startup.S
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,8 @@ _start:
 	/* use relocated stack */
 	addis	%r1, %r1, KERNEL_OFFSET@ha
 
-	li	%r2, l4_powerpc_init@l
-	oris	%r2, %r2, l4_powerpc_init@h
+	li	%r2, startup_system@l
+	oris	%r2, %r2, startup_system@h
 	mtctr	%r2
 	bctr	
 	
@@ -93,8 +93,8 @@ wait_secondary:
 	/* relocate stack */
 	addis	%r1, %r1, KERNEL_OFFSET@ha
 
-	li	%r2, l4_powerpc_cpu_start@l
-	oris	%r2, %r2, l4_powerpc_cpu_start@h
+	li	%r2, startup_cpu@l
+	oris	%r2, %r2, startup_cpu@h
 	mfspr	%r3, SPR_PIR
 	mtctr	%r2
 	bctr

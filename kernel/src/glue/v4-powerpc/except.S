@@ -374,7 +374,7 @@ EXCEPTION(extern_int, EXCEPT_OFFSET_EXTERNAL_INT)
 
 	/* Enter C code, and finish cpu initialization. */
 	grab_sym %r10, MSR_KERNEL_INIT	/* Grab the kernel's init msr. */
-	grab_sym %r11, l4_powerpc_cpu_start	/* Load the C code entry point. */
+	grab_sym %r11, startup_cpu	/* Load the C code entry point. */
 	mtsrr1	%r10			/* Prepare to install the kernel msr. */
 	mtsrr0	%r11			/* Prepare to jump to the C code. */
 	rfi				/* Enter the kernel. */

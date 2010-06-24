@@ -138,9 +138,9 @@ static void smp_bp_commence (void)
 
 
 /**
- * startup_processor
+ * startup_cpu
  */
-extern "C" void SECTION(SEC_INIT) startup_processor (void)
+extern "C" void SECTION(SEC_INIT) startup_cpu (void)
 {
 #if defined(CONFIG_DEBUG)
     if (x86_reboot_scheduled)
@@ -405,7 +405,7 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 #if defined(CONFIG_IS_64BIT) && defined(CONFIG_SMP)
     /* check if we are running on the BSP or on an AP */
     if ( is_ap )
-	startup_processor();
+	startup_cpu();
 #endif
 
     clear_bss();
