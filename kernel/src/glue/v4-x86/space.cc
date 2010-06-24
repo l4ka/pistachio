@@ -20,12 +20,12 @@
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
 #include INC_API(kernelinterface.h)
+#include INC_API(cpu.h)
 
 #include INC_ARCH(mmu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(pgent.h)
 
-#include INC_GLUE(cpu.h)
 #include INC_GLUE(memory.h)
 #include INC_GLUE(space.h)
 

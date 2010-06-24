@@ -72,7 +72,7 @@
 #include INC_API(kernelinterface.h)
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 
 #include INC_PLAT(rtc.h)
 #include INC_PLAT(perfmon.h)

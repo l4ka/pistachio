@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2010,  Karlsruhe University
  *                
  * File path:     generic/debug.h
  * Description:   Debug functions
@@ -171,5 +171,8 @@ void kdebug_check_breakin();
 
 bool kdebug_check_interrupt();
 
+#if 1
+#include <generic/simics.h>
+#endif
 
 #endif /* !__DEBUG_H__ */

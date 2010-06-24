@@ -39,7 +39,7 @@
 #include INC_API(schedule.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(smp.h)
-#include INC_GLUE(cpu.h)
+#include INC_API(cpu.h)
 
 
 DECLARE_TRACEPOINT(INTERRUPT);

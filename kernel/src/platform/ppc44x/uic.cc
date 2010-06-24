@@ -30,7 +30,6 @@
  ********************************************************************/
 #include <debug.h>
 #include <kdb/tracepoints.h>
-#include <generic/simics.h>
 
 #include <lib.h>
 #include INC_ARCH(string.h)

@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/cpu.cc
+ * File path:     glue/v4-powerpc/cpu.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
  ********************************************************************/
 #include INC_API(smp.h)
 #include INC_GLUE(intctrl.h)
-#include INC_GLUE(cpu.h)
+#include INC_API(cpu.h)
 
 cpu_t cpu_t::descriptors[CONFIG_SMP_MAX_CPUS];
 word_t cpu_t::count;

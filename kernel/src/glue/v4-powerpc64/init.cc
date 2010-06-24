@@ -51,7 +51,7 @@ extern void init_serial_console();
 #include INC_API(tcb.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(schedule.h)
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(timer.h)
@@ -240,9 +240,9 @@ SECTION(".init") static void finish_api_init( void )
     get_timer()->init_global();
 
 #if defined(CONFIG_SMP)
-    init_processor( boot_cpu, boot_buskhz, boot_cpukhz );
+    init_cpu( boot_cpu, boot_buskhz, boot_cpukhz );
 #else
-    init_processor( 0, boot_buskhz, boot_cpukhz );
+    init_cpu( 0, boot_buskhz, boot_cpukhz );
 #endif
 
     get_interrupt_ctrl()->init_arch();

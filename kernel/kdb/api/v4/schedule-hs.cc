@@ -35,7 +35,7 @@
 #include <sync.h>
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
-#include INC_GLUE(cpu.h)
+#include INC_API(cpu.h)
 
 tcb_t * global_present_list UNIT("kdebug") = NULL;
 spinlock_t present_list_lock;

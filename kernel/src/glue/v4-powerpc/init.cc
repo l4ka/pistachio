@@ -59,7 +59,7 @@
 #include INC_API(space.h)
 #include INC_API(kernelinterface.h)
 #include INC_API(schedule.h)
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 
 #include INC_GLUE(pghash.h)
 #include INC_GLUE(intctrl.h)
@@ -256,7 +256,7 @@ SECTION(".init") static void kip_cpu_init( kernel_interface_page_t *kip )
 	timer_init( cpu_hz, bus_hz );
     }
 
-    init_processor( get_current_cpu(), bus_khz, cpu_khz );
+    init_cpu( get_current_cpu(), bus_khz, cpu_khz );
 }
 
 SECTION(".init") static void kip_sc_init( kernel_interface_page_t *kip )

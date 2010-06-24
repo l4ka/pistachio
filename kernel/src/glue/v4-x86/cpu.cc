@@ -32,9 +32,9 @@
 #include INC_GLUE(config.h)
 #include INC_GLUE(idt.h)
 #include INC_API(smp.h)
+#include INC_API(cpu.h)
 #include INC_ARCH(apic.h)
 #include INC_ARCH(trapgate.h)
-#include INC_GLUE(cpu.h)
 #include <debug.h>
 
 DECLARE_TRACEPOINT_DETAIL(X86_APIC_IPI);
@@ -67,7 +67,7 @@ X86_EXCNO_ERRORCODE(smp_trigger_ipi, 0)
 void smp_xcpu_trigger(cpuid_t cpu)
 {
     TRACEPOINT(X86_APIC_IPI, "send IPI to CPU %d\n", cpu);
-    apic.send_ipi(cpu_t::get(cpu)->get_apic_id(), IDT_LAPIC_XCPU_IPI);
+    apic.send_ipi(cpu_t::get(cpu)->get_id(), IDT_LAPIC_XCPU_IPI);
 }
 
 void init_xcpu_handling ()

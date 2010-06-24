@@ -33,6 +33,7 @@
 #include <debug.h>
 #include <kdb/kdb.h>
 #include <kdb/input.h>
+#include INC_API(cpu.h)
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(ioport.h)
@@ -45,9 +46,6 @@
 #include INC_GLUE(idt.h)
 #if defined(CONFIG_IOAPIC)
 # include INC_ARCH(apic.h)
-#endif
-#if defined(CONFIG_SMP)
-#include INC_GLUE(cpu.h)
 #endif
 
 

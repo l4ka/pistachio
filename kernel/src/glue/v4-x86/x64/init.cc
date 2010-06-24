@@ -39,7 +39,7 @@
 
 #include INC_API(kernelinterface.h)
 #include INC_API(types.h)
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 #include INC_API(schedule.h)
 
 #include INC_ARCH(cpu.h)

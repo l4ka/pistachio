@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2009,  Karlsruhe University
+ * Copyright (C) 2007-2010,  Karlsruhe University
  *                
  * File path:     kdb/arch/x86/x86.cc
  * Description:   
@@ -14,6 +14,7 @@
 #include <kdb/kdb.h>
 #include <kdb/input.h>
 #include INC_API(tcb.h)
+#include INC_API(cpu.h)
 #include INC_ARCH(cpu.h)
 #include INC_ARCH(trapgate.h)
 #include INC_ARCH(ioport.h)
@@ -29,9 +30,6 @@
 #include INC_GLUE(idt.h)
 #if defined(CONFIG_IOAPIC)
 #include INC_ARCH(apic.h)
-#endif
-#if defined(CONFIG_SMP)
-#include INC_GLUE(cpu.h)
 #endif
 #if defined(CONFIG_X_X86_HVM)
 #include INC_ARCH_SA(vmx.h)
@@ -206,9 +204,9 @@ CMD(cmd_send_nmi, cg)
     cpu_t* cpu = cpu_t::get(cpuid);
     local_apic_t<APIC_MAPPINGS_START> local_apic;
     // don't nmi ourselfs
-    if (cpu->get_apic_id() == local_apic.id())
+    if (cpu->get_id() == local_apic.id())
 	return CMD_NOQUIT;
-    local_apic.send_nmi(cpu->get_apic_id());
+    local_apic.send_nmi(cpu->get_id());
     return CMD_NOQUIT;
 }
 

@@ -63,7 +63,7 @@ static spinlock_t kiplock;
  * @param internal_freq		internal frequency (in KHz)
  */
 void SECTION(".init")
-init_processor(cpuid_t processor, word_t external_freq, word_t internal_freq)
+init_cpu(cpuid_t processor, word_t external_freq, word_t internal_freq)
 {
     TRACE_INIT("\tRegistering processor %d in KIP (%dMHz, %dMHz)\n", 
 	       processor, external_freq/1000, internal_freq/1000);

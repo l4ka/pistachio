@@ -41,7 +41,6 @@
 #include INC_GLUE(space.h)
 #include INC_GLUE(timer.h)
 #include INC_GLUE(memory.h)
-#include INC_GLUE(cpu.h)
 #include INC_GLUE(logging.h)
 
 #include INC_ARCH(apic.h)
@@ -49,7 +48,7 @@
 
 #include INC_API(smp.h)
 #include INC_API(kernelinterface.h)
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 #include INC_API(schedule.h)
 
 #include INC_PLAT(perfmon.h)
@@ -298,12 +297,12 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
     get_interrupt_ctrl()->init_cpu();
     
 #if defined(CONFIG_SMP)
-    word_t apicid = get_apic_id();
+    word_t id = get_apic_id();
     for (cpuid = 0; cpuid < cpu_t::count; cpuid++)
-	if (cpu_t::get(cpuid)->apicid == apicid)
+	if (cpu_t::get(cpuid)->id == id)
 	    break;
     if (cpuid > CONFIG_SMP_MAX_CPUS)
-	panic("unconfigured CPU started (LAPIC id %d)\n", apicid);
+	panic("unconfigured CPU started (LAPIC id %d)\n", id);
 #endif
     
     TRACE_INIT("\tActivating TSS (CPU %d)se\n", cpuid);
@@ -361,7 +360,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
 
     /* initialize V4 processor info */
     TRACE_INIT("\tInitializing Processor (CPU %d)\n", cpuid);
-    init_processor (cpuid, get_timer()->get_bus_freq(),
+    init_cpu (cpuid, get_timer()->get_bus_freq(),
 		    get_timer()->get_proc_freq());
 
     /* CPU specific mappings */
@@ -522,23 +521,23 @@ extern "C" void SECTION(".init.init64") startup_system(u32_t is_ap)
 
 	local_apic_t<APIC_MAPPINGS_START> local_apic;
 
-	word_t apic_id = get_apic_id();
+	word_t id = get_apic_id();
 
 	for (cpuid_t cpuid = 0; cpuid < cpu_t::count; cpuid++) 
         {
 	    cpu_t* cpu = cpu_t::get(cpuid);
 
 	    // don't start ourselfs
-	    if (cpu->get_apic_id() == apic_id)
+	    if (cpu->get_id() == id)
 		continue;
 
 	    smp_boot_lock.lock(); // unlocked by AP
 	    TRACE_INIT("Sending startup IPI to CPU#%d APIC %d\n", 
-		       cpuid, cpu->get_apic_id());
-	    local_apic.send_init_ipi(cpu->get_apic_id(), true);
+		       cpuid, cpu->get_id());
+	    local_apic.send_init_ipi(cpu->get_id(), true);
             x86_wait_cycles(1000000);
-	    local_apic.send_init_ipi(cpu->get_apic_id(), false);
-	    local_apic.send_startup_ipi(cpu->get_apic_id(), (void(*)(void))SMP_STARTUP_ADDRESS);
+	    local_apic.send_init_ipi(cpu->get_id(), false);
+	    local_apic.send_startup_ipi(cpu->get_id(), (void(*)(void))SMP_STARTUP_ADDRESS);
 
 #warning VU: time out on AP call in
 	}

@@ -36,8 +36,8 @@
 #include INC_API(queueing.h)
 #include INC_API(syscalls.h)
 #include INC_API(smp.h)
+#include INC_API(cpu.h)
 #include INC_API(kernelinterface.h)
-#include INC_GLUE(cpu.h)
 #include INC_GLUE(syscalls.h)
 #include INC_GLUE(config.h)
 

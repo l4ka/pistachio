@@ -31,7 +31,7 @@
 #define __GLUE__V4_X86__TIMER_H__
 
 #include <timer.h>
-#include INC_API(processor.h)
+#include INC_API(cpu.h)
 
 #if !defined(CONFIG_X86_TSC)
 // In absence of a processor cycle counter we count timer ticks

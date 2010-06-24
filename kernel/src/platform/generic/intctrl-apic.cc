@@ -32,6 +32,7 @@
 
 #include <linear_ptab.h>
 #include INC_API(tcb.h)
+#include INC_API(cpu.h)
 
 #include INC_GLUE(config.h)
 
@@ -43,7 +44,6 @@
 #include INC_GLUE(space.h)
 #include INC_GLUE(intctrl.h)
 #include INC_GLUE(hwirq.h)
-#include INC_GLUE(cpu.h)
 
 intctrl_t intctrl;
 EXC_INTERRUPT(spurious_interrupt)
@@ -262,7 +262,7 @@ void intctrl_t::init_arch()
 		   total_cpus, cpu_t::count);
 #ifndef CONFIG_SMP
 	/* make sure the boot CPU is the first */
-	cpu_t::get(0)->apicid = local_apic.id();
+	cpu_t::get(0)->id = local_apic.id();
 #endif
     }
 
@@ -552,9 +552,9 @@ void intctrl_t::set_cpu(word_t irq, word_t cpu)
     if (irq >= get_number_irqs())
 	return;
 
-    if (redir[irq].entry.get_phys_dest() != cpu_t::get(cpu)->get_apic_id())
+    if (redir[irq].entry.get_phys_dest() != cpu_t::get(cpu)->get_id())
     {
-	redir[irq].entry.set_phys_dest(cpu_t::get(cpu)->get_apic_id());
+	redir[irq].entry.set_phys_dest(cpu_t::get(cpu)->get_id());
 	/* JS: for edge triggered IRQs, sw and hw redir entry may
 	 * not be in sync. If we sync here, we may destroy the logic. 
 	 * We therefore only sync the upper half */

@@ -35,7 +35,7 @@
 #include <kdb/input.h>
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
-#include INC_GLUE(cpu.h)
+#include INC_API(cpu.h)
 
 #if defined(CONFIG_IS_64BIT)
 #define __PADSTRING__ "        "

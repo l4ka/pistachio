@@ -36,7 +36,7 @@
 #include INC_API(tcb.h)
 #include INC_API(smp.h)
 #include INC_API(schedule.h)
-#include INC_GLUE(cpu.h)
+#include INC_API(cpu.h)
 
 tcb_t * global_present_list UNIT("kdebug") = NULL;
 spinlock_t present_list_lock;
@@ -48,7 +48,8 @@ static void show_sched_queue(bool empty)
 {
     int abort = 1000000;
     present_list_lock.lock();
-    
+
+    printf("cpus %d\n", cpu_t::count);
     for (cpuid_t cpu = 0; cpu < cpu_t::count; cpu++)
     {
 	bool print_cpu_header = false;
@@ -62,8 +63,9 @@ static void show_sched_queue(bool empty)
             print_cpu_header = true;
         }
 
-
-	for (s16_t prio = MAX_PRIORITY; prio >= 0; prio--)
+        s16_t prio = MAX_PRIORITY;
+        printf("prio %d\n", prio);
+	for (prio = MAX_PRIORITY; prio >= 0; prio--)
 	{
 	    /* check whether we have something for this prio */
 	    tcb_t* walk = global_present_list;

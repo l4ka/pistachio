@@ -38,11 +38,11 @@
 
 #include <debug.h>
 #include <linear_ptab.h>
+#include INC_API(cpu.h)	
 #include INC_API(tcb.h)
 #include INC_ARCH(apic.h)	
 #include INC_ARCH(traps.h)	
 #include INC_ARCH(trapgate.h)	
-#include INC_GLUE(cpu.h)	
 #include INC_GLUE(schedule.h)	
 #include INC_PLAT(nmi.h)
 

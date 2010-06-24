@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
  *                
  * File path:     api/v4/processor.h
  * Description:   processor management
@@ -33,6 +33,40 @@
 #define __API__V4__CPU_H__
 
 typedef u16_t cpuid_t;
-void init_processor(cpuid_t processor, word_t external_freq, word_t internal_freq);
+void init_cpu(cpuid_t processor, word_t external_freq, word_t internal_freq);
+
+class cpu_t {
+public:
+    cpu_t() 
+	{ id = ~0UL; }
+
+    bool is_valid()
+	{ return this->id < ~0UL; }
+
+    void set_id(word_t apicid)
+	{ this->id = id; }
+
+    word_t get_id() 
+	{ return id; }
+
+public:
+    word_t id;
+
+private:
+    static cpu_t descriptors[CONFIG_SMP_MAX_CPUS];
+public:
+    static word_t count;
+    static cpu_t * get(cpuid_t cpuid) {
+	ASSERT(cpuid < CONFIG_SMP_MAX_CPUS);
+	return &descriptors[cpuid];
+    }
+
+    static bool add_cpu(word_t id) {
+	if (count >= CONFIG_SMP_MAX_CPUS)
+	    return false;
+	descriptors[count++].id = id;
+	return true;
+    }
+};
 
 #endif /* !__API__V4__CPU_H__ */

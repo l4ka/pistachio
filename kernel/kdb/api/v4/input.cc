@@ -125,7 +125,7 @@ static inline int thread_match (const char * str)
  */
 tcb_t SECTION (SEC_KDEBUG) * get_thread (const char * prompt)
 {
-    space_t * dummy = kdb.kdb_current->get_space ();
+    UNUSED space_t * dummy = kdb.kdb_current->get_space ();
     const word_t nsize = sizeof (word_t) * 2;
 
     printf ("%s [current]: ", prompt ? prompt : "Thread");
