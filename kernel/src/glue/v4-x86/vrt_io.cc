@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2008,  Karlsruhe University
+ * Copyright (C) 2005-2008, 2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/vrt_io.cc
  * Description:   VRT for thread objects
@@ -95,7 +95,7 @@ void vrt_io_t::operator delete (void * v)
  */
 void vrt_io_t::init (void)
 {
-#if defined(CONFIG_KDB)
+#if defined(CONFIG_DEBUG)
     // Initialize name to "io<address>".
 
     word_t idx = 4 + sizeof (word_t) * 2;
@@ -186,7 +186,7 @@ mdb_t * vrt_io_t::get_mapdb (void)
  */
 const char * vrt_io_t::get_name (void)
 {
-#if defined(CONFIG_KDB)
+#if defined(CONFIG_DEBUG)
     return name;
 #else
     return "";

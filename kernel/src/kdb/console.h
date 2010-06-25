@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004, 2007,  Karlsruhe University
+ * Copyright (C) 2002, 2004, 2007, 2010,  Karlsruhe University
  *                
  * File path:     kdb/console.h
  * Description:   Generic KDB console functionality
@@ -49,6 +49,7 @@ public:
 
 extern kdb_console_t kdb_consoles[];
 extern word_t kdb_current_console;
+extern word_t kdb_num_consoles;
 
 
 #endif /* !__KDB__CONSOLE_H__ */

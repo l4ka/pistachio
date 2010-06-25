@@ -139,7 +139,6 @@ Enables kernel event logging and kernel performance counters.
 #
 # debugger menu
 #
-KDB		'Enable Kernel Debugger'
 KDB_BOOT_CONS	'Kernel Debugger console used at boot time' 
 KDB_CONS_COM	'Serial Port'
 KDB_CONS_KBD	'Keyboard'
@@ -355,17 +354,15 @@ menu kdb_console
 
 unless ARCH_X86 suppress KDB_CONS_KBD 
 unless ARCH_X86 or ARCH_POWERPC suppress KDB_CONS_COM 
-
 default KDB_CONS_COM from y
 default KDB_COMPORT from 0
 default KDB_COMSPEED from 115200 range 115200 57600 38400 19200 9600 4800 2400 1200 300
 
 
 default KDB_BOOT_CONS from 0 range 0 1 2
-unless KDB suppress dependent kdb_console
+unless DEBUG suppress dependent kdb_console
 
 menu debugger
-	KDB
 	kdb_console
 	KDB_DISAS
 	KDB_ON_STARTUP
@@ -376,7 +373,6 @@ menu debugger
 
 default DEBUG from y
 unless DEBUG suppress dependent debugger
-unless KDB suppress dependent KDB_DISAS KDB_ON_STARTUP KDB_BREAKIN trace 
 unless ARCH_X86 suppress dependent KDB_INPUT_HLT KDB_BREAKIN_BREAK
 default KDB_BREAKIN_ESCAPE from y
 default KDB_BREAKIN_BREAK from y

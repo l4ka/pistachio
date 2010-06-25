@@ -38,17 +38,12 @@
 //#define CONFIG_SMP_OUTPUTPREFIX 1
 
 word_t kdb_current_console;
-
 void init_console (void)
 {
-    for (kdb_current_console=0; kdb_current_console < CONFIG_KDB_BOOT_CONS; kdb_current_console++)
-    {
-        if (kdb_consoles[kdb_current_console].name == NULL)
-        {
-            kdb_current_console = 0;
-            break;
-        }
-    }        
+
+    kdb_current_console = min(kdb_num_consoles, (word_t) CONFIG_KDB_BOOT_CONS);
+    kdb_current_console = 0;
+
     if (kdb_consoles[kdb_current_console].init)
         kdb_consoles[kdb_current_console].init ();
 }
