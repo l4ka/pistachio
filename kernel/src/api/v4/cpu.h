@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
  *                
- * File path:     api/v4/processor.h
+ * File path:     api/v4/cpu.h
  * Description:   processor management
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -43,16 +43,14 @@ public:
     bool is_valid()
 	{ return this->id < ~0UL; }
 
-    void set_id(word_t apicid)
+    void set_id(word_t id)
 	{ this->id = id; }
 
     word_t get_id() 
 	{ return id; }
 
-public:
-    word_t id;
-
 private:
+    word_t id;
     static cpu_t descriptors[CONFIG_SMP_MAX_CPUS];
 public:
     static word_t count;
