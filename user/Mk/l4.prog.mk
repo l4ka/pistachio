@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2004,  Karlsruhe University
+## Copyright (C) 2003-2004, 2010,  Karlsruhe University
 ##                
 ## File path:     l4.prog.mk
 ## Description:   Rules for building executables
@@ -54,4 +54,4 @@ $(PROGRAM): $(PROGRAM_DEPS) $(OBJS)
 	$(LD) -e_start $(LDFLAGS) $(OBJS) $(LIBGCC) $(LIBS) $(LGCC) -o $@
 
 $(PROGRAM_DEPS):
-	@(cd `dirname $@` && make `basename $@`)
+	@(cd `dirname $@` && $(MAKE) `basename $@`)
