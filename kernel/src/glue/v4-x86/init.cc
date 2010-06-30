@@ -299,7 +299,7 @@ cpuid_t SECTION(".init.cpu") init_cpu (void)
 #if defined(CONFIG_SMP)
     word_t id = get_apic_id();
     for (cpuid = 0; cpuid < cpu_t::count; cpuid++)
-	if (cpu_t::get(cpuid)->id == id)
+	if (cpu_t::get(cpuid)->get_id() == id)
 	    break;
     if (cpuid > CONFIG_SMP_MAX_CPUS)
 	panic("unconfigured CPU started (LAPIC id %d)\n", id);
