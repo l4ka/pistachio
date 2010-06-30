@@ -94,11 +94,15 @@
 
 #define INT_LEVEL_UIC0_MIN   0    /* First interrupt level on UIC-0 */
 #define INT_LEVEL_UIC0_MAX  31    /* Last interrupt level on UIC-0 */
+#define UIC0_NUM_IRQS (INT_LEVEL_UIC0_MAX - INT_LEVEL_UIC0_MIN + 1)
 #define INT_LEVEL_UIC1_MIN  32    /* First interrupt level on UIC-1 */
 #define INT_LEVEL_UIC1_MAX  63    /* Last interrupt level on UIC-1 */
+#define UIC1_NUM_IRQS (INT_LEVEL_UIC1_MAX - INT_LEVEL_UIC1_MIN + 1)
 #if defined(PPC440EPx)
 #define INT_LEVEL_UIC2_MIN  64    /* First interrupt level on UIC-2 */
 #define INT_LEVEL_UIC2_MAX  74    /* Last interrupt level on UIC-2 */
+#define UIC2_NUM_IRQS (INT_LEVEL_UIC2_MAX - INT_LEVEL_UIC2_MIN + 1)
+
 #endif
 
 #define INT_IS_CRT      (true)         /* Int. is critical (for handler) */
@@ -141,7 +145,7 @@ public:
     void init_cpu(int cpu);
 
     word_t get_number_irqs() 
-	{ return INT_LEVEL_MAX; }
+	{ return INT_LEVEL_MAX + 1; }
 
     bool is_irq_available(word_t irq)
 	{ return (irq >= INT_LEVEL_MIN && irq <= INT_LEVEL_MAX); }
@@ -164,7 +168,11 @@ public:
 	{ return is_masked(irq); }
 
     void set_cpu(word_t irq, word_t cpu)
-	{ UNIMPLEMENTED(); }
+	{
+	    set_irq_routing(irq, cpu);
+	    if (!is_masked(irq))
+		unmask(irq);
+	}
 
 
     /* handler invoked on interrupt (left for compatibility)
@@ -195,7 +203,10 @@ private:
     spinlock_t lock;
     word_t num_irqs;
     word_t mem_size;
-
+    word_t uic1_dchain_mask;
+#if defined(PPC440EPx)
+    word_t uic2_dchain_mask;
+#endif
     word_t init_controllers();
     word_t get_irq_routing(word_t irq)
 	{

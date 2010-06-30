@@ -76,14 +76,8 @@ void SECTION (".init") intctrl_t::init_arch()
     if (prop->get_word(1) != 9)
     	panic("Invalid number of control registers found (%d)",prop->get_word(1));
 
-#if defined(PPC440EPx)
-    num_irqs=30;
-#else
-    num_irqs=31;
-#endif
-
     TRACE_INIT("UIC0: DCR base 0x%x, %d interrupts\n",
-	       UIC0_DCR_BASE, num_irqs);
+	       UIC0_DCR_BASE, UIC0_NUM_IRQS);
 
     //Controller 1
     printf("Looking for interrupt controller 1... ");
@@ -115,10 +109,15 @@ void SECTION (".init") intctrl_t::init_arch()
     if (prop->get_word(1) != 9)
     	panic("UIC1: Invalid number of control registers found (%d)",prop->get_word(1));
 
-    num_irqs=32;
+    prop = fdt->find_property_node(hdr, "interrupts");
+    if (!prop)
+		panic("UIC1: Couldn't determine daisychain interrupts");
+
+    uic1_dchain_mask = 1 << (31 - prop->get_word(0));
+    uic1_dchain_mask |= 1 << (31 - prop->get_word(2));
 
     TRACE_INIT("UIC1: DCR base 0x%x, %d interrupts\n",
-	       UIC1_DCR_BASE, num_irqs);
+	       UIC1_DCR_BASE, UIC1_NUM_IRQS);
 
     //Controller 2
 #if defined(PPC440EPx)
@@ -151,10 +150,15 @@ void SECTION (".init") intctrl_t::init_arch()
     if (prop->get_word(1) != 9)
     	panic("UIC2: Invalid number of control registers found (%d)",prop->get_word(1));
 
-    num_irqs=32;
+    prop = fdt->find_property_node(hdr, "interrupts");
+    if (!prop)
+		panic("UIC2: Couldn't determine daisychain interrupts");
+
+    uic2_dchain_mask = 1 << (31 - prop->get_word(0));
+    uic2_dchain_mask |= 1 << (31 - prop->get_word(2));
 
     TRACE_INIT("UIC2: DCR base 0x%x, %d interrupts\n",
-	       UIC2_DCR_BASE, num_irqs);
+	       UIC2_DCR_BASE, UIC2_NUM_IRQS);
 
 #endif //PPC440EPx
 
@@ -305,10 +309,10 @@ void intctrl_t::mask(word_t irq)
 		/* really disable interrupt */
 		mtdcr(UIC2_ER, (~intMask) & mfdcr(UIC2_ER));
 
-		lock.unlock();                         /* re-enable interrupts */
-
 		mtdcr(UIC2_SR, intMask);       /* clear pending interrupts */
-		mtdcr(UIC0_SR, 0x0000000c);      /* clear dchained UIC1 ints */
+		mtdcr(UIC0_SR, uic2_dchain_mask);      /* clear dchained UIC1 ints */
+
+		lock.unlock();                         /* re-enable interrupts */
 		}
 	else if (irq > INT_LEVEL_UIC0_MAX)        /* For UIC1 */
 #else
@@ -329,10 +333,11 @@ void intctrl_t::mask(word_t irq)
 		/* really disable interrupt */
 		mtdcr(UIC1_ER, (~intMask) & mfdcr(UIC1_ER));
 
+		mtdcr(UIC1_SR, intMask);       /* clear pending interrupts */
+		mtdcr(UIC0_SR, uic1_dchain_mask);      /* clear dchained UIC1 ints */
+
 		lock.unlock();                         /* re-enable interrupts */
 
-		mtdcr(UIC1_SR, intMask);       /* clear pending interrupts */
-		mtdcr(UIC0_SR, 0x00000003);      /* clear dchained UIC1 ints */
 		}
 	else
 		{
@@ -349,9 +354,9 @@ void intctrl_t::mask(word_t irq)
 		/* really disable interrupt */
 		mtdcr(UIC0_ER, (~intMask) & mfdcr(UIC0_ER));
 
-		lock.unlock();                         /* re-enable interrupts */
-
 		mtdcr(UIC0_SR, intMask);   /* clear pending interrupts */
+
+		lock.unlock();                         /* re-enable interrupts */
 		}
 
 	return;
@@ -372,7 +377,7 @@ bool intctrl_t::unmask(word_t irq)
         intMask = 1 << (31 - irq) ;
 
         mtdcr(UIC2_SR, intMask);        /* clear pending interrupts */
-        mtdcr(UIC0_SR, 0x0000000c);     /* clear pending dchain     */
+        mtdcr(UIC0_SR, uic2_dchain_mask);     /* clear pending dchain     */
 
         /*
          * enable the interrupt level
@@ -385,7 +390,7 @@ bool intctrl_t::unmask(word_t irq)
         mtdcr(UIC2_ER, intMask | mfdcr(UIC2_ER));
 
         /* Enable dchain*/
-        mtdcr(UIC0_ER, 0x0000000c | mfdcr(UIC0_ER));
+        mtdcr(UIC0_ER, uic2_dchain_mask | mfdcr(UIC0_ER));
 
         lock.unlock();                         /* re-enable interrupts */
 
@@ -398,7 +403,7 @@ bool intctrl_t::unmask(word_t irq)
         irq -= INT_LEVEL_UIC1_MIN ;
         intMask = 1 << (31 - irq) ;
         mtdcr(UIC1_SR, intMask);        /* clear pending interrupts */
-        mtdcr(UIC0_SR, 0x00000003);     /* clear pending dchain     */
+        mtdcr(UIC0_SR, uic1_dchain_mask);     /* clear pending dchain     */
 
         /*
          * enable the interrupt level
@@ -411,7 +416,7 @@ bool intctrl_t::unmask(word_t irq)
         mtdcr(UIC1_ER, intMask | mfdcr(UIC1_ER));
 
         /* Enable dchain*/
-        mtdcr(UIC0_ER, 0x00000003 | mfdcr(UIC0_ER));
+        mtdcr(UIC0_ER, uic1_dchain_mask | mfdcr(UIC0_ER));
 
         lock.unlock();                         /* re-enable interrupts */
 
@@ -562,7 +567,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
 
                 uic2Er = mfdcr(UIC2_ER);
                 newUicXEr = uic2Er \
-                            & ~(vecToUicBit(vector -  INT_LEVEL_UIC2_MIN));
+                            & ~(vecToUicMask(vector - INT_LEVEL_UIC2_MIN));
                 }
             else
                 {
@@ -575,7 +580,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
                 uic2Cr = mfdcr(UIC2_CR);
                 uic2Er = mfdcr(UIC2_ER);
                 newUicXEr = ((uic2Er &
-                             (~(vecToUicBit(vector - INT_LEVEL_UIC2_MIN)))) |
+                             (~(vecToUicMask(vector - INT_LEVEL_UIC2_MIN)))) |
                              uic2Cr );
                 }
 
@@ -586,7 +591,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
             /* Clear the Status registers */
 
             mtdcr(UIC2_SR, (1 << (31 - (vector - INT_LEVEL_UIC2_MIN)))) ;
-            mtdcr(UIC0_SR, 0x0000000c);    /* clear daisychain */
+            mtdcr(UIC0_SR, uic2_dchain_Mask);    /* clear daisychain */
 
             }
         else if (vector > INT_LEVEL_UIC0_MAX)
@@ -611,7 +616,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
 
                 uic1Er = mfdcr(UIC1_ER);
                 newUicXEr = uic1Er \
-                            & ~(vecToUicBit(vector -  INT_LEVEL_UIC1_MIN));
+                            & ~(vecToUicMask(vector -  INT_LEVEL_UIC1_MIN));
                 }
             else
                 {
@@ -624,7 +629,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
                 uic1Cr = mfdcr(UIC1_CR);
                 uic1Er = mfdcr(UIC1_ER);
                 newUicXEr = ((uic1Er &
-                             (~(vecToUicBit(vector - INT_LEVEL_UIC1_MIN)))) |
+                             (~(vecToUicMask(vector - INT_LEVEL_UIC1_MIN)))) |
                              uic1Cr );
                 }
 
@@ -635,7 +640,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
             /* Clear the Status registers */
 
             mtdcr(UIC1_SR, (1 << (31 - (vector - INT_LEVEL_UIC1_MIN)))) ;
-            mtdcr(UIC0_SR, 0x00000003);    /* clear daisychain */
+            mtdcr(UIC0_SR, uic1_dchain_mask);    /* clear daisychain */
             }
         else
             {
@@ -656,7 +661,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
 
                 uic0Er = mfdcr(UIC0_ER);
                 newUicXEr = uic0Er \
-                            & ~(vecToUicBit(vector -  INT_LEVEL_UIC0_MIN));
+                            & ~(vecToUicMask(vector -  INT_LEVEL_UIC0_MIN));
                 }
             else
                 {
@@ -668,7 +673,7 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
                 uic0Cr = mfdcr(UIC0_CR);
                 uic0Er = mfdcr(UIC0_ER);
                 newUicXEr = ((uic0Er &
-                             (~(vecToUicBit(vector - INT_LEVEL_UIC0_MIN)))) |
+                             (~(vecToUicMask(vector - INT_LEVEL_UIC0_MIN)))) |
                              uic0Cr);
                 }
 
@@ -706,37 +711,28 @@ void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
      */
 
     ::handle_interrupt(vector);
-#if 0
-    /*
-     * Clear this interrupt level to ensure that this interrupt level is
-     * disabled before re-enabling interrupts.
-     */
 
-    if (intIsCritical)
-        vxMsrSet(vxMsrGet() & ~(_PPC_MSR_CE));
-    else
-        vxMsrSet(vxMsrGet() & ~(_PPC_MSR_EE));
-    //this is not done in bic.cc, so I'm assuming it's done somewhere else.
     /*
      * Reenable the interrupts as they were went we got called.
      */
+    lock.lock();
 #if defined(PPC440EPx)
     if (vector > INT_LEVEL_UIC1_MAX)
         {
-        mtdcr(UIC2_ER, uic2Er );
+			mtdcr(UIC2_ER, uic2Er );
         }
     else if (vector > INT_LEVEL_UIC0_MAX)
 #else
     if (vector > INT_LEVEL_UIC0_MAX)
 #endif
         {
-        mtdcr(UIC1_ER, uic1Er );
+			mtdcr(UIC1_ER, uic1Er );
         }
     else
         {
-        mtdcr(UIC0_ER, uic0Er );
+			mtdcr(UIC0_ER, uic0Er );
         }
-#endif
+    lock.unlock();
 }
 
 bool intctrl_t::is_masked(word_t irq) {
@@ -804,9 +800,9 @@ void intctrl_t::dump() {
 			mfdcr(UIC1_SR),mfdcr(UIC1_ER),mfdcr(UIC1_CR),mfdcr(UIC1_PR),
 			mfdcr(UIC1_TR),mfdcr(UIC1_MSR),mfdcr(UIC1_VCR),mfdcr(UIC1_VR));
 #if defined(PPC440EPx)
-printf("UIC2:\nSR: %08x\nER: %08x\nCR: %08x\nPR: %08x\nTR: %08x\nMSR: %08x\nVCR: %08x\nVR: %08x\n",
+	printf("UIC2:\nSR: %08x\nER: %08x\nCR: %08x\nPR: %08x\nTR: %08x\nMSR: %08x\nVCR: %08x\nVR: %08x\n",
 			mfdcr(UIC2_SR),mfdcr(UIC2_ER),mfdcr(UIC2_CR),mfdcr(UIC2_PR),
 			mfdcr(UIC2_TR),mfdcr(UIC2_MSR),mfdcr(UIC2_VCR),mfdcr(UIC2_VR));
 #endif
-lock.unlock();
+	lock.unlock();
 }
