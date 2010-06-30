@@ -34,6 +34,7 @@
 #include <kdb/tracepoints.h>
 
 #include <lib.h>
+#include INC_GLUE(intctrl.h)
 #include INC_ARCH(string.h)
 #include INC_GLUE(space.h)
 #include INC_PLAT(bic.h)
