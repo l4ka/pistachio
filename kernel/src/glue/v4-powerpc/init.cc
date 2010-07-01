@@ -94,15 +94,15 @@ static void fatal( char *msg )
     while( 1 ) ;
 }
 
-SECTION(SEC_INIT) void timer_init( word_t cpu_hz, word_t bus_hz )
+SECTION(SEC_INIT) void timer_init( word_t cpu_hz, word_t bus_hz, word_t cpu )
 {
     word_t decrementer_hz;
 
     decrementer_hz = bus_hz / 1;
     decrementer_interval = TIMER_TICK_LENGTH * (decrementer_hz / 1000) / 1000; 
-    TRACE_INIT( "Decrementer %d (KHz), timer tick %d (us), "
-	        "decrementer ticks %d\n", decrementer_hz/1000, 
-	        TIMER_TICK_LENGTH, decrementer_interval );
+    TRACE_INIT( "\tDecrementer %d KHz, timer tick %d us\n"
+	        "\tDecrementer ticks %d (CPU %d)\n", decrementer_hz/1000, 
+	        TIMER_TICK_LENGTH, decrementer_interval, cpu );
 }
 
 /*****************************************************************************
@@ -236,7 +236,8 @@ SECTION(SEC_INIT) static void kip_cpu_init( kernel_interface_page_t *kip )
     // Invoked for each processor.
 {
     static word_t cpu_khz = 0, bus_khz = 0;
-
+    word_t cpu = get_current_cpu();
+    
     if( cpu_khz == 0 ) 
     {
     	word_t cpu_hz, bus_hz;
@@ -251,10 +252,10 @@ SECTION(SEC_INIT) static void kip_cpu_init( kernel_interface_page_t *kip )
 	cpu_khz = cpu_hz / 1000;
 	bus_khz = bus_hz / 1000;
 
-	TRACE_INIT( "PowerPC cpu speed: %d (KHz)\n", cpu_khz );
-	TRACE_INIT( "Bus speed: %d (KHz)\n", bus_khz );
+	TRACE_INIT( "\tPowerPC CPU speed: %d KHz (CPU %d)\n", cpu_khz, cpu);
+	TRACE_INIT( "\tBus speed: %d KHz (CPU %d)\n", bus_khz, cpu);
 
-	timer_init( cpu_hz, bus_hz );
+	timer_init( cpu_hz, bus_hz, cpu );
     }
 
     init_cpu( get_current_cpu(), bus_khz, cpu_khz );
@@ -314,7 +315,7 @@ SECTION(SEC_INIT) static void reclaim_cpu_kmem()
 }
 #endif
 
-SECTION(SEC_INIT) static word_t do_kmem_init()
+SECTION(SEC_INIT) static word_t init_bootmem()
 {
     word_t bootmem_low, bootmem_high;
     word_t tot, size;
@@ -328,7 +329,6 @@ SECTION(SEC_INIT) static word_t do_kmem_init()
 #else
     bootmem_high = bootmem_low + KB(512);
 #endif
-    TRACE_INIT("kmem init %x-%x\n", bootmem_low, bootmem_high);
     kmem.init( (addr_t)bootmem_low, (addr_t)bootmem_high );
     tot = bootmem_high - bootmem_low;
 
@@ -341,21 +341,20 @@ SECTION(SEC_INIT) static word_t do_kmem_init()
     // Claim the memory between the end of the kernel data section and
     // the start of the cpu data page.
     size = cpu_phys_area(0) - (word_t)memcfg_end_data_phys();
-    TRACE_INIT("kmem add %x/ %x\n", phys_to_virt(memcfg_end_data_phys()), size);
     if( size )
 	kmem.add( phys_to_virt(memcfg_end_data_phys()), size );
     tot += size;
 
-    TRACE_INIT( "Kernel boot mem: %d bytes\n", tot );
     return virt_to_phys(bootmem_high);
 }
 
 #elif defined(CONFIG_PPC_MMU_TLB)
+#if defined(CONFIG_SMP)
 SECTION(SEC_INIT) static void reclaim_cpu_kmem()
 {
 }
-
-SECTION(SEC_INIT) static word_t do_kmem_init()
+#endif
+SECTION(SEC_INIT) static word_t init_bootmem()
 {
     addr_t bootmem_low, bootmem_high;
     word_t tot;
@@ -365,11 +364,9 @@ SECTION(SEC_INIT) static word_t do_kmem_init()
     bootmem_low = phys_to_virt( memcfg_end_cpu_phys() );
     bootmem_high = addr_offset(bootmem_low, KB(3584));
 
-    TRACE_INIT("kmem init %p-%p\n", bootmem_low, bootmem_high);
     kmem.init( bootmem_low, bootmem_high );
     tot = (word_t)bootmem_high - (word_t)bootmem_low;
 
-    TRACE_INIT( "Kernel boot mem: %d bytes\n", tot );
     return virt_to_phys((word_t)bootmem_high);
 }
 #endif
@@ -569,7 +566,6 @@ SECTION(SEC_INIT) static void finish_api_init( void )
     cpu_t::add_cpu(0);
 
 #if defined(CONFIG_SMP)
-
     reclaim_cpu_kmem();
     start_all_cpus();
 #endif
@@ -694,7 +690,7 @@ extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t 
     
     /* Init all of our memory related stuff.
      */
-    word_t bootmem_phys_high = do_kmem_init();
+    word_t bootmem_phys_high = init_bootmem();
     kip_mem_init( get_kip(), bootmem_phys_high );
     
     TRACE_INIT("Initializing kernel space\n");
@@ -719,9 +715,11 @@ extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t 
     TRACE_INIT("Initializing mapping database\n");
     init_mdb();
 
+
     /* Initialize the idle tcb, and push notify frames for starting
      * the idle thread. */
     get_current_scheduler()->init( true );
+
     /* Push a notify frame for the second stage of initialization, which
      * executes in the context of the idle thread.  This must execute
      * before the scheduler's notify frames. */

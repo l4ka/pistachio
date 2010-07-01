@@ -382,7 +382,7 @@ typedef void (*func_ptr_t) (void);
 void SECTION(".init") scheduler_t::init( bool bootcpu )
 {
     
-    TRACE_INIT ("\tInitializing threading CPU %d\n", get_current_cpu());
+    TRACE_INIT ("\tInitializing threading (CPU %d)\n", get_current_cpu());
     policy_scheduler_init();
     
 

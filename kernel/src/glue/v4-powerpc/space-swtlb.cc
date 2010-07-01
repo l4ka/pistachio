@@ -146,9 +146,9 @@ void SECTION(".init.memory") space_t::init_cpu_mappings(cpuid_t cpu)
 	memcpy(page, phys_to_virt(_cpu_phys), 1 << log2size);
     }
 
-    TRACE_INIT("mapping %p/%p -> %p, log2sz=%d, TLB entry: %d\n", 
+    TRACE_INIT("\tMapping %p/%p -> %p, log2sz=%d, TLB entry: %d (CPU %d)\n", 
 	       page, virt_to_phys(page), CPU_AREA_START, log2size, 
-	       swtlb_high_water);
+	       swtlb_high_water, cpu);
 
     tlb0.init_vaddr_size(CPU_AREA_START, log2size);
     tlb1.init_paddr((paddr_t)virt_to_phys(page));
@@ -164,6 +164,7 @@ void SECTION(".init.memory") space_t::init_cpu_mappings(cpuid_t cpu)
     /* 
      * CPU local mappings exist now 
      */
+    TRACE_INIT("\tASID manager init %x -> %x (CPU %d)\n", 1, CONFIG_MAX_NUM_ASIDS-1, cpu);
     asid_manager.init(1, CONFIG_MAX_NUM_ASIDS - 1);
     ASSERT(this == get_kernel_space());
     this->cpu[cpu].asid.init_kernel(0);
@@ -178,7 +179,7 @@ void SECTION(".init.memory") space_t::init_cpu_mappings(cpuid_t cpu)
 	    init_swtlb[idx].tlb0.read(idx);
 	    init_swtlb[idx].tlb1.read(idx);
 	    init_swtlb[idx].tlb2.read(idx);
-	    TRACEF("TLB%d: %lx, %lx, %lx\n", idx, init_swtlb[idx].tlb0.raw,
+	    TRACEF("\tTLB%d: %lx, %lx, %lx\n", idx, init_swtlb[idx].tlb0.raw,
 		   init_swtlb[idx].tlb1.raw, init_swtlb[idx].tlb2.raw);
 	}
     }
@@ -493,8 +494,8 @@ SECTION(".init") void setup_kernel_mappings( void )
     ppc_tlbsx((u32_t)&init_paging, entry);
     tlb0.read(entry);
 
-    TRACE_INIT("flush boot mapping %x, vaddr=%x, size=%x (%x)\n", 
-	       entry, tlb0.get_vaddr(), tlb0.get_size(), tlb0.raw);
+    TRACE_INIT("Flush boot mapping %x, vaddr=%x, size=%x (%x)\n", 
+               entry, tlb0.get_vaddr(), tlb0.get_size(), tlb0.raw);
     ppc_tlb0_t::invalid().write(entry);
 }
 

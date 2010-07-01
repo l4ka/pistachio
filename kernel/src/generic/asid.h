@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/generic/asid.h
+ * File path:     generic/asid.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -83,8 +83,6 @@ public:
 
     void init(word_t start, word_t end)
 	{
-	    TRACE_INIT("asid_manager init %x -> %x\n", start, end);
-	    
 	    free_list = NULL;
 	    timestamp = 0;
 

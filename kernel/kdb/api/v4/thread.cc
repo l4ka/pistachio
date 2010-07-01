@@ -73,7 +73,7 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 	addr_to_tcb((addr_t) val) == get_idle_tcb() || 
 	addr_to_tcb((addr_t) val) == get_kdebug_tcb())
     {
-	tcb = addr_to_tcb ((addr_t) val);
+        tcb = addr_to_tcb ((addr_t) val);
 	tid = tcb->get_global_id ();
     }
     else
@@ -88,14 +88,11 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 	threadid_t ktid;
 	ktid.set_global_id (get_kip ()->thread_info.get_system_base (), 1);
 
-	if (tcb->get_global_id() == ktid)
+	if (tid == ktid)
 	    return print_string ("KRN_THRD", width, precision);
 
-	if (tcb == get_idle_tcb ())
+	if (tid == IDLETHREAD)
 	    return print_string ("IDLETHRD", width, precision);
-
-	if (tcb == get_kdebug_tcb())
-	    return print_string ("KDBTHRD", width, precision);
 
 	if (tid.is_nilthread ())
 	    return print_string ("NIL_THRD", width, precision);
@@ -115,6 +112,10 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 	    const char *names[3] = { "SIGMA0", "SIGMA1", "ROOTTASK" };
 	    return print_string (names[base_id], width, precision);
 	}
+
+        if (tcb == get_kdebug_tcb())
+	    return print_string ("KDBTHRD", width, precision);
+
     }
 
     // We're dealing with something which is not a special thread ID.
