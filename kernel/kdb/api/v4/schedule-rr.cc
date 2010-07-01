@@ -66,7 +66,6 @@ static void show_sched_queue(bool empty)
 	{
 	    /* check whether we have something for this prio */
 	    tcb_t* walk = global_present_list;
-            printf("tcb %t\n", walk);
 
 	    do {
 		if (walk->sched_state.get_priority() == prio && walk->get_cpu() == cpu) 

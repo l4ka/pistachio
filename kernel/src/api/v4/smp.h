@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006, 2008-2009,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006, 2008-2010,  Karlsruhe University
  *                
  * File path:     api/v4/smp.h
  * Description:   multiprocessor handling
@@ -38,6 +38,7 @@
 
 template<typename T> INLINE T *get_on_cpu(cpuid_t cpu, T *item)
 {
+#if defined(CONFIG_SMP)
     pgent_t *pgent;
     pgent_t::pgsize_e pgsize;
     space_t *kspace = get_kernel_space();
@@ -48,9 +49,13 @@ template<typename T> INLINE T *get_on_cpu(cpuid_t cpu, T *item)
                                  addr_mask(item, page_mask (pgsize)));
     else 
         return NULL;
+    
+#else
+    return item;
+#endif
 }
 
-#if defined (CONFIG_SMP)
+#if defined(CONFIG_SMP)
 
 #define ON_CONFIG_SMP(x) do { x; } while(0)
 
