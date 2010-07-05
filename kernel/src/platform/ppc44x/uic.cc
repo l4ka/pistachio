@@ -226,10 +226,130 @@ word_t intctrl_t::init_controllers() {
 	return (0);
 }
 
+/*
+ * UIC interrupt handler.
+ * NOTE: This function does not implement any interrupt priorities.
+ * Instead, all interrupts are immediately sent to the appropriate
+ * handler thread when they arrive. If two interrupts are active
+ * at the same time, the one with the lower number is served first.
+ * There are also no critical interrupts for now.
+ * Some time in the future, we might want to use the interrupt threads'
+ * priorities here.
+ */
 void intctrl_t::handle_irq(word_t cpu)
 {
-	//forward to noncritical interrupt handler
-    sysUicIntHandler();
+    int   vector;
+    word_t  uicmsr;     /* contents of Masked Status Register */
+    word_t  uicer = 0;  /* contents of enable register */
+
+    //Lock all interrupts while the handler is running.
+    //TODO: Is this really necessary?
+    lock.lock();
+    /*
+     * Get contents of UIC0_MSR.  This register is read-only
+     * and relects the value of UIC0_SR ANDed with UIC0_ER.
+     */
+
+    uicmsr = mfdcr(UIC0_MSR);
+
+    /*
+     * Determine the interrupt source.
+     */
+
+    vector = count_leading_zeros(uicmsr);
+
+    if ((vector == 30)|| (vector == 31)) /* dchain interrupt */
+      {
+      uicmsr = mfdcr(UIC1_MSR);
+      vector = count_leading_zeros(uicmsr);
+      vector+= INT_LEVEL_UIC1_MIN ;
+      }
+#if defined(PPC440EPx)
+    if ((vector == 28)|| (vector == 29)) /* dchain interrupt */
+      {
+      uicmsr = mfdcr(UIC2_MSR);
+      vector = count_leading_zeros(uicmsr);
+      vector+= INT_LEVEL_UIC2_MIN ;
+      }
+#endif
+
+#ifdef INCLUDE_WINDVIEW
+    WV_EVT_INT_ENT(vector)
+#endif
+
+    if ( EXPECT_TRUE(vector <= INT_LEVEL_MAX) )
+        {
+
+        /*
+         * The vector is valid. Which UIC is it for?
+         */
+#if defined(PPC440EPx)
+        if (vector > INT_LEVEL_UIC1_MAX)
+            {
+            /* In UIC-2 */
+
+            //Mask the current interrupt
+        	uicer = mfdcr(UIC2_ER);
+            uicer &= ~(1 << (31 - (vector - INT_LEVEL_UIC2_MIN)));
+    		mtdcr(UIC2_ER, uicer );
+
+            /* Clear the Status registers */
+
+            mtdcr(UIC2_SR, (1 << (31 - (vector - INT_LEVEL_UIC2_MIN)))) ;
+            mtdcr(UIC0_SR, uic2_dchain_Mask);    /* clear daisychain */
+
+            }
+        else if (vector > INT_LEVEL_UIC0_MAX)
+#else
+        if (vector > INT_LEVEL_UIC0_MAX)
+#endif
+            {
+
+            /* In UIC-1 */
+
+            //Mask the current interrupt
+        	uicer = mfdcr(UIC1_ER);
+            uicer &= ~(1 << (31 - (vector - INT_LEVEL_UIC1_MIN)));
+    		mtdcr(UIC1_ER, uicer );
+
+            /* Clear the Status registers */
+
+            mtdcr(UIC1_SR, (1 << (31 - (vector - INT_LEVEL_UIC1_MIN)))) ;
+            mtdcr(UIC0_SR, uic1_dchain_mask);    /* clear daisychain */
+            }
+        else
+            {
+
+            /* In UIC-0 */
+
+            //Mask the current interrupt
+        	uicer = mfdcr(UIC0_ER);
+            uicer &= ~(1 << (31 - vector));
+    		mtdcr(UIC0_ER, uicer );
+
+            /* Clear the Status register. */
+            mtdcr(UIC0_SR,(1 << (31 - vector))) ;
+            }
+
+        }
+    else
+        {
+        /* This should never happen. Bail out. */
+			panic("UIC: Invalid interrupt received!");
+        }
+
+    /*
+     * The current interrupt is now masked, so we can allow other
+     * interrupts from this point on.
+     */
+    lock.unlock();
+
+    /*
+     * Call the appropriate handler with the appropriate argument
+     */
+
+    ::handle_interrupt(vector);
+
 }
 
 void intctrl_t::map()
@@ -441,298 +561,6 @@ bool intctrl_t::unmask(word_t irq)
         }
 
     return true;
-}
-
-/***************************************************************************
-*
-* sysUicIntHandler - UIC non-critical external interrupt handler
-*
-* Non-critical interrupt handler entry point.
-*
-* This routine gets connected to the _EXC_OFF_INTR vector in the CPU's
-* exception table by sysHwInit() during system hardware initialization.
-*
-* RETURNS: N/A
-*
-* ERRNO
-*/
-void intctrl_t::sysUicIntHandler(void) {
-	lock.lock();
-    /* call common handler code with NON CRITICAL flag */
-    sysUicIntHandlerCommon(INT_IS_NOT_CRT);
-}
-
-/***************************************************************************
-*
-* sysUicCrtIntHandler - UIC critical external interrupt handler
-*
-* Critical interrupt handler entry point.
-*
-* This routine gets connected to the _EXC_OFF_CRTL vector in the CPU's
-* exception table by sysHwInit() during system hardware initialization.
-*
-*
-* RETURNS: N/A
-*
-* ERRNO
-*/
-void intctrl_t::sysUicCrtIntHandler(void) {
-    lock.lock();
-    /* call common handler code with CRITICAL flag */
-    sysUicIntHandlerCommon(INT_IS_CRT);
-}
-
-/***************************************************************************
-*
-* sysUicIntHandlerCommon - UIC external interrupt handler common code
-*
-* This is the external interrupt handler for the UIC. It must be called
-* from either entry interrupt handler entry points (sysUicIntHandlerEnt and
-* sysUicCrtIntHandlerEnt).
-*
-* RETURNS: N/A
-*
-* ERRNO
-* /NOMANUAL
-*/
-void intctrl_t::sysUicIntHandlerCommon (bool intIsCritical) {
-    int   vector;
-    word_t  uicmsr;     /* contents of Masked Status Register */
-    word_t  uic0Cr;     /* UIC-0 CR */
-    word_t  uic1Cr;     /* UIC-1 CR */
-#if defined(PPC440EPx)
-    word_t  uic2Cr;     /* UIC-2 CR */
-#endif
-    word_t  uic0Er = 0; /* UIC-0 ER */
-    word_t  uic1Er = 0; /* UIC-1 ER */
-#if defined(PPC440EPx)
-    word_t  uic2Er = 0; /* UIC-2 ER */
-#endif
-    word_t  newUicXEr;  /* temporary variable for readability */
-
-    /*
-     * Get contents of UIC0_MSR.  This register is read-only
-     * and relects the value of UIC0_SR ANDed with UIC0_ER.
-     */
-
-    uicmsr = mfdcr(UIC0_MSR);
-
-    /*
-     * Determine the interrupt source.
-     */
-
-    vector = count_leading_zeros(uicmsr);
-
-    if ((vector == 30)|| (vector == 31)) /* dchain interrupt */
-      {
-      uicmsr = mfdcr(UIC1_MSR);
-      vector = count_leading_zeros(uicmsr);
-      vector+= INT_LEVEL_UIC1_MIN ;
-      }
-#if defined(PPC440EPx)
-    if ((vector == 28)|| (vector == 29)) /* dchain interrupt */
-      {
-      uicmsr = mfdcr(UIC2_MSR);
-      vector = count_leading_zeros(uicmsr);
-      vector+= INT_LEVEL_UIC2_MIN ;
-      }
-#endif
-
-#ifdef INCLUDE_WINDVIEW
-    WV_EVT_INT_ENT(vector)
-#endif
-
-    if ( EXPECT_TRUE(vector <= INT_LEVEL_MAX) )
-        {
-
-        /*
-         * The vector is valid. Is it in UIC 0 or UIC 1?
-         */
-#if defined(PPC440EPx)
-        if (vector > INT_LEVEL_UIC1_MAX)
-            {
-            /* In UIC-2 */
-
-            /*
-             * Disable all lower-priority non-critical interrupts.
-             *
-             * If we are being called from a critical interrupt,
-             * we must also disable lower-priority critical interrupts.
-             */
-
-            if (intIsCritical)
-                {
-
-                /* Critical interrupt, disable all lower priority interrupts */
-
-                uic2Er = mfdcr(UIC2_ER);
-                newUicXEr = uic2Er \
-                            & ~(vecToUicMask(vector - INT_LEVEL_UIC2_MIN));
-                }
-            else
-                {
-
-                /*
-                 * Non-critical interrupt, disable only non-critical,
-                 * lower priority interrupts.
-                 */
-
-                uic2Cr = mfdcr(UIC2_CR);
-                uic2Er = mfdcr(UIC2_ER);
-                newUicXEr = ((uic2Er &
-                             (~(vecToUicMask(vector - INT_LEVEL_UIC2_MIN)))) |
-                             uic2Cr );
-                }
-
-            /* Update the Enable register */
-
-            mtdcr(UIC2_ER, newUicXEr);
-
-            /* Clear the Status registers */
-
-            mtdcr(UIC2_SR, (1 << (31 - (vector - INT_LEVEL_UIC2_MIN)))) ;
-            mtdcr(UIC0_SR, uic2_dchain_Mask);    /* clear daisychain */
-
-            }
-        else if (vector > INT_LEVEL_UIC0_MAX)
-#else
-        if (vector > INT_LEVEL_UIC0_MAX)
-#endif
-            {
-
-            /* In UIC-1 */
-
-            /*
-             * Disable all lower-priority non-critical interrupts.
-             *
-             * If we are being called from a critical interrupt,
-             * we must also disable lower-priority critical interrupts.
-             */
-
-            if (intIsCritical)
-                {
-
-                /* Critical interrupt, disable all lower priority interrupts */
-
-                uic1Er = mfdcr(UIC1_ER);
-                newUicXEr = uic1Er \
-                            & ~(vecToUicMask(vector -  INT_LEVEL_UIC1_MIN));
-                }
-            else
-                {
-
-                /*
-                 * Non-critical interrupt, disable only non-critical,
-                 * lower priority interrupts.
-                 */
-
-                uic1Cr = mfdcr(UIC1_CR);
-                uic1Er = mfdcr(UIC1_ER);
-                newUicXEr = ((uic1Er &
-                             (~(vecToUicMask(vector - INT_LEVEL_UIC1_MIN)))) |
-                             uic1Cr );
-                }
-
-            /* Update the Enable register */
-
-            mtdcr(UIC1_ER, newUicXEr);
-
-            /* Clear the Status registers */
-
-            mtdcr(UIC1_SR, (1 << (31 - (vector - INT_LEVEL_UIC1_MIN)))) ;
-            mtdcr(UIC0_SR, uic1_dchain_mask);    /* clear daisychain */
-            }
-        else
-            {
-
-            /* In UIC-0 */
-
-            /*
-             * Disable all lower-priority interrupts.
-             *
-             * If we are being called from a critical interrupt,
-             * we must also disable lower-priority critical interrupts.
-             */
-
-            if (intIsCritical)
-                {
-
-                /* Critical interrupt, disable all lower priority interrupts */
-
-                uic0Er = mfdcr(UIC0_ER);
-                newUicXEr = uic0Er \
-                            & ~(vecToUicMask(vector -  INT_LEVEL_UIC0_MIN));
-                }
-            else
-                {
-                /*
-                 * Non-critical interrupt, disable only non-critical, lower
-                 * priority interrupts
-                 */
-
-                uic0Cr = mfdcr(UIC0_CR);
-                uic0Er = mfdcr(UIC0_ER);
-                newUicXEr = ((uic0Er &
-                             (~(vecToUicMask(vector - INT_LEVEL_UIC0_MIN)))) |
-                             uic0Cr);
-                }
-
-
-            /*
-             * Disable this interrupt, critical or not, as we don't want to
-             * be stuck having to constantly reservice this interrupt.
-             */
-
-            newUicXEr &= ~(1 << (31 - vector)) ;
-
-            /* Update the register */
-            mtdcr(UIC0_ER, newUicXEr);
-
-            /* Clear the Status register. */
-            mtdcr(UIC0_SR,(1 << (31 - vector))) ;
-            }
-
-        }
-    else
-        {
-        /* This should never happen. Bail out. */
-			panic("UIC: Invalid interrupt received!");
-        }
-
-    /*
-     * Enable interrupt nesting. At this point all higher priority
-     * interrupts and, in the case of servicing a non-critical
-     * interrupt, all lower priority critical interrupts are enabled.
-     */
-
-    lock.unlock();
-    /*
-     * Call the appropriate handler with the appropriate argument
-     */
-
-    ::handle_interrupt(vector);
-
-    /*
-     * Reenable the interrupts as they were went we got called.
-     */
-    lock.lock();
-#if defined(PPC440EPx)
-    if (vector > INT_LEVEL_UIC1_MAX)
-        {
-			mtdcr(UIC2_ER, uic2Er );
-        }
-    else if (vector > INT_LEVEL_UIC0_MAX)
-#else
-    if (vector > INT_LEVEL_UIC0_MAX)
-#endif
-        {
-			mtdcr(UIC1_ER, uic1Er );
-        }
-    else
-        {
-			mtdcr(UIC0_ER, uic0Er );
-        }
-    lock.unlock();
 }
 
 bool intctrl_t::is_masked(word_t irq) {
