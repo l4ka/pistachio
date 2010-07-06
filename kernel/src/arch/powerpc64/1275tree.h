@@ -34,8 +34,6 @@
 #ifndef __ARCH__POWERPC64__1275TREE_H__
 #define __ARCH__POWERPC64__1275TREE_H__
 
-#define OF1275_KIP_TYPE		0xe
-#define OF1275_KIP_SUBTYPE	0xf
 
 INLINE word_t of1275_align( word_t val )
 {

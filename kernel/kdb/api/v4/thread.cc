@@ -56,7 +56,6 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft)
 {
     tcb_t * tcb;
     threadid_t tid;
-    space_t * dummy = NULL;
 
 #if 0
     print_string ("<");

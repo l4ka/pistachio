@@ -88,7 +88,7 @@ void bgic_t::dump()
 
 void SECTION (".init") intctrl_t::init_arch()
 {
-    fdt_t *fdt = get_fdt();
+    fdt_t *fdt = get_dtree();
 
     fdt_header_t *hdr = fdt->find_subtree("/interrupt-controller");
     if (!hdr)

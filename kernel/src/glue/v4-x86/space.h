@@ -99,6 +99,10 @@ public:
     static void begin_update() { }
     static void end_update();
 
+    /* sigma0 translation hooks */
+    static addr_t sigma0_translate(addr_t addr, pgent_t::pgsize_e size) { return addr; }
+    static word_t sigma0_attributes(pgent_t *pg, addr_t addr, pgent_t::pgsize_e size) { return 0; };
+
     /* generic page table walker */
     pgent_t * pgent (word_t num);
     pgent_t * pgent (word_t num, word_t cpu);

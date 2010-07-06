@@ -80,12 +80,6 @@ static SECTION(".init.data") volatile cpuid_t cpu_start_id;
 
 
 // Debug consoles
-#if defined(CONFIG_KDB_CONS_PSIM_COM)
-extern void init_psim_com_console();
-#endif
-#if defined(CONFIG_KDB_CONS_OF1275)
-extern void init_of1275_console( word_t entry );
-#endif
 
 __attribute__((unused)) 
 static void fatal( char *msg ) 
@@ -110,75 +104,58 @@ SECTION(SEC_INIT) void timer_init( word_t cpu_hz, word_t bus_hz, word_t cpu )
  *                            Platform init
  *
  *****************************************************************************/
+static dtree_t *dtree = NULL;
+static word_t dtree_size = 0;
+
+dtree_t *get_dtree()
+{
+    if (!dtree)
+    {
+        kernel_interface_page_t *kip = get_kip();
+        for( word_t i = 0; i < kip->memory_info.get_num_descriptors(); i++ ) 
+        {
+            memdesc_t *mdesc = kip->memory_info.get_memdesc( i );
+            
+            if( (mdesc->type() == memdesc_t::boot_specific) && 
+                (mdesc->subtype() == 0xf) )
+            {
+                dtree = (dtree_t*) mdesc->low();
+                dtree_size = mdesc->size();
+                break;
+            }
+        }
+    }
+    return dtree;
+}
+
+SECTION(SEC_INIT) void dtree_remap( kernel_interface_page_t *kip )
+{
+
+    dtree_t *dtreemapping;
+    paddr_t pdtree = (paddr_t) dtree;
+    printf("dtree %p %d\n", dtree, dtree_size);
+    addr_t page = get_kernel_space()->map_device( pdtree, dtree_size, pgent_t::cache_standard );
+    dtreemapping = (dtree_t*)addr_offset(page, pdtree & (KERNEL_PAGE_SIZE - 1));
+
+    if (!dtreemapping->is_valid())
+	panic("Invalid device tree (%p)--can't continue\n");
+
+    TRACE_INIT("Remapping device tree from %p to %p (sz=%x, magic=%x)\n", (word_t) pdtree, 
+	       dtreemapping, dtreemapping->size, dtreemapping->magic);
+    
 
 #if defined(CONFIG_PLAT_OFPPC)
-
-SECTION(SEC_INIT) void firmware_init( kernel_interface_page_t *kip )
-    /* Finds and installs the position-independent copy of the
-     * OpenFirmware device tree.
-     */
-{
-    addr_t vaddr = NULL;
-
-    // Look for the position-independent copy of the OpenFirmware device tree
-    // in the kip's memory descriptors.
-    for( word_t i = 0; i < kip->memory_info.get_num_descriptors(); i++ ) 
-    {
-	memdesc_t *mdesc = kip->memory_info.get_memdesc( i );
-	if( (mdesc->type() == OF1275_KIP_TYPE) && 
-		(mdesc->subtype() == OF1275_KIP_SUBTYPE) )
-	{
-	    vaddr = get_kernel_space()->map_device( mdesc->low(), mdesc->size(), pgent_t::cache_standard);
-	    break;
-	}
-    }
-
-    // Not found.  Things won't work, but ...
-    if (!vaddr)
-	printf( "*** Error: the boot loader didn't supply a copy of the\n"
-		"*** Open Firmware device tree!\n" );
-    get_of1275_tree()->init( vaddr );
-
-#if defined(CONFIG_KDB_CONS_PSIM_COM)
-    init_psim_com_console();
+    get_of1275_tree()->init( dtreemapping );
 #endif
-}
 
-#elif defined(CONFIG_PLAT_PPC44X)
-
-static fdt_t *fdt = NULL;
-fdt_t *get_fdt()
-{
-    if (fdt)
-	return fdt;
-    else
-	return (fdt_t*)get_kip()->boot_info;
-}
-
-SECTION(SEC_INIT) void firmware_init( kernel_interface_page_t *kip )
-{
-    fdt_t *fdtmapping;
-    int size = KERNEL_PAGE_SIZE * 8;
-#warning VU: FDT mapping is a hard-coded hack
-    if (!kip->boot_info)
-	panic("*** Error: FDT not set\n");
-
-    // XXX: get fdt size!!!
-    addr_t page = get_kernel_space()->
-	map_device( kip->boot_info, size, pgent_t::cache_standard );
-
-    fdtmapping = (fdt_t*)addr_offset(page, kip->boot_info & (KERNEL_PAGE_SIZE - 1));
-    TRACE_INIT("Remapping FDT from %p to %p (sz=%x, magic=%x)\n", kip->boot_info, 
-	       fdtmapping, fdtmapping->size, fdtmapping->magic);
-    if (!fdtmapping->is_valid())
-	panic("Invalid FDT (%p)--can't continue\n");
-
-    fdt = (fdt_t*)kmem.alloc(kmem_misc, size);
-    memcpy(fdt, fdtmapping, size);
+#if defined(CONFIG_PLAT_PPC44X)
+    dtree = (dtree_t*)kmem.alloc(kmem_misc, dtree_size);
+    memcpy(dtree, dtreemapping, dtree_size);
     // XXX: unmap FDT
+#endif
+
 }
 
-#endif
 
 /*****************************************************************************
  *
@@ -554,7 +531,7 @@ SECTION(SEC_INIT) static void finish_api_init( void )
     get_pghash()->get_htab()->activate( get_kernel_space()->get_segment_id() );
 #endif
 
-    firmware_init( get_kip() );
+    dtree_remap( get_kip() );
 
     kip_cpu_init( get_kip() );
     kip_sc_init( get_kip() );
@@ -666,9 +643,6 @@ static SECTION(SEC_INIT) void install_exception_handlers( cpuid_t cpu )
 extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t r5 )
 {
     init_console();
-#if defined(CONFIG_KDB_CONS_OF1275)
-    init_of1275_console( r5 ); // XXX: use standard init routine!
-#endif
 
     call_global_ctors();
     call_node_ctors();

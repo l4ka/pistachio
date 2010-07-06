@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2008, 2010,  Karlsruhe University
  *                
  * File path:     api/v4/memdesc.h
  * Description:   Memory descriptors for kernel interface page

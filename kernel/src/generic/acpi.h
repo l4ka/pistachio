@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2008,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008, 2010,  Karlsruhe University
  *                
  * File path:     generic/acpi.h
  * Description:   ACPI structures
@@ -234,7 +234,12 @@ class acpi_fadt_t {
 private:
     u8_t	data[0];
 public:
-    u32_t pmtimer_ioport() { return * ((u32_t *) &data[76-sizeof(acpi_thead_t)]); }
+    u32_t pmtimer_ioport() 
+        { 
+            u8_t *ret8 = &data[76-sizeof(acpi_thead_t)];
+            u32_t *ret =  (u32_t *) ret8;
+            return *ret;
+        }
 } __attribute__((packed));
 
 

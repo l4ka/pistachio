@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2009,  Karlsruhe University
+ * Copyright (C) 2002-2010,  Karlsruhe University
  *                
  * File path:     generic/linear_ptab_walker.cc
  * Description:   Linear page table manipulation
@@ -643,19 +643,21 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 #endif
 
 #ifdef CONFIG_HAVE_MEMORY_CONTROL
+		// XXX: should f_addr be offset?
 		if (lookup_mapping (f_addr, &fpg, &f_size))
 		    tpg->set_entry (t_space, t_size,
-		       		    addr_offset (f_addr, offset + f_off),
-				    snd_fp.get_rwx (), 
+		       		    sigma0_translate(addr_offset (f_addr, offset + f_off), f_size),
+				    snd_fp.get_rwx (),
 				    fpg->attributes(this, f_size),
 				    false);
 		else
 #endif
 		    tpg->set_entry (t_space, t_size,
-				    addr_offset (f_addr, offset + f_off),
-				    snd_fp.get_rwx (), 0, false);
-
-		tpg->set_linknode (t_space, t_size, newmap, t_addr);
+				    sigma0_translate(addr_offset (f_addr, offset + f_off), f_size),
+				    snd_fp.get_rwx (), 
+				    sigma0_attributes(fpg, addr_offset(f_addr, offset + f_off), f_size),
+				    false);
+                tpg->set_linknode (t_space, t_size, newmap, t_addr);
 	    }
 	    else
 	    {

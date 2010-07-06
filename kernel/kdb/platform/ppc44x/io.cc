@@ -119,7 +119,7 @@ static void init_serial (void)
     fdt_node_t *node;
     fdt_t *fdt;    
 
-    if (!(fdt = get_fdt()))
+    if (!(fdt = get_dtree()))
         return;
     
     if (!(node = fdt->find_subtree("/aliases")))
@@ -282,7 +282,7 @@ static jtag_console_t cons;
 
 static void init_jtag()
 {
-    cons.init(get_fdt());
+    cons.init(get_dtree());
     init_bgtree();
 }
 
@@ -776,8 +776,8 @@ void init_bgtree()
 {
     static bool initialized = false;
     if (!initialized) {
-	bgtree_t::tree.init(get_fdt());
-	tree_console.init(get_fdt());
+	bgtree_t::tree.init(get_dtree());
+	tree_console.init(get_dtree());
 	initialized = true;
     }
 }

@@ -127,10 +127,4 @@ public:
 };
 
 
-INLINE of1275_tree_t *get_of1275_tree()
-{
-    extern of1275_tree_t of1275_tree;
-    return &of1275_tree;
-}
-
 #endif	/* __PLATFORM__OFPPC__1275TREE_H__ */

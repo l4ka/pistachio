@@ -139,6 +139,7 @@ public:
     u32_t data[0];
 };
 
-fdt_t *get_fdt();
+typedef fdt_t dtree_t;
+dtree_t *get_dtree();
 
 #endif /* !__PLATFORM__PPC44X__FDT_H__ */

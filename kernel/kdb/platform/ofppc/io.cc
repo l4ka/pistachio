@@ -63,8 +63,10 @@ static void switch_console( const char *name )
 
 #if defined(CONFIG_KDB_CONS_OF1275)
 
-void init_of1275_console( word_t entry )
+void init_of1275_console( )
 {
+    word_t entry = get_kip()->boot_info;
+    
     get_of1275_space()->init( 
 	    (word_t)ofppc_stack_top(), (word_t)ofppc_stack_bottom() );
     get_of1275_ci()->init( entry );
@@ -169,10 +171,10 @@ static char getc_com( bool block )
 
 kdb_console_t kdb_consoles[] = {
 #if defined(CONFIG_KDB_CONS_OF1275)
-    { PROM_NAME, NULL, putc_of1275, getc_of1275 },
+    { PROM_NAME, init_of1275_console, putc_of1275, getc_of1275 },
 #endif
 #if defined(CONFIG_KDB_CONS_PSIM_COM)
-    { COM_NAME, NULL, putc_com, getc_com },
+    { COM_NAME, init_psim_com_console, putc_com, getc_com },
 #endif
     KDB_NULL_CONSOLE
 };

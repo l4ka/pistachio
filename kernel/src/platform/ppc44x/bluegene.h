@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/platform/ppc44x/bluegene.h
+ * File path:     platform/ppc44x/bluegene.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +59,7 @@ INLINE fdt_header_t *find_cpu( fdt_t *fdt, word_t cpu )
 
 INLINE bool get_cpu_speed( word_t cpu, word_t *cpu_hz, word_t *bus_hz )
 {
-    fdt_t *fdt = get_fdt();
+    fdt_t *fdt = get_dtree();
     fdt_property_t *prop;
 
     fdt_header_t *fdtcpu = find_cpu(fdt, cpu);
@@ -82,7 +82,7 @@ INLINE bool get_cpu_speed( word_t cpu, word_t *cpu_hz, word_t *bus_hz )
 INLINE int get_cpu_count()
 {
     int count = 0;
-    fdt_t *fdt = get_fdt();
+    fdt_t *fdt = get_dtree();
     fdt_header_t *fdtcpu = fdt->find_subtree("/cpus");
     if (!fdtcpu)
 	return 1;

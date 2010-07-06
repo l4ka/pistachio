@@ -42,7 +42,7 @@ intctrl_t intctrl;
 
 void SECTION (".init") intctrl_t::init_arch()
 {
-    fdt_t *fdt = get_fdt();
+    fdt_t *fdt = get_dtree();
     fdt_header_t *hdr;
     fdt_property_t *prop;
 
