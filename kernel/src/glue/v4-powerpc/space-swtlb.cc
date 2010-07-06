@@ -335,7 +335,6 @@ void space_t::flush_tlbent( space_t *curspace, addr_t addr, word_t log2size )
     if (ppc_tlbsx((word_t)addr, idx))
     {
 	TRACEF("invalidating TLB entry %d\n", idx);
-
 	ppc_tlb0_t::invalid().write(idx);
 	swtlb.set_free(idx);
     }
@@ -347,13 +346,13 @@ void space_t::arch_free()
 }
 
 #define RELOC(s0addr, physaddr, size) \
-case s0addr ... s0addr + size - 1: paddr = physaddr + reinterpret_cast<paddr_t>(addr_offset(addr, -s0addr)); break;
+    case s0addr ... s0addr + size - 1: paddr = physaddr + reinterpret_cast<paddr_t>(addr_offset(addr, -s0addr)); break;
 
 /* XXX: remove remapping */
 paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 {
     paddr_t paddr = reinterpret_cast<paddr_t>(addr);
-#ifdef CONFIG_PLAT_440_BGP
+#if defined(CONFIG_PLAT_440_BGP)
     switch(reinterpret_cast<word_t>(addr))
     {
 	RELOC(0xff000000, 0x600000000ULL, 0x4000);	// DMA
@@ -363,7 +362,12 @@ paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 	RELOC(0xff021000, 0x611000000ULL, 0x1000);	// Tree Ch1
 	RELOC(0xff030000, 0x720000000ULL, 0x10000);	// Tomal, Xemac, xgmii
     }
-#endif
+#elif defined(CONFIG_PLAT_440_EBONY)
+    switch(reinterpret_cast<word_t>(addr))
+    {
+	RELOC(0xf0000000, 0x140000000ULL, 0x10000000);  // PERIPHERAL_BASE
+    }
+#endif 
     return paddr;
 }
 

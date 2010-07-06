@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2000-2006,  Karlsruhe University
+ * Copyright (C) 2000-2006, 2010,  Karlsruhe University
  *                
  * File path:     generic/mapping.cc
  * Description:   Generic mapping database implementation
