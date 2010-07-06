@@ -131,6 +131,8 @@ L4_Word_t fdt_init (void)
     kip.install_root_task(modules[2].start, modules[2].end,
 			  modules[2].entry, modules[2].type);
 
+    kip.dedicate_memory((L4_Word64_t) fdt, (L4_Word64_t) fdt + fdt->size, L4_BootLoaderSpecificMemoryType, 0xf );
+
     // MUST BE LAST: store the fdt in the bootinfo field and update
     // all descriptors
     kip.update_kip((L4_Word_t)fdt);

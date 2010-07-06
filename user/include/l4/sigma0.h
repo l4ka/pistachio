@@ -91,16 +91,17 @@ L4_INLINE L4_Fpage_t L4_Sigma0_GetAny (L4_ThreadId_t s0,
 /**
  *  L4_Sigma0_GetSpecial(L4_Word_t type)
  *
- *  Searches the KIP's memory descriptors for special memory segment. If address
- *  is zero. requests sigma0 to map the relevant pages into the current address space
- *  1:1, and returns a pointer to the segment
+ *  Searches the KIP's memory descriptors for special memory segment. Requests
+ *  sigma0 to map the relevant pages into the current address space, (1:1 if
+ *  address equals zero)
+ * 
  */
-L4_INLINE void * L4_Sigma0_GetSpecial(L4_Word_t type, L4_Word_t address, L4_Word_t pagesize)
+L4_INLINE void *L4_Sigma0_GetSpecial(L4_Word_t type, void* address, L4_Word_t pagesize)
 {
     void *kip = L4_GetKernelInterface();
     L4_ThreadId_t sigma0 = L4_GlobalId(L4_ThreadIdUserBase(kip), 1);
     
-    // Search for the memory descriptor for the 1275 tree.
+    // Search for the memory descriptor for the type.
     for( L4_Word_t i = 0; i < L4_NumMemoryDescriptors(kip); i++ )
     {
 	L4_MemoryDesc_t *mdesc = L4_MemoryDesc( kip, i );
@@ -108,34 +109,37 @@ L4_INLINE void * L4_Sigma0_GetSpecial(L4_Word_t type, L4_Word_t address, L4_Word
 	{
 	    L4_Word_t start = L4_MemoryDescLow(mdesc);
 	    L4_Word_t end = L4_MemoryDescHigh(mdesc) + 1;
-            void *ret;
+            L4_Word_t rcvstart = (L4_Word_t) address;
+            
+            if (!rcvstart)
+            {
+                rcvstart = start;
+                address = (void *) start;
+            }
+                    
+            if ( L4_Myself() == sigma0 )
+		return 0; 
 
-            if( L4_Myself() == sigma0 )
-		return (void *)start;
-
-            if (address == 0)
-                address = start;
-            ret = (void *)address;
             
             // Request mappings for the pages.
 	    while( start < end )
 	    {
 		L4_Fpage_t fpage = L4_Fpage( start, pagesize );
-		L4_Fpage_t rcvfpage = L4_Fpage( address, pagesize );
+		L4_Fpage_t rcvfpage = L4_Fpage( rcvstart, pagesize );
+
 		fpage.X.rwx = L4_ReadWriteOnly;
 		fpage = L4_Sigma0_GetPage( sigma0, fpage, rcvfpage );
 		if( L4_IsNilFpage(fpage) )
-		    return 0;
+		    return address;
 
 		start += pagesize;
+                rcvstart += pagesize;
 	    }
-            return ret;	    
+            return address;	    
 	}
     }
-
     return 0;
 }
-
 
 #endif /* !__L4__SIGMA0_H__ */
 

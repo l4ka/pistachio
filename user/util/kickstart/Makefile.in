@@ -83,7 +83,7 @@ PROGRAM_DEPS_amd64=	$(top_builddir)/util/kickstart/libio32.a
 ## PowerPC specifics
 ##
 SRCS_powerpc=		$(SRCS_FDT) 
-LIBS_powerpc=		-lio 
+LIBS_powerpc=		-lio -ll4
 LDFLAGS_powerpc=	
 CFLAGS_kickstart_powerpc:= $(CFLAGS) 
 MKIMAGE=		mkimage

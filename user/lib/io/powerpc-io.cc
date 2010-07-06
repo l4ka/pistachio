@@ -32,7 +32,7 @@
 #include <l4/types.h>
 #include <l4/types.h>
 #include <l4/powerpc/kdebug.h>
-
+#include <l4/space.h>
 
 extern "C" int __l4_getc( void );
 extern "C" int getc( void ) __attribute__ ((weak, alias("__l4_getc")));
@@ -55,7 +55,14 @@ extern "C" void putc( int c ) __attribute__ ((weak, alias("__l4_putc")));
 static volatile L4_Word8_t *comport = CONFIG_COMPORT;
 static bool io_initialized = false;
 
-fdt_t *__l4_fdt_ptr = 0;
+#define DTREE_KIP_SUBTYPE	0xf
+#define DTREE_KIP_SUBTYPE	0xf
+#define DTREE_KIP_TYPE	        (L4_BootLoaderSpecificMemoryType + (DTREE_KIP_SUBTYPE << 4))
+
+#define SIGMA0_DEVICE_RELOC     0xf0000000
+void *__l4_dtree = 0;
+static L4_Word8_t __attribute__((aligned(4096))) comport_page[4096];
+   
 
 #define IER     (comport+1)
 #define EIR     (comport+2)
@@ -66,6 +73,7 @@ fdt_t *__l4_fdt_ptr = 0;
 #define DLLO    (comport+0)
 #define DLHI    (comport+1)
 
+extern "C" int printf (const char *fmt, ...);
 
 static void io_init( void )
 {
@@ -80,9 +88,8 @@ static void io_init( void )
     char *alias;
     L4_Word_t *reg, len;
     of1275_device_t *dev;
-    of1275_tree_t *of1275_tree =  (of1275_tree_t *) L4_Sigma0_GetSpecial(OF1275_KIP_TYPE, 0, 4096);
+    of1275_tree_t *of1275_tree =  (of1275_tree_t *) L4_Sigma0_GetSpecial(DTREE_KIP_TYPE, 0, 4096);
 
-    
     if( of1275_tree == 0 )
         return;
 
@@ -123,12 +130,24 @@ static void io_init( void )
 #else
 
 #if CONFIG_COMPORT == 0
+    
     /*  FDT  */
     fdt_property_t *prop;
     fdt_node_t *node;
     fdt_t *fdt;    
+    bool io_direct = true; 
+        
+    if (!(__l4_dtree))
+    {
+        __l4_dtree = L4_Sigma0_GetSpecial(DTREE_KIP_TYPE, 0, 4096);
+        io_direct = false;
+    }
 
-    if (!(fdt = __l4_fdt_ptr))
+    if (!(fdt = (fdt_t *) __l4_dtree))
+        return;
+
+    
+    if (!(fdt->is_valid()))
         return;
     
     if (!(node = fdt->find_subtree("/aliases")))
@@ -140,12 +159,50 @@ static void io_init( void )
 
     if (!(node = fdt->find_subtree(prop->get_string())))
         return;
-    
+
     if (! (prop = fdt->find_property_node(node, "virtual-reg")) )
         return;
+ 
 
-    comport = (volatile L4_Word8_t *) prop->get_word(0);
+    if (io_direct) 
+    {
+        comport = (volatile L4_Word8_t *) prop->get_word(0);
+    }
+    else
+    {
+        
+        if (! (prop = fdt->find_property_node(node, "reg")) )
+            return;
+
+        L4_Word_t comport_ofs =  prop->get_word(0) & 4095;
+        L4_Word_t comport_phys = SIGMA0_DEVICE_RELOC + comport_ofs;
+        comport = comport_page + comport_ofs;
+        
+        
+        L4_Flush(L4_Fpage( (L4_Word_t) comport, 4096) + L4_FullyAccessible);
+
+        /* 
+         * Request the device page from sigma0.
+         */
+
+
+        L4_ThreadId_t sigma0 = L4_GlobalId( L4_ThreadIdUserBase(L4_GetKernelInterface()), 1);
+        if( sigma0 == L4_Myself() )
+            return;
+        
+        // Hopefully it is free!
+        L4_Fpage_t target = L4_Fpage( (L4_Word_t) comport, 4096 );	
+        L4_Fpage_t fpage = L4_Fpage( comport_phys, 4096 );
+        fpage.X.rwx = L4_ReadWriteOnly;
+        fpage = L4_Sigma0_GetPage( sigma0, fpage, target );
+
+        if( L4_IsNilFpage(fpage) )
+            return;
+
+        
+    }
 #endif /* CONFIG_COMPORT == 0 */
+    
     if (comport)
     {
         outb(LCR, 0x80);          /* select bank 1        */
@@ -161,9 +218,6 @@ static void io_init( void )
         inb(MCR);
         inb(LSR);
         inb(MSR);
-        
-        //extern "C" int printf (const char *fmt, ...);
-        //printf("Serial port %x initialized\n", comport);
 
     }
 #endif
@@ -205,7 +259,6 @@ extern "C" void __l4_putc( int c )
     }
 }
 #else	/* CONFIG_COMPORT */
-
 
 extern "C" int __l4_getc()
 {

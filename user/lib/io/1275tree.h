@@ -37,11 +37,6 @@
 #include <l4/kip.h>
 #include <l4/sigma0.h>
 
-#define OF1275_KIP_MAJOR_TYPE	0xe
-#define OF1275_KIP_MINOR_TYPE	0xf
-#define OF1275_KIP_TYPE	(OF1275_KIP_MAJOR_TYPE + (OF1275_KIP_MINOR_TYPE << 4))
-
-
 L4_INLINE L4_Word_t of1275_align( L4_Word_t val )
 {
     L4_Word_t size = sizeof(L4_Word_t);
@@ -94,8 +89,9 @@ public:
 
     bool get_prop( const char *prop_name, L4_Word_t *data )
     {
-	L4_Word_t *ptr, prop_len;
-	if( !this->get_prop(prop_name, (char **)&ptr, &prop_len) )
+	L4_Word_t prop_len;
+        char *ptr;
+	if( !this->get_prop(prop_name, &ptr, &prop_len) )
 	    return false;
 	if( prop_len != sizeof(*data) )
 	    return false;

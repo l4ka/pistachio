@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007,  Karlsruhe University
+ * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4test/ipc-smp.cc
  * Description:   Simple SMP IPC tests

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2007,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2007, 2010,  Karlsruhe University
  *                
  * File path:     l4/types.h
  * Description:   Commonly used L4 types

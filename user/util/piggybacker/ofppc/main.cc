@@ -223,9 +223,9 @@ extern "C" void loader_main( L4_Word_t r3, L4_Word_t r4, L4_Word_t of1275_entry)
 
     kip_manager.dedicate_memory( devtree_start, devtree_end, 
 	    L4_BootLoaderSpecificMemoryType, 0xf );
-    kip_manager.update_kip();	// Do this last!
+    kip_manager.update_kip(of1275_entry);	// Do this last!
 
-    start_kernel( r3, r4, of1275_entry );
+    start_kernel(r3, r4, of1275_entry);
 }
 
 extern word_t call_addr;
