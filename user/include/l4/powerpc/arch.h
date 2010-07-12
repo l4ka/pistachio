@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     include/l4/powerpc/arch.h
+ * File path:     l4/powerpc/arch.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,8 @@
 #define __L4__POWERPC__ARCH_H__
 
 #include "specials.h"
-#include <l4/thread.h>
+#include <l4/ipc.h>
 
-#define L4_EXREGS_CTRLXFER_CONF_FLAG    	(1UL <<  9)  
-#define L4_EXREGS_CTRLXFER_READ_FLAG    	(1UL << 10)
-#define L4_EXREGS_CTRLXFER_WRITE_FLAG    	(1UL << 11)
-#define L4_EXREGS_EXCHANDLER_FLAG		(1UL << 12)
-#define L4_EXREGS_SCHEDULER_FLAG		(1UL << 13)
 
 #define L4_CTRLXFER_GPREGS0		(0)
 #define L4_CTRLXFER_GPREGS1		(1)
@@ -145,110 +140,6 @@
 #define L4_CTRLXFER_CACHE_TVx(x)	(5 + (x))
 
 /*
- * CtrlXfer Item
- */
-
-typedef union {
-    L4_Word_t		raw[];
-    struct {
-	L4_Word_t	mask:20;
-	L4_Word_t	id:8;
-	L4_Word_t	__type:3;
-	L4_Word_t	C:1;
-    };
-} L4_CtrlXferItem_t;	
-
-
-
-/*
- * PPC CtrlXfer Item
- */
-
-L4_INLINE void L4_CtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t id)
-{
-    c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = id;
-    c->mask = 0;
-
-}
-
-L4_INLINE void L4_MsgAppendCtrlXferItem (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
-{ 
-    L4_Word_t reg=0, num=0, mask = c->mask;
-    
-    /* 
-     * Add regs according to mask 
-     * */
-    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
-	msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
-   
-    /* Add item */
-    if (num)
-    {
-	msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
-	msg->tag.X.t += 1 + num;
-    }
-
-
-}
-
-L4_INLINE L4_Word_t L4_MsgStoreCtrlXferItem (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
-{
-    L4_Word_t reg=0, num=0, mask=0;
-
-    /* Store item */
-    c->raw[0] = msg->msg[mr];
-    mask = c->mask;
-    /* 
-     * Store regs according to mask 
-     * */
-    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
-	c->raw[reg+1] = msg->msg[mr + 1 + num];
-    
-    return num + 1;
-}
-
-/* 
- * Fault Configuration item 
- */
-L4_INLINE void L4_FaultConfCtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
-{
-    c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = fault_id;
-    c->mask = fault_mask;
-}
-
-L4_INLINE void L4_AppendFaultConfCtrlXferItems(L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
-{
-    L4_CtrlXferItem_t item; 
-    L4_Word_t fault_id = 0;
-    L4_Word_t fault_id_mask_low = fault_id_mask;
-    L4_Word_t fault_id_mask_high = (fault_id_mask >> 32);
-
-    for (fault_id+=__L4_Lsb(fault_id_mask_low); fault_id_mask_low != 0;  
-	 fault_id_mask_low>>=__L4_Lsb(fault_id_mask_low)+1,fault_id+=__L4_Lsb(fault_id_mask_low)+1)
-    {
-	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = true;
-	L4_Append(msg, item.raw[0]);
-    }
-    
-    fault_id = 32;
-    for (fault_id+=__L4_Lsb(fault_id_mask_high); fault_id_mask_high != 0;  
-	 fault_id_mask_high>>=__L4_Lsb(fault_id_mask_high)+1,fault_id+=__L4_Lsb(fault_id_mask_high)+1)
-    {
-	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = true;
-	L4_Append(msg, item.raw[0]);
-    }
-
-    item.C = C;
-    msg->msg[msg->tag.X.u + msg->tag.X.t] = item.raw[0];
-}
-
-/*
  * PPC GPRegs 
  */
 
@@ -306,9 +197,14 @@ L4_INLINE void L4_MsgAppendGPRegsCtrlXferItem (L4_Msg_t * msg, L4_GPRegsCtrlXfer
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreGPRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutGPRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_GPRegsCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetGPRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -358,9 +254,14 @@ L4_INLINE void L4_MsgAppendGPRegsXCtrlXferItem (L4_Msg_t * msg, L4_GPRegsXCtrlXf
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreGPRegsXCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsXCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutGPRegsXCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_GPRegsXCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetGPRegsXCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsXCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -373,6 +274,13 @@ L4_INLINE void L4_MsgAppendFPRegsCtrlXferItem (L4_Msg_t * msg)
     L4_CtrlXferItemInit(&item, L4_CTRLXFER_FPU);
     msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = item.raw[0];
     msg->tag.X.t += 1;
+}
+
+L4_INLINE void L4_MsgPutFPRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t)
+{
+    L4_CtrlXferItem_t  item;
+    L4_CtrlXferItemInit(&item, L4_CTRLXFER_FPU);
+    msg->msg[msg->tag.X.u + t + 1] = item.raw[0];
 }
 
 
@@ -433,9 +341,14 @@ L4_INLINE void L4_MsgAppendTLBCtrlXferItem (L4_Msg_t * msg, L4_TLBCtrlXferItem_t
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreTLBCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_TLBCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutTLBCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_TLBCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetTLBCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_TLBCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -495,9 +408,14 @@ L4_INLINE void L4_MsgAppendExceptCtrlXferItem (L4_Msg_t * msg, L4_ExceptCtrlXfer
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreExceptCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_ExceptCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutExceptCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_ExceptCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetExceptCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_ExceptCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -541,9 +459,14 @@ L4_INLINE void L4_MsgAppendIvorCtrlXferItem (L4_Msg_t * msg, L4_IvorCtrlXferItem
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreIvorCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_IvorCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutIvorCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_IvorCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetIvorCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_IvorCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -593,9 +516,9 @@ L4_INLINE void L4_MsgAppendTimerCtrlXferItem (L4_Msg_t * msg, L4_TimerCtrlXferIt
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreTimerCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_TimerCtrlXferItem_t *c)
+L4_INLINE L4_Word_t L4_MsgGetTimerCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_TimerCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -645,9 +568,14 @@ L4_INLINE void L4_MsgAppendConfigCtrlXferItem (L4_Msg_t * msg, L4_ConfigCtrlXfer
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreConfigCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_ConfigCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutConfigCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_ConfigCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetConfigCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_ConfigCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -701,9 +629,9 @@ L4_INLINE void L4_MsgAppendDebugCtrlXferItem (L4_Msg_t * msg, L4_DebugCtrlXferIt
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreDebugCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DebugCtrlXferItem_t *c)
+L4_INLINE L4_Word_t L4_MsgGetDebugCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DebugCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -758,17 +686,12 @@ L4_INLINE void L4_MsgAppendCacheCtrlXferItem (L4_Msg_t * msg, L4_CacheCtrlXferIt
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreCacheCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_CacheCtrlXferItem_t *c)
+L4_INLINE L4_Word_t L4_MsgGetCacheCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_CacheCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 #if defined(__cplusplus)
-L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
-{
-    L4_FaultConfCtrlXferItemInit (c, fault_id, fault_mask);
-}
-
 #define DECLARE_INIT_SET_APPEND(type)					\
 L4_INLINE void L4_Init (L4_##type##_t *c)				\
 {									\
@@ -783,39 +706,21 @@ L4_INLINE void L4_Set (L4_##type##_t *c, L4_Word_t reg, L4_Word_t val)	\
 L4_INLINE void L4_Append (L4_Msg_t *msg, L4_##type##_t *c)		\
 {									\
     L4_MsgAppend##type(msg, c);						\
+}                                                                       \
+                                                                        \
+L4_INLINE void L4_Put (L4_Msg_t *msg, L4_Word_t t, L4_##type##_t *c)    \
+{									\
+    L4_MsgPut##type(msg, t, c);                                         \
+}                                                                       \
+                                                                        \
+L4_INLINE void L4_Get (L4_Msg_t *msg, L4_Word_t mr, L4_##type##_t *c)   \
+{									\
+    L4_MsgGet##type(msg, mr, c);                                        \
 }
 
 DECLARE_INIT_SET_APPEND(GPRegsXCtrlXferItem)
 DECLARE_INIT_SET_APPEND(ExceptCtrlXferItem)
 DECLARE_INIT_SET_APPEND(ConfigCtrlXferItem)
 #endif
-
-
-L4_INLINE L4_Word_t L4_ConfCtrlXferItems(L4_ThreadId_t dest)
-{    
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_CONF_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
-
-L4_INLINE L4_Word_t L4_ReadCtrlXferItems(L4_ThreadId_t dest)
-{
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_READ_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
-
-L4_INLINE L4_Word_t L4_WriteCtrlXferItems(L4_ThreadId_t dest)
-{
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_WRITE_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
 
 #endif /* !__L4__POWERPC__ARCH_H__ */

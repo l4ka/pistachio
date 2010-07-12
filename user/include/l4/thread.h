@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006, 2008-2009,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006, 2008-2010,  Karlsruhe University
  *                
  * File path:     l4/thread.h
  * Description:   Thread handling interfaces
@@ -569,6 +569,12 @@ L4_INLINE L4_ThreadState_t L4_AbortIpc_and_stop (L4_ThreadId_t t,
 }
 #endif
 
+#define L4_EXREGS_CTRLXFER_CONF_FLAG    	(1UL <<  9)  
+#define L4_EXREGS_CTRLXFER_READ_FLAG    	(1UL << 10)
+#define L4_EXREGS_CTRLXFER_WRITE_FLAG    	(1UL << 11)
+#define L4_EXREGS_EXCHANDLER_FLAG		(1UL << 12)
+#define L4_EXREGS_SCHEDULER_FLAG		(1UL << 13)
+
 L4_INLINE L4_Word_t L4_AssociateInterrupt (L4_ThreadId_t InterruptThread,
 					   L4_ThreadId_t HandlerThread)
 {
@@ -580,6 +586,33 @@ L4_INLINE L4_Word_t L4_DeassociateInterrupt (L4_ThreadId_t InterruptThread)
 {
     return L4_ThreadControl (InterruptThread, InterruptThread,
 			     L4_nilthread, InterruptThread, (void *) -1);
+}
+
+L4_INLINE L4_Word_t L4_ConfCtrlXferItems(L4_ThreadId_t dest)
+{    
+    L4_Word_t dummy, old_control;
+    L4_ThreadId_t dummy_tid;
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_CONF_FLAG, 0, 0 , 0, 0, L4_nilthread,
+			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
+    return old_control;
+}
+
+L4_INLINE L4_Word_t L4_ReadCtrlXferItems(L4_ThreadId_t dest)
+{
+    L4_Word_t dummy, old_control;
+    L4_ThreadId_t dummy_tid;
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_READ_FLAG, 0, 0 , 0, 0, L4_nilthread,
+			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
+    return old_control;
+}
+
+L4_INLINE L4_Word_t L4_WriteCtrlXferItems(L4_ThreadId_t dest)
+{
+    L4_Word_t dummy, old_control;
+    L4_ThreadId_t dummy_tid;
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_WRITE_FLAG, 0, 0 , 0, 0, L4_nilthread,
+			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
+    return old_control;
 }
 
 #endif /* !__L4__THREAD_H__ */

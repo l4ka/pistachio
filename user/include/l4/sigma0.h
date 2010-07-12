@@ -89,7 +89,7 @@ L4_INLINE L4_Fpage_t L4_Sigma0_GetAny (L4_ThreadId_t s0,
 
 
 /**
- *  L4_Sigma0_GetSpecial(L4_Word_t type)
+ *  L4_Sigma0_GetSpecial
  *
  *  Searches the KIP's memory descriptors for special memory segment. Requests
  *  sigma0 to map the relevant pages into the current address space, (1:1 if

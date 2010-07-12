@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2003, 2005,  Karlsruhe University
+ * Copyright (C) 2002, 2003, 2005, 2010,  Karlsruhe University
  *                
  * File path:     l4/amd64/specials.h
  * Description:   amd64 specific functions and defines
@@ -55,6 +55,27 @@ L4_INLINE int __L4_Msb (L4_Word_t w)
     return bitnum;
 }
 
+/*
+ * Architecture specific helper functions.
+ */
+
+L4_INLINE int __L4_Lsb (L4_Word_t w) __attribute__ ((const));
+
+L4_INLINE int __L4_Lsb (L4_Word_t w)
+{
+    L4_Word_t bitnum;
+
+    __asm__ (
+	"/* l4_lsb()		*/			\n"
+	"bsf	%1, %0					\n"
+	: /* outputs */
+	"=r" (bitnum)
+	: /* inputs */
+	"rm" (w)
+	);
+
+    return bitnum;
+}
 
 
 #endif /* !__L4__AMD64__SPECIALS_H__ */

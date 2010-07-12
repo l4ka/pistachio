@@ -34,8 +34,8 @@
 #define __L4__IA32__ARCH_H__
 
 #include <l4/ia32/specials.h>
-#include <l4/thread.h>
 #include <l4/kip.h>
+#include <l4/ipc.h>
 
 typedef union {
     L4_Word_t	raw;
@@ -109,12 +109,6 @@ L4_INLINE L4_Bool_t L4_IsIoFpage (L4_Fpage_t f)
     return (iofp.X.__two == 2);
 }
 
-
-#define L4_EXREGS_CTRLXFER_CONF_FLAG    	(1UL <<  9)  
-#define L4_EXREGS_CTRLXFER_READ_FLAG    	(1UL << 10)
-#define L4_EXREGS_CTRLXFER_WRITE_FLAG    	(1UL << 11)
-#define L4_EXREGS_EXCHANDLER_FLAG		(1UL << 12)
-#define L4_EXREGS_SCHEDULER_FLAG		(1UL << 13)
 
 #define L4_CTRLXFER_GPREGS_ID		(0)
 #define L4_CTRLXFER_FPUREGS_ID		(1)
@@ -212,155 +206,6 @@ L4_INLINE L4_Bool_t L4_IsIoFpage (L4_Fpage_t f)
 
 #define L4_CTRLXFER_REG_ID(id, reg)	((id * 0x10) + reg)
 
-
-/*
- * CtrlXfer Item
- */
-
-typedef union {
-    L4_Word_t		raw[0];
-    struct {
-	L4_Word_t	C:1;
-	L4_Word_t	__type:3;
-	L4_Word_t	id:8;
-	L4_Word_t	mask:20;
-    };
-} L4_CtrlXferItem_t;	
-
-
-#if defined(__cplusplus)
-/*
- * IA32 CtrlXfer Item
- */
-
-L4_INLINE void L4_CtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t id)
-{
-    c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = id;
-    c->mask = 0;
-
-}
-
-L4_INLINE void L4_MsgAppendCtrlXferItem (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
-{
-    L4_Word_t reg=0, num=0, mask = c->mask;
-    
-    /* 
-     * Add regs according to mask 
-     * */
-    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
-	msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
-   
-    /* Add item */
-    if (num)
-    {
-	msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
-	msg->tag.X.t += 1 + num;
-    }
-}
-
-L4_INLINE L4_Word_t L4_MsgStoreCtrlXferItem (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
-{
-    L4_Word_t reg=0, num=0, mask=0;
-
-    /* Store item */
-    c->raw[0] = msg->msg[mr];
-    mask = c->mask;
-    /* 
-     * Store regs according to mask 
-     * */
-    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
-	c->raw[reg+1] = msg->msg[mr + 1 + num];
-    
-    return num + 1;
-}
-
-
-L4_INLINE L4_Word_t L4_CtrlXferItemId(L4_Msg_t * msg, L4_Word_t mr)
-{
-    
-    L4_CtrlXferItem_t *c = (L4_CtrlXferItem_t *) &msg->msg[mr];
-    
-    return (c->__type == 0x6) ? c->id : L4_CTRLXFER_INVALID_ID;
-       
-}
-				      
-/* 
- * IA32 Fault Configuration item 
- */
-L4_INLINE void L4_FaultConfCtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
-{
-    c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = fault_id;
-    c->mask = fault_mask;
-}
-
-L4_INLINE void L4_AppendFaultConfCtrlXferItems(L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
-{
-    L4_CtrlXferItem_t item; 
-    L4_Word_t fault_id = 0;
-    L4_Word_t fault_id_mask_low = fault_id_mask;
-    L4_Word_t fault_id_mask_high = (fault_id_mask >> 32);
-    
-    for (fault_id+=__L4_Lsb(fault_id_mask_low); fault_id_mask_low != 0;  
-	 fault_id_mask_low>>=__L4_Lsb(fault_id_mask_low)+1,fault_id+=__L4_Lsb(fault_id_mask_low)+1)
-    {
-	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = 1;
-	L4_Append(msg, item.raw[0]);
-    }
-    
-    fault_id = 32;
-    for (fault_id+=__L4_Lsb(fault_id_mask_high); fault_id_mask_high != 0;  
-	 fault_id_mask_high>>=__L4_Lsb(fault_id_mask_high)+1,fault_id+=__L4_Lsb(fault_id_mask_high)+1)
-    {
-	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = 1;
-	L4_Append(msg, item.raw[0]);
-    }
-
-    item.C = C;
-    msg->msg[msg->tag.X.u + msg->tag.X.t] = item.raw[0];
-}
-
-
-
-/*
- * IA32 Single Reg CtrlXfer Item
- */
-
-typedef union { 
-    L4_Word_t   raw[2]; 
-    struct { 
-	L4_CtrlXferItem_t item; 
-	L4_Word_t   reg; 
-    }; 
-} L4_RegCtrlXferItem_t; 
-
-
-L4_INLINE void L4_RegCtrlXferItemInit(L4_RegCtrlXferItem_t *c, L4_Word_t id)
-{
-    L4_CtrlXferItemInit(&c->item, id);
-}
-
-L4_INLINE void L4_RegCtrlXferItemSet(L4_RegCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    c->reg = val;
-    c->item.mask |= (1<<reg);	   
-}
-
-L4_INLINE void L4_MsgAppendRegCtrlXferItem(L4_Msg_t * msg, L4_RegCtrlXferItem_t *c)
-{
-    L4_MsgAppendCtrlXferItem(msg, &c->item);
-}
-
-L4_INLINE L4_Word_t L4_MsgStoreRegCtrlXferItem(L4_Msg_t *msg, L4_Word_t mr, L4_RegCtrlXferItem_t *c)
-{
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
-}
-
 /*
  * IA32 GPRegs 
  */
@@ -417,9 +262,14 @@ L4_INLINE void L4_MsgAppendGPRegsCtrlXferItem (L4_Msg_t * msg, L4_GPRegsCtrlXfer
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreGPRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutGPRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_GPRegsCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetGPRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -473,15 +323,19 @@ L4_INLINE void L4_CRegsCtrlXferItemSet(L4_CRegsCtrlXferItem_t *c,
 }
 
 
-
 L4_INLINE void L4_MsgAppendCRegsCtrlXferItem (L4_Msg_t * msg, L4_CRegsCtrlXferItem_t *c)
 {
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreCRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_CRegsCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutCRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_CRegsCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetCRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_CRegsCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -532,15 +386,19 @@ L4_INLINE void L4_DRegsCtrlXferItemSet(L4_DRegsCtrlXferItem_t *c,
 }
 
 
-
 L4_INLINE void L4_MsgAppendDRegsCtrlXferItem (L4_Msg_t * msg, L4_DRegsCtrlXferItem_t *c)
 {
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreDRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DRegsCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutDRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_DRegsCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetDRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DRegsCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -575,7 +433,6 @@ L4_INLINE void L4_SegCtrlXferItemInit(L4_SegCtrlXferItem_t *c, L4_Word_t id)
     for (i=0; i < L4_CTRLXFER_SEGREG_SIZE; i++)
 	c->regs.reg[i] = 0;
     
-    
 }
 
 L4_INLINE void L4_SegCtrlXferItemSet(L4_SegCtrlXferItem_t *c, 
@@ -590,9 +447,14 @@ L4_INLINE void L4_MsgAppendSegCtrlXferItem (L4_Msg_t * msg, L4_SegCtrlXferItem_t
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreSegCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_SegCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutSegCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_SegCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetSegCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_SegCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /* 
@@ -639,9 +501,14 @@ L4_INLINE void L4_MsgAppendDTRCtrlXferItem (L4_Msg_t * msg, L4_DTRCtrlXferItem_t
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreDTRCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DTRCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutDTRCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_DTRCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetDTRCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_DTRCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -696,9 +563,14 @@ L4_INLINE void L4_MsgAppendNonRegExcCtrlXferItem(L4_Msg_t *msg, L4_NonRegExcCtrl
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreNonRegExcCtrlXferItem(L4_Msg_t *msg, L4_Word_t mr, L4_NonRegExcCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutNonRegExcCtrlXferItem(L4_Msg_t *msg, L4_Word_t t, L4_NonRegExcCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetNonRegExcCtrlXferItem(L4_Msg_t *msg, L4_Word_t mr, L4_NonRegExcCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 /*
@@ -742,14 +614,20 @@ L4_INLINE void L4_ExecCtrlXferItemSet(L4_ExecCtrlXferItem_t *c,
 }
 
 
-L4_INLINE void L4_MsgAppendExeccCtrlXferItem(L4_Msg_t *msg, L4_ExecCtrlXferItem_t *c)
+L4_INLINE void L4_MsgAppendExecCtrlXferItem(L4_Msg_t *msg, L4_ExecCtrlXferItem_t *c)
 {
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreExeccCtrlXferItem(L4_Msg_t *msg, L4_Word_t mr, L4_ExecCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutExecCtrlXferItem(L4_Msg_t *msg, L4_Word_t t, L4_ExecCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
+}
+
+
+L4_INLINE L4_Word_t L4_MsgGetExecCtrlXferItem(L4_Msg_t *msg, L4_Word_t mr, L4_ExecCtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
 
@@ -809,239 +687,80 @@ L4_INLINE void L4_MsgAppendOtherRegsCtrlXferItem (L4_Msg_t * msg, L4_OtherRegsCt
     L4_MsgAppendCtrlXferItem(msg, &c->item);
 }
 
-L4_INLINE L4_Word_t L4_MsgStoreOtherRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_OtherRegsCtrlXferItem_t *c)
+L4_INLINE void L4_MsgPutOtherRegsCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_OtherRegsCtrlXferItem_t *c)
 {
-    return L4_MsgStoreCtrlXferItem(msg, mr, &c->item);
+    L4_MsgPutCtrlXferItem(msg, t, &c->item);
 }
 
-L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
+L4_INLINE L4_Word_t L4_MsgGetOtherRegsCtrlXferItem (L4_Msg_t *msg, L4_Word_t mr, L4_OtherRegsCtrlXferItem_t *c)
 {
-    L4_FaultConfCtrlXferItemInit (c, fault_id, fault_mask);
+    return L4_MsgGetCtrlXferItem(msg, mr, &c->item);
 }
 
-L4_INLINE void L4_Init (L4_RegCtrlXferItem_t *c, L4_Word_t id)
-{
-    L4_RegCtrlXferItemInit(c, id);
+#if defined(__cplusplus)
+#define DECLARE_INIT_SET_APPEND(type)					\
+L4_INLINE void L4_Init (L4_##type##_t *c)				\
+{									\
+    L4_##type##Init(c);							\
+}									\
+									\
+L4_INLINE void L4_Set (L4_##type##_t *c, L4_Word_t reg, L4_Word_t val)	\
+{									\
+    L4_##type##Set(c, reg, val);					\
+}									\
+									\
+L4_INLINE void L4_Append (L4_Msg_t *msg, L4_##type##_t *c)	        \
+{									\
+    L4_MsgAppend##type(msg, c);						\
+}                                                                       \
+                                                                        \
+L4_INLINE void L4_Put (L4_Msg_t *msg, L4_Word_t t, L4_##type##_t *c)    \
+{									\
+    L4_MsgPut##type(msg, t, c);                                         \
+}                                                                       \
+                                                                        \
+L4_INLINE L4_Word_t L4_Get (L4_Msg_t *msg, L4_Word_t mr, L4_##type##_t *c) \
+{									\
+    return L4_MsgGet##type(msg, mr, c);                                 \
 }
 
-L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t id)
-{
-    L4_CtrlXferItemInit(c, id);
+DECLARE_INIT_SET_APPEND(GPRegsCtrlXferItem)
+DECLARE_INIT_SET_APPEND(CRegsCtrlXferItem)
+DECLARE_INIT_SET_APPEND(DRegsCtrlXferItem)
+DECLARE_INIT_SET_APPEND(NonRegExcCtrlXferItem)
+DECLARE_INIT_SET_APPEND(ExecCtrlXferItem)
+DECLARE_INIT_SET_APPEND(OtherRegsCtrlXferItem)
+
+#define DECLARE_INIT_SET_APPEND_ID(type)                                \
+L4_INLINE void L4_Init (L4_##type##_t *c, L4_Word_t id)                 \
+{									\
+    L4_##type##Init(c, id);                                             \
+}									\
+									\
+L4_INLINE void L4_Set (L4_##type##_t *c, L4_Word_t reg, L4_Word_t val)	\
+{									\
+    L4_##type##Set(c, reg, val);					\
+}									\
+									\
+L4_INLINE void L4_Append (L4_Msg_t *msg, L4_##type##_t *c)	        \
+{									\
+    L4_MsgAppend##type(msg, c);						\
+}                                                                       \
+                                                                        \
+L4_INLINE void L4_Put (L4_Msg_t *msg, L4_Word_t t, L4_##type##_t *c)    \
+{									\
+    L4_MsgPut##type(msg, t, c);                                         \
+}                                                                       \
+                                                                        \
+L4_INLINE L4_Word_t L4_Get (L4_Msg_t *msg, L4_Word_t mr, L4_##type##_t *c) \
+{									\
+    return L4_MsgGet##type(msg, mr, c);                                 \
 }
 
-L4_INLINE void L4_Init (L4_GPRegsCtrlXferItem_t *c)
-{
-    L4_GPRegsCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Init (L4_CRegsCtrlXferItem_t *c)
-{
-    L4_CRegsCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Init (L4_DRegsCtrlXferItem_t *c)
-{
-    L4_DRegsCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Init (L4_SegCtrlXferItem_t *c, L4_Word_t id)
-{
-    L4_SegCtrlXferItemInit(c, id);
-}
-
-L4_INLINE void L4_Init (L4_DTRCtrlXferItem_t *c, L4_Word_t id)
-{
-    L4_DTRCtrlXferItemInit(c, id);
-}
-
-L4_INLINE void L4_Init (L4_NonRegExcCtrlXferItem_t *c)
-{
-    L4_NonRegExcCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Init (L4_ExecCtrlXferItem_t *c)
-{
-    L4_ExecCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Init (L4_OtherRegsCtrlXferItem_t *c)
-{
-    L4_OtherRegsCtrlXferItemInit(c);
-}
-
-L4_INLINE void L4_Set (L4_RegCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_RegCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set (L4_GPRegsCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_GPRegsCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set (L4_CRegsCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_CRegsCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set (L4_DRegsCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_DRegsCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set (L4_SegCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_SegCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set (L4_DTRCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_DTRCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set(L4_NonRegExcCtrlXferItem_t *c,  L4_Word_t reg, L4_Word_t val)
-{
-    L4_NonRegExcCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set(L4_ExecCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_ExecCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Set(L4_OtherRegsCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
-{
-    L4_OtherRegsCtrlXferItemSet(c, reg, val);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
-{
-    L4_MsgAppendCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_RegCtrlXferItem_t *c)
-{
-    L4_MsgAppendRegCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GPRegsCtrlXferItem_t *c)
-{
-    L4_MsgAppendGPRegsCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CRegsCtrlXferItem_t *c)
-{
-    L4_MsgAppendCRegsCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_DRegsCtrlXferItem_t *c)
-{
-    L4_MsgAppendDRegsCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_SegCtrlXferItem_t *c)
-{
-    L4_MsgAppendSegCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_DTRCtrlXferItem_t *c)
-{
-    L4_MsgAppendDTRCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_NonRegExcCtrlXferItem_t *c)
-{
-    L4_MsgAppendNonRegExcCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_ExecCtrlXferItem_t *c)
-{
-    L4_MsgAppendExeccCtrlXferItem(msg, c);
-}
-
-L4_INLINE void L4_Append (L4_Msg_t * msg, L4_OtherRegsCtrlXferItem_t *c)
-{
-    L4_MsgAppendOtherRegsCtrlXferItem(msg, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
-{
-    return L4_MsgStoreCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_RegCtrlXferItem_t *c)
-{
-    return L4_MsgStoreRegCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_GPRegsCtrlXferItem_t *c)
-{
-    return L4_MsgStoreGPRegsCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_CRegsCtrlXferItem_t *c)
-{
-    return L4_MsgStoreCRegsCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_DRegsCtrlXferItem_t *c)
-{
-    return L4_MsgStoreDRegsCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_SegCtrlXferItem_t *c)
-{
-    return L4_MsgStoreSegCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_DTRCtrlXferItem_t *c)
-{
-    return L4_MsgStoreDTRCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_NonRegExcCtrlXferItem_t *c)
-{
-    return L4_MsgStoreNonRegExcCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_ExecCtrlXferItem_t *c)
-{
-    return L4_MsgStoreExeccCtrlXferItem(msg, mr, c);
-}
-
-L4_INLINE L4_Word_t L4_Store (L4_Msg_t *msg, L4_Word_t mr, L4_OtherRegsCtrlXferItem_t *c)
-{
-    return L4_MsgStoreOtherRegsCtrlXferItem(msg, mr, c);
-}
+DECLARE_INIT_SET_APPEND_ID(SegCtrlXferItem)
+DECLARE_INIT_SET_APPEND_ID(DTRCtrlXferItem)
 
 #endif /* define(__cplusplus) */
-
-L4_INLINE L4_Word_t L4_ConfCtrlXferItems(L4_ThreadId_t dest)
-{    
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_CONF_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
-
-L4_INLINE L4_Word_t L4_ReadCtrlXferItems(L4_ThreadId_t dest)
-{
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_READ_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
-
-L4_INLINE L4_Word_t L4_WriteCtrlXferItems(L4_ThreadId_t dest)
-{
-    L4_Word_t dummy, old_control;
-    L4_ThreadId_t dummy_tid;
-    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_WRITE_FLAG, 0, 0 , 0, 0, L4_nilthread,
-			  &old_control, &dummy, &dummy, &dummy, &dummy, &dummy_tid);
-    return old_control;
-}
 
 /**********************************************************************
  *                       EVT Logging 

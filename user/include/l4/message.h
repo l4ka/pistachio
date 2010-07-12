@@ -35,6 +35,7 @@
 
 #include <l4/types.h>
 #include __L4_INC_ARCH(vregs.h)
+#include __L4_INC_ARCH(specials.h)
 
 #define __L4_NUM_MRS	64
 #define __L4_NUM_BRS	33
@@ -445,8 +446,73 @@ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
 #endif /* __cplusplus */
 
 
+/*
+ * CtrlXfer Item
+ */
+
+typedef union {
+    L4_Word_t		raw[0];
+#if defined(L4_BIG_ENDIAN)
+    struct {
+	L4_Word_t	mask:20 __PLUS32;
+	L4_Word_t	id:8;
+	L4_Word_t	__type:3;
+	L4_Word_t	C:1;
+    };
+#else
+    struct {
+	L4_Word_t	C:1;
+	L4_Word_t	__type:3;
+	L4_Word_t	id:8;
+	L4_Word_t	mask:20 __PLUS32;
+    };
+#endif
+} L4_CtrlXferItem_t;	
 
 
+L4_INLINE L4_Bool_t L4_IsCtrlXferItem (L4_CtrlXferItem_t * s)
+{
+    return (s->__type == 6);
+}
+
+#if defined(__cplusplus)
+L4_INLINE L4_Bool_t L4_CtrlXferItem (L4_CtrlXferItem_t * s)
+{
+    return L4_IsCtrlXferItem (s);
+}
+#endif
+
+
+L4_INLINE void L4_CtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t id)
+{
+    c->raw[0] = 0;
+    c->__type = 0x06;
+    c->id = id;
+    c->mask = 0;
+
+}
+
+L4_INLINE void L4_FaultConfCtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
+{
+    c->raw[0] = 0;
+    c->__type = 0x06;
+    c->id = fault_id;
+    c->mask = fault_mask;
+}
+
+
+#if defined(__cplusplus)
+L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t id)
+{
+    L4_CtrlXferItemInit (c, id);
+}
+
+
+L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
+{
+    L4_FaultConfCtrlXferItemInit (c, fault_id, fault_mask);
+}
+#endif 
 
 /*
  * Cache allocation hints
@@ -652,6 +718,53 @@ L4_INLINE void L4_MsgAppendStringItem (L4_Msg_t * msg,
     msg->tag.X.t += size;
 }
 
+L4_INLINE void L4_MsgAppendCtrlXferItem (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+{ 
+    L4_Word_t reg=0, num=0, mask = c->mask;
+    
+    /* 
+     * Add regs according to mask 
+     * */
+    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
+	msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
+   
+    /* Add item */
+    if (num)
+    {
+	msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
+	msg->tag.X.t += 1 + num;
+    }
+
+}
+
+L4_INLINE void L4_AppendFaultConfCtrlXferItems(L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+{
+    L4_CtrlXferItem_t item; 
+    L4_Word_t fault_id = 0;
+    L4_Word_t fault_id_mask_low = fault_id_mask;
+    L4_Word_t fault_id_mask_high = (fault_id_mask >> 32);
+
+    for (fault_id+=__L4_Lsb(fault_id_mask_low); fault_id_mask_low != 0;  
+	 fault_id_mask_low>>=__L4_Lsb(fault_id_mask_low)+1,fault_id+=__L4_Lsb(fault_id_mask_low)+1)
+    {
+	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
+	item.C = 1;
+	L4_MsgAppendWord(msg, item.raw[0]);
+    }
+    
+    fault_id = 32;
+    for (fault_id+=__L4_Lsb(fault_id_mask_high); fault_id_mask_high != 0;  
+	 fault_id_mask_high>>=__L4_Lsb(fault_id_mask_high)+1,fault_id+=__L4_Lsb(fault_id_mask_high)+1)
+    {
+	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
+	item.C = 1;
+	L4_MsgAppendWord(msg, item.raw[0]);
+    }
+
+    item.C = C;
+    msg->msg[msg->tag.X.u + msg->tag.X.t] = item.raw[0];
+}
+
 L4_INLINE void L4_MsgPutWord (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
 {
     msg->msg[u+1] = w;
@@ -684,6 +797,22 @@ L4_INLINE void L4_MsgPutStringItem (L4_Msg_t * msg, L4_Word_t t,
 {
     L4_StringItem_t *d = (L4_StringItem_t *) &msg->msg[msg->tag.X.u + t + 1];
     __L4_Copy_String (d, s);
+}
+
+L4_INLINE void L4_MsgPutCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+{ 
+    L4_Word_t reg=0, num=0, mask = c->mask;
+    
+    /* 
+     * Put regs according to mask 
+     * */
+    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
+	msg->msg[msg->tag.X.u + t + 2 + num] = c->raw[reg+1];
+   
+    /* Put item */
+    if (num)
+	msg->msg[msg->tag.X.u + t + 1] = c->raw[0];
+
 }
 
 L4_INLINE L4_Word_t L4_MsgWord (L4_Msg_t * msg, L4_Word_t u)
@@ -719,6 +848,22 @@ L4_INLINE L4_Word_t L4_MsgGetStringItem (L4_Msg_t * msg, L4_Word_t t,
     L4_StringItem_t *e = __L4_EndOfString (b, &s);
     __L4_Copy_String (s, b);
     return ((L4_Word_t) e - (L4_Word_t) b) / sizeof (L4_Word_t);
+}
+
+L4_INLINE L4_Word_t L4_MsgGetCtrlXferItem (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+{
+    L4_Word_t reg=0, num=0, mask=0;
+
+    /* Store item */
+    c->raw[0] = msg->msg[mr];
+    mask = c->mask;
+    /* 
+     * Store regs according to mask 
+     * */
+    for (reg+=__L4_Lsb(mask); mask!=0; mask>>=__L4_Lsb(mask)+1,reg+=__L4_Lsb(mask)+1,num++)
+	c->raw[reg+1] = msg->msg[mr + 1 + num];
+    
+    return num + 1;
 }
 
 #if defined(__cplusplus)
@@ -799,6 +944,16 @@ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
     L4_MsgAppendStringItem (msg, s);
 }
 
+L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+{
+    L4_MsgAppendCtrlXferItem (msg, c);
+}
+
+L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+{
+    L4_AppendFaultConfCtrlXferItems (msg, fault_id_mask, fault_mask, C);
+}
+
 L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
 {
     L4_MsgPutWord (msg, u, w);
@@ -822,6 +977,11 @@ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
 L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
 {
     L4_MsgPutStringItem (msg, t, s);
+}
+
+L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+{
+    L4_Put (msg, t, c);
 }
 
 L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
@@ -848,6 +1008,11 @@ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
 {
     return L4_MsgGetStringItem (msg, t, s);
 }
+
+L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+{
+    return L4_MsgGetCtrlXferItem (msg, mr, c);
+}
 #endif /* __cplusplus */
 
 
@@ -863,11 +1028,11 @@ typedef union {
 #if defined(L4_BIG_ENDIAN)
 	L4_Word_t	RcvWindow:28 __PLUS32;
 	L4_Word_t	__zeros:2;
-	L4_Word_t	CtrlXfer : 1;
+	L4_Word_t	c:1;
 	L4_Word_t	s:1;
 #else
 	L4_Word_t	s:1;
-	L4_Word_t	CtrlXfer : 1;
+	L4_Word_t	c:1;
 	L4_Word_t	__zeros:2;
 	L4_Word_t	RcvWindow:28 __PLUS32;
 #endif
