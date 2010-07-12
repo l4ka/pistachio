@@ -59,7 +59,7 @@ OBJS+=		${filter %crt0.o crt0%, $(_OBJS)} \
 
 .c.o:	$(MKFILE_DEPS)
 	@$(ECHO_MSG) `echo $< | sed s,^$(top_srcdir)/,,`
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) -std=c99 -c $< -o $@
 
 .S.o:	$(MKFILE_DEPS)
 	@$(ECHO_MSG) `echo $< | sed s,^$(top_srcdir)/,,`
