@@ -40,6 +40,7 @@
 #include INC_ARCH(ppc44x.h)
 #include INC_PLAT(fdt.h)
 
+bool getc_blocked = false;
 
 #define SEC_PPC44X_IO		".kdebug"
 extern addr_t setup_console_mapping(paddr_t paddr, int log2size);
@@ -169,7 +170,6 @@ static void putc_serial (const char c)
     if (c == '\n')
 	putc_serial('\r');
 }
-bool getc_blocked = false;
 
 static char getc_serial (bool block)
 {
@@ -185,6 +185,20 @@ static char getc_serial (bool block)
     }
     return in_8(comport);
 }
+
+static bool check_breakin_serial ()
+{
+#if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
+    u8_t c = in_8(comport+5);
+#endif
+
+#if defined(CONFIG_KDB_BREAKIN_ESCAPE)
+    if ((c & 0x01) && (in_8(comport) == 0x1b))
+        return true;
+#endif
+    return false;
+}
+
 #endif /* defined(CONFIG_KDB_CONS_COM) */
 
 
@@ -295,8 +309,11 @@ static char getc_jtag(bool block)
 	return kbd_ret[cnt++];
 
     if (block)
+    {
+        getc_blocked = true;
 	while(1);
-
+        getc_blocked = false;
+    }
     return 0; 
 }
 
@@ -604,8 +621,10 @@ public:
 	    lock.lock();
 
 	    do {
+                getc_blocked = true;
 		flush_outbuf(); // make sure the other end sees all output...
 		poll();
+                getc_blocked = false;
 	    } while (block && in_len == 0);
 
 	    if (in_len)
@@ -817,14 +836,11 @@ void kdebug_check_breakin (void)
 	enter_kdebug("breakin");
 #endif
 
-#if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
-    u8_t c = in_8(comport+5);
-#endif
-
-#if defined(CONFIG_KDB_BREAKIN_ESCAPE)
-    if ((c & 0x01) && (in_8(comport) == 0x1b))
-	    enter_kdebug("breakin");
-#endif
+#if defined(CONFIG_KDB_CONS_COM)
+    if (check_breakin_serial())
+	enter_kdebug("breakin");
+#endif 
+    
     return;
 }
 #endif

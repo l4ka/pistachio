@@ -191,8 +191,10 @@ extern "C" void __loader(L4_Word_t r3, L4_Word_t r4, L4_Word_t r5,
 			 L4_Word_t r6, L4_Word_t r7)
 {
     fdt_ptr = (fdt_t*)r3;
+#if defined(CONFIG_COMPORT)
     extern void *__l4_dtree;
     __l4_dtree = fdt_ptr;
+#endif
     
     bgp_cons.init(fdt_ptr);
     loader();
