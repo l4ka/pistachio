@@ -254,7 +254,7 @@ L4_INLINE void L4_GPRegsCtrlXferItemSet(L4_GPRegsCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 L4_INLINE void L4_MsgAppendGPRegsCtrlXferItem (L4_Msg_t * msg, L4_GPRegsCtrlXferItem_t *c)
@@ -319,7 +319,7 @@ L4_INLINE void L4_CRegsCtrlXferItemSet(L4_CRegsCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 
@@ -382,7 +382,7 @@ L4_INLINE void L4_DRegsCtrlXferItemSet(L4_DRegsCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 
@@ -439,7 +439,7 @@ L4_INLINE void L4_SegCtrlXferItemSet(L4_SegCtrlXferItem_t *c,
 				     L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 L4_INLINE void L4_MsgAppendSegCtrlXferItem (L4_Msg_t * msg, L4_SegCtrlXferItem_t *c)
@@ -493,7 +493,7 @@ L4_INLINE void L4_DTRCtrlXferItemSet(L4_DTRCtrlXferItem_t *c,
 				     L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 L4_INLINE void L4_MsgAppendDTRCtrlXferItem (L4_Msg_t * msg, L4_DTRCtrlXferItem_t *c)
@@ -555,7 +555,7 @@ L4_INLINE void L4_NonRegExcCtrlXferItemInit(L4_NonRegExcCtrlXferItem_t *c)
 L4_INLINE void L4_NonRegExcCtrlXferItemSet(L4_NonRegExcCtrlXferItem_t *c, L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 L4_INLINE void L4_MsgAppendNonRegExcCtrlXferItem(L4_Msg_t *msg, L4_NonRegExcCtrlXferItem_t *c)
@@ -610,7 +610,7 @@ L4_INLINE void L4_ExecCtrlXferItemSet(L4_ExecCtrlXferItem_t *c,
 				     L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 
@@ -678,7 +678,7 @@ L4_INLINE void L4_OtherRegsCtrlXferItemSet(L4_OtherRegsCtrlXferItem_t *c,
 					   L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1<<reg);    
+    c->item.X.mask |= (1<<reg);    
 }
 
 

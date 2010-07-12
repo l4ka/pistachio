@@ -39,7 +39,7 @@ L4_INLINE int __L4_Msb( L4_Word_t w )
 {
     int zeros;
 
-    asm volatile ("cntlzw %0, %1" : "=r" (zeros) : "r" (w) );
+    __asm__ __volatile__ ("cntlzw %0, %1" : "=r" (zeros) : "r" (w) );
 
     return 31-zeros;
 }

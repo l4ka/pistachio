@@ -458,21 +458,20 @@ typedef union {
 	L4_Word_t	id:8;
 	L4_Word_t	__type:3;
 	L4_Word_t	C:1;
-    };
 #else
     struct {
 	L4_Word_t	C:1;
 	L4_Word_t	__type:3;
 	L4_Word_t	id:8;
 	L4_Word_t	mask:20 __PLUS32;
-    };
 #endif
+    } X;
 } L4_CtrlXferItem_t;	
 
 
 L4_INLINE L4_Bool_t L4_IsCtrlXferItem (L4_CtrlXferItem_t * s)
 {
-    return (s->__type == 6);
+    return (s->X.__type == 6);
 }
 
 #if defined(__cplusplus)
@@ -486,18 +485,18 @@ L4_INLINE L4_Bool_t L4_CtrlXferItem (L4_CtrlXferItem_t * s)
 L4_INLINE void L4_CtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t id)
 {
     c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = id;
-    c->mask = 0;
+    c->X.__type = 0x06;
+    c->X.id = id;
+    c->X.mask = 0;
 
 }
 
 L4_INLINE void L4_FaultConfCtrlXferItemInit (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
 {
     c->raw[0] = 0;
-    c->__type = 0x06;
-    c->id = fault_id;
-    c->mask = fault_mask;
+    c->X.__type = 0x06;
+    c->X.id = fault_id;
+    c->X.mask = fault_mask;
 }
 
 
@@ -720,7 +719,7 @@ L4_INLINE void L4_MsgAppendStringItem (L4_Msg_t * msg,
 
 L4_INLINE void L4_MsgAppendCtrlXferItem (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
 { 
-    L4_Word_t reg=0, num=0, mask = c->mask;
+    L4_Word_t reg=0, num=0, mask = c->X.mask;
     
     /* 
      * Add regs according to mask 
@@ -748,7 +747,7 @@ L4_INLINE void L4_AppendFaultConfCtrlXferItems(L4_Msg_t *msg, L4_Word64_t fault_
 	 fault_id_mask_low>>=__L4_Lsb(fault_id_mask_low)+1,fault_id+=__L4_Lsb(fault_id_mask_low)+1)
     {
 	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = 1;
+	item.X.C = 1;
 	L4_MsgAppendWord(msg, item.raw[0]);
     }
     
@@ -757,11 +756,11 @@ L4_INLINE void L4_AppendFaultConfCtrlXferItems(L4_Msg_t *msg, L4_Word64_t fault_
 	 fault_id_mask_high>>=__L4_Lsb(fault_id_mask_high)+1,fault_id+=__L4_Lsb(fault_id_mask_high)+1)
     {
 	L4_FaultConfCtrlXferItemInit(&item, fault_id, fault_mask); 
-	item.C = 1;
+	item.X.C = 1;
 	L4_MsgAppendWord(msg, item.raw[0]);
     }
 
-    item.C = C;
+    item.X.C = C;
     msg->msg[msg->tag.X.u + msg->tag.X.t] = item.raw[0];
 }
 
@@ -801,7 +800,7 @@ L4_INLINE void L4_MsgPutStringItem (L4_Msg_t * msg, L4_Word_t t,
 
 L4_INLINE void L4_MsgPutCtrlXferItem (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
 { 
-    L4_Word_t reg=0, num=0, mask = c->mask;
+    L4_Word_t reg=0, num=0, mask = c->X.mask;
     
     /* 
      * Put regs according to mask 
@@ -856,7 +855,7 @@ L4_INLINE L4_Word_t L4_MsgGetCtrlXferItem (L4_Msg_t * msg, L4_Word_t mr, L4_Ctrl
 
     /* Store item */
     c->raw[0] = msg->msg[mr];
-    mask = c->mask;
+    mask = c->X.mask;
     /* 
      * Store regs according to mask 
      * */

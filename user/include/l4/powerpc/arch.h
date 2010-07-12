@@ -189,7 +189,7 @@ L4_INLINE void L4_GPRegsCtrlXferItemSet(L4_GPRegsCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendGPRegsCtrlXferItem (L4_Msg_t * msg, L4_GPRegsCtrlXferItem_t *c)
@@ -246,7 +246,7 @@ L4_INLINE void L4_GPRegsXCtrlXferItemSet(L4_GPRegsXCtrlXferItem_t *c,
 					 L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendGPRegsXCtrlXferItem (L4_Msg_t * msg, L4_GPRegsXCtrlXferItem_t *c)
@@ -333,7 +333,7 @@ L4_INLINE void L4_TLBCtrlXferItemSet(L4_TLBCtrlXferItem_t *c,
 				     L4_Word_t reg, L4_Word_t val)
 {
     c->regs[reg / 4].reg[reg % 4] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendTLBCtrlXferItem (L4_Msg_t * msg, L4_TLBCtrlXferItem_t *c)
@@ -400,7 +400,7 @@ L4_INLINE void L4_ExceptCtrlXferItemSet(L4_ExceptCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendExceptCtrlXferItem (L4_Msg_t * msg, L4_ExceptCtrlXferItem_t *c)
@@ -451,7 +451,7 @@ L4_INLINE void L4_IvorCtrlXferItemSet(L4_IvorCtrlXferItem_t *c,
 				      L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendIvorCtrlXferItem (L4_Msg_t * msg, L4_IvorCtrlXferItem_t *c)
@@ -508,7 +508,7 @@ L4_INLINE void L4_TimerCtrlXferItemSet(L4_TimerCtrlXferItem_t *c,
 				       L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendTimerCtrlXferItem (L4_Msg_t * msg, L4_TimerCtrlXferItem_t *c)
@@ -560,7 +560,7 @@ L4_INLINE void L4_ConfigCtrlXferItemSet(L4_ConfigCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendConfigCtrlXferItem (L4_Msg_t * msg, L4_ConfigCtrlXferItem_t *c)
@@ -621,7 +621,7 @@ L4_INLINE void L4_ConfigCtrlXferItemSet(L4_DebugCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendDebugCtrlXferItem (L4_Msg_t * msg, L4_DebugCtrlXferItem_t *c)
@@ -678,7 +678,7 @@ L4_INLINE void L4_CacheCtrlXferItemSet(L4_CacheCtrlXferItem_t *c,
 					L4_Word_t reg, L4_Word_t val)
 {
     c->regs.reg[reg] = val;
-    c->item.mask |= (1ul << reg);    
+    c->item.X.mask |= (1ul << reg);    
 }
 
 L4_INLINE void L4_MsgAppendCacheCtrlXferItem (L4_Msg_t * msg, L4_CacheCtrlXferItem_t *c)
