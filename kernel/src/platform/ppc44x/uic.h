@@ -158,8 +158,10 @@ public:
 
     bool is_pending(word_t irq);
 
-    void enable(word_t irq)
-	{ unmask(irq); }
+    void enable(word_t irq) {
+    	if (unmask(irq))
+    		::handle_interrupt(irq);
+    }
 
     void disable(word_t irq)
 	{ mask(irq); }
@@ -179,12 +181,6 @@ public:
      * TODO: Remove it?
      */
     void handle_irq(word_t cpu);
-
-    //noncritical interrupt handler
-    void sysUicIntHandler(void);
-
-    //critical interrupt handler;
-    void sysUicCrtIntHandler(void);
 
     /* map routine provided by glue */
     void map();
@@ -225,7 +221,6 @@ private:
 	    return cpu * 8 + ipi;
 	}
     //common interrupt handler, should not be called directly.
-    void sysUicIntHandlerCommon(bool intIsCritical);
     void raise_irq(word_t irq);
 };
 
