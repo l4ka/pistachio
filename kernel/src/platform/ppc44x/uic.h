@@ -158,8 +158,10 @@ public:
 
     bool is_pending(word_t irq);
 
-    void enable(word_t irq)
-	{ unmask(irq); }
+    void enable(word_t irq) {
+    	if (unmask(irq))
+    		::handle_interrupt(irq);
+    }
 
     void disable(word_t irq)
 	{ mask(irq); }

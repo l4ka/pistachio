@@ -169,11 +169,13 @@ void SECTION (".init") intctrl_t::init_arch()
 
 void SECTION(".init") intctrl_t::init_cpu(int cpu)
 {
+#ifdef CONFIG_SMP
     ASSERT(cpu < 4);
 
     /* map IPIs */
     set_irq_routing(get_ipi_irq(cpu, 0), cpu);
     enable(get_ipi_irq(cpu, 0));
+#endif
 }
 
 word_t intctrl_t::init_controllers() {
