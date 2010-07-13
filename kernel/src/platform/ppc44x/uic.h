@@ -180,12 +180,6 @@ public:
      */
     void handle_irq(word_t cpu);
 
-    //noncritical interrupt handler
-    void sysUicIntHandler(void);
-
-    //critical interrupt handler;
-    void sysUicCrtIntHandler(void);
-
     /* map routine provided by glue */
     void map();
 
@@ -225,7 +219,6 @@ private:
 	    return cpu * 8 + ipi;
 	}
     //common interrupt handler, should not be called directly.
-    void sysUicIntHandlerCommon(bool intIsCritical);
     void raise_irq(word_t irq);
 };
 

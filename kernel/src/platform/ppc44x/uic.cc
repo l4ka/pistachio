@@ -496,24 +496,29 @@ bool intctrl_t::unmask(word_t irq)
         irq -= INT_LEVEL_UIC2_MIN ;
         intMask = 1 << (31 - irq) ;
 
-        mtdcr(UIC2_SR, intMask);        /* clear pending interrupts */
-        mtdcr(UIC0_SR, uic2_dchain_mask);     /* clear pending dchain     */
+        //Check if interrupt was already pending
+        if ((mfdcr(UIC2_SR) & intMask) > 0) {
+            mtdcr(UIC2_SR, intMask);        /* clear pending interrupts */
+            mtdcr(UIC0_SR, uic2_dchain_mask);     /* clear pending dchain     */
+            return true;
+        } else {
 
-        /*
-         * enable the interrupt level
-         * We must lock out interrupts to enable the hardware
-         * as the handler may crush what we just did in UIC_ER.
-         */
+			/*
+			 * enable the interrupt level
+			 * We must lock out interrupts to enable the hardware
+			 * as the handler may crush what we just did in UIC_ER.
+			 */
 
-        lock.lock();                        /* lock interrupts */
+			lock.lock();                        /* lock interrupts */
 
-        mtdcr(UIC2_ER, intMask | mfdcr(UIC2_ER));
+			mtdcr(UIC2_ER, intMask | mfdcr(UIC2_ER));
 
-        /* Enable dchain*/
-        mtdcr(UIC0_ER, uic2_dchain_mask | mfdcr(UIC0_ER));
+			/* Enable dchain*/
+			mtdcr(UIC0_ER, uic2_dchain_mask | mfdcr(UIC0_ER));
 
-        lock.unlock();                         /* re-enable interrupts */
-
+			lock.unlock();                         /* re-enable interrupts */
+			return false;
+        }
         }
     else if (irq > INT_LEVEL_UIC0_MAX)        /* For UIC1 */
 #else
@@ -522,45 +527,56 @@ bool intctrl_t::unmask(word_t irq)
         {
         irq -= INT_LEVEL_UIC1_MIN ;
         intMask = 1 << (31 - irq) ;
-        mtdcr(UIC1_SR, intMask);        /* clear pending interrupts */
-        mtdcr(UIC0_SR, uic1_dchain_mask);     /* clear pending dchain     */
 
-        /*
-         * enable the interrupt level
-         * We must lock out interrupts to enable the hardware
-         * as the handler may crush what we just did in UIC_ER.
-         */
+        //Check if interrupt was already pending
+        if ((mfdcr(UIC1_SR) & intMask) > 0) {
+        	mtdcr(UIC1_SR, intMask);        /* clear pending interrupts */
+        	mtdcr(UIC0_SR, uic1_dchain_mask);     /* clear pending dchain     */
+        	return true;
+        } else {
 
-        lock.lock();                        /* lock interrupts */
+			/*
+			 * enable the interrupt level
+			 * We must lock out interrupts to enable the hardware
+			 * as the handler may crush what we just did in UIC_ER.
+			 */
 
-        mtdcr(UIC1_ER, intMask | mfdcr(UIC1_ER));
+			lock.lock();                        /* lock interrupts */
 
-        /* Enable dchain*/
-        mtdcr(UIC0_ER, uic1_dchain_mask | mfdcr(UIC0_ER));
+			mtdcr(UIC1_ER, intMask | mfdcr(UIC1_ER));
 
-        lock.unlock();                         /* re-enable interrupts */
+			/* Enable dchain*/
+			mtdcr(UIC0_ER, uic1_dchain_mask | mfdcr(UIC0_ER));
 
+			lock.unlock();                         /* re-enable interrupts */
+			return false;
+        }
         }
     else
         {
         intMask = 1 << (31 - irq) ;
-        mtdcr(UIC0_SR, intMask);        /* clear pending interrupts */
 
-        /*
-         * enable the interrupt level
-         * We must lock out interrupts to enable the hardware
-         * as the handler may crush what we just did in UIC_ER.
-         */
+        //Check if interrupt was already pending
+        if ((mfdcr(UIC0_SR) & intMask) > 0) {
+        	mtdcr(UIC0_SR, intMask);        /* clear pending interrupts */
+        	return true;
+        } else {
 
-        lock.lock();                        /* lock interrupts */
+			/*
+			 * enable the interrupt level
+			 * We must lock out interrupts to enable the hardware
+			 * as the handler may crush what we just did in UIC_ER.
+			 */
 
-        mtdcr(UIC0_ER, intMask | mfdcr(UIC0_ER));
+			lock.lock();                        /* lock interrupts */
 
-        lock.unlock();                         /* re-enable interrupts */
+			mtdcr(UIC0_ER, intMask | mfdcr(UIC0_ER));
 
+			lock.unlock();                         /* re-enable interrupts */
+			return false;
+        }
         }
 
-    return true;
 }
 
 bool intctrl_t::is_masked(word_t irq) {
