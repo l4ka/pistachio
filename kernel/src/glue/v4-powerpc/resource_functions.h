@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/resources_inline.h
+ * File path:     glue/v4-powerpc/resource_functions.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,8 @@
  * $Id$
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_POWERPC__RESOURCES_INLINE_H__
-#define __GLUE__V4_POWERPC__RESOURCES_INLINE_H__
-
+#ifndef __GLUE__V4_POWERPC__RESOURCE_FUNCTIONS_H__
+#define __GLUE__V4_POWERPC__RESOURCE_FUNCTIONS_H__
 #include INC_API(resources.h)
 
 INLINE void thread_resources_t::fpu_unavail_exception( tcb_t *tcb )
@@ -115,4 +114,5 @@ INLINE void thread_resources_t::set_kernel_thread( tcb_t *tcb )
     tcb->resource_bits += KERNEL_THREAD;
 }
 
-#endif /* !__GLUE__V4_POWERPC__RESOURCES_H__ */
+
+#endif /* !__GLUE__V4_POWERPC__RESOURCE_FUNCTIONS_H__ */

@@ -34,9 +34,9 @@
 
 #include INC_GLUE(intctrl.h)
 #include INC_ARCH(1275tree.h)
-#include INC_PLAT(opic.h)
+#include INC_ARCH(pgent.h)
 #include INC_ARCH(segment.h)
-#include INC_GLUE(pgent_inline.h)
+#include INC_PLAT(opic.h)
 
 intctrl_t intctrl;
 

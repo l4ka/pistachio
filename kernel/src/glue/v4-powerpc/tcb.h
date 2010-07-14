@@ -36,7 +36,7 @@
 #include INC_ARCH(msr.h)
 #include INC_API(syscalls.h)
 #include INC_API(ipc.h)
-#include INC_GLUE(resources_inline.h)
+#include INC_GLUE(resource_functions.h)
 
 #define TRACE_TCB(x...)
 //#define TRACE_TCB(x...)	TRACEF(x)

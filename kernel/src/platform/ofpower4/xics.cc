@@ -33,11 +33,11 @@
 #include INC_GLUE(intctrl.h)
 #include INC_ARCH(rtas.h)
 #include INC_ARCH(1275tree.h)
+#include INC_ARCH(pgent.h)
 #include INC_PLAT(xics.h)
 #include INC_PLAT(prom.h)
 #include INC_GLUE(space.h)
 #include INC_GLUE(pghash.h)
-#include INC_GLUE(pgent_inline.h)
 
 intctrl_t intctrl;
 

@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/arch/powerpc/pgent.h
+ * File path:     arch/powerpc/pgent.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,11 @@
 #endif
 
 #if defined(CONFIG_PPC_MMU_SEGMENTS)
-
-#include INC_GLUE(pgent.h)
-#include INC_GLUE(pgent_inline.h)
-
+#include INC_ARCH(pgent-pghash.h)
+#include INC_ARCH(pgent-pghash_functions.h)
 #elif defined(CONFIG_PPC_MMU_TLB)
-
-#include INC_GLUE(pgent-swtlb.h)
-#include INC_GLUE(pgent-swtlb_inline.h)
-
+#include INC_ARCH(pgent-swtlb.h)
+#include INC_ARCH(pgent-swtlb_functions.h)
 #endif
 
 #if defined(CONFIG_NEW_MDB)

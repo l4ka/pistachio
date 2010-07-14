@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     glue/v4-powerpc/pgent-swtlb.h
+ * File path:     arch/powerpc/pgent-swtlb.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,8 +30,9 @@
  * $Id$
  *                
  ********************************************************************/
-#ifndef __GLUE__V4_POWERPC__PGENT_SWTLB_H__
-#define __GLUE__V4_POWERPC__PGENT_SWTLB_H__
+#ifndef __ARCH__POWERPC__PGENT_SWTLB_H__
+#define __ARCH__POWERPC__PGENT_SWTLB_H__
+
 
 class space_t;
 class mapnode_t;
@@ -143,5 +144,4 @@ public:
 };
 
 
-
-#endif /* !__GLUE__V4_POWERPC__PGENT_SWTLB_H__ */
+#endif /* !__ARCH__POWERPC__PGENT_SWTLB_H__ */

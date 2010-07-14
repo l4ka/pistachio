@@ -45,7 +45,7 @@ template<typename T> INLINE T *get_on_cpu(cpuid_t cpu, T *item)
     bool ret = kspace->lookup_mapping(item, &pgent, &pgsize, cpu);
     
     if (ret)
-        return (T *) addr_offset(phys_to_virt(pgent->address(kspace, pgsize)),
+        return (T *) addr_offset(phys_to_virt((addr_t)pgent->address(kspace, pgsize)),
                                  addr_mask(item, page_mask (pgsize)));
     else 
         return NULL;

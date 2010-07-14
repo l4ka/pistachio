@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/pgent_inline.h
+ * File path:     arch/powerpc/pgent-swtlb_functions.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -30,38 +30,12 @@
  * $Id$
  *                
  ********************************************************************/
-
-#ifndef __GLUE__V4_POWERPC__PGENT_INLINE_H__
-#define __GLUE__V4_POWERPC__PGENT_INLINE_H__
+#pragma once
 
 #include <kmemory.h>
-
-#include INC_GLUE(pgent.h)
 #include INC_GLUE(space.h)
-#include INC_GLUE(pghash.h)
 
 EXTERN_KMEM_GROUP (kmem_pgtab);
-
-// Page hash synchronization
-
-#ifdef CONFIG_PPC_MMU_SEGMENT
-inline void pgent_t::update_from_pghash( space_t * s, addr_t vaddr )
-{
-    ppc_translation_t *pte;
-
-    // Force the cpu to sync the tlb with the page hash before we read from it.
-    sync();
-
-    pte = get_pghash()->get_htab()->locate_pte( (word_t)vaddr, 
-	    s->get_vsid(vaddr), 
-	    this->map.pteg_slot, this->map.second_hash );
-    if( pte )
-    {
-	this->map.referenced = pte->x.r;
-	this->map.changed = pte->x.c;
-    }
-}
-#endif
 
 // Linknode access 
 
@@ -79,31 +53,29 @@ inline void pgent_t::set_linknode( word_t val )
 // Predicates
 
 inline bool pgent_t::is_valid( space_t * s, pgsize_e pgsize )
-{ 
-    if( pgsize == pgent_t::size_4m )
-	return this->tree.valid;
-    else
-	return this->raw != 0;
+{
+    return this->tree.valid != 0;
 }
 
 inline bool pgent_t::is_writable( space_t * s, pgsize_e pgsize )
-{ 
-    return this->map.pp != pgent_t::read_only;
+{
+    return this->map.write;
 }
 
 inline bool pgent_t::is_readable( space_t * s, pgsize_e pgsize )
-{ 
-    return this->is_valid( s, pgsize );
+{
+    return this->map.read;
 }
 
 inline bool pgent_t::is_executable( space_t * s, pgsize_e pgsize )
-{ 
-    return this->is_valid( s, pgsize );
+{
+    return this->map.execute;
 }
 
 inline bool pgent_t::is_subtree( space_t * s, pgsize_e pgsize )
-{ 
-    return (pgsize == size_4m); 
+{
+    return pgsize == size_4m && 
+	this->tree.is_subtree == cache_subtree;
 }
 
 inline bool pgent_t::is_kernel( space_t * s, pgsize_e pgsize )
@@ -112,15 +84,15 @@ inline bool pgent_t::is_kernel( space_t * s, pgsize_e pgsize )
 }
 
 // Retrieval
-
-inline addr_t pgent_t::address( space_t * s, pgsize_e pgsize )
-{ 
-    return (addr_t)(this->raw & POWERPC_PAGE_MASK);
+inline paddr_t pgent_t::address( space_t * s, pgsize_e pgsize )
+{
+    return (paddr_t)(this->raw & POWERPC_PAGE_MASK) + 
+	((paddr_t)this->map.erpn << 32);
 }
-	
+
 inline pgent_t * pgent_t::subtree( space_t * s, pgsize_e pgsize )
 { 
-    return (pgent_t *) phys_to_virt( this->address(s, pgsize) ); 
+    return (pgent_t *) this->address(s, pgsize); 
 }
 
 inline mapnode_t * pgent_t::mapnode( space_t * s, pgsize_e pgsize, addr_t vaddr )
@@ -133,6 +105,13 @@ inline addr_t pgent_t::vaddr( space_t * s, pgsize_e pgsize, mapnode_t * map )
     return (addr_t) (this->get_linknode() ^ (word_t) map); 
 }
 
+inline word_t pgent_t::rights (space_t * s, pgsize_e pgsize)
+{ 
+    return ((is_readable(s, pgsize) ? (1<<2) : 0) | 
+	    (is_writable(s, pgsize) ? (1<<1) : 0) |
+	    (is_executable(s, pgsize) ? (1<<0) : 0));
+}
+
 inline word_t pgent_t::attributes ( space_t * s, pgsize_e pgsize )
 {
     return (raw & PPC_PAGE_CACHE_INHIBIT) ? 1 : 0;
@@ -141,9 +120,6 @@ inline word_t pgent_t::attributes ( space_t * s, pgsize_e pgsize )
 inline word_t pgent_t::reference_bits( space_t *s, pgsize_e pgsize, 
 	addr_t vaddr )
 {
-#ifdef CONFIG_PPC_MMU_SEGMENT
-    this->update_from_pghash( s, vaddr );
-#endif
     word_t rwx = 0;
     if( this->map.referenced ) rwx = 5;
     if( this->map.changed )    rwx |= 6;
@@ -157,19 +133,12 @@ inline void pgent_t::update_reference_bits( space_t *s, pgsize_e pgsize,
     if (rwx & 0x2) this->map.changed = 1;
 }
 
-inline word_t pgent_t::get_translation( space_t *s, pgsize_e pgsize )
-{
-    return this->raw & PPC_PAGE_PTE_MASK;
-}
-
 // Modification
 
 inline void pgent_t::flush( space_t *s, pgsize_e pgsize, bool kernel, 
 	addr_t vaddr )
 {
-#ifdef CONFIG_PPC_MMU_SEGMENT
-    get_pghash()->flush_mapping( s, vaddr, pgsize, this );
-#endif
+
 }
 
 inline void pgent_t::clear( space_t * s, pgsize_e pgsize, bool kernel, 
@@ -181,67 +150,62 @@ inline void pgent_t::clear( space_t * s, pgsize_e pgsize, bool kernel,
     this->raw = 0;
     if( !kernel )
 	this->set_linknode(0);
-    
-    tmp.flush( s, pgsize, kernel, vaddr );
 }
 
 inline void pgent_t::make_subtree( space_t * s, pgsize_e pgsize, bool kernel )
 {
-    addr_t page = kmem.alloc( kmem_pgtab, POWERPC_PAGE_SIZE * (kernel ? 1:2) );
+    this->raw = (word_t)kmem.alloc( kmem_pgtab, POWERPC_PAGE_SIZE * (kernel ? 1:2) );
 
-    this->raw = (word_t)virt_to_phys( page );
+    /* the following is a no-op */
+    this->tree.is_subtree = cache_subtree;
+
     if( this->raw )
 	this->tree.valid = 1;
 }
 
 inline void pgent_t::remove_subtree( space_t * s, pgsize_e pgsize, bool kernel )
 {
-    addr_t ptab = this->address( s, pgsize );
+    addr_t ptab = (addr_t) this->address( s, pgsize );
     this->raw = 0;
 
-    kmem.free( kmem_pgtab, phys_to_virt(ptab), 
-	    POWERPC_PAGE_SIZE * (kernel ? 1:2) );
+    kmem.free( kmem_pgtab, ptab, POWERPC_PAGE_SIZE * (kernel ? 1:2) );
 }
 
-inline void pgent_t::set_entry( space_t * s, pgsize_e pgsize, addr_t paddr,
+inline void pgent_t::set_entry( space_t * s, pgsize_e pgsize, paddr_t paddr,
 				word_t rwx, word_t attrib, bool kernel )
 {
-    word_t attr = rwx & 2 ? pgent_t::read_write : pgent_t::read_only;
-    if( attrib )
-	attr |= PPC_PAGE_CACHE_INHIBIT;
-
-    this->raw = ((word_t)paddr & POWERPC_PAGE_MASK) | 
-	(attr & PPC_PAGE_FLAGS_MASK);
+    this->raw = paddr & POWERPC_PAGE_MASK;
+    this->map.erpn = (paddr >> 32) & 0xf;
+    this->map.read = rwx >> 2 & 1;
+    this->map.write = rwx >> 1 & 1;
+    this->map.execute = rwx >> 0 & 1;
+    this->map.caching = attrib;
 }
 
-inline void pgent_t::set_writable( space_t * s, pgsize_e pgsize )
-{ 
-    this->map.pp = pgent_t::read_write;
-}
-
-inline void pgent_t::set_readonly( space_t * s, pgsize_e pgsize )
-{ 
-    this->map.pp = pgent_t::read_only;
-}
 
 inline void pgent_t::update_rights( space_t *s, pgsize_e pgsize, word_t rwx )
 { 
-    if( rwx & 2 ) 
-	this->set_writable( s, pgsize );
+    if (rwx & 4) this->map.read = 1;
+    if (rwx & 2) this->map.write = 1;
+    if (rwx & 1) this->map.execute = 1;
 }
 
 inline void pgent_t::revoke_rights( space_t *s, pgsize_e pgsize, word_t rwx )
 { 
-    if( rwx & 2) 
-	this->set_readonly( s, pgsize );
+    if (rwx & 4) this->map.read = 0;
+    if (rwx & 2) this->map.write = 0;
+    if (rwx & 1) this->map.execute = 0;
+}
+
+inline void pgent_t::set_rights( space_t *s, pgsize_e pgsize, word_t rwx )
+{
+    this->map.read = rwx & 4 ? 1 : 0;
+    this->map.write = rwx & 2 ? 1 : 0;
+    this->map.execute = rwx & 1;
 }
 
 inline void pgent_t::set_attributes ( space_t * s, pgsize_e pgsize, word_t attrib )
 {
-    if (attrib)
-	raw |= PPC_PAGE_CACHE_INHIBIT;
-    else
-	raw &= ~PPC_PAGE_CACHE_INHIBIT;
 }
 
 inline void pgent_t::reset_reference_bits( space_t *s, pgsize_e pgsize )
@@ -277,6 +241,9 @@ inline pgent_t * pgent_t::next( space_t * s, pgsize_e pgsize, word_t num )
 
 inline void pgent_t::dump_misc (space_t * s, pgsize_e pgsize)
 {
+    printf("%s",
+	   map.caching == 1 ? "inhibit " : 
+	   map.caching == 2 ? "coherent " :
+	   map.caching == 3 ? "guarded " :
+	   map.caching == 4 ? "write-through " : "");
 }
-
-#endif	/* __GLUE__V4_POWERPC__PGENT_INLINE_H__ */

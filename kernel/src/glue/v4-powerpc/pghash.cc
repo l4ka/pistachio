@@ -33,10 +33,9 @@
 #include <debug.h>
 
 #include INC_API(kernelinterface.h)
-
+#include INC_ARCH(pgent.h)
 #include INC_GLUE(pghash.h)
 #include INC_GLUE(space.h)
-#include INC_GLUE(pgent_inline.h)
 
 #define TRACE_PGHASH(x...)
 //#define TRACE_PGHASH(x...)     TRACEF(x)

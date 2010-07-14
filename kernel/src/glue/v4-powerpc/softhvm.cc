@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/softhvm.cc
+ * File path:     glue/v4-powerpc/softhvm.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,13 @@
 
 #include INC_ARCH(phys.h)
 #include INC_ARCH(softhvm.h)
+#include INC_ARCH(pgent.h)
 
 #include INC_API(tcb.h)
 #include INC_API(schedule.h)
 #include INC_API(kernelinterface.h)
 
 #include INC_GLUE(exception.h)
-#include INC_GLUE(pgent-swtlb_inline.h)
 
 #define TRACE_EMUL(args...)
 #define MAX_INSTR_EMULATE	10
@@ -249,7 +249,7 @@ space_t::handle_hvm_tlb_miss(ppc_softhvm_t *vm, ppc_softhvm_t::tlb_t *tlbentry, 
 	return false;
     
     size_t hsize = page_shift (pgsize);
-    paddr_t hpaddr = pg->paddress (this, pgsize) | (gpaddr & ((1ull << hsize) - 1));
+    paddr_t hpaddr = pg->address (this, pgsize) | (gpaddr & ((1ull << hsize) - 1));
 	
     /* we have a valid entry in the TLB and in the ptab --> we
      * can create a TLB entry */

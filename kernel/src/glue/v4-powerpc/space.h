@@ -42,9 +42,9 @@
 #include INC_API(thread.h)
 
 #if defined(CONFIG_PPC_MMU_SEGMENTS)
-#include INC_GLUE(pgent.h)
+#include INC_ARCH(pgent-pghash.h)
 #else
-#include INC_GLUE(pgent-swtlb.h)
+#include INC_ARCH(pgent-swtlb.h)
 #include INC_ARCH(swtlb.h)
 #define HAVE_ARCH_FREE_SPACE
 #include INC_ARCH(softhvm.h)
