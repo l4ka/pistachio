@@ -394,7 +394,6 @@ int __l4_vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap)
 	    RIGHTPAD( width - numpr - (signch ? 1 : 0) );
 	    break;
 
-#if !defined(L4_ARCH_ALPHA)
 	case 'f': 
 	{
 	    double fval = va_arg( ap, double );
@@ -474,7 +473,6 @@ int __l4_vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap)
 	    RIGHTPAD( width - numpr );
 	    break;
 	}
-#endif
 	case 't':
 	    tid = va_arg( ap, L4_ThreadId_t );
 	    if ( L4_IsNilThread(tid) ) {

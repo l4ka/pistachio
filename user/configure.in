@@ -295,6 +295,9 @@ case $HOST in
 	LDFLAGS="$LDFLAGS -melf_x86_64"
 	AC_SUBST([PLAT])
 	;;
+  powerpc)
+	CFLAGS="$CFLAGS -msoft-float  -mno-regnames -meabi -msdata=none -mno-toc"
+        ;;
   powerpc64*)
 	CFLAGS="$CFLAGS -msoft-float -mminimal-toc"
 	;;
