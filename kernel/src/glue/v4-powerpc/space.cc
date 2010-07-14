@@ -255,12 +255,12 @@ found:
  **********************************************************************/
 
 
-void space_t::release_kernel_mapping (addr_t vaddr, addr_t paddr,
+void space_t::release_kernel_mapping (addr_t vaddr, paddr_t paddr,
 				      word_t log2size)
 {
     // Free up memory used for UTCBs
     if (get_utcb_page_area ().is_addr_in_fpage (vaddr))
-	kmem.free (kmem_utcb, phys_to_virt (paddr), 1UL << log2size);
+	kmem.free (kmem_utcb, (addr_t) phys_to_virt (paddr), 1UL << log2size);
 }
 
 utcb_t *space_t::allocate_utcb( tcb_t *tcb )
@@ -272,7 +272,7 @@ utcb_t *space_t::allocate_utcb( tcb_t *tcb )
     pgent_t *pgent = this->page_lookup( utcb );
     if( pgent && pgent->is_valid(this, pgent_t::size_4k) )
 	// Already a valid page mapped at the UTCB address.
-	page = phys_to_virt( pgent->address(this, pgent_t::size_4k) );
+	page = (addr_t) phys_to_virt( pgent->address(this, pgent_t::size_4k) );
     else
     {
 	// Allocate a new UTCB page.

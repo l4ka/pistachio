@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/pgent-swtlb.h
+ * File path:     glue/v4-powerpc/pgent-swtlb.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -104,8 +104,7 @@ public:
 
     // Retrieval
 
-    addr_t address( space_t * s, pgsize_e pgsize );
-    paddr_t paddress( space_t *s, pgsize_e pgsize );
+    paddr_t address( space_t * s, pgsize_e pgsize );
     pgent_t * subtree( space_t * s, pgsize_e pgsize );
     mapnode_t * mapnode( space_t * s, pgsize_e pgsize, addr_t vaddr );
     addr_t vaddr( space_t * s, pgsize_e pgsize, mapnode_t * map );
@@ -120,8 +119,6 @@ public:
     void make_subtree( space_t * s, pgsize_e pgsize, bool kernel );
     void remove_subtree( space_t * s, pgsize_e pgsize, bool kernel );
     void set_entry( space_t * s, pgsize_e pgsize, paddr_t paddr,
-			   word_t rwx, word_t attrib, bool kernel );
-    void set_entry( space_t * s, pgsize_e pgsize, addr_t paddr,
 			   word_t rwx, word_t attrib, bool kernel );
     void set_writable( space_t * s, pgsize_e pgsize );
     void set_readonly( space_t * s, pgsize_e pgsize );

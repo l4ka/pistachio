@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003,  National ICT Australia (NICTA)
+ * Copyright (C) 2003, 2010,  National ICT Australia (NICTA)
  *                
  * File path:     arch/powerpc64/types.h
  * Description:   PowerPC64 specific types
@@ -51,5 +51,11 @@ typedef signed char		s8_t;
  *	word_t - machine word wide unsigned int
  */
 typedef u64_t			word_t;
+
+
+/**
+ *	paddr_t - used to denote physical addresses
+ */
+typedef void * paddr_t;
 
 #endif /* !__ARCH__POWERPC64__TYPES_H__ */

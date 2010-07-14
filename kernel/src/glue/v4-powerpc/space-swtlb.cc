@@ -201,7 +201,7 @@ NOINLINE bool space_t::handle_tlb_miss( addr_t lookup_vaddr, addr_t install_vadd
 
     size_t  size  = page_shift (pgsize);
     word_t  vaddr = (word_t) install_vaddr;
-    paddr_t paddr = pg->paddress (this, pgsize) | (vaddr & ((1ul << size) - 1));
+    paddr_t paddr = pg->address (this, pgsize) | (vaddr & ((1ul << size) - 1));
 
     while (!ppc_tlb0_t::is_valid_pagesize (size))
         size--;

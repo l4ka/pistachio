@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/pgent.h
+ * File path:     glue/v4-powerpc/pgent.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -123,7 +123,7 @@ public:
     inline void clear( space_t * s, pgsize_e pgsize, bool kernel, addr_t vaddr);
     inline void make_subtree( space_t * s, pgsize_e pgsize, bool kernel );
     inline void remove_subtree( space_t * s, pgsize_e pgsize, bool kernel );
-    inline void set_entry( space_t * s, pgsize_e pgsize, addr_t paddr,
+    inline void set_entry( space_t * s, pgsize_e pgsize, paddr_t paddr,
 			   word_t rwx, word_t attrib, bool kernel );
     inline void set_writable( space_t * s, pgsize_e pgsize );
     inline void set_readonly( space_t * s, pgsize_e pgsize );

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2005-2007,  Karlsruhe University
+ * Copyright (C) 2005-2007, 2010,  Karlsruhe University
  *                
  * File path:     generic/mdb_mem.cc
  * Description:   Memory specific generic mapping database functions
@@ -286,7 +286,7 @@ word_t mdb_mem_t::get_purged_status (mdb_node_t * node)
     return purged_status (node);
 }
 
-/**
+/*
  * Reset the purged status bits for mapping.
  * @param node		mapping node
  */

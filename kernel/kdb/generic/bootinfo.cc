@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004,  Karlsruhe University
+ * Copyright (C) 2004, 2010,  Karlsruhe University
  *                
  * File path:     kdb/generic/bootinfo.cc
  * Description:   Generic bootinfo dumping
@@ -164,7 +164,7 @@ class bootinfo_t
     word_t	__reserved[3];
 
     word_t safe_get (word_t * fld)
-	{ return kdb.kdb_current->get_space ()->readmem_phys (fld); }
+	{ return kdb.kdb_current->get_space ()->readmem_phys ((paddr_t)fld); }
 
 public:
 
@@ -243,7 +243,7 @@ CMD (cmd_dump_bootinfo, cg)
 	word_t * src = (word_t *) bi;
 	word_t * dst = (word_t *) bootinfo_copy;
 	for (;size > 0; size -= sizeof (word_t), src++, dst++)
-	    *dst = s->readmem_phys (src);
+	    *dst = s->readmem_phys ((paddr_t) src);
 
 	bi = bootinfo_copy;
     }

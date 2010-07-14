@@ -96,7 +96,8 @@ public:
     void free_asid(word_t asid)
 	{
 	    list_entry[asid] = free_list;
-            free_list = (word_t *) &list_entry[asid];
+            word_t **fl = &list_entry[asid];                
+            free_list = (word_t *) fl;
 	}
 
     void allocate_asid(T* space)
@@ -130,14 +131,13 @@ public:
 	    return asid->asid;
 	}
 
-public:
+private:
     word_t *free_list;
     union {
 	T* asid_user[SIZE];
 	word_t *list_entry[SIZE];
     };
 
-private:
     word_t start, end;
     word_t timestamp;
 };

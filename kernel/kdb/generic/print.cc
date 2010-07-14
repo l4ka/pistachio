@@ -151,6 +151,7 @@ int SECTION(SEC_KDEBUG) print_string(const char * s,
 
     for (;;)
     {
+        ASSERT(s);
 	if (*s == 0)
 	    break;
 

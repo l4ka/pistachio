@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/pgent-swtlb_inline.h
+ * File path:     glue/v4-powerpc/pgent-swtlb_inline.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -84,14 +84,7 @@ inline bool pgent_t::is_kernel( space_t * s, pgsize_e pgsize )
 }
 
 // Retrieval
-
-inline addr_t pgent_t::address( space_t * s, pgsize_e pgsize )
-{
-//    ASSERT(this->map.erpn == 0);
-    return (addr_t)(this->raw & POWERPC_PAGE_MASK);
-}
-
-inline paddr_t pgent_t::paddress( space_t * s, pgsize_e pgsize )
+inline paddr_t pgent_t::address( space_t * s, pgsize_e pgsize )
 {
     return (paddr_t)(this->raw & POWERPC_PAGE_MASK) + 
 	((paddr_t)this->map.erpn << 32);
@@ -172,7 +165,7 @@ inline void pgent_t::make_subtree( space_t * s, pgsize_e pgsize, bool kernel )
 
 inline void pgent_t::remove_subtree( space_t * s, pgsize_e pgsize, bool kernel )
 {
-    addr_t ptab = this->address( s, pgsize );
+    addr_t ptab = (addr_t) this->address( s, pgsize );
     this->raw = 0;
 
     kmem.free( kmem_pgtab, ptab, POWERPC_PAGE_SIZE * (kernel ? 1:2) );
@@ -187,12 +180,6 @@ inline void pgent_t::set_entry( space_t * s, pgsize_e pgsize, paddr_t paddr,
     this->map.write = rwx >> 1 & 1;
     this->map.execute = rwx >> 0 & 1;
     this->map.caching = attrib;
-}
-
-inline void pgent_t::set_entry( space_t * s, pgsize_e pgsize, addr_t paddr,
-				word_t rwx, word_t attrib, bool kernel )
-{
-    set_entry(s, pgsize, (paddr_t)paddr, rwx, attrib,! kernel);
 }
 
 
@@ -254,8 +241,6 @@ inline pgent_t * pgent_t::next( space_t * s, pgsize_e pgsize, word_t num )
 
 inline void pgent_t::dump_misc (space_t * s, pgsize_e pgsize)
 {
-    if (map.erpn != 0)
-	printf("erpn: %x ", map.erpn);
     printf("%s",
 	   map.caching == 1 ? "inhibit " : 
 	   map.caching == 2 ? "coherent " :

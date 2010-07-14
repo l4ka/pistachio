@@ -105,7 +105,7 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
     pgent_t::pgsize_e f_size, t_size, pgsize;
     mapnode_t *newmap, *map = NULL;
     addr_t f_addr, t_addr;
-
+   
     pgent_t * r_fpg[pgent_t::size_max];
     pgent_t * r_tpg[pgent_t::size_max];
     word_t r_fnum[pgent_t::size_max];
@@ -436,9 +436,8 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 		 /* Check if we're simply extending access rights */
 		 (tpg->is_subtree (t_space, t_size) ||
 		  (is_sigma0_space (this) ?
-		   (tpg->address (t_space, t_size) != f_addr) :
-		   (tpg->address (t_space, t_size) !=
-		    fpg->address (this, f_size)))
+		   (tpg->address (t_space, t_size) != (paddr_t) f_addr) :
+		   (tpg->address (t_space, t_size) != fpg->address (this, f_size)))
 #if defined(CONFIG_NEW_MDB)
 		  || 
 		  (tpg->mapnode (t_space, t_size,
@@ -582,11 +581,11 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 	     * just extending the current access rights.
 	     */
 	    if (is_sigma0_space (this) ?
-		(tpg->address (t_space, t_size) != f_addr) :
+		(tpg->address (t_space, t_size) != (paddr_t) f_addr) :
 		(tpg->address (t_space, t_size) !=
 		 addr_offset (fpg->address (this, f_size), offset)))
 	    {
-		addr_t a UNUSED = is_sigma0_space (this) ? f_addr :
+		paddr_t a UNUSED = is_sigma0_space (this) ? (paddr_t) f_addr :
 		    addr_offset (fpg->address (this, f_size), offset);
 		printf ("map_fpage(from=%p  to=%p  base=%p  "
 			"sndfp=%p  rcvfp=%p)  paddr %p != %p\n",
@@ -669,7 +668,7 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 			    "pg=%p addr=%p %d%cB}) paddr=%p\n", map, 
 			    fpg, f_addr, dbg_pgsize (page_size(f_size)), dbg_szname (page_size(f_size)),  
 			    tpg, t_addr, dbg_pgsize (page_size(t_size)), dbg_szname (page_size(t_size)),
-			    addr_offset (fpg->address (this, f_size),  offset + f_off));
+			    (addr_t) addr_offset (fpg->address (this, f_size),  offset + f_off));
 #endif
 
 #if defined(CONFIG_NEW_MDB)
@@ -989,9 +988,9 @@ bool space_t::readmem (addr_t vaddr, word_t * contents)
     if (! lookup_mapping (vaddr, &pg, &pgsize))
 	return false;
 
-    addr_t paddr = pg->address (this, pgsize);
+    paddr_t paddr = pg->address (this, pgsize);
     paddr = addr_offset (paddr, (word_t) vaddr & page_mask (pgsize));
-    addr_t paddr1 = addr_mask (paddr, ~(sizeof (word_t) - 1));
+    paddr_t paddr1 = addr_mask (paddr, ~(sizeof (word_t) - 1));
 
     if (paddr1 == paddr)
     {
@@ -1002,7 +1001,7 @@ bool space_t::readmem (addr_t vaddr, word_t * contents)
     {
 	// Word access not properly aligned.  Need to perform two
 	// separate accesses.
-	addr_t paddr2 = addr_offset (paddr1, sizeof (word_t));
+	paddr_t paddr2 = addr_offset (paddr1, sizeof (word_t));
 	word_t mask = ~page_mask (pgsize);
 
 	if (addr_mask (paddr1, mask) != addr_mask (paddr2, mask))

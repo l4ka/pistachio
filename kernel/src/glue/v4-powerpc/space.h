@@ -174,9 +174,9 @@ public:
     bool lookup_mapping( addr_t vaddr, pgent_t ** r_pg,
 			 pgent_t::pgsize_e *r_size, cpuid_t cpu = 0);
     bool readmem (addr_t vaddr, word_t * contents);
-    static word_t readmem_phys (addr_t paddr)
+    static word_t readmem_phys (paddr_t paddr)
 	{ return *phys_to_virt((word_t*)paddr); }
-    void release_kernel_mapping (addr_t vaddr, addr_t paddr, word_t log2size);
+    void release_kernel_mapping (addr_t vaddr, paddr_t paddr, word_t log2size);
 
     static space_t *vsid_to_space( word_t vsid )
     {

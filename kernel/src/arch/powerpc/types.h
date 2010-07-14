@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/arch/powerpc/types.h
+ * File path:     arch/powerpc/types.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -60,6 +60,17 @@ typedef u64_t			paddr_t;
 #else
 typedef u32_t			paddr_t;
 #endif
+
+INLINE paddr_t addr_offset(paddr_t addr, word_t off)
+{
+    return (paddr_t)(addr + off);
+}
+
+
+INLINE paddr_t addr_mask (paddr_t addr, word_t mask)
+{
+    return (paddr_t) (addr & mask);
+}
 
 
 /**
