@@ -96,7 +96,7 @@ bool tbuf, hsched;
 
 	if (tbuf) L4_Tbuf_RecordEvent (1, args);	        
 #else
-#define Dprintf(...) 
+#define Dprintf(x...) 
 #endif
 
 L4_ThreadId_t s0tid, roottid, pager_tid, ping_tid, pong_tid;
@@ -443,12 +443,6 @@ int main (void)
     kip_area = L4_FpageLog2 ((L4_Word_t) kip, L4_KipAreaSizeLog2 (kip));
 #endif
 
-    // We need a maximum of two threads per task
-    utcb_area = L4_FpageLog2 ((L4_Word_t) UTCB_ADDRESS,
-			      L4_UtcbAreaSizeLog2 (kip) + 1);
-    Dprintf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
-             kip_area.raw, utcb_area.raw, utcb_size);
-
     // Touch the memory to make sure we never get pagefaults
     extern L4_Word_t _end, _start;
     for (L4_Word_t * x = (&_start); x < &_end; x++)
@@ -456,7 +450,13 @@ int main (void)
 	volatile L4_Word_t q;
 	q = *(volatile L4_Word_t*) x;
     }
-    
+
+    // We need a maximum of two threads per task
+    utcb_area = L4_FpageLog2 ((L4_Word_t) UTCB_ADDRESS,
+			      L4_UtcbAreaSizeLog2 (kip) + 1);
+    Dprintf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
+             kip_area.raw, utcb_area.raw, utcb_size);
+
     // Create pager
     pager_tid = L4_GlobalId (L4_ThreadNo (roottid) + 1, 2);
     ping_tid = L4_GlobalId (L4_ThreadNo (roottid) + 2, 2);
