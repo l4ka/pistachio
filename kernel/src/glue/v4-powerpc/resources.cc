@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/resources.cc
+ * File path:     glue/v4-powerpc/resources.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -215,16 +215,7 @@ void thread_resources_t::spill_fpu( tcb_t *tcb )
      * so that we can store it as a double and avoid an fp-double to
      * fp-single conversion.  Then we move it to our 4-byte tcb location.
      */
-    u64_t fpscr_tmp;
-    asm volatile (
-	    "mffs %%f0 ;"
-	    "stfd %%f0, 0(%0) ;"
-	    : /* ouputs */
-	    : /* inputs */
-	      "b" (&fpscr_tmp)
-	    );
-    this->fpscr = (word_t)fpscr_tmp;
-
+    this->fpscr = ppc_get_fpscr();
     this->deactivate_fpu( tcb );
 }
 
@@ -235,14 +226,7 @@ void thread_resources_t::restore_fpu( tcb_t *tcb )
      * conversion from fp-single to fp-double.  So temporarily store
      * it in a 8-byte location.
      */
-    u64_t fpscr_tmp = this->fpscr;
-    asm volatile (
-	    "lfd %%f0, 0(%0) ;"
-	    "mtfsf 0xff, %%f0 ;"
-	    : /* ouputs */
-	    : /* inputs */
-	      "b" (&fpscr_tmp)
-	    );
+    ppc_set_fpscr(this->fpscr);
 
     // Load the registers.
     u64_t *start = this->fpu_state;

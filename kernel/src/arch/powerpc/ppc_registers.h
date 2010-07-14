@@ -387,6 +387,30 @@ public:
 } __attribute__((packed));
 
 
+INLINE u64_t ppc_get_fpscr()
+{
+    u64_t value;
+    asm volatile (
+	    "mffs %%f0 ;"
+	    "stfd %%f0, 0(%0) ;"
+	    : /* ouputs */
+	    : /* inputs */
+	      "b" (&value)
+	    );
+    return value;
+}
+
+INLINE void ppc_set_fpscr( u64_t value )
+{
+    asm volatile (
+        "lfd %%f0, 0(%0) ;"
+        "mtfsf 0xff, %%f0 ;"
+        : /* ouputs */
+        : /* inputs */
+          "b" (&value)
+        );
+
+}
 
 
 #endif	/* ASSEMBLY */

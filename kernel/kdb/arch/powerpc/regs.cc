@@ -81,6 +81,9 @@ static void dbg_print_sysregs( void )
     printf( "  tbl: 0x%08x   tbu: 0x%08x\n", ppc_get_tbl(), ppc_get_tbu() );
     printf( " dabr: 0x%08x   ear: 0x%08x   dec: 0x%08x\n",
 	    ppc_get_dabr(), ppc_get_ear(), ppc_get_dec() );
+    //printf( " fpscr: 0x%16X\n", ppc_get_fpscr());
+    
+    
 }
 
 static void dbg_print_except_regs( except_regs_t *cpu )
