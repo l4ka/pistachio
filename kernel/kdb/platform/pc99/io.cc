@@ -331,9 +331,9 @@ static void init_serial (void)
 
 static void putc_serial (const char c)
 {
-    while ((in_u8(COMPORT+5) & 0x20) == 0);
+    while ((in_u8(LSR) & 0x20) == 0);
     out_u8(COMPORT,c);
-    while ((in_u8(COMPORT+5) & 0x40) == 0);
+    while ((in_u8(LSR) & 0x40) == 0);
     if (c == '\n')
 	putc_serial('\r');
 }
@@ -341,13 +341,13 @@ bool getc_blocked = false;
 
 static char getc_serial (bool block)
 {
-    if ((in_u8(COMPORT+5) & 0x01) == 0)
+    if ((in_u8(LSR) & 0x01) == 0)
     {
 	if (!block)
 	    return -1;
 	
 	getc_blocked = true;
-	while ((in_u8(COMPORT+5) & 0x01) == 0)
+	while ((in_u8(LSR) & 0x01) == 0)
 	{
 #if defined(CONFIG_KDB_INPUT_HLT)
 	    processor_sleep();
@@ -368,7 +368,7 @@ void kdebug_check_breakin (void)
 	return;
     
 #if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
-    u8_t c = in_u8(COMPORT+5);
+    u8_t c = in_u8(LSR);
 #endif
 
 #if defined(CONFIG_KDB_BREAKIN_BREAK)

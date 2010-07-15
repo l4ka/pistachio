@@ -40,10 +40,9 @@
 #include INC_ARCH(ppc44x.h)
 #include INC_PLAT(fdt.h)
 
-bool getc_blocked = false;
-
 #define SEC_PPC44X_IO		".kdebug"
 extern addr_t setup_console_mapping(paddr_t paddr, int log2size);
+bool getc_blocked = false;
 
 
 /* Section assignements */
@@ -66,7 +65,6 @@ static void init_serial (void) SECTION (SEC_PPC44X_IO);
 #endif 
 
 #if defined(CONFIG_KDB_BREAKIN)
-extern bool kdebug_check_breakin_enabled;
 void kdebug_check_breakin (void) SECTION (SEC_PPC44X_IO);
 #endif
 
@@ -164,23 +162,23 @@ static void init_serial (void)
 
 static void putc_serial (const char c)
 {
-    while ((in_8(comport+5) & 0x20) == 0);
+    while ((in_8(LSR) & 0x20) == 0);
     out_8(comport,c);
-    while ((in_8(comport+5) & 0x40) == 0);
+    while ((in_8(LSR) & 0x40) == 0);
     if (c == '\n')
 	putc_serial('\r');
 }
 
 static char getc_serial (bool block)
 {
-    if ((in_8(comport+5) & 0x01) == 0)
+    if ((in_8(LSR) & 0x01) == 0)
     {
 	if (!block)
 	    return (char) -1;
 	
-	getc_blocked = true;
-	while ((in_8(comport+5) & 0x01) == 0);
-	getc_blocked = false;
+        getc_blocked = true;
+	while ((in_8(LSR) & 0x01) == 0);
+        getc_blocked = false;
 	
     }
     return in_8(comport);
@@ -189,7 +187,7 @@ static char getc_serial (bool block)
 static bool check_breakin_serial ()
 {
 #if defined(CONFIG_KDB_BREAKIN_BREAK) || defined(CONFIG_KDB_BREAKIN_ESCAPE)
-    u8_t c = in_8(comport+5);
+    u8_t c = in_8(LSR);
 #endif
 
 #if defined(CONFIG_KDB_BREAKIN_ESCAPE)
@@ -620,12 +618,12 @@ public:
 	    char c = 0;
 	    lock.lock();
 
+            getc_blocked = true;
 	    do {
-                getc_blocked = true;
 		flush_outbuf(); // make sure the other end sees all output...
 		poll();
-                getc_blocked = false;
 	    } while (block && in_len == 0);
+            getc_blocked = false;
 
 	    if (in_len)
 	    {
@@ -825,12 +823,8 @@ void kdb_inject(except_regs_t* frame)
 
 
 #if defined(CONFIG_KDB_BREAKIN) 
-bool kdebug_check_breakin_enabled = true;
 void kdebug_check_breakin (void)
 {
-    if (getc_blocked || !kdebug_check_breakin_enabled)
-	return;
-    
 #if defined(CONFIG_KDB_CONS_BGP_TREE)
     if (tree_console.check_breakin())
 	enter_kdebug("breakin");
