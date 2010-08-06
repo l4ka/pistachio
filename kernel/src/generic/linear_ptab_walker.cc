@@ -527,10 +527,12 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 		flush_tlb (get_current_space ());
 
 	    /*
-	     * We might have invalidated the source mapping during the
-	     * unmap operation above.  If so, we have to skip it.
+	     * We might have invalidated the source mapping during the unmap
+	     * operation above. If so, we have to skip it (unless whe deal with
+	     * sigma0 mappings, where source mappings are invalid by default).
+             * 
 	     */
-	    if (! fpg->is_valid (this, f_size))
+	    if (!fpg->is_valid (this, f_size) && !is_sigma0_space(this))
 		goto Next_receiver_entry;
 	}
 	else if (tpg->is_valid (t_space, t_size) &&
