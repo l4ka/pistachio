@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2008,  Karlsruhe University
+ * Copyright (C) 2002-2008, 2010,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/ptab.h
  * Description:   X86-64 pagetable management (4KByte long mode)
@@ -52,7 +52,8 @@ class x86_pgent_t
 public:
     enum pagesize_e {
 	size_4k = 0,
-	size_2m = 1     
+	size_2m = 1,
+        size_superpage = 1
     };
 
     // predicates

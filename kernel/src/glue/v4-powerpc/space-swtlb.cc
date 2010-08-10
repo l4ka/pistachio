@@ -183,6 +183,9 @@ void SECTION(".init.memory") space_t::init_cpu_mappings(cpuid_t cpu)
 		   init_swtlb[idx].tlb1.raw, init_swtlb[idx].tlb2.raw);
 	}
     }
+
+    current_cpu = cpu;
+
 #endif
 }
 

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007, 2009,  Karlsruhe University
+ * Copyright (C) 2007, 2009-2010,  Karlsruhe University
  *                
  * File path:     arch/x86/atomic.h
  * Description:   
@@ -33,7 +33,7 @@ public:
 	    __asm__ __volatile__(X86_LOCK "sub $1, %0" : "=m"(val));
 	    return val;
 	}
-
+    
     word_t operator = (word_t val) 
 	{ return this->val = val; }
 

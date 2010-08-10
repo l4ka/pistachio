@@ -221,20 +221,5 @@ INLINE void tcb_t::release_copy_area (void)
     resources.release_copy_area (this, true);
 }
 
-/**********************************************************************
- *
- *                        global tcb functions
- *
- **********************************************************************/
-
-#if defined(CONFIG_SMP)
-extern cpuid_t current_cpu;
-INLINE cpuid_t get_current_cpu()
-{
-    return current_cpu;
-}
-#endif
-
-
 
 #endif /* !__GLUE__V4_X86__TCB_H__ */

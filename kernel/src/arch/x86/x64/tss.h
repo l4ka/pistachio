@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2005, 2007-2008,  Karlsruhe University
+ * Copyright (C) 2002-2005, 2007-2008, 2010,  Karlsruhe University
  *                
  * File path:     arch/x86/x64/tss.h
  * Description:   AMD64 Task State Segment

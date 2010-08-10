@@ -371,6 +371,16 @@ static SECTION(SEC_INIT) void perfmon_init( void )
 	ppc_set_pmc4( 0 );
     }
 }
+#if defined(CONFIG_TRACEBUFFER)
+tracebuffer_t * tracebuffer;
+EXTERN_KMEM_GROUP (kmem_misc);
+
+void SECTION(SEC_INIT) setup_tracebuffer (void)
+{
+    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
+    tracebuffer->initialize ();
+}
+#endif /* CONFIG_TRACEBUFFER */
 
 static SECTION(SEC_INIT) void timer_start( void )
 {
@@ -675,6 +685,12 @@ extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t 
 
     TRACE_INIT("Initializing boot CPU\n");
     cpu_init( 0 );
+
+#if defined(CONFIG_TRACEBUFFER)
+    /* allocate and setup tracebuffer */
+    TRACE_INIT("Initializing Tracebuffer (%dM)\n", TRACEBUFFER_SIZE / (1024 * 1024));
+    setup_tracebuffer();
+#endif
 
     TRACE_INIT("Initializing kernel debugger\n");
     if( get_kip()->kdebug_init )

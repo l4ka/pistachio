@@ -790,12 +790,7 @@ INLINE space_t * get_current_space()
     return get_current_tcb()->get_space();
 }
 
-#ifndef CONFIG_SMP
-INLINE cpuid_t get_current_cpu()
-{
-    return 0;
-}
-
+#if !defined(CONFIG_SMP)
 INLINE bool tcb_t::migrate_to_processor(cpuid_t processor)
 {
     return processor == 0;

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006, 2008-2009,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2008-2010,  Karlsruhe University
  *                
  * File path:     api/v4/smp.cc
  * Description:   Multiprocessor handling for cross-processor 
@@ -30,13 +30,15 @@
  * $Id: smp.cc,v 1.10 2006/06/16 10:28:44 stoess Exp $
  *                
  ********************************************************************/
-#if defined(CONFIG_SMP)
-
 #include <sync.h>
 #include <kdb/tracepoints.h>
 #include INC_API(smp.h)
 #include INC_API(schedule.h)
 #include INC_API(queueing.h)
+
+cpuid_t	current_cpu UNIT("cpulocal");;
+
+#if defined(CONFIG_SMP)
 
 //#define TRACE_IPI(x...) do { printf("CPU %d: ", get_current_cpu()); printf(x); } while(0)
 

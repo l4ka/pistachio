@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2007, 2010,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2008, 2010,  Karlsruhe University
  *                
- * File path:     api/v4/cpu.h
- * Description:   processor management
+ * File path:     arch/powerpc/tracebuffer.h
+ * Description:   PPC specific tracebuffer
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,51 +26,29 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: processor.h,v 1.2 2003/09/24 19:04:24 skoglund Exp $
- *                
  ********************************************************************/
-#ifndef __API__V4__CPU_H__
-#define __API__V4__CPU_H__
+#pragma once
+#include <tcb_layout.h>
+#include INC_ARCH(ppc_registers.h)
 
-typedef u16_t cpuid_t;
-void init_cpu(cpuid_t processor, word_t external_freq, word_t internal_freq);
-
-class cpu_t {
-public:
-    cpu_t() 
-	{ id = ~0UL; }
-
-    bool is_valid()
-	{ return this->id < ~0UL; }
-
-    void set_id(word_t id)
-	{ this->id = id; }
-
-    word_t get_id() 
-	{ return id; }
-
-private:
-    word_t id;
-    static cpu_t descriptors[CONFIG_SMP_MAX_CPUS];
-public:
-    static word_t count;
-    static cpu_t * get(cpuid_t cpuid) {
-	return &descriptors[cpuid];
-    }
-
-    static bool add_cpu(word_t id) {
-	if (count >= CONFIG_SMP_MAX_CPUS)
-	    return false;
-	descriptors[count++].id = id;
-	return true;
-    }
-};
-
-INLINE cpuid_t get_current_cpu()
+#define TRACEBUFFER_SIZE        ( 1 * 1024 * 1024)
+INLINE void tracerecord_t::store_arch(const traceconfig_t config)
 {
-    extern cpuid_t current_cpu;
-    return current_cpu;
+    tsc = ppc_get_timebase();
+   
 }
-
-
-#endif /* !__API__V4__CPU_H__ */
+   
+INLINE void tracebuffer_t::initialize()
+{
+    magic = TRACEBUFFER_MAGIC;
+    current = 0;
+    mask = TBUF_DEFAULT_MASK;
+    max = (TRACEBUFFER_SIZE/sizeof(tracerecord_t))-1;
+    config.raw = 0;
+#if defined(CONFIG_SMP)
+    config.smp = 1;
+#endif
+#if defined(CONFIG_TBUF_PERFMON)
+    config.pmon = 1;
+#endif
+}

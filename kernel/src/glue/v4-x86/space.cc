@@ -40,7 +40,6 @@ DECLARE_KMEM_GROUP (kmem_utcb);
 
 space_t * kernel_space = NULL;
 addr_t utcb_page = NULL;
-cpuid_t	current_cpu UNIT("x86.cpulocal");;
 
 /**********************************************************************
  *
@@ -617,7 +616,7 @@ bool space_t::sync_io_bitmap()
 #if defined(CONFIG_SMP)
     /* May be that we've already created a bitmap on a different cpu */
     
-    if (current_cpu == data.reference_ptab)
+    if (get_current_cpu() == data.reference_ptab)
 	return false;
     
     if (get_io_bitmap() != get_io_bitmap(data.reference_ptab))
@@ -860,7 +859,9 @@ void SECTION (".init") space_t::init_cpu_mappings(cpuid_t cpu)
 	       get_top_pdir_phys(cpu), cpu);
     x86_mmu_t::set_active_pagetable((word_t)get_top_pdir_phys(cpu));
     x86_mmu_t::flush_tlb(true);
+#if defined(CONFIG_SMP)
     current_cpu = cpu;
+#endif
     TRACE_INIT("\tCPU local pagetable activated %x (CPU %d)\n", 
 	       x86_mmu_t::get_active_pagetable(), cpu);
 #endif

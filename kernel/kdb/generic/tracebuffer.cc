@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2002-2003, 2007-2010,  Karlsruhe University
  *                
- * File path:     kdb/glue/v4-x86/tracebuffer.cc
+ * File path:     kdb/generic/tracebuffer.cc
  * Description:   Tracebuffer for PC99 platform
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@
  * SUCH DAMAGE.
  *                
  ********************************************************************/
+
+#if defined(CONFIG_TRACEBUFFER)
 #include <debug.h>
 #include <linear_ptab.h>
 #include <generic/lib.h>
@@ -36,9 +38,7 @@
 #include <kdb/tracebuffer.h>
 #include INC_API(thread.h)
 #include INC_API(tcb.h)
-#include INC_GLUE(timer.h)
-
-#if defined(CONFIG_TRACEBUFFER)
+#include INC_GLUE(schedule.h)
 
 FEATURESTRING ("tracebuffer");
 
@@ -138,8 +138,10 @@ private:
 	    if (tsc == 0) return true;
 	    
 	    u64_t ttsc = t->tsc;
+#if defined(CONFIG_TBUF_PERFMON_ENERGY)
             if (get_tbuf_config().pmon_e)
                 ttsc <<= X86_PMC_TSC_SHIFT;
+#endif
 	    return (ttsc >= tsc);
 	}
 
@@ -447,9 +449,9 @@ public:
                 {
                     u64_t pmcdelta0;		
                     u64_t pmcdelta1;
+#if defined(CONFIG_TBUF_PERFMON_ENERGY)
                     if (get_tbuf_config().pmon_e)
                     {                
-
                         // Energy mix
                         c_delta <<= X86_PMC_TSC_SHIFT;
 				    
@@ -468,6 +470,7 @@ public:
                         pmcdelta1 = p_delta / 1000;
                     }
                     else
+#endif
                     {
                         // User and kernel instructions
                         pmcdelta0 = pmc_delta(rec->pmc0, (word_t) old[cpu].pmc0);
@@ -626,7 +629,10 @@ void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
     
     if (usec)
     {
-	u64_t tsc = x86_rdtsc() - ((u64_t) usec * (u64_t) (get_timer()->get_proc_freq() / 1000));
+        procdesc_t * pdesc = get_kip()->processor_info.get_procdesc(get_current_cpu());
+        ASSERT (pdesc);
+        word_t freq = pdesc->internal_freq + 1;
+        u64_t tsc = get_cpu_cycles() - ((u64_t) usec * (u64_t) (freq / 1000));
 	count = size;
 	tbuf_handler.set_tsc(tsc);
     }

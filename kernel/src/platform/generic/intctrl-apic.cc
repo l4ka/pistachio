@@ -262,7 +262,7 @@ void intctrl_t::init_arch()
 		   total_cpus, cpu_t::count);
 #ifndef CONFIG_SMP
 	/* make sure the boot CPU is the first */
-	cpu_t::get(0)->id = local_apic.id();
+	cpu_t::get(0)->set_id(local_apic.id());
 #endif
     }
 
