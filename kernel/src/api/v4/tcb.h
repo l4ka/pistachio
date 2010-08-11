@@ -35,6 +35,7 @@
 
 #include <debug.h>
 
+#include INC_API(cpu.h)
 #include INC_API(types.h)
 #include INC_API(queuestate.h)
 #include INC_API(queueing.h)
