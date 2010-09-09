@@ -33,6 +33,26 @@
 #ifndef __L4__POWERPC__SPECIALS_H__
 #define __L4__POWERPC__SPECIALS_H__
 
+/*
+ * Architecture specific helper functions.
+ */
+L4_INLINE void __L4_Inc_Atomic (L4_Word_t *w)
+{
+    L4_Word_t dummy;
+    __asm__ __volatile__(
+        "/* l4_inc_atomic()	*/\n"
+        "sync\n"
+        "1:	lwarx	%0,0,%1\n"
+        "	addic	%0,%0,1\n"
+        "	stwcx.	%0,0,%1 \n"
+        "	bne-	1b"
+        "isync\n"
+        : "=&r" (dummy)
+        : "r" (w)
+        : "cc");
+}
+
+
 L4_INLINE int __L4_Msb( L4_Word_t w ) __attribute__ ((const));
 
 L4_INLINE int __L4_Msb( L4_Word_t w )
@@ -59,3 +79,4 @@ L4_INLINE L4_Fpage_t L4_Fpage (L4_Fpage_t f)
 #endif
 
 #endif	/* __L4__POWERPC__SPECIALS_H__ */
+

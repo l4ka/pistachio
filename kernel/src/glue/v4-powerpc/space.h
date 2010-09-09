@@ -145,7 +145,7 @@ public:
 
     void init_kernel_mappings();
     void init_cpu_mappings(cpuid_t cpu);
-    addr_t map_device( paddr_t paddr, word_t size, word_t attrib );
+    addr_t map_device( paddr_t paddr, word_t size, bool kernel, word_t attrib );
 
 #ifdef CONFIG_PPC_MMU_SEGMENTS
     bool handle_hash_miss( addr_t vaddr );
@@ -153,7 +153,7 @@ public:
 #endif
 
 #ifdef CONFIG_PPC_MMU_TLB
-    addr_t map_device_pinned( paddr_t paddr, word_t log2size, word_t attrib );
+    addr_t map_device_pinned( paddr_t paddr, word_t size, bool kernel, word_t attrib );
     bool handle_tlb_miss( addr_t lookup_vaddr, addr_t install_vaddr, bool user, bool global = false );
     bool handle_hvm_tlb_miss( ppc_softhvm_t*, ppc_softhvm_t::tlb_t*, word_t gvaddr, paddr_t &gpaddr );
     asid_t *get_asid(); // asid of current cpu
@@ -183,12 +183,12 @@ public:
 	return (space_t *)( (vsid & 0xfffffff0) << (POWERPC_PAGE_BITS - 4) );
     }
 
-private:
     void add_mapping( addr_t vaddr, paddr_t paddr, pgent_t::pgsize_e size, 
 		      bool writable, bool kernel, 
 		      word_t attrib = pgent_t::cache_standard );
     void flush_mapping( addr_t vaddr, pgent_t::pgsize_e size, pgent_t *pgent );
 
+private:
     pgent_t pdir[1024];
     union {
 	word_t raw[1024];
@@ -210,6 +210,7 @@ private:
 	};
     };
 
+    static word_t pinned_mapping;
     friend class kdb_t;
 };
 

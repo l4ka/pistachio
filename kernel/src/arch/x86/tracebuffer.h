@@ -34,13 +34,6 @@
 #include INC_ARCH(cpu.h)
 #include <tcb_layout.h>
 
-#if defined(CONFIG_IS_32BIT)
-#define TRACEBUFFER_PGENTSZ        pgent_t::size_4m
-#else
-#define TRACEBUFFER_PGENTSZ        pgent_t::size_2m
-#endif
-
-
 #if defined(CONFIG_TBUF_PERFMON_ENERGY)
 #define TRACEBUFFER_SIZE        (32 * 1024 * 1024)
 #else
@@ -114,7 +107,7 @@ INLINE void tracerecord_t::store_arch(const traceconfig_t config)
             else
             {
                 pmc0 = (word_t) x86_rdpmc(12);
-                pmc1 = (word_t) x86_rdpmc(2);
+                pmc1 = (word_t) x86_rdpmc(14);
             }
             break;
         default:
@@ -144,5 +137,6 @@ INLINE void tracebuffer_t::initialize()
     config.pmon_cpu = 1;
 #endif
 
+    printf("sz %d rec %d max %d\n", TRACEBUFFER_SIZE, sizeof(tracerecord_t), max);
 }
 #endif /* !__ARCH__X86__TRACEBUFFER_H__ */

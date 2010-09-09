@@ -31,7 +31,7 @@
 #include <tcb_layout.h>
 #include INC_ARCH(ppc_registers.h)
 
-#define TRACEBUFFER_SIZE        ( 1 * 1024 * 1024)
+#define TRACEBUFFER_SIZE        ( 1024 * 1024)
 INLINE void tracerecord_t::store_arch(const traceconfig_t config)
 {
     tsc = ppc_get_timebase();

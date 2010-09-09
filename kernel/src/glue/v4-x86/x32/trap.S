@@ -244,10 +244,8 @@ fp_save_resources_done:
 	movl	%eax, 28(%ebp)
 	movl	$X86_UDS, %ecx
 	movl	%ecx, %es
-#if !defined(CONFIG_TRACEBUFFER)
 	movl	%ecx, %fs
-#endif
-	movl	$X86_UTCBS, %ecx
+       	movl	$X86_UTCBS, %ecx
 	movl	%ecx, %gs
 	movl	$1, __is_small
 1:	popl	%ecx
@@ -266,9 +264,7 @@ fp_save_resources_done:
 
 	movl	$X86_UDS, %edx
 	movl	%edx, %es
-#if !defined(CONFIG_TRACEBUFFER)
 	movl	%edx, %fs
-#endif
 	movl	$X86_UTCBS, %edx
 	movl	%edx, %gs
 

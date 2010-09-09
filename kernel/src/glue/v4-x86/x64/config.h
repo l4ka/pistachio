@@ -213,8 +213,7 @@
 #define X86_UDS                  0x23		/* 4, RPL = 3	*/
 #define X86_UCS                  0x2b		/* 5, RPL = 3	*/
 #define X86_UTCBS                0x33		/* 6, RPL = 3	*/
-#define X86_X64_KDBS               0x38		/* 7, RPL = 0	*/
-#define X86_TBS                  0x43		/* 8, RPL = 0	*/
+#define X86_X64_KDBS             0x38		/* 7, RPL = 0	*/
 #define X86_TSS			 0x48		/* 9, RPL = 0	*/
 
 /* user mode e-flags   */

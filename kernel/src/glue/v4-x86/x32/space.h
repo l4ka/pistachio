@@ -61,6 +61,7 @@
 #define PGSIZE_KTCB	(pgent_t::size_4k)
 #define PGSIZE_UTCB	(pgent_t::size_4k)
 #define PGSIZE_KERNEL	((KERNEL_PAGE_SIZE == X86_SUPERPAGE_SIZE) ? pgent_t::size_4m : pgent_t::size_4k)
+
 #define PGSIZE_KIP	(pgent_t::size_4k)
 #define PGSIZE_SIGMA    PGSIZE_KERNEL
 

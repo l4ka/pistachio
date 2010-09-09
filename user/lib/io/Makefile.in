@@ -36,14 +36,10 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-ia32_SRCS=	ia32-getc.cc ia32-putc.cc
-powerpc_SRCS=	powerpc-io.cc 1275tree.cc fdt.cc 
-powerpc64_SRCS=	powerpc64-getc.cc powerpc64-putc.cc
-amd64_SRCS=	amd64-getc.cc amd64-putc.cc
+powerpc_SRCS=	1275tree.cc fdt.cc 
 
 LIBRARY=	io
-SRCS=		get_hex.cc  print.cc $($(ARCH)_SRCS)
-
+SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS)
 
 include $(top_srcdir)/Mk/l4.lib.mk
 

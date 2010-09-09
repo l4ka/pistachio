@@ -31,9 +31,6 @@
  ********************************************************************/
 #include <l4/arch.h>
 
-#undef L4_TRACEBUFFER
-#include <l4/tracebuffer.h>
-
 #include L4_COMPAT_H_LOCATION
 
 

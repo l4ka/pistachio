@@ -323,8 +323,6 @@ void space_t::handle_pagefault(addr_t addr, addr_t ip, access_e access, bool ker
     
 }
 
-
-
 SYS_SPACE_CONTROL (threadid_t space_tid, word_t control, fpage_t kip_area,
 		   fpage_t utcb_area, threadid_t redirector_tid)
 {
@@ -429,3 +427,4 @@ void space_t::free (void)
     fp.set_rwx ();
     unmap_fpage (fp, true, true);
 }
+

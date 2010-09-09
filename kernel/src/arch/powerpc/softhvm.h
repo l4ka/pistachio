@@ -3,7 +3,7 @@
  * Copyright (C) 1999-2010,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/arch/powerpc/softhvm.h
+ * File path:     arch/powerpc/softhvm.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 
 #include "msr.h"
 #include "swtlb.h"
+#include "frame.h"
 
 #define LAZY_TLB
 

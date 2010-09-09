@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2007,  Karlsruhe University
+## Copyright (C) 2003, 2007, 2010,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ##                
@@ -36,13 +36,10 @@ top_builddir=	@top_builddir@
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-ia32_OBJS=	ia32-syscall-init.cc ia32-syscall-stubs.S
-powerpc_OBJS=	powerpc-syscalls.c
-powerpc64_OBJS=	powerpc64-syscalls.c
-amd64_OBJS=	amd64-syscalls.c
+ia32_OBJS=	ia32-syscall-stubs.S
 
 LIBRARY=	l4
-SRCS=		$($(ARCH)_OBJS)
+SRCS=		debug.cc $(ARCH).cc $($(ARCH)_OBJS) 
 
 
 include $(top_srcdir)/Mk/l4.lib.mk

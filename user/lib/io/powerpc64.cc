@@ -2,8 +2,8 @@
  *
  * Copyright (C) 2002, Karlsruhe University
  *
- * File path:	lib/io/powerpc-ofppc-getc.c
- * Description:	debugger getc() for PowerPC-L4.
+ * File path:	lib/io/powerpc-ofppc-putc.c
+ * Description:	debugger putc() for PowerPC-L4.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,18 +26,28 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $Id: powerpc64-getc.cc,v 1.4 2004/05/19 05:19:48 cvansch Exp $
+ * $Id: powerpc64-putc.cc,v 1.4 2003/11/24 16:21:16 skoglund Exp $
  *
  ***************************************************************************/
 
 #include <l4/types.h>
 #include <l4/powerpc64/kdebug.h>
 
+extern "C" void __l4_putc (int c);
+extern "C" void putc (int c) __attribute__ ((weak, alias ("__l4_putc")));
+
 extern "C" int __l4_getc (void);
 extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
+
+extern "C" void __l4_putc( int c )
+{
+    L4_KDB_PrintChar( c );
+    if( c == '\n' )
+	L4_KDB_PrintChar( '\r' );
+}
+
 
 extern "C" int __l4_getc()
 {
     return L4_KDB_ReadChar_Blocked();
 }
-

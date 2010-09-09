@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2010,  Karlsruhe University
+ * Copyright (C) 2001-2006, 2010,  Karlsruhe University
  *                
- * File path:     ia32-getc.cc
- * Description:   getc() for x86-based PCs
+ * File path:     ia32.cc
+ * Description:   putc() for x86-based PCs, serial and screen
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,15 +26,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *                
- * $Id: ia32-getc.cc,v 1.8 2004/01/29 15:50:05 uhlig Exp $
+ * $Id: ia32-putc.cc,v 1.13 2006/10/07 16:30:25 ud3 Exp $
  *                
  ********************************************************************/
+#include <config.h>
 #include <l4/types.h>
-#include "ia32-port.h"
-#include "config.h"
+#include "ia32.h"
 
+extern "C" void __l4_putc (int c);
+extern "C" void putc (int c) __attribute__ ((weak, alias ("__l4_putc")));
 extern "C" int __l4_getc (void);
 extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
+
 
 #if defined(CONFIG_COMPORT)
 
@@ -50,15 +53,67 @@ extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
 #define COMPORT CONFIG_COMPORT
 #endif
 
+static void io_init( void )
+{
+    static bool io_initialized = false;
+
+    if (io_initialized)
+        return;
+
+    io_initialized = true;
+
+#define IER	(COMPORT+1)
+#define EIR	(COMPORT+2)
+#define LCR	(COMPORT+3)
+#define MCR	(COMPORT+4)
+#define LSR	(COMPORT+5)
+#define MSR	(COMPORT+6)
+#define DLLO	(COMPORT+0)
+#define DLHI	(COMPORT+1)
+
+        outb(LCR, 0x80);		/* select bank 1	*/
+        for (volatile int i = 10000000; i--; );
+        outb(DLLO, (((115200/CONFIG_COMSPEED) >> 0) & 0x00FF));
+        outb(DLHI, (((115200/CONFIG_COMSPEED) >> 8) & 0x00FF));
+        outb(LCR, 0x03);		/* set 8,N,1		*/
+        outb(IER, 0x00);		/* disable interrupts	*/
+        outb(EIR, 0x07);		/* enable FIFOs	*/
+        outb(MCR, 0x0b);                /* force data terminal ready */
+        outb(IER, 0x01);		/* enable RX interrupts	*/
+        inb(IER);
+        inb(EIR);
+        inb(LCR);
+        inb(MCR);
+        inb(LSR);
+        inb(MSR);
+        
+
+}
+
+void __l4_putc(int c)
+{
+    io_init();
+    
+    while (!(inb(COMPORT+5) & 0x20));
+    outb(COMPORT,c);
+    while (!(inb(COMPORT+5) & 0x40));
+    if (c == '\n')
+	__l4_putc('\r');
+}
+
 int __l4_getc (void)
 {
+    io_init();
+
     while ((inb(COMPORT+5) & 0x01) == 0);
     return inb(COMPORT);
 }
 
-#else /* CONFIG_COMPORT */
+#else /* ! CONFIG_COMPORT */
 
-/* No SHIFT key support!!! */
+#define DISPLAY ((char*)0xb8000)
+#define COLOR 7
+#define NUM_LINES 25
 
 #define KBD_STATUS_REG		0x64	
 #define KBD_CNTL_REG		0x64	
@@ -78,6 +133,56 @@ static unsigned char keyb_layout[128] =
 	"230\177\000\000\213\214\000\000\000\000\000\000\000\000\000\000" /* 0x50 - 0x5f */
 	"\r\000/";					/* 0x60 - 0x6f */
 
+void __l4_putc(int c)
+{
+    unsigned int i;
+
+    // Shared cursor pointer
+    static unsigned __l4_putc_cursor = 160 * (NUM_LINES - 1);
+
+    // Create thread-local copy. Using proper locking would be better.
+    unsigned __cursor = __l4_putc_cursor;
+
+    switch(c) {
+    case '\r':
+        break;
+    case '\n':
+        do
+	{
+	    DISPLAY[__cursor++] = ' ';
+	    DISPLAY[__cursor++] = COLOR;
+	}
+        while (__cursor % 160 != 0);
+        break;
+    case '\t':
+        do
+	  {
+	    DISPLAY[__cursor++] = ' ';
+	    DISPLAY[__cursor++] = COLOR;
+	}
+        while (__cursor % 16 != 0);
+        break;
+    default:
+        DISPLAY[__cursor++] = c;
+        DISPLAY[__cursor++] = COLOR;
+    }
+    if (__cursor == (160 * NUM_LINES)) {
+	for (i = (160 / sizeof (L4_Word_t));
+	     i < (160 / sizeof (L4_Word_t)) * NUM_LINES;
+	     i++)
+	    ((L4_Word_t *) DISPLAY)[i - 160 / sizeof (L4_Word_t)]
+	      = ((L4_Word_t *) DISPLAY)[i];
+	for (i = 0; i < 160 / sizeof (L4_Word_t); i++)
+	    ((L4_Word_t *) DISPLAY)[160 / sizeof (L4_Word_t)
+				  * (NUM_LINES-1) + i] = 0;
+	__cursor -= 160;
+    }
+
+    // Write back thread-local cursor value
+    __l4_putc_cursor = __cursor;
+}
+
+/* No SHIFT key support!!! */
 
 int __l4_getc()
 {

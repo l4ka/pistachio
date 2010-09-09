@@ -703,18 +703,11 @@ void SECTION(".init.memory") space_t::init_kernel_mappings()
      * each processor gets a full cache line to avoid bouncing 
      * page is user-writable and global
      */
-    EXTERN_KMEM_GROUP(kmem_misc);
-    add_mapping((addr_t)UTCB_MAPPING,	
-		virt_to_phys(kmem.alloc(kmem_misc, X86_PAGE_SIZE)), 
-		pgent_t::size_4k, true,	false, true);
-    
     EXTERN_KMEM_GROUP(kmem_misc); 
     utcb_page = kmem.alloc(kmem_misc, X86_PAGE_SIZE);
     ASSERT(utcb_page);
     add_mapping((addr_t)UTCB_MAPPING,  virt_to_phys(utcb_page), 
 	       pgent_t::size_4k, true,	false, true);
-    
-
     
 #if defined(CONFIG_X86_SMALL_SPACES) && defined(CONFIG_X86_SYSENTER)
     /* User-level trampoline for ipc_sysexit, readonly but global. */

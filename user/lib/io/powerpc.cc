@@ -2,7 +2,7 @@
  *                
  * Copyright (C) 2010,  Karlsruhe Institute of Technology
  *                
- * Filename:      powerpc-io.cc
+ * Filename:      powerpc.cc
  * Author:        Jan Stoess <stoess@kit.edu>
  * Description:   
  *                
@@ -48,14 +48,12 @@ extern "C" void putc( int c ) __attribute__ ((weak, alias("__l4_putc")));
 #if defined(CONFIG_COMPORT)
 
 #include <l4/sigma0.h>
-#include "powerpc-port.h"
+#include "powerpc.h"
 #include "fdt.h"
 #include "1275tree.h"
 
 static volatile L4_Word8_t *comport = CONFIG_COMPORT;
-static bool io_initialized = false;
 
-#define DTREE_KIP_SUBTYPE	0xf
 #define DTREE_KIP_SUBTYPE	0xf
 #define DTREE_KIP_TYPE	        (L4_BootLoaderSpecificMemoryType + (DTREE_KIP_SUBTYPE << 4))
 
@@ -73,10 +71,9 @@ static L4_Word8_t __attribute__((aligned(4096))) comport_page[4096];
 #define DLLO    (comport+0)
 #define DLHI    (comport+1)
 
-extern "C" int printf (const char *fmt, ...);
-
 static void io_init( void )
 {
+    static bool io_initialized = false;
 
     if (io_initialized)
         return;

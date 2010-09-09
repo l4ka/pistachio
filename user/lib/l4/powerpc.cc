@@ -48,11 +48,9 @@ __L4_SpaceControl_t __L4_SpaceControl = NULL;
 __L4_ProcessorControl_t __L4_ProcessorControl = NULL;
 __L4_MemoryControl_t __L4_MemoryControl = NULL;
 
-void __L4_Init( void )
+extern "C" void __L4_Init( void )
 {
-    L4_KernelInterfacePage_t *kip;
-    
-    kip = L4_KernelInterface( NULL, NULL, NULL );
+    L4_KernelInterfacePage_t *kip = (L4_KernelInterfacePage_t *) L4_KernelInterface( NULL, NULL, NULL );
 
 #define KIP_RELOC(a) (a)
 

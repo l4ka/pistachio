@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003, 2009,  Karlsruhe University
+ * Copyright (C) 2003, 2009-2010,  Karlsruhe University
  *                
- * File path:     amd64-syscalls.c
+ * File path:     amd64.cc
  * Description:   AMD64 syscall pointers.
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -49,12 +49,12 @@ __L4_SpaceControl_t __L4_SpaceControl = NULL;
 __L4_ProcessorControl_t __L4_ProcessorControl = NULL;
 __L4_MemoryControl_t __L4_MemoryControl = NULL;
 
-void __L4_Init( void )
+extern "C" void __L4_Init( void )
 {
     L4_KernelInterfacePage_t *kip;
     L4_Word_t dummy;
     
-    kip = L4_KernelInterface( &dummy, &dummy, &dummy );
+    kip = (L4_KernelInterfacePage_t *) L4_KernelInterface( &dummy, &dummy, &dummy );
 
 
     __L4_Ipc = (__L4_Ipc_t) (kip->Ipc);

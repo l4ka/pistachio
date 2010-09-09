@@ -163,7 +163,6 @@
 #define X86_UTCBS      	0x2b
 #define X86_TSS		0x30
 #define X86_KDB		0x38
-#define X86_TBS		0x43
 
 /* user mode e-flags */
 #if defined(CONFIG_X86_PVI)

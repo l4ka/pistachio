@@ -35,6 +35,13 @@
 /*
  * Architecture specific helper functions.
  */
+L4_INLINE void __L4_Inc_Atomic (L4_Word_t *w)
+{
+    __asm__ __volatile__(
+        "/* l4_inc_atomic()	*/\n"
+        "lock; add $1, %0" 
+        : "=m"(w));
+}
 
 
 L4_INLINE int __L4_Msb (L4_Word_t w) __attribute__ ((const));
@@ -77,5 +84,29 @@ L4_INLINE int __L4_Lsb (L4_Word_t w)
     return bitnum;
 }
 
+L4_INLINE L4_Word64_t __L4_Rdtsc ()
+{
+    L4_Word_t eax, edx;
+
+    __asm__ __volatile__ (
+	"/* l4_rdtsc()		*/			\n"
+        "rdtsc"
+        : "=a"(eax), "=d"(edx));
+
+    return (((L4_Word64_t)edx) << 32) | (L4_Word64_t)eax;
+}
+
+L4_INLINE L4_Word64_t __L4_Rdpmc (const L4_Word_t ctrsel)
+{
+    L4_Word_t eax, edx;
+
+    __asm__ __volatile__ (
+	"/* l4_rdpmc()		*/			\n"
+        "rdpmc"
+        : "=a"(eax), "=d"(edx)
+        : "c"(ctrsel));
+    
+    return (((L4_Word64_t)edx) << 32) | (L4_Word64_t)eax;
+}
 
 #endif /* !__L4__AMD64__SPECIALS_H__ */

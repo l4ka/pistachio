@@ -1,8 +1,8 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002,  Karlsruhe University
+ * Copyright (C) 2002, 2010,  Karlsruhe University
  *                
- * File path:     init.h
+ * File path:     kdb/init.h
  * Description:   Macro for declaring a kernel debugger init function.
  *                
  * Redistribution and use in source and binary forms, with or without

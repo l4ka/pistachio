@@ -140,7 +140,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
     ASSERT(unsigned(cpuid * CACHE_LINE_SIZE) < X86_PAGE_SIZE);
     gdt[gdt_idx(X86_UTCBS)].set_seg((u32_t)UTCB_MAPPING + 
 				    (cpuid * CACHE_LINE_SIZE),
-				    sizeof(threadid_t) - 1, 
+				    sizeof(threadid_t) - 1,
 				    3, x86_segdesc_t::data);
 
     /* the TSS
@@ -152,17 +152,8 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 				   0, x86_segdesc_t::tss);
     
     
-#ifdef CONFIG_TRACEBUFFER
-    if (get_tracebuffer())
-        gdt[gdt_idx(X86_TBS)].set_seg((u32_t)get_tracebuffer(), TRACEBUFFER_SIZE-1, 3,
-				       x86_segdesc_t::data);
-    else 
-        gdt[gdt_idx(X86_TBS)].set_seg(0, ~0UL, 3, x86_segdesc_t::data);
-#endif
-    
     
     /* create a temporary GDT descriptor to load the GDTR from */
-    
     x86_descreg_t gdtr((word_t) &gdt, sizeof(gdt));
     gdtr.setdescreg(x86_descreg_t::gdtr);
     x86_descreg_t tr(X86_TSS);
@@ -185,11 +176,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 	"mov  %0, %%es		\n"	/* need valid %es for movs/stos	*/
 	"mov  %1, %%ss		\n"	/* reload stack segment		*/
 	"mov  %2, %%gs		\n"	/* load UTCB segment		*/
-#ifdef CONFIG_TRACEBUFFER
-        "mov  %3, %%fs          \n"     /* tracebuffer segment          */
-#else
 	"mov  %0, %%fs		\n"	/* default without tracebuffer	*/
-#endif
 	"xor %%eax, %%eax	\n"	/*				*/
 	"lldt %%ax		\n"	/* clear LDTR			*/
 	:
@@ -199,7 +186,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 #else
 	"r"(X86_UDS),
 #endif
-	"r"(X86_KDS), "r"(X86_UTCBS), "r"(X86_TBS)
+	"r"(X86_KDS), "r"(X86_UTCBS)
 	: "eax", "memory"
 	);
     

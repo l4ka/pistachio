@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2005,  Karlsruhe University
+## Copyright (C) 2003, 2005, 2010,  Karlsruhe University
 ##                
 ## File path:     Makefile.in
 ##                
@@ -56,7 +56,6 @@ LDFLAGS+=	-Ttext=$(SIGMA0_LINKBASE)
 CFLAGS_powerpc+=	-msoft-float -fno-builtin
 CXXFLAGS_powerpc+=	-fno-rtti
 
-CFLAGS_alpha = -O2 -freg-struct-return -mno-fp-regs -mcpu=ev4
 
 
 include $(top_srcdir)/Mk/l4.prog.mk

@@ -133,8 +133,8 @@ SECTION(SEC_INIT) void dtree_remap( kernel_interface_page_t *kip )
 
     dtree_t *dtreemapping;
     paddr_t pdtree = (paddr_t) dtree;
-    printf("dtree %p %d\n", dtree, dtree_size);
-    addr_t page = get_kernel_space()->map_device( pdtree, dtree_size, pgent_t::cache_standard );
+    //TRACEF("dtree %p %d\n", dtree, dtree_size);
+    addr_t page = get_kernel_space()->map_device( pdtree, dtree_size, true, pgent_t::cache_standard );
     dtreemapping = (dtree_t*)addr_offset(page, pdtree & (KERNEL_PAGE_SIZE - 1));
 
     if (!dtreemapping->is_valid())
@@ -348,6 +348,7 @@ SECTION(SEC_INIT) static word_t init_bootmem()
 }
 #endif
 
+
 /****************************************************************************
  *
  *                  Per-cpu init.
@@ -371,16 +372,6 @@ static SECTION(SEC_INIT) void perfmon_init( void )
 	ppc_set_pmc4( 0 );
     }
 }
-#if defined(CONFIG_TRACEBUFFER)
-tracebuffer_t * tracebuffer;
-EXTERN_KMEM_GROUP (kmem_misc);
-
-void SECTION(SEC_INIT) setup_tracebuffer (void)
-{
-    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
-    tracebuffer->initialize ();
-}
-#endif /* CONFIG_TRACEBUFFER */
 
 static SECTION(SEC_INIT) void timer_start( void )
 {

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006-2009,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/thread.cc
  * Description:   
@@ -54,14 +54,10 @@ void return_to_user_wrapper()
         "    mov %0, %%eax              \n"
         "    mov %%eax, %%ds            \n"
         "    mov %%eax, %%es            \n"
-#if defined(CONFIG_TRACEBUFFER)
-        "    mov %1, %%eax              \n"
-#else
         "    mov %%eax, %%fs            \n"
-#endif
 
 #if defined(CONFIG_IS_64BIT)
-        "    add %3, %%rsp              \n"
+        "    add %1, %%rsp              \n"
         "    iretq                      \n"
 #else
 #if defined(CONFIG_X_CTRLXFER_MSG)
@@ -69,13 +65,12 @@ void return_to_user_wrapper()
 	"     popa			\n"
 	"     addl   $4, %%esp		\n"
 #else
-	"     add %3, %%esp		\n"
+	"     add %1, %%esp		\n"
 #endif
 	"     iret			\n"
 #endif
         :
-        : "i"(X86_UDS), "i" (X86_TBS), "i"(X86_UTCBS),
-	      "i"(EXC_FRAME_SIZE * BYTES_WORD)
+        : "i"(X86_UDS), "i"(EXC_FRAME_SIZE * BYTES_WORD)
         );
 }
 

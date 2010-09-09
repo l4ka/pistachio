@@ -40,8 +40,6 @@
 #include INC_API(tcb.h)
 #include INC_GLUE(schedule.h)
 
-FEATURESTRING ("tracebuffer");
-
 #define TB_WRAP	80
 extern void list_tp_choices (void);
 
@@ -273,11 +271,11 @@ public:
 	{ return get_tracebuffer()->config; }
 
     
-    word_t get_tbuf_size()
-	{ return (TRACEBUFFER_SIZE / sizeof (tracerecord_t)) - 1; }
+    word_t get_tbuf_max()
+	{ return get_tracebuffer()->max; }
     
     word_t get_tbuf_current()
-	{ return get_tracebuffer()->current / sizeof (tracerecord_t); }
+	{ return get_tracebuffer()->current; }
 
     void reset_tbuf()
 	{ 
@@ -606,7 +604,7 @@ tbuf_handler_t tbuf_handler;
 
 void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
 {
-    word_t start, end, size;
+    word_t start, end, max;
     word_t old_tp_id[tbuf_handler_t::max_filters];
     word_t old_cpumask = tbuf_handler.get_cpumask();
     word_t old_typemask = tbuf_handler.get_typemask();
@@ -624,7 +622,7 @@ void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
     }
     tbuf_handler.set_id(0, tp_id);
     
-    size  = tbuf_handler.get_tbuf_size();
+    max  =  tbuf_handler.get_tbuf_max();
     end   = tbuf_handler.get_tbuf_current();
     
     if (usec)
@@ -633,15 +631,15 @@ void tbuf_dump (word_t count, word_t usec, word_t tp_id, word_t cpumask)
         ASSERT (pdesc);
         word_t freq = pdesc->internal_freq + 1;
         u64_t tsc = get_cpu_cycles() - ((u64_t) usec * (u64_t) (freq / 1000));
-	count = size;
+	count = max;
 	tbuf_handler.set_tsc(tsc);
     }
     else if (count == 0)
-	count = size;
+	count = max;
     
-    start = tbuf_handler.find_tbuf_start(end, count, size);
-    count = (end >= start) ? end - start : end + size - start;
-    tbuf_handler.dump_tbuf(start, count, size, false);
+    start = tbuf_handler.find_tbuf_start(end, count, max);
+    count = (end >= start) ? end - start : end + max - start;
+    tbuf_handler.dump_tbuf(start, count, max, false);
 
     if (tp_id)
     {
@@ -761,12 +759,12 @@ DECLARE_CMD (cmd_tb_dump, tracebuf, 'd', "dump", "Dump tracebuffer");
 
 CMD (cmd_tb_dump, cg)
 { 
-    word_t start, end, size, count;
+    word_t start, end, max, count;
    
     if (!tbuf_handler.is_tbuf_valid())
 	return CMD_NOQUIT;
     
-    size  = tbuf_handler.get_tbuf_size();
+    max  = tbuf_handler.get_tbuf_max();
     count = 32;
     start = 0;
     end   = tbuf_handler.get_tbuf_current();
@@ -774,26 +772,26 @@ CMD (cmd_tb_dump, cg)
     switch (get_choice ("Dump tracebuffer", "All/Region/Top/Bottom", 'b'))
     {
     case 'a': 
-	count = size;
+	count = max;
 	break;
     case 'r': 
 	start = get_dec ("From record",  0);
 	// Fall through
     case 't': 
 	count = get_dec ("Record count", count);
-	end = tbuf_handler.find_tbuf_end(start, count, size);
-	if (count > size)  count = size; 
+	end = tbuf_handler.find_tbuf_end(start, count, max);
+	if (count > max)  count = max; 
 	break;
     case 'b':
     default: 
 	count = get_dec ("Record count", count);
-	if (count > size) count = size;
-	start = tbuf_handler.find_tbuf_start(end, count, size);
+	if (count > max) count = max;
+	start = tbuf_handler.find_tbuf_start(end, count, max);
 	break;
     } 
 
-    count = (end >= start) ? end - start : end + size - start;
-    tbuf_handler.dump_tbuf(start, count, size);
+    count = (end >= start) ? end - start : end + max - start;
+    tbuf_handler.dump_tbuf(start, count, max);
 	
     return CMD_NOQUIT;
 }
@@ -809,18 +807,18 @@ DECLARE_CMD (cmd_tb_dump_def, root, 'Y', "tracebuffer dump",
 
 CMD (cmd_tb_dump_def, cg)
 {
-    word_t start, end, size, count;
+    word_t start, end, max, count;
    
     if (!tbuf_handler.is_tbuf_valid())
 	return CMD_NOQUIT;
     
     
-    size  = tbuf_handler.get_tbuf_size();
+    max  = tbuf_handler.get_tbuf_max();
     count = 64;
     end   = tbuf_handler.get_tbuf_current();
-    start = tbuf_handler.find_tbuf_start(end, count, size);
-    count = (end >= start) ? end - start : end + size - start;
-    tbuf_handler.dump_tbuf(start, count, size);
+    start = tbuf_handler.find_tbuf_start(end, count, max);
+    count = (end >= start) ? end - start : end + max - start;
+    tbuf_handler.dump_tbuf(start, count, max);
 
     return CMD_NOQUIT;
 }

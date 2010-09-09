@@ -1554,30 +1554,23 @@ void vmexit_entry_point_wrapper ()
 	"	mov %0, %%bx		\n"
 	"	mov %%bx, %%ds		\n"
 	"	mov %%bx, %%es		\n"
-
-	// FS.
-#if defined(CONFIG_TRACEBUFFER)
-	"	mov %1, %%bx		\n"
-#endif
 	"	mov %%bx, %%fs		\n"
 #endif
-
 	// GS.
-	"	mov %2, %%bx		\n"
+	"	mov %1, %%bx		\n"
 	"	mov %%bx, %%gs		\n"
 
 	// EFLAGS.
 	//  VM-Exit has a cleared eflags (except bit 1, which is always 1)
-	"       pushl %3		\n"
+	"       pushl %2		\n"
 	"	popfl			\n"
 
 	// Call do_handle_vmexit.
-	"	jmp %4			\n"
+	"	jmp %3			\n"
 	:
 	: "i" (X86_UDS),					// %0
-	  "i" (X86_TBS),					// %1
-	  "i" (X86_UTCBS),					// %2
-	  "i" (X86_KERNEL_FLAGS),				// %3
-	  "m" (*do_handle_vmexit_ptr)                           // %4
+	  "i" (X86_UTCBS),					// %1
+	  "i" (X86_KERNEL_FLAGS),				// %2
+	  "m" (*do_handle_vmexit_ptr)                           // %3
 	);
 }

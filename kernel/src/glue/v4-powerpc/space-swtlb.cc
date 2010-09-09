@@ -53,6 +53,7 @@ EXTERN_KMEM_GROUP(kmem_space);
 //#define TRACE_TLB(x...)	TRACEF(x)
 #define TRACE_TLB(x...)
 
+word_t space_t::pinned_mapping;
 // used by initialization code...
 word_t swtlb_high_water;
 
@@ -120,7 +121,7 @@ void space_t::init(fpage_t utcb_area, fpage_t kip_area)
 
 void SECTION(".init.memory") space_t::init_kernel_mappings()
 {
-    //this->pinned_mapping = PINNED_AREA_START;
+    this->pinned_mapping = PINNED_AREA_START;
 
 }
 
@@ -246,8 +247,7 @@ NOINLINE bool space_t::handle_tlb_miss( addr_t lookup_vaddr, addr_t install_vadd
     return true;
 }
 
-#if 0
-addr_t space_t::map_device_pinned(paddr_t paddr, word_t size, word_t attrib)
+addr_t space_t::map_device_pinned(paddr_t paddr, word_t size, bool kernel, word_t attrib)
 {
     word_t log2sz;
     word_t vaddr = pinned_mapping;
@@ -270,6 +270,8 @@ addr_t space_t::map_device_pinned(paddr_t paddr, word_t size, word_t attrib)
     ppc_tlb2_t tlb2;
     tlb2.init_device();
     tlb2.set_kernel_perms(true, true, false);
+    if (!kernel)
+        tlb2.set_user_perms(true, true, false);
 
     word_t tlb_index = swtlb.allocate_pinned();
     tlb0.write(tlb_index);
@@ -284,7 +286,6 @@ addr_t space_t::map_device_pinned(paddr_t paddr, word_t size, word_t attrib)
 
     return addr_offset((addr_t)vaddr, paddr - paddr_align);
 }
-#endif
 
 asid_t *space_t::get_asid()
 {
@@ -463,6 +464,25 @@ extern "C" SECTION(".einit") void init_paging( int cpu )
 #endif
     }
 }
+
+#if defined(CONFIG_TRACEBUFFER)
+FEATURESTRING ("tracebuffer");
+tracebuffer_t * tracebuffer;
+EXTERN_KMEM_GROUP (kmem_misc);
+void setup_tracebuffer (void)
+{
+    tracebuffer = (tracebuffer_t *) kmem.alloc (kmem_misc, TRACEBUFFER_SIZE);
+    if (!tracebuffer)
+        return;
+    
+    addr_t vaddr = get_kernel_space()->map_device_pinned(virt_to_phys((paddr_t)tracebuffer), 
+                                                         TRACEBUFFER_SIZE, false, pgent_t::cache_standard );
+    get_kip()->memory_info.insert(memdesc_t::reserved, true, vaddr,
+                                  addr_offset(vaddr, TRACEBUFFER_SIZE -1));
+
+    tracebuffer->initialize ();
+}
+#endif /* CONFIG_TRACEBUFFER */
 
 addr_t setup_console_mapping(paddr_t paddr, int log2size)
 {

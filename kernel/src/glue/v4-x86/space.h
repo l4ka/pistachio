@@ -423,9 +423,7 @@ INLINE void reload_user_segregs (void)
 {
     asm volatile (
 	"	movl %0, %%es	\n"
-#if !defined(CONFIG_TRACEBUFFER)
 	"	movl %0, %%fs	\n"
-#endif
 	"	movl %1, %%gs	\n"
 	:
 	: "r" (X86_UDS), "r" (X86_UTCBS));

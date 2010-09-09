@@ -32,8 +32,6 @@
  ********************************************************************/
 #include <l4/arch.h>
 
-#define L4_TRACEBUFFER
-
 #define HAVE_HANDLE_ARCH_PAGEFAULT
 #define HAVE_READ_CYCLES
 #define HAVE_ARCH_IPC

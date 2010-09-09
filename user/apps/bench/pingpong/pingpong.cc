@@ -38,35 +38,6 @@
 #include <l4io.h>
 #include <l4/arch.h>
 
-int strcmp( const char *str1, const char *str2 )
-{
-    while( *str1 && *str2 ) {
-	if( *str1 < *str2 )
-	    return -1;
-	if( *str1 > *str2 )
-	    return 1;
-	str1++;
-	str2++;
-    }
-    if( *str2 )
-	return -1;
-    if( *str1 )
-	return 1;
-    return 0;
-}
-
-bool l4_has_feature( const char *feature_name )
-{
-    void *kip = L4_GetKernelInterface();
-    char *name;
-
-    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
-	if( !strcmp(feature_name, name) )
-	    return true;
-    return false;
-}
-
-
 #if defined(L4_ARCH_POWERPC64)
 extern long _start_pager;
 extern long _start_ping_thread;
@@ -89,15 +60,8 @@ int SMALL_AS = 0;
 int LIPC = 0;
 int PRINT_TABLE = 0;
 
-bool tbuf, hsched;
+int hsched;
 
-#if defined(L4_TRACEBUFFER)
-#define Dprintf(args...)                                \
-
-	if (tbuf) L4_Tbuf_RecordEvent (1, args);	        
-#else
-#define Dprintf(x...) 
-#endif
 
 L4_ThreadId_t s0tid, roottid, pager_tid, ping_tid, pong_tid;
 L4_KernelInterfacePage_t * kip;
@@ -140,7 +104,9 @@ void pong_thread (void);
 #elif defined(L4_ARCH_AMD64)
 #include "amd64.h"
 #endif
+#include <l4/tracebuffer.h>
 
+#define debug_printf(x...) L4_Tbuf_RecordEvent (1, x)
 
 static inline void rdpmc (int no, L4_Word64_t* res)
 { 
@@ -227,7 +193,7 @@ void pong_thread (void)
     else
 	for (;;)
 	{
-	    Dprintf("pong ipc\n");
+	    debug_printf("pong ipc\n");
 	    untyped = pingpong_ipc (ping_tid, untyped);
 	}
 }
@@ -282,7 +248,7 @@ void ping_thread (void)
 		{
 		    for (int k = 0; k < FACTOR; k++)
 		    {	    
-			Dprintf( "ping ipc\n");
+			debug_printf( "ping ipc\n");
 			pingpong_ipc (pong_tid, j);
 		    }
 		}
@@ -370,8 +336,8 @@ void pager (void)
 	{
 	    L4_Store (tag, &msg);
             
-            Dprintf( "Pager got msg from %p\n", (L4_Word_t) tid.raw);
-            Dprintf( "\tmsg  (%p, %p, %p, %p)\n",                             
+            debug_printf( "Pager got msg from %p\n", (L4_Word_t) tid.raw);
+            debug_printf( "\tmsg  (%p, %p, %p, %p)\n",                             
                              (L4_Word_t) tag.raw, 
                              (L4_Word_t) L4_Get (&msg, 0), 
                              (L4_Word_t) L4_Get (&msg, 1),
@@ -454,8 +420,10 @@ int main (void)
     // We need a maximum of two threads per task
     utcb_area = L4_FpageLog2 ((L4_Word_t) UTCB_ADDRESS,
 			      L4_UtcbAreaSizeLog2 (kip) + 1);
-    Dprintf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
+
+    debug_printf ("kip_area = %lx, utcb_area = %lx, utcb_size = %lx\n", 
              kip_area.raw, utcb_area.raw, utcb_size);
+
 
     // Create pager
     pager_tid = L4_GlobalId (L4_ThreadNo (roottid) + 1, 2);
@@ -464,16 +432,13 @@ int main (void)
     
     L4_ThreadId_t scheduler_tid[2] = { roottid, roottid };
     
-    hsched  = l4_has_feature("hscheduling");
+    hsched  = L4_HasFeature("hscheduling");
     
-#if defined(L4_TRACEBUFFER)
-    tbuf =  l4_has_feature("tracebuffer");
-#endif
     
     // VU: calculate UTCB address -- this has to be revised
     L4_Word_t pager_utcb = L4_MyLocalId().raw;
     pager_utcb = (pager_utcb & ~(utcb_size - 1)) + utcb_size;
-    Dprintf("local id = %lx, pager UTCB = %lx\n", L4_MyLocalId().raw,
+    debug_printf("local id = %lx, pager UTCB = %lx\n", L4_MyLocalId().raw,
             pager_utcb);
 
     L4_ThreadControl (pager_tid, L4_Myself (), scheduler_tid[0], L4_Myself (), (void*)pager_utcb);
@@ -504,7 +469,7 @@ int main (void)
     
     const char *str = "Pingpong started %x\n";
     printf(str, L4_Myself());
-    Dprintf( str, L4_Myself().raw);
+    debug_printf( str, L4_Myself().raw);
     
     for (;;)
     {

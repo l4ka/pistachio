@@ -76,7 +76,7 @@ CPPFLAGS_amd64= 	-I$(top_srcdir)/lib/io -I$(srcdir) \
 			-DALSO_ELF64 -DALSO_BOOTINFO64
 LDFLAGS_amd64=		-b elf32-i386 --oformat elf32-i386 \
 			-N -m elf_i386 -L.
-IO32FILES_amd64=	get_hex.cc print.cc $(ARCH)-getc.cc $(ARCH)-putc.cc
+IO32FILES_amd64=	get_hex.cc print.cc $(ARCH).cc
 PROGRAM_DEPS_amd64=	$(top_builddir)/util/kickstart/libio32.a
 
 ##

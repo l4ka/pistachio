@@ -219,14 +219,7 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 				           x86_segdesc_t::m_long,
 				           x86_segdesc_t::msr_gs);
     
-#if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg((u64_t) get_tracebuffer(),
-					 x86_segdesc_t::data,
-					 3,
-					 x86_segdesc_t::m_long,
-					 x86_segdesc_t::msr_fs);
-#endif
-    
+   
     __asm__ __volatile__ ("" ::: "memory");
     
 
@@ -236,16 +229,12 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 	"mov  %0, %%es		\n\t"		// load extra segment (ES)
 	"mov  %0, %%ss		\n\t"		// load stack segment (SS)
 	"mov  %1, %%gs		\n\t"		// load UTCB segment  (GS)
-#ifdef CONFIG_TRACEBUFFER       
-	"mov  %2, %%fs		\n\t"		// tracebuffer segment (FS)
-#else
 	"mov  %0, %%fs		\n\t"	        // no tracebuffer
-#endif  
- 	"pushq  %3	      	\n\t"		// new CS
+ 	"pushq  %2	      	\n\t"		// new CS
  	"pushq $1f		\n\t"		// new IP		
  	"lretq			\n\t"
  	"1:			\n\t"	
-	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" (X86_TBS), "r" ((u64_t) X86_KCS)
+	: /* No Output */ : "r" (0), "r" (X86_UTCBS), "r" ((u64_t) X86_KCS)
 	);
     
     
@@ -255,14 +244,6 @@ void SECTION(SEC_INIT) setup_gdt(x86_tss_t &tss, cpuid_t cpuid)
 					   x86_segdesc_t::m_long,
 				           x86_segdesc_t::msr_gs);
     
-#if defined(CONFIG_TRACEBUFFER)
-    gdt.segdsc[GDT_IDX(X86_TBS)].set_seg( (u64_t) get_tracebuffer(),
-                                          x86_segdesc_t::data,
-                                          3,
-                                          x86_segdesc_t::m_long,
-                                          x86_segdesc_t::msr_fs);
-#endif
-
 }
 
 /**

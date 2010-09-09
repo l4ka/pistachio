@@ -140,8 +140,7 @@ public:
 
     bool next_record(word_t type, word_t id)
         {   
-            if (!this)
-                return false;
+            if (!this) return false;
             
             /* Check wheter to filter the event */                  
             if ((mask & ((type & 0xffff) << 16)) == 0)         
@@ -159,6 +158,7 @@ public:
     
     void  increase_counter(word_t ctr)
         {
+            if (!this) return;
             counters[ctr & 0x7]++;
         }
     
@@ -223,11 +223,12 @@ INLINE void __tbuf_record_event(word_t type, word_t tpid, const char *str, ...)
     va_end(args);
 }
 
+void setup_tracebuffer (void);
+
 #else /* !CONFIG_TRACEBUFFER */
 #define tbuf_inc_counter(counter)
 #define tbuf_record_event(args...)
 #endif
-
 
 # define TBUF_REC_TRACEPOINT(tptype, tpid, str, args...)	\
     tbuf_record_event (tptype, tpid, str, ##args)

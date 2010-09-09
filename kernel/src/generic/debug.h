@@ -130,6 +130,7 @@ void kdebug_entry (void *);
 # define printf(fmt, args...)		do { } while (false)
 # define enter_kdebug(x)		do { } while (true)
 # define UNIMPLEMENTED()		do { } while (true)
+# define UNTESTED()		        do { } while (true)
 # define ASSERT(x)			do { } while (false)
 # define WARNING(fmt, args...)		do { } while (false)
 # define TRACE(x...)			do { } while (false)

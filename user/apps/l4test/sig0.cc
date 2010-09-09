@@ -133,7 +133,7 @@ bad_send(void)
 	L4_Load( &msg );
 
 	tag = L4_Call_Timeouts( L4_Pager(), L4_Never, L4_TimePeriod( 1000 * 1000 ));
-        bool ok = L4_IpcFailed(tag) && (L4_ErrorCode() & 0x1 == 1);
+        bool ok = (L4_IpcFailed(tag) && (L4_ErrorCode() & 0x1 == 1));
 
 	/* give sigma0 a little time to recover */
 	msec_sleep(1000);

@@ -191,7 +191,7 @@ void SECTION(".init.memory") space_t::init_kernel_space()
     kernel_space->init_kernel_mappings();
 }
 
-addr_t space_t::map_device( paddr_t paddr, word_t size, word_t attrib)
+addr_t space_t::map_device( paddr_t paddr, word_t size, bool kernel, word_t attrib)
 {
     addr_t start_addr = (addr_t)(DEVICE_AREA_START + DEVICE_AREA_BAT_SIZE);
 
@@ -242,7 +242,7 @@ found:
     for( word_t page = 0; page < size; page += POWERPC_PAGE_SIZE ) 
     {
 	this->add_mapping( addr_offset(start_addr, page),
-		paddr + page, pgent_t::size_4k, true, true, attrib );
+		paddr + page, pgent_t::size_4k, true, kernel, attrib );
     }
 
     return start_addr;

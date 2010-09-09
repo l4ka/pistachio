@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002, 2004-2009,  Karlsruhe University
+ * Copyright (C) 2002, 2004-2010,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/tcb.h
  * Description:   TCB related functions for Version 4, IA-32
@@ -137,7 +137,6 @@ INLINE SECTION(".text") void tcb_t::switch_to(tcb_t * dest)
 #endif
 
 #if defined(CONFIG_X86_SMALL_SPACES)
-    
     __asm__ __volatile__ (
 	"/* switch_to_thread */				\n"
 	"	pushl	%%ebp				\n"
@@ -171,9 +170,7 @@ INLINE SECTION(".text") void tcb_t::switch_to(tcb_t * dest)
 	"	movl	%%eax, 28(%%ebp)		\n"
 	"	movl	$"MKSTR(X86_UDS)", %%ecx	\n"
 	"	movl	%%ecx, %%es			\n"
-#if !defined(CONFIG_TRACEBUFFER)
 	"	movl	%%ecx, %%fs			\n"
-#endif        
 	"	movl	$"MKSTR(X86_UTCBS)", %%ecx	\n"
 	"	movl	%%ecx, %%gs			\n"
 
@@ -196,9 +193,8 @@ INLINE SECTION(".text") void tcb_t::switch_to(tcb_t * dest)
 
 	"	movl	$"MKSTR(X86_UDS)", %%edx	\n"
 	"	movl	%%edx, %%es			\n"
-#if !defined(CONFIG_TRACEBUFFER)
 	"	movl	%%edx, %%fs			\n"
-#endif
+
 	"	movl	$"MKSTR(X86_UTCBS)", %%edx	\n"
 	"	movl	%%edx, %%gs			\n"
 
