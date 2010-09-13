@@ -33,9 +33,9 @@
 #ifndef __PLATFORM__PPC44X__INTCTRL_H__
 #define __PLATFORM__PPC44X__INTCTRL_H__
 
-#ifdef CONFIG_PLAT_440_BGP
+#ifdef CONFIG_SUBPLAT_440_BGP
 # include INC_PLAT(bic.h)
-#elif CONFIG_PLAT_440_EBONY
+#elif CONFIG_SUBPLAT_440_EBONY
 # include INC_PLAT(uic.h)
 #else
 # error undefined interrupt controller

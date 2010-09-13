@@ -101,7 +101,7 @@ bool kdb_t::pre()
 	    param->frame->r3 = (word_t)getc();
 	    param->frame->srr0_ip += 4;
 	}
-#ifdef CONFIG_PLAT_440_BGP
+#ifdef CONFIG_SUBPLAT_440_BGP
 	else if( user_io && (L4_TRAP_KINJ == param->frame->r0) )
 	{
 	    // User request to inject character stream into KDB

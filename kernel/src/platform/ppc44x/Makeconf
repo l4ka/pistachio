@@ -32,10 +32,10 @@
 ######################################################################
 SOURCES += $(addprefix src/platform/ppc44x/, startup.S init.cc fdt.cc)
 
-ifeq ("$(CONFIG_PLAT_440_BGP)","y")
+ifeq ("$(CONFIG_SUBPLAT_440_BGP)","y")
 SOURCES += $(addprefix src/platform/ppc44x/,bic.cc)
 endif
 
-ifeq ("$(CONFIG_PLAT_440_EBONY)","y")
+ifeq ("$(CONFIG_SUBPLAT_440_EBONY)","y")
 SOURCES += $(addprefix src/platform/ppc44x/,uic.cc)
 endif

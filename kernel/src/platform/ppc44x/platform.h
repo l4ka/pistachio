@@ -33,9 +33,9 @@
 #ifndef __PLATFORM__PPC44X__PLATFORM_H__
 #define __PLATFORM__PPC44X__PLATFORM_H__
 
-#if defined(CONFIG_PLAT_440_BGP)
+#if defined(CONFIG_SUBPLAT_440_BGP)
 # include INC_PLAT(bluegene.h)
-#elif defined(CONFIG_PLAT_440_EBONY)
+#elif defined(CONFIG_SUBPLAT_440_EBONY)
 # include INC_PLAT(ebony.h)
 #endif
 

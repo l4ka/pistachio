@@ -44,8 +44,8 @@ PLAT_OFPPC	"IEEE 1275 Open Firmware for PowerPC"
 PLAT_PPC44X	"44X Embedded Processor Platform"
 
 powerpc_subplatform	'Sub-Platform'
-PLAT_440_BGP	"BluegeneP"
-PLAT_440_EBONY	"AMCC Ebony Evaluation Board"
+SUBPLAT_440_BGP	"BluegeneP"
+SUBPLAT_440_EBONY	"AMCC Ebony Evaluation Board"
 
 
 PPC_EXPOSE_OPIC	'Expose the interrupt controller to user space?' text
@@ -161,14 +161,14 @@ unless ARCH_POWERPC suppress dependent powerpc_platform
 unless ARCH_POWERPC suppress dependent powerpc_type
 
 choices powerpc_subplatform
-	PLAT_440_BGP
-	PLAT_440_EBONY
-	default PLAT_440_BGP
+	SUBPLAT_440_BGP
+	SUBPLAT_440_EBONY
+	default SUBPLAT_440_BGP
 
 # standard PPC arch
 unless PPC_MMU_SEGMENTS suppress PLAT_OFPPC PPC_BAT_SYSCALLS PPC_SEGMENT_LOOP
 unless PLAT_OFPPC suppress PPC_EXPOSE_OPIC KDB_CONS_OF1275 KDB_CONS_PSIM_COM
-unless PLAT_440_BGP suppress KDB_CONS_BGP_JTAG KDB_CONS_BGP_TREE
+unless SUBPLAT_440_BGP suppress KDB_CONS_BGP_JTAG KDB_CONS_BGP_TREE
 default PPC_EXPOSE_OPIC from n
 
 unless PLAT_PPC44X suppress dependent powerpc_subplatform
@@ -181,9 +181,9 @@ derive PPC_MMU_SEGMENTS from CPU_POWERPC_IBM750 or CPU_POWERPC_PPC604
 require CPU_POWERPC_PPC440 implies STATIC_TCBS==y
 
 # Platform-specific configurations/features
-derive PPC_CACHE_ICBI_LOCAL from PLAT_440_BGP
-derive PPC_TLB_INV_LOCAL from PLAT_440_BGP
-derive PPC_CACHE_L1_WRITETHROUGH from PLAT_440_BGP
+derive PPC_CACHE_ICBI_LOCAL from SUBPLAT_440_BGP
+derive PPC_TLB_INV_LOCAL from SUBPLAT_440_BGP
+derive PPC_CACHE_L1_WRITETHROUGH from SUBPLAT_440_BGP
 
 # Experimental stuff
 unless PLAT_PPC44X suppress X_PPC_SOFTHVM

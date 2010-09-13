@@ -134,7 +134,7 @@ void thread_resources_t::spill_fpu( tcb_t *tcb )
 {
     // Spill the registers.
     u64_t *start = this->fpu_state;
-#ifdef CONFIG_PLAT_440_BGP
+#ifdef CONFIG_SUBPLAT_440_BGP
     ASSERT((reinterpret_cast<word_t>(start) & 0xf) == 0);
     asm volatile (
 	"stfpdx	  0, 0, %[dest]\n"
@@ -230,7 +230,7 @@ void thread_resources_t::restore_fpu( tcb_t *tcb )
 
     // Load the registers.
     u64_t *start = this->fpu_state;
-#ifdef CONFIG_PLAT_440_BGP
+#ifdef CONFIG_SUBPLAT_440_BGP
     ASSERT((reinterpret_cast<word_t>(start) & 0xf) == 0);
     asm volatile (
 	"lfpdx	 0, 0, %[src]\n"

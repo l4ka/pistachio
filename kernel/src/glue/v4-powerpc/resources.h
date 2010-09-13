@@ -46,7 +46,7 @@ enum resource_type_e {
 #define FPU_REGS	32
 
 /* support for extended floating point state like AltiVec or Double Hummer */
-#ifdef CONFIG_PLAT_440_BGP
+#ifdef CONFIG_SUBPLAT_440_BGP
 #define FPU_EXTRA_REGS	32
 #else
 #define FPU_EXTRA_REGS	0
