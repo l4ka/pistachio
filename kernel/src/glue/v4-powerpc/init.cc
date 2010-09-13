@@ -654,7 +654,6 @@ extern "C" void SECTION(SEC_INIT) startup_system ( word_t r3, word_t r4, word_t 
     TRACE_INIT("virtual memory layout:\n"
 	       "\tuser area     %wx - %wx\n"
 	       "\tcopy area     %wx - %wx\n"
-	       "\tktcb area     %wx - %wx\n"
 	       "\tkernel area   %wx - %wx\n",
 	       USER_AREA_START, USER_AREA_END,
 	       COPY_AREA_START, COPY_AREA_END,
