@@ -166,7 +166,7 @@ void intctrl_t::handle_irq(word_t cpu)
 void intctrl_t::map()
 {
     ctrl = (bgic_t*)get_kernel_space()->
-	map_device(phys_addr, mem_size, pgent_t::cache_inhibited);
+	map_device(phys_addr, mem_size, true, pgent_t::cache_inhibited);
 }
 
 void intctrl_t::start_new_cpu(word_t cpu)
