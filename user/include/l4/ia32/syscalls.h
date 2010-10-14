@@ -47,6 +47,28 @@
 # define __L4_CLOBBER_REGS	"ebx", "cc"
 #endif
 
+#ifdef __cplusplus
+#define _C_ "C"
+#else
+#define _C_
+#endif
+
+/*
+ * Note: We do not call the __L4*-functions from inline assembly any more,
+ * instead we pass the pointers as input operands. This way there is no need for
+ * the linker to generate text relocations for position independent code.
+ */
+extern _C_ void __L4_ExchangeRegisters(void);
+extern _C_ void __L4_ThreadControl(void);
+extern _C_ void __L4_SystemClock(void);
+extern _C_ void __L4_ThreadSwitch(void);
+extern _C_ void __L4_Schedule(void);
+extern _C_ void __L4_Ipc(void);
+extern _C_ void __L4_Lipc(void);
+extern _C_ void __L4_Unmap(void);
+extern _C_ void __L4_SpaceControl(void);
+extern _C_ void __L4_ProcessorControl(void);
+extern _C_ void __L4_MemoryControl(void);
 
 L4_INLINE void * L4_KernelInterface (L4_Word_t *ApiVersion,
 				     L4_Word_t *ApiFlags,
@@ -95,32 +117,35 @@ L4_INLINE L4_ThreadId_t L4_ExchangeRegisters (L4_ThreadId_t dest,
 	L4_Word_t	esi;
     } in;
 
-    in.ebp = pager.raw;
-    in.ebx = UserDefHandle;
-    in.esi = ip;
-    in.edi = flags;
+    in.ebp  = pager.raw;
+    in.ebx  = UserDefHandle;
+    in.esi  = ip;
+    in.edi  = flags;
 
     __asm__ __volatile__ (
 	"/* L4_ExchangeRegisters() */			\n"
 	__L4_SAVE_REGS
 	"       pushl   %%esi                           \n"
+	"       pushl   %%edi                           \n"
 	"       movl    (%%esi), %%ebp                  \n"
 	"       movl    4(%%esi), %%edi                 \n"
 	"       movl    8(%%esi), %%ebx                 \n"
 	"       movl    12(%%esi), %%esi                \n"
-	"	call	__L4_ExchangeRegisters		\n"
-        "       xchgl   %%esi, (%%esp)                  \n"
+	"       call    *(%%esp)                        \n"
+        "       xchgl   %%esi, 4(%%esp)                 \n"
         "       movl    %%edi, 4(%%esi)                 \n"
         "       movl    %%ebx, 8(%%esi)                 \n"
         "       movl    %%ebp, (%%esi)                  \n"
+        "       popl    %%edi                           \n"
         "       popl    %%esi                           \n"
 	__L4_RESTORE_REGS
         :
 	"=a" (result), "=c" (*old_control), "=d" (*old_sp), "=S" (*old_ip)
         :
-	"a" (dest.raw), "c" (control), "d" (sp), "S" (&in)
+	"a" (dest.raw), "c" (control), "d" (sp), "S" (&in),
+	"D" (__L4_ExchangeRegisters)
         :
-	"edi", "memory", __L4_CLOBBER_REGS);
+	"memory", __L4_CLOBBER_REGS);
 
     old_pager->raw = in.ebp;
     *old_flags = in.edi;    
@@ -141,7 +166,9 @@ L4_INLINE L4_Word_t L4_ThreadControl (L4_ThreadId_t dest,
     __asm__ __volatile__ (
 	"/* L4_ThreadControl() */			\n"
 	__L4_SAVE_REGS
-	"	call	__L4_ThreadControl		\n"
+	"	movl	%%edi, %%ebx			\n"
+	"	movl	%9, %%edi			\n"
+	"	call	*%%ebx				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -156,7 +183,8 @@ L4_INLINE L4_Word_t L4_ThreadControl (L4_ThreadId_t dest,
 	"1" (Pager),
 	"2" (Scheduler),
 	"3" (SpaceSpecifier),
-	"4" (UtcbLocation)
+	"m" (UtcbLocation),
+	"D" (__L4_ThreadControl)
 
 	: /* clobbers */
 	__L4_CLOBBER_REGS);
@@ -171,14 +199,14 @@ L4_INLINE L4_Clock_t L4_SystemClock (void)
 
     __asm__ __volatile__ (
 	"/* L4_SystemClock() */				\n"
-	"	call	__L4_SystemClock		\n"
-
+	"	call	*%%ecx				\n"
 	: /* outputs */
 	"=A" (result.raw)
 
-	: /* no inputs */
+	:
+	"c" (__L4_SystemClock)
 	: /* clobbers */
-	"ecx", "esi", "edi");
+	"esi", "edi");
 
     return result;
 }
@@ -188,12 +216,13 @@ L4_INLINE void L4_ThreadSwitch (L4_ThreadId_t dest)
 {
     __asm__ __volatile__ (
 	"/* L4_ThreadSwitch() */			\n"
-	"	call	__L4_ThreadSwitch		\n"
+	"	call	*%%ecx				\n"
 
 	: /* no outputs */
 
 	: /* inputs */
-	"a" (dest)
+	"a" (dest),
+	"c" (__L4_ThreadSwitch)
 
 	/* no clobbers */
 	);
@@ -213,7 +242,9 @@ L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
     __asm__ __volatile__ (
 	"/* L4_Schedule() */				\n"
 	__L4_SAVE_REGS
-	"	call	__L4_Schedule			\n"
+	"	movl	%%edi, %%ebx			\n"
+	"	movl	%9, %%edi			\n"
+	"	call	*%%ebx				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -228,7 +259,8 @@ L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
 	"1" (PrioControl),
 	"2" (TimeControl),
 	"3" (ProcessorControl),
-	"4" (PreemptionControl)
+	"m" (PreemptionControl),
+	"D" (__L4_Schedule)
 
 	: /* clobbers */
 	__L4_CLOBBER_REGS);
@@ -246,10 +278,13 @@ L4_INLINE L4_MsgTag_t L4_Ipc (L4_ThreadId_t to,
     L4_Word_t * utcb = __L4_X86_Utcb ();
 
 #if defined(__pic__)
+
     __asm__ __volatile__ (
 	"/* L4_Ipc() */					\n"
 	__L4_SAVE_REGS
-	"	call	__L4_Ipc			\n"
+	"	movl	%%eax, %%ebx			\n"
+	"	movl	%5, %%eax			\n"
+	"	call	*%%ebx				\n"
         "	movl	%%ebp, %%ecx			\n"
 	"	movl	%%ebx, %%edx			\n"
 	__L4_RESTORE_REGS
@@ -262,11 +297,13 @@ L4_INLINE L4_MsgTag_t L4_Ipc (L4_ThreadId_t to,
         
 	: /* inputs */
 	"S" (utcb[0]),
-	"a" (to.raw),
-        "D" (utcb),
+	"m" (to.raw),
+	"D" (utcb),
 	"c" (Timeouts),
-	"d" (FromSpecifier)
+	"d" (FromSpecifier),
+	"a" (__L4_Ipc)
 	);
+
 #else
     L4_Word_t dummy;
 
@@ -282,7 +319,7 @@ L4_INLINE L4_MsgTag_t L4_Ipc (L4_ThreadId_t to,
 	"=a" (result),
 	"=b" (mr1),
 	"=c" (mr2),
-        "=d" (dummy)
+    "=d" (dummy)
         
 	: /* inputs */
 	"S" (utcb[0]),
@@ -317,8 +354,10 @@ L4_INLINE L4_MsgTag_t L4_Lipc (L4_ThreadId_t to,
     __asm__ __volatile__ (
 	"/* L4_Lipc() */				\n"
 	__L4_SAVE_REGS
-	"	call	__L4_Lipc			\n"
-        "	movl	%%ebp, %%ecx			\n"
+	"	movl	%%eax, %%ebx			\n"
+	"	movl	%5, %%eax			\n"
+	"	call	*%%ebx				\n"
+	"	movl	%%ebp, %%ecx			\n"
 	"	movl	%%ebx, %%edx			\n"
 	__L4_RESTORE_REGS
 
@@ -330,10 +369,11 @@ L4_INLINE L4_MsgTag_t L4_Lipc (L4_ThreadId_t to,
         
 	: /* inputs */
 	"S" (utcb[0]),
-	"a" (to.raw),
-        "D" (utcb),
+	"m" (to.raw),
+	"D" (utcb),
 	"c" (Timeouts),
-	"d" (FromSpecifier)
+	"d" (FromSpecifier),
+	"a" (__L4_Lipc)
 	);
 #else
     L4_Word_t dummy;
@@ -344,7 +384,7 @@ L4_INLINE L4_MsgTag_t L4_Lipc (L4_ThreadId_t to,
 	"	call	__L4_Lipc			\n"
         "	movl	%%ebp, %%ecx			\n"
 	__L4_RESTORE_REGS
-	
+
 	: /* outputs */
 	"=S" (mr0),
 	"=a" (result),
@@ -355,7 +395,7 @@ L4_INLINE L4_MsgTag_t L4_Lipc (L4_ThreadId_t to,
 	: /* inputs */
 	"S" (utcb[0]),
 	"a" (to.raw),
-        "D" (utcb),
+	"D" (utcb),
 	"c" (Timeouts),
 	"d" (FromSpecifier)
 	);
@@ -378,7 +418,7 @@ L4_INLINE void L4_Unmap (L4_Word_t control)
     __asm__ __volatile__ (
 	"/* L4_Unmap() */				\n"
 	__L4_SAVE_REGS
-	"	call	__L4_Unmap			\n"
+	"	call	*%%ecx				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -389,10 +429,11 @@ L4_INLINE void L4_Unmap (L4_Word_t control)
 	: /* inputs */
 	"0" (utcb[0]),
 	"1" (utcb),
-	"2" (control)
+	"2" (control),
+	"c" (__L4_Unmap)
 
 	: /* clobbered */
-	"ecx", "edx", __L4_CLOBBER_REGS);
+	"edx", __L4_CLOBBER_REGS);
 }
 
 
@@ -408,7 +449,9 @@ L4_INLINE L4_Word_t L4_SpaceControl (L4_ThreadId_t SpaceSpecifier,
     __asm__ __volatile__ (
 	"/* L4_SpaceControl() */			\n"
 	__L4_SAVE_REGS
-	"	call	__L4_SpaceControl		\n"
+	"	movl	%%edi, %%ebx			\n"
+	"	movl	%9, %%edi			\n"
+	"	call	*%%ebx				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -423,7 +466,8 @@ L4_INLINE L4_Word_t L4_SpaceControl (L4_ThreadId_t SpaceSpecifier,
 	"1" (control),
 	"2" (KernelInterfacePageArea),
 	"3" (UtcbArea),
-	"4" (redirector)
+	"m" (redirector),
+	"D" (__L4_SpaceControl)
 
 	: /* clobbers */
 	__L4_CLOBBER_REGS);
@@ -442,7 +486,7 @@ L4_INLINE L4_Word_t L4_ProcessorControl (L4_Word_t ProcessorNo,
     __asm__ __volatile__ (
 	"/* L4_ProcessorControl() */			\n"
 	__L4_SAVE_REGS
-	"	call	__L4_ProcessorControl		\n"
+	"	call	*%%edi				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -456,7 +500,8 @@ L4_INLINE L4_Word_t L4_ProcessorControl (L4_Word_t ProcessorNo,
 	"0" (ProcessorNo),
 	"1" (InternalFrequency),
 	"2" (ExternalFrequency),
-	"3" (voltage)
+	"3" (voltage),
+	"4" (__L4_ProcessorControl)
 
 	: /* clobbers */
 	__L4_CLOBBER_REGS);
@@ -474,11 +519,14 @@ L4_INLINE L4_Word_t L4_MemoryControl (L4_Word_t control,
     __asm__ __volatile__ (
 	"/* L4_MemoryControl() */			\n"
 	__L4_SAVE_REGS
+	"	pushl	%%edi				\n"
+	"	movl	%8, %%edi			\n"
 	"	movl	12(%6), %%ebp			\n"
 	"	movl	8(%6), %%ebx			\n"
 	"	movl	4(%6), %%edx			\n"
 	"	movl	(%6), %%ecx			\n"
-	"	call	__L4_MemoryControl		\n"
+	"	call	*(%%esp)			\n"
+	"	popl	%%edi				\n"
 	__L4_RESTORE_REGS
 
 	: /* outputs */
@@ -492,7 +540,8 @@ L4_INLINE L4_Word_t L4_MemoryControl (L4_Word_t control,
 	"0" (control),
 	"1" (attributes),
 	"3" (utcb[0]),
-	"4" (utcb)
+	"m" (utcb),
+	"4" (__L4_MemoryControl)
 
 	: /* clobbers */
 	__L4_CLOBBER_REGS);
