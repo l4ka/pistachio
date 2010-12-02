@@ -382,7 +382,7 @@ SYS_SPACE_CONTROL (threadid_t space_tid, word_t control, fpage_t kip_area,
 	}
     }
 
-    word_t old_control = space->space_control (control);
+    word_t old_control = space->space_control (control, kip_area, utcb_area, redirector_tid);
 
     return_space_control (1, old_control);
 

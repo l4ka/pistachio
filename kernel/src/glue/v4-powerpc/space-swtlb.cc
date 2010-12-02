@@ -108,20 +108,29 @@ bool space_t::sync_kernel_space(addr_t addr)
 
 void space_t::init(fpage_t utcb_area, fpage_t kip_area)
 {
-    this->utcb_area = utcb_area;
+	int i;
+	this->utcb_area = utcb_area;
     this->kip_area = kip_area;
 
     this->add_mapping( kip_area.get_base(), (paddr_t)virt_to_phys(get_kip()), 
 		       pgent_t::size_4k, false, false );
 
     // XXX: do upon migration!
-    for (int i = 0; i < CONFIG_SMP_MAX_CPUS; i++)
+    for (i = 0; i < CONFIG_SMP_MAX_CPUS; i++)
 	get_asid(i)->init();
 }
 
 void SECTION(".init.memory") space_t::init_kernel_mappings()
 {
+    int i;
     this->pinned_mapping = PINNED_AREA_START;
+
+    //initialize translation table
+    for (i=0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
+    	transTable[i].s0addr = 0;
+    	transTable[i].physaddr = 0;
+    	transTable[i].size = 0;
+    }
 
 }
 
@@ -352,33 +361,25 @@ void space_t::arch_free()
 #define RELOC(s0addr, physaddr, size) \
     case s0addr ... s0addr + size - 1: paddr = physaddr + reinterpret_cast<paddr_t>(addr_offset(addr, -s0addr)); break;
 
-/* XXX: remove remapping */
 paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 {
-    paddr_t paddr = reinterpret_cast<paddr_t>(addr);
-#if defined(CONFIG_SUBPLAT_440_BGP)
-    switch(reinterpret_cast<word_t>(addr))
-    {
-	RELOC(0xff000000, 0x600000000ULL, 0x4000);	// DMA
-	RELOC(0xff010000, 0x601140000ULL, 0x8000);	// FIFO0
-	RELOC(0xff018000, 0x601150000ULL, 0x8000);	// FIFO1
-	RELOC(0xff020000, 0x610000000ULL, 0x1000);	// Tree Ch0
-	RELOC(0xff021000, 0x611000000ULL, 0x1000);	// Tree Ch1
-	RELOC(0xff030000, 0x720000000ULL, 0x10000);	// Tomal, Xemac, xgmii
+	word_t i;
+	paddr_t paddr = (paddr_t)addr;
+    for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
+    	if ((transTable[i].size > 0) && ((word_t)addr >= transTable[i].s0addr) && ((word_t)addr <= transTable[i].s0addr + transTable[i].size - 1)) {
+    		paddr = transTable[i].physaddr + (word_t)addr_offset(addr, -transTable[i].s0addr);
+    		transTable[i].size = 0;
+    		break;
+    	}
     }
-#elif defined(CONFIG_SUBPLAT_440_EBONY)
-    switch(reinterpret_cast<word_t>(addr))
-    {
-	RELOC(0xf0000000, 0x140000000ULL, 0x10000000);  // PERIPHERAL_BASE
-    }
-#endif 
     return paddr;
 }
 
-word_t space_t::sigma0_attributes(pgent_t *pg, addr_t addr, pgent_t::pgsize_e size)
+word_t space_t::sigma0_attributes(pgent_t *pg, paddr_t addr, pgent_t::pgsize_e size)
 {
     /* device memory is guarded */
-    if (sigma0_translate(addr, size) >= 0x100000000ULL)
+    //if (sigma0_translate(addr, size) >= 0x100000000ULL)
+	if (addr >= 0x100000000ULL)
 	return pgent_t::cache_inhibited;
     else
 	return pgent_t::cache_standard;

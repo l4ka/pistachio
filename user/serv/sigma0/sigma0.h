@@ -93,7 +93,7 @@ L4_INLINE bool is_kernel_thread (L4_ThreadId_t t)
 /* From sigma0_mem.cc */
 void init_mempool (void);
 void dump_mempools (void);
-bool allocate_page (L4_ThreadId_t tid, L4_Word_t addr, L4_Word_t log2size,
+bool allocate_page (L4_ThreadId_t tid, L4_Paddr_t addr, L4_Word_t log2size,
 		    L4_MapItem_t & map, bool only_conventional = false);
 bool allocate_page (L4_ThreadId_t tid, L4_Word_t log2size, L4_MapItem_t & map);
 

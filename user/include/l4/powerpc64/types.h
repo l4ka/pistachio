@@ -51,5 +51,6 @@ typedef signed char		L4_SignedWord8_t;
 typedef signed long		L4_SignedWord_t;
 
 typedef long unsigned int	L4_Size_t;
+typedef L4_Word64_t		L4_Paddr_t;
 
 #endif	/* __L4__POWERPC64__TYPES_H__ */

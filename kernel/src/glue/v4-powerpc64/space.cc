@@ -71,6 +71,9 @@ char kernel_space_segment_table[POWERPC64_STAB_SIZE] __attribute__((aligned(POWE
 space_t *kernel_space = (space_t*)&kernel_space_object;
 tcb_t *dummy_tcb = NULL;
 
+//translation table
+struct transTable_t transTable[TRANSLATION_TABLE_ENTRIES];
+
 INLINE word_t pagedir_idx (addr_t addr)
 {
     return page_table_index (pgent_t::size_max, addr);

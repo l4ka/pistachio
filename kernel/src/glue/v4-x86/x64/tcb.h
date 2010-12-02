@@ -33,6 +33,8 @@
 #define __GLUE_V4_X86__X64__TCB_H__
 
 #include INC_ARCH_SA(tss.h)			/* for x86_x64_tss_t */
+#include INC_API(fpage.h)
+#include INC_API(thread.h)
 
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 #include INC_GLUE_SA(x32comp/tcb.h)
@@ -333,7 +335,7 @@ INLINE addr_t tcb_t::copy_area_real_address (addr_t addr)
 /**********************************************************************
  *
  *                        global tcb functions
- *
+ *L4_Nilpage
  **********************************************************************/
 
 
@@ -361,7 +363,7 @@ INLINE tcb_t * get_current_tcb()
  */
 INLINE void tcb_t::arch_init_root_server (space_t * space, word_t ip, word_t sp)
 { 
-    space->space_control(sp);
+	space->space_control(sp, fpage_t::nilpage(), fpage_t::nilpage(), threadid_t::nilthread());
 }
 
 #endif /* !__GLUE_V4_X86__X64__TCB_H__ */

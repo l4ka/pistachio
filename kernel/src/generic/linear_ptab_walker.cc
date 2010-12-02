@@ -653,10 +653,11 @@ void space_t::map_fpage (fpage_t snd_fp, word_t base,
 				    false);
 		else
 #endif
-		    tpg->set_entry (t_space, t_size,
-				    sigma0_translate(addr_offset (f_addr, offset + f_off), f_size),
+		    paddr_t paddr = sigma0_translate (addr_offset(f_addr, offset + f_off), f_size);
+			tpg->set_entry (t_space, t_size,
+				    paddr,
 				    snd_fp.get_rwx (), 
-				    sigma0_attributes(fpg, addr_offset(f_addr, offset + f_off), f_size),
+				    sigma0_attributes(fpg, paddr, f_size),
 				    false);
                 tpg->set_linknode (t_space, t_size, newmap, t_addr);
 	    }

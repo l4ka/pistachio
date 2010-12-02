@@ -149,7 +149,7 @@ typedef union {
     struct {
 	L4_BITFIELD4(L4_Word_t, 
 		rwx : 3,
-		reserved : 1,
+		extended : 1,
 		s : 6,
 		b : 22 __PLUS32);
     } X;

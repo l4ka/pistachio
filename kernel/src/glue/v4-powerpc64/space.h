@@ -53,6 +53,13 @@
 // Even if new MDB is not used we need the mdb_t::ctrl_t
 #include <mdb.h>
 
+//translation table (actual declaration in space.cc)
+#define TRANSLATION_TABLE_ENTRIES 32
+extern struct transTable_t {
+	word_t s0addr;
+	paddr_t physaddr;
+	word_t size;
+} transTable[TRANSLATION_TABLE_ENTRIES];
 
 class utcb_t;
 class tcb_t;
@@ -115,7 +122,11 @@ public:
     bool remove_tcb(tcb_t * tcb);
 
     /* space control */
-    word_t space_control (word_t ctrl) { return 0; }
+    word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid) { return 0; }
+
+    /* sigma0 translation hooks */
+    static paddr_t sigma0_translate(addr_t addr, pgent_t::pgsize_e size) { return (paddr_t)addr; }
+    static word_t sigma0_attributes(pgent_t *pg, addr_t addr, pgent_t::pgsize_e size) { return 0; };
 
     /* tlb */
     void flush_tlb( space_t *curspace );

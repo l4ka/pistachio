@@ -50,7 +50,7 @@ region_list_t region_list;
 **
 */
 
-region_t::region_t (L4_Word_t l, L4_Word_t h, L4_ThreadId_t o)
+region_t::region_t (L4_Paddr_t l, L4_Paddr_t h, L4_ThreadId_t o)
 {
     low = l;
     high = h;
@@ -142,15 +142,19 @@ L4_Fpage_t region_t::allocate (L4_Word_t log2size, L4_ThreadId_t tid,
     L4_Word_t size = 1UL << log2size;
     L4_Fpage_t ret;
 
+	L4_Fpage_t kip_area, utcb_area;
+	L4_Word_t control, shortaddr;
+	L4_ThreadId_t redirector;
+
     // Low and high address of region within mwmregion when they are
     // aligned according to log2size.  Note that these values might
     // overflow and must as such be handled with care.
-    L4_Word_t low_a = (low + size - 1) & ~(size-1);
-    L4_Word_t high_a = ((high + 1) & ~(size-1)) - 1;
+    L4_Paddr_t low_a = (low + size - 1) & ~(size-1);
+    L4_Paddr_t high_a = ((high + 1) & ~(size-1)) - 1;
 
     if (low_a > high_a			// Low rounded up to above high
 	|| low > low_a			// Low wrapped around
-	|| high < size-1		// High wrapper around
+	|| high < size-1		// High wrapped around
 	|| (high_a - low_a) < size-1	// Not enough space in region
 	|| (owner != tid && owner != L4_anythread))
     {
@@ -160,7 +164,20 @@ L4_Fpage_t region_t::allocate (L4_Word_t log2size, L4_ThreadId_t tid,
     else if (low_a == low)
     {
 	// Allocate from start of region
-	ret = make_fpage (low, log2size) + L4_FullyAccessible;
+
+
+	if (low != (L4_Word_t)low) { //extended mapping
+		shortaddr = (L4_Word_t)low;
+		kip_area.X.s = log2size;
+		kip_area.X.b = shortaddr >> 10;
+		redirector.raw = low >> 32;
+		utcb_area.raw = shortaddr;
+
+		L4_SpaceControl(sigma0_id,1 << 29, kip_area, utcb_area, redirector,
+				&control);
+	}
+
+    ret = make_fpage ((L4_Word_t)low, log2size) + L4_FullyAccessible;
 	if (low + size == high + 1)
 	    remove ();
 	else
@@ -169,13 +186,38 @@ L4_Fpage_t region_t::allocate (L4_Word_t log2size, L4_ThreadId_t tid,
     else if (high_a == high)
     {
 	// Allocate from end of region
-	ret = make_fpage (high_a - size + 1, log2size) + L4_FullyAccessible;
+
+	if (high_a != (L4_Word_t)high_a) { //extended mapping
+		shortaddr = (L4_Word_t)(high_a - size + 1);
+		kip_area.X.s = log2size;
+		kip_area.X.b = shortaddr >> 10;
+		redirector.raw = low >> 32;
+		utcb_area.raw = shortaddr;
+
+		L4_SpaceControl(sigma0_id,1 << 29, kip_area, utcb_area, redirector,
+				&control);
+	}
+
+    ret = make_fpage ((L4_Word_t)(high_a) - size + 1, log2size) + L4_FullyAccessible;
 	high -= size;
     }
     else
     {
 	// Allocate from middle of region
-	ret = make_fpage (low_a, log2size) + L4_FullyAccessible;
+
+	if (low_a != (L4_Word_t)low_a) { //extended mapping
+		shortaddr = (L4_Word_t)low_a;
+		kip_area.X.s = log2size;
+		kip_area.X.b = shortaddr >> 10;
+		redirector.raw = low >> 32;
+		utcb_area.raw = shortaddr;
+
+		L4_SpaceControl(sigma0_id,1 << 29, kip_area, utcb_area, redirector,
+				&control);
+	}
+
+
+	ret = make_fpage ((L4_Word_t)low_a, log2size) + L4_FullyAccessible;
 	region_t * r = new region_t (low_a + size, high, owner);
 	r->next = next;
 	r->prev = this;
@@ -199,7 +241,7 @@ L4_Fpage_t region_t::allocate (L4_Word_t log2size, L4_ThreadId_t tid,
  *
  * @return fpage for allocated region if successful, nilpage otherwise
  */
-L4_Fpage_t region_t::allocate (L4_Word_t addr, L4_Word_t log2size,
+L4_Fpage_t region_t::allocate (L4_Paddr_t addr, L4_Word_t log2size,
 			       L4_ThreadId_t tid,
 			       L4_Fpage_t (*make_fpage) (L4_Word_t, int))
 {
@@ -209,8 +251,8 @@ L4_Fpage_t region_t::allocate (L4_Word_t addr, L4_Word_t log2size,
     // Low and high address of region within mwmregion when they are
     // aligned according to log2size.  Note that these values might
     // overflow and must as such be handled with care.
-    L4_Word_t low_a = (low + size - 1) & ~(size-1);
-    L4_Word_t high_a = ((high + 1) & ~(size-1)) - 1;
+    L4_Paddr_t low_a = (low + size - 1) & ~(size-1);
+    L4_Paddr_t high_a = ((high + 1) & ~(size-1)) - 1;
 
     if (addr < low_a			// Address range below low
 	|| (addr + size - 1) > high_a	// Address range above high
@@ -225,7 +267,7 @@ L4_Fpage_t region_t::allocate (L4_Word_t addr, L4_Word_t log2size,
     else if (low_a == low && addr == low)
     {
 	// Allocate from start of region
-	ret = make_fpage (low, log2size) + L4_FullyAccessible;
+	ret = make_fpage ((L4_Word_t)low, log2size) + L4_FullyAccessible;
 	if (low + size == high + 1)
 	    remove ();
 	else
@@ -234,13 +276,13 @@ L4_Fpage_t region_t::allocate (L4_Word_t addr, L4_Word_t log2size,
     else if (high_a == high && (addr + size - 1) == high)
     {
 	// Allocate from end of region
-	ret = make_fpage (high_a - size + 1, log2size) + L4_FullyAccessible;
+	ret = make_fpage ((L4_Word_t)(high_a - size + 1), log2size) + L4_FullyAccessible;
 	high -= size;
     }
     else
     {
 	// Allocate from middle of region
-	ret = make_fpage (addr, log2size) + L4_FullyAccessible;
+	ret = make_fpage ((L4_Word_t)addr, log2size) + L4_FullyAccessible;
 	region_t * r = new region_t (addr + size, high, owner);
 	r->next = next;
 	r->prev = this;
@@ -261,7 +303,7 @@ L4_Fpage_t region_t::allocate (L4_Word_t addr, L4_Word_t log2size,
  *
  * @return true if allocation is possible, false otherwise
  */
-bool region_t::can_allocate (L4_Word_t addr, L4_Word_t log2size,
+bool region_t::can_allocate (L4_Paddr_t addr, L4_Word_t log2size,
 				L4_ThreadId_t tid)
 {
     L4_Word_t size = 1UL << log2size;
@@ -269,8 +311,8 @@ bool region_t::can_allocate (L4_Word_t addr, L4_Word_t log2size,
     // Low and high address of region within mwmregion when they are
     // aligned according to log2size.  Note that these values might
     // overflow and must as such be handled with care.
-    L4_Word_t low_a = (low + size - 1) & ~(size-1);
-    L4_Word_t high_a = ((high + 1) & ~(size-1)) - 1;
+    L4_Paddr_t low_a = (low + size - 1) & ~(size-1);
+    L4_Paddr_t high_a = ((high + 1) & ~(size-1)) - 1;
 
     if (addr < low_a			// Address range below low
 	|| (addr + size - 1) > high_a	// Address range above high
@@ -298,7 +340,7 @@ bool region_t::can_allocate (L4_Word_t addr, L4_Word_t log2size,
  * @param addr	location of memory to add
  * @param size	amount of memory to add
  */
-void region_list_t::add (L4_Word_t addr, L4_Word_t size)
+void region_list_t::add (L4_Paddr_t addr, L4_Word_t size)
 {
     if (addr == 0)
     {
@@ -463,7 +505,7 @@ void region_pool_t::remove (region_t * r)
  * @param high		upper limit of memory region
  * @param owner		owner of memory region
  */
-void region_pool_t::insert (L4_Word_t low, L4_Word_t high,
+void region_pool_t::insert (L4_Paddr_t low, L4_Paddr_t high,
 			       L4_ThreadId_t owner)
 {
     insert (new region_t (low, high, owner));
@@ -476,7 +518,7 @@ void region_pool_t::insert (L4_Word_t low, L4_Word_t high,
  * @param low		lower limit of memory region to remove
  * @param high		upper limit of memory region to remove
  */
-void region_pool_t::remove (L4_Word_t low, L4_Word_t high)
+void region_pool_t::remove (L4_Paddr_t low, L4_Paddr_t high)
 {
     region_t * n = first.next;
 

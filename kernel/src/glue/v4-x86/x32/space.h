@@ -58,6 +58,14 @@
 // Even if new MDB is not used we need the mdb_t::ctrl_t
 #include <mdb.h>
 
+//translation table (actual declaration in space.cc)
+#define TRANSLATION_TABLE_ENTRIES 32
+extern struct transTable_t {
+	word_t s0addr;
+	paddr_t physaddr;
+	word_t size;
+} transTable[TRANSLATION_TABLE_ENTRIES];
+
 #define PGSIZE_KTCB	(pgent_t::size_4k)
 #define PGSIZE_UTCB	(pgent_t::size_4k)
 #define PGSIZE_KERNEL	((KERNEL_PAGE_SIZE == X86_SUPERPAGE_SIZE) ? pgent_t::size_4m : pgent_t::size_4k)

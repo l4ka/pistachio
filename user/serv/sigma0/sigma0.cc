@@ -128,7 +128,6 @@ extern "C" void sigma0_main (void)
     L4_ThreadId_t tid;
     L4_Accept (L4_UntypedWordsAcceptor);
     L4_Reset_WordSizeMask();
-
     tag = L4_Wait (&tid);
 
     for (;;)
@@ -144,7 +143,7 @@ extern "C" void sigma0_main (void)
 	while (L4_IpcFailed (tag))
 	    tag = L4_Wait (&tid);
 
-	if (L4_UntypedWords (tag) != 2 || L4_TypedWords (tag) != 0)
+	if ((L4_UntypedWords (tag) != 2 && L4_UntypedWords (tag) != 3) || L4_TypedWords (tag) != 0)
 	{
 	    dprintf (0, "s0: malformed request from %p (tag=%p)\n", 
 		     (void *) tid.raw, (void *) tag.raw);
@@ -209,7 +208,13 @@ extern "C" void sigma0_main (void)
 		break;
 	    }
 #endif
-	    L4_Word_t addr = L4_Address (fpage);
+	    L4_Paddr_t addr;
+	    if (fpage.X.extended == 1) {
+	    	addr = L4_Get(&msg,2);
+	    	addr <<= 32;
+	    	addr |= L4_Address (fpage);
+	    } else
+	    	addr = L4_Address (fpage);
 	    L4_Word_t attributes = L4_Get (&msg, 1);
 
 	    if (is_kernel_thread (tid))

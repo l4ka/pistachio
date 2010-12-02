@@ -40,15 +40,15 @@ class region_t
 {
 public:
 
-    L4_Word_t		low;
-    L4_Word_t		high;
+    L4_Paddr_t		low;
+    L4_Paddr_t		high;
     L4_ThreadId_t	owner;
 
     region_t		*prev;
     region_t		*next;
 
     region_t (void) {}
-    region_t (L4_Word_t low, L4_Word_t high, L4_ThreadId_t owner);
+    region_t (L4_Paddr_t low, L4_Paddr_t high, L4_ThreadId_t owner);
 
     void * operator new (L4_Size_t size);
 
@@ -57,9 +57,9 @@ public:
     bool is_adjacent (const region_t & r);
     bool concatenate (region_t * reg);
 
-    bool can_allocate (L4_Word_t addr, L4_Word_t log2size,
+    bool can_allocate (L4_Paddr_t addr, L4_Word_t log2size,
 		       L4_ThreadId_t tid);
-    L4_Fpage_t allocate (L4_Word_t addr, L4_Word_t log2size, L4_ThreadId_t tid,
+    L4_Fpage_t allocate (L4_Paddr_t addr, L4_Word_t log2size, L4_ThreadId_t tid,
 			 L4_Fpage_t (*make_fpage) (L4_Word_t, int));
     L4_Fpage_t allocate (L4_Word_t log2size, L4_ThreadId_t tid,
 			 L4_Fpage_t (*make_fpage) (L4_Word_t, int));
@@ -95,7 +95,7 @@ class region_list_t
 
 public:
 
-    void add (L4_Word_t addr, L4_Word_t size);
+    void add (L4_Paddr_t addr, L4_Word_t size);
     L4_Word_t contents (void);
     region_t * alloc (void);
     void free (region_t * r);
@@ -117,8 +117,8 @@ public:
     void dump (void);
     void insert (region_t * r);
     void remove (region_t * r);
-    void insert (L4_Word_t low, L4_Word_t high, L4_ThreadId_t owner);
-    void remove (L4_Word_t low, L4_Word_t high);
+    void insert (L4_Paddr_t low, L4_Paddr_t high, L4_ThreadId_t owner);
+    void remove (L4_Paddr_t low, L4_Paddr_t high);
     void reset (void);
     region_t * next (void);
 };

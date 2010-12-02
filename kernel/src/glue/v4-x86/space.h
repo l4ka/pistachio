@@ -72,7 +72,7 @@ public:
     void move_tcb(tcb_t * tcb, cpuid_t src_cpu, cpuid_t dst_cpu);
 
     /* space control */
-    word_t space_control (word_t ctrl);
+    word_t space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid);
 
     /* x86 specific functions */
     static void init_kernel_space();
@@ -100,7 +100,7 @@ public:
     static void end_update();
 
     /* sigma0 translation hooks */
-    static addr_t sigma0_translate(addr_t addr, pgent_t::pgsize_e size) { return addr; }
+    static paddr_t sigma0_translate(addr_t addr, pgent_t::pgsize_e size);
     static word_t sigma0_attributes(pgent_t *pg, addr_t addr, pgent_t::pgsize_e size) { return 0; };
 
     /* generic page table walker */

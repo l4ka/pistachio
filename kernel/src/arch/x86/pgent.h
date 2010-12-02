@@ -245,7 +245,7 @@ public:
 #endif
 	}
 
-    void set_entry (space_t * s, pgsize_e pgsize, addr_t paddr,
+    void set_entry (space_t * s, pgsize_e pgsize, paddr_t paddr,
 		    word_t rwx, word_t attrib, bool kernel)
 	{
 	    pgent.set_entry (paddr,

@@ -50,6 +50,9 @@
 
 EXTERN_TRACEPOINT(DEBUG);
 
+//translation table
+struct transTable_t transTable[TRANSLATION_TABLE_ENTRIES];
+
 /**********************************************************************
  *
  *                         space_t implementation
@@ -202,7 +205,7 @@ word_t pgent_t::smp_reference_bits(space_t * space, pgsize_e pgsize, addr_t vadd
 
 #if defined(CONFIG_X86_SMALL_SPACES)
 
-word_t space_t::space_control (word_t ctrl)
+word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid)
 {
     // Ignore parameter if 's' bit is not set.
     if ((ctrl & (1 << 31)) == 0)
@@ -227,8 +230,12 @@ bool is_smallspace(space_t *space)
 
 #else /* !CONFIG_X86_SMALL_SPACES */
 
-word_t space_t::space_control (word_t ctrl)
+word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid)
 {
+    word_t oldctrl = 0;
+    u64_t physaddr;
+    int i;
+
 #if defined(CONFIG_X_X86_HVM)
     // Check if 'v' bit is set.
     if (ctrl & (1 << 30))
@@ -238,10 +245,37 @@ word_t space_t::space_control (word_t ctrl)
     }
 #endif
 
-    return 0;
+    if ((ctrl & (1 << 29)) && (sizeof(paddr_t) != sizeof(u32_t))) {
+    	for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
+    		if (transTable[i].size > 0)
+    			continue;
+        	oldctrl |= 1 << 29;
+        	//printf("UTCB: 0x%x, redirect: 0x%x, KIP: 0x%x\n", utcb_area.raw, redirector_tid.get_raw(), kip_area.raw);
+        	physaddr = redirector_tid.get_raw();
+        	physaddr <<= 32;
+        	physaddr |= utcb_area.raw;
+        	transTable[i].physaddr = (paddr_t)physaddr;
+        	transTable[i].s0addr = kip_area.mem.x.base << 10;
+        	transTable[i].size = 1UL << kip_area.mem.x.size;
+        	break;
+    	}
+    }
+    return oldctrl;
 }
 
-
+paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
+{
+	word_t i;
+	paddr_t paddr = (paddr_t)addr;
+    for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
+    	if ((transTable[i].size > 0) && ((word_t)addr >= transTable[i].s0addr) && ((word_t)addr <= transTable[i].s0addr + transTable[i].size - 1)) {
+    		paddr = transTable[i].physaddr + (word_t)addr_offset(addr, -transTable[i].s0addr);
+    		transTable[i].size = 0;
+    		break;
+    	}
+    }
+    return paddr;
+}
 
 #endif
 

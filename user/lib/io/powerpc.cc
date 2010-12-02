@@ -115,9 +115,15 @@ static void io_init( void )
     // Install it as the 2nd page in our address space.  
     // Hopefully it is free!
     L4_Fpage_t target = L4_Fpage( 4096, 4096 );	
+#if 0
     L4_Fpage_t fpage = L4_Fpage( reg[1], 4096 );
     fpage.X.rwx = L4_ReadWriteOnly;
     fpage = L4_Sigma0_GetPage( sigma0, fpage, target );
+#else
+    L4_Fpage_t fpage = L4_Fpage(0x40000000,4096);
+    fpage.X.rwx = L4_ReadWriteOnly;
+    fpage = L4_Sigma0_GetPage( sigma0, fpage, 0x1, target );
+#endif
     if( L4_IsNilFpage(fpage) )
         return;
 
@@ -189,10 +195,15 @@ static void io_init( void )
         
         // Hopefully it is free!
         L4_Fpage_t target = L4_Fpage( (L4_Word_t) comport, 4096 );	
+#if 0
         L4_Fpage_t fpage = L4_Fpage( comport_phys, 4096 );
         fpage.X.rwx = L4_ReadWriteOnly;
         fpage = L4_Sigma0_GetPage( sigma0, fpage, target );
-
+#else
+        L4_Fpage_t fpage = L4_Fpage(0x40000200,4096);
+        fpage.X.rwx = L4_ReadWriteOnly;
+        fpage = L4_Sigma0_GetPage( sigma0, fpage, 0x1, target );
+#endif
         if( L4_IsNilFpage(fpage) )
             return;
 

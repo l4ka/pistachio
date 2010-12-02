@@ -39,7 +39,8 @@
 
 L4_INLINE L4_Fpage_t L4_Sigma0_GetPage_RcvWindow (L4_ThreadId_t s0,
 						  L4_Fpage_t f,
-						  L4_Fpage_t RcvWindow)
+						  L4_Fpage_t RcvWindow,
+						  L4_Word_t high)
 {
     L4_MsgTag_t tag;
     L4_Msg_t msg;
@@ -54,6 +55,9 @@ L4_INLINE L4_Fpage_t L4_Sigma0_GetPage_RcvWindow (L4_ThreadId_t s0,
     L4_MsgClear (&msg);
     L4_MsgAppendWord (&msg, f.raw);
     L4_MsgAppendWord (&msg, 0);
+    if (f.X.extended == 1) {
+    	L4_MsgAppendWord (&msg, high);
+    }
     L4_Set_MsgLabel (&msg, (L4_Word_t) -6UL << 4);
     L4_MsgLoad (&msg);
     L4_Accept (L4_MapGrantItems (RcvWindow));
@@ -71,20 +75,37 @@ L4_INLINE L4_Fpage_t L4_Sigma0_GetPage (L4_ThreadId_t s0,
 					L4_Fpage_t f,
 					L4_Fpage_t RcvWindow)
 {
-    return L4_Sigma0_GetPage_RcvWindow (s0, f, RcvWindow);
+    return L4_Sigma0_GetPage_RcvWindow (s0, f, RcvWindow, 0);
 }
 #endif
 
 L4_INLINE L4_Fpage_t L4_Sigma0_GetPage (L4_ThreadId_t s0, L4_Fpage_t f)
 {
-    return L4_Sigma0_GetPage_RcvWindow (s0, f, L4_CompleteAddressSpace);
+    return L4_Sigma0_GetPage_RcvWindow (s0, f, L4_CompleteAddressSpace, 0);
+}
+
+L4_INLINE L4_Fpage_t L4_Sigma0_GetPage (L4_ThreadId_t s0,
+					L4_Fpage_t f,
+					L4_Word_t high)
+{
+	f.X.extended = 1;
+	return L4_Sigma0_GetPage_RcvWindow (s0, f, L4_CompleteAddressSpace, high);
+}
+
+L4_INLINE L4_Fpage_t L4_Sigma0_GetPage (L4_ThreadId_t s0,
+					L4_Fpage_t f,
+					L4_Word_t high,
+					L4_Fpage_t RcvWindow)
+{
+	f.X.extended = 1;
+	return L4_Sigma0_GetPage_RcvWindow (s0, f, RcvWindow, high);
 }
 
 L4_INLINE L4_Fpage_t L4_Sigma0_GetAny (L4_ThreadId_t s0,
 				      L4_Word_t	s,
 				      L4_Fpage_t RcvWindow)
 {
-    return L4_Sigma0_GetPage_RcvWindow (s0, L4_FpageLog2 (~0UL, s), RcvWindow);
+    return L4_Sigma0_GetPage_RcvWindow (s0, L4_FpageLog2 (~0UL, s), RcvWindow, 0);
 }
 
 
@@ -128,7 +149,7 @@ L4_INLINE void *L4_Sigma0_GetSpecial(L4_Word_t type, void* address, L4_Word_t pa
 		L4_Fpage_t rcvfpage = L4_Fpage( rcvstart, pagesize );
 
 		fpage.X.rwx = L4_ReadWriteOnly;
-		fpage = L4_Sigma0_GetPage_RcvWindow( sigma0, fpage, rcvfpage );
+		fpage = L4_Sigma0_GetPage_RcvWindow( sigma0, fpage, rcvfpage, 0 );
 		if( L4_IsNilFpage(fpage) )
 		    return address;
 

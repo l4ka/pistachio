@@ -57,6 +57,9 @@ EXTERN_KMEM_GROUP(kmem_space);
 
 space_t *kernel_space = NULL;
 
+//translation table
+struct transTable_t transTable[TRANSLATION_TABLE_ENTRIES];
+
 void space_t::allocate_tcb(addr_t addr)
 {
 #if !defined(CONFIG_STATIC_TCBS)
@@ -301,9 +304,11 @@ void space_t::map_sigma0(addr_t addr)
     add_mapping( addr, (paddr_t)addr, pgent_t::size_4k, true, false );
 }
 
-word_t space_t::space_control (word_t ctrl)
+word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid)
 {
     word_t oldctrl = 0;
+    paddr_t physaddr;
+    int i;
 #ifdef CONFIG_X_PPC_SOFTHVM
     oldctrl |= this->hvm_mode ? 1 : 0;
 
@@ -314,5 +319,19 @@ word_t space_t::space_control (word_t ctrl)
 	this->hvm_mode = true;
     }
 #endif
+    if (ctrl & (1 << 29)) {
+    	for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
+    		if (transTable[i].size > 0)
+    			continue;
+        	oldctrl |= 1 << 29;
+        	physaddr = redirector_tid.get_raw();
+        	physaddr <<= 32;
+        	physaddr |= utcb_area.raw;
+        	transTable[i].physaddr = physaddr;
+        	transTable[i].s0addr = kip_area.mem.x.base << 10;
+        	transTable[i].size = 1UL << kip_area.mem.x.size;
+        	break;
+    	}
+    }
     return oldctrl;
 }

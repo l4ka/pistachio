@@ -56,6 +56,13 @@ class utcb_t;
 #define PGSIZE_KERNEL	((KERNEL_PAGE_SIZE == X86_SUPERPAGE_SIZE) ? pgent_t::size_2m : pgent_t::size_4k)
 #define PGSIZE_SIGMA    pgent_t::size_2m
 
+//translation table (actual declaration in space.cc)
+#define TRANSLATION_TABLE_ENTRIES 32
+extern struct transTable_t {
+	word_t s0addr;
+	paddr_t physaddr;
+	word_t size;
+} transTable[TRANSLATION_TABLE_ENTRIES];
    
 /**
  * The address space representation
