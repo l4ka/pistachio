@@ -265,13 +265,14 @@ word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area,
 
 paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 {
-	word_t i;
-	paddr_t paddr = (paddr_t)addr;
+    word_t i;
+    paddr_t paddr = (paddr_t)addr;
     for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
-    	if ((transTable[i].size > 0) && ((word_t)addr >= transTable[i].s0addr) && ((word_t)addr <= transTable[i].s0addr + transTable[i].size - 1)) {
-    		paddr = transTable[i].physaddr + (word_t)addr_offset(addr, -transTable[i].s0addr);
-    		transTable[i].size = 0;
-    		break;
+    	if ((transTable[i].size > 0) && ((word_t)addr >= transTable[i].s0addr) && 
+            ((word_t)addr <= transTable[i].s0addr + transTable[i].size - 1)) {
+            paddr = (paddr_t) ((u64_t) transTable[i].physaddr + (word_t) addr_offset(addr, - transTable[i].s0addr));
+            transTable[i].size = 0;
+            break;
     	}
     }
     return paddr;
