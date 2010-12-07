@@ -58,7 +58,7 @@ EXTERN_KMEM_GROUP(kmem_space);
 space_t *kernel_space = NULL;
 
 //translation table
-struct transTable_t transTable[TRANSLATION_TABLE_ENTRIES];
+struct transtable_t transtable[TRANSLATION_TABLE_ENTRIES];
 
 void space_t::allocate_tcb(addr_t addr)
 {
@@ -321,15 +321,15 @@ word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area,
 #endif
     if (ctrl & (1 << 29)) {
     	for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
-    		if (transTable[i].size > 0)
+    		if (transtable[i].size > 0)
     			continue;
         	oldctrl |= 1 << 29;
         	physaddr = redirector_tid.get_raw();
         	physaddr <<= 32;
         	physaddr |= utcb_area.raw;
-        	transTable[i].physaddr = physaddr;
-        	transTable[i].s0addr = kip_area.mem.x.base << 10;
-        	transTable[i].size = 1UL << kip_area.mem.x.size;
+        	transtable[i].physaddr = physaddr;
+        	transtable[i].s0addr = kip_area.mem.x.base << 10;
+        	transtable[i].size = 1UL << kip_area.mem.x.size;
         	break;
     	}
     }

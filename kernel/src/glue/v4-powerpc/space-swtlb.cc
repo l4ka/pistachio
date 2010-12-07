@@ -127,9 +127,9 @@ void SECTION(".init.memory") space_t::init_kernel_mappings()
 
     //initialize translation table
     for (i=0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
-    	transTable[i].s0addr = 0;
-    	transTable[i].physaddr = 0;
-    	transTable[i].size = 0;
+    	transtable[i].s0addr = 0;
+    	transtable[i].physaddr = 0;
+    	transtable[i].size = 0;
     }
 
 }
@@ -366,9 +366,9 @@ paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 	word_t i;
 	paddr_t paddr = (paddr_t)addr;
     for (i = 0; i < TRANSLATION_TABLE_ENTRIES; ++i) {
-    	if ((transTable[i].size > 0) && ((word_t)addr >= transTable[i].s0addr) && ((word_t)addr <= transTable[i].s0addr + transTable[i].size - 1)) {
-    		paddr = transTable[i].physaddr + (word_t)addr_offset(addr, -transTable[i].s0addr);
-    		transTable[i].size = 0;
+    	if ((transtable[i].size > 0) && ((word_t)addr >= transtable[i].s0addr) && ((word_t)addr <= transtable[i].s0addr + transtable[i].size - 1)) {
+    		paddr = transtable[i].physaddr + (word_t)addr_offset(addr, -transtable[i].s0addr);
+    		transtable[i].size = 0;
     		break;
     	}
     }

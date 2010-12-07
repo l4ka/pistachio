@@ -57,11 +57,11 @@
 
 //translation table (actual declaration in space.cc)
 #define TRANSLATION_TABLE_ENTRIES 32
-extern struct transTable_t {
+extern struct transtable_t {
 	word_t s0addr;
 	paddr_t physaddr;
 	word_t size;
-} transTable[TRANSLATION_TABLE_ENTRIES];
+} transtable[TRANSLATION_TABLE_ENTRIES];
 
 class utcb_t;
 class tcb_t;
