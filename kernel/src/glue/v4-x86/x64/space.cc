@@ -134,7 +134,7 @@ void acpi_unmap(addr_t addr)
 #if defined(CONFIG_X86_COMPATIBILITY_MODE)
 extern addr_t utcb_page;
 
-word_t space_t::space_control(word_t ctrl)
+word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area, threadid_t redirector_tid)
 {
     // Ignore parameter if 'c' bit is not set.
     if ((ctrl & (((word_t) 1) << 63)) == 0)
@@ -170,10 +170,10 @@ word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area,
 {
     return 0;
 }
+#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
 paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size) {
 	return (paddr_t)addr;
 }
 
-#endif /* defined(CONFIG_X86_COMPATIBILITY_MODE) */
 
