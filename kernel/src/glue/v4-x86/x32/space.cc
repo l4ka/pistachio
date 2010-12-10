@@ -263,6 +263,8 @@ word_t space_t::space_control (word_t ctrl, fpage_t kip_area, fpage_t utcb_area,
     return oldctrl;
 }
 
+#endif
+
 paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
 {
     word_t i;
@@ -278,6 +280,5 @@ paddr_t space_t::sigma0_translate(addr_t addr, pgent_t::pgsize_e size)
     return paddr;
 }
 
-#endif
 
 
