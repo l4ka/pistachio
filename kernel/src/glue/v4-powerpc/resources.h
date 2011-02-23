@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 1999-2011,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/resources.h
+ * File path:     glue/v4-powerpc/resources.h
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,9 @@ private:
     }
 
 private:
+#ifdef CONFIG_X_PPC_SOFTHVM
+    static tcb_t *last_hvm_tcb; 
+#endif
     word_t copy_area_offset;
     word_t fpscr;
     u64_t fpu_state[FPU_REGS + FPU_EXTRA_REGS] __attribute__((aligned(16)));

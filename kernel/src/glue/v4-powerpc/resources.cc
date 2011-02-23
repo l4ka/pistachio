@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 1999-2011,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
  * File path:     glue/v4-powerpc/resources.cc
@@ -63,6 +63,8 @@ void thread_resources_t::reown_fpu( tcb_t *tcb, tcb_t *new_owner )
 
 #ifdef CONFIG_X_PPC_SOFTHVM
 #include INC_ARCH(softhvm.h)
+tcb_t *thread_resources_t::last_hvm_tcb;
+
 INLINE void thread_resources_t::enable_hvm_mode(tcb_t *tcb)
 {
     //TRACEF("Enable HVM mode (%p)\n", tcb);
@@ -97,8 +99,10 @@ void thread_resources_t::save( tcb_t *tcb )
     if (tcb->resource_bits.have_resource(COPY_AREA))
 	flush_copy_area(tcb);
 #ifdef CONFIG_X_PPC_SOFTHVM
-    if (tcb->resource_bits.have_resource(SOFTHVM))
+    if (tcb->resource_bits.have_resource(SOFTHVM)) {
 	disable_hvm_mode( tcb );
+        last_hvm_tcb = tcb;
+    }
 #endif
 }
 
@@ -107,8 +111,17 @@ void thread_resources_t::load( tcb_t *tcb )
     if (tcb->resource_bits.have_resource(COPY_AREA))
 	enable_copy_area( tcb );
 #ifdef CONFIG_X_PPC_SOFTHVM
-    if (tcb->resource_bits.have_resource(SOFTHVM))
+    if (tcb->resource_bits.have_resource(SOFTHVM)) {
 	enable_hvm_mode( tcb );
+        space_t *space = tcb->get_space();
+        if (last_hvm_tcb && space != last_hvm_tcb->get_space())
+        {
+            //flush hvm tlb entries
+            //printf("hvm space switch %t %p -> %t %p, flushing tlb\n",
+            //     last_hvm_tcb, last_hvm_tcb->get_space(), tcb, space);
+            space->flush_tlb_hvm(space, 0, ~0U);
+        }
+    }
 #endif
 }
 
