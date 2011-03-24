@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2009,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2009, 2011,  Karlsruhe University
  *                
  * File path:     api/v4/syscalls.h
  * Description:   declaration of system calls
@@ -243,7 +243,7 @@ struct schedule_ctrl_t {
 		      prio		:  9,
 		      logid		:  7,
 		      stride		:  16,
-		      : BITS_WORD-24);
+		      : BITS_WORD-32);
 	};
 	struct {
 	    BITFIELD5(word_t,
