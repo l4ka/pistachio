@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2001-2004, 2006-2007, 2010,  Karlsruhe University
+ * Copyright (C) 2001-2004, 2006-2007, 2010-2011,  Karlsruhe University
  *                
  * File path:     l4/kip.h
  * Description:   Kernel interface page definitions.
@@ -552,7 +552,7 @@ L4_INLINE char * L4_Feature (void * KernelInterface, L4_Word_t num)
 
     return str;
 }
-
+#if defined(__cplusplus)
 L4_INLINE L4_Bool_t L4_HasFeature (const char *feature_name)
 {
     void *kip = L4_GetKernelInterface();
@@ -571,7 +571,7 @@ L4_INLINE L4_Bool_t L4_HasFeature (const char *feature_name)
     }
     return false;
 }
-
+#endif
 
 typedef union {
     L4_Word_t	raw[2];
