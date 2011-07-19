@@ -1,9 +1,9 @@
 /*********************************************************************
  *                
- * Copyright (C) 1999-2010,  Karlsruhe University
+ * Copyright (C) 1999-2011,  Karlsruhe University
  * Copyright (C) 2008-2009,  Volkmar Uhlig, IBM Corporation
  *                
- * File path:     src/glue/v4-powerpc/thread.cc
+ * File path:     glue/v4-powerpc/thread.cc
  * Description:   
  *                
  * Redistribution and use in source and binary forms, with or without
@@ -208,7 +208,7 @@ word_t arch_ktcb_t::set_powerpc_frameregs(word_t id, word_t mask, tcb_t *src, wo
     {
         TRACE_CTRLXFER_DETAILS( "\t (m%06d->f%06d/%06d/%8s): %08x", 
                                 src_mr, reg, hwreg[reg], ctrlxfer_item_t::get_hwregname(id, reg),
-                                src->get_mr(src_mr++));
+                                src->get_mr(src_mr));
         
         ((word_t*)frame)[hwreg[reg]] = src->get_mr(src_mr++);
     }
@@ -280,7 +280,7 @@ word_t arch_ktcb_t::set_powerpc_vmregs(word_t id, word_t mask, tcb_t *src, word_
     {
         TRACE_CTRLXFER_DETAILS( "\t (m%06d->f%06d/%06d/%8s): %08x", 
                                 src_mr, reg, hwreg[reg], ctrlxfer_item_t::get_hwregname(id, reg),
-                                src->get_mr(src_mr++));
+                                src->get_mr(src_mr));
         ((word_t*)vm)[hwreg[reg]] = src->get_mr(src_mr++);
     }
     return num;
@@ -320,7 +320,7 @@ word_t arch_ktcb_t::set_powerpc_tlbregs(word_t id, word_t mask, tcb_t *src, word
         
         TRACE_CTRLXFER_DETAILS( "\t (m%06d->f%06d/%06d/%8s): %08x", 
                                 src_mr, reg, hwreg, ctrlxfer_item_t::get_hwregname(id, reg),
-                                src->get_mr(src_mr++));
+                                src->get_mr(src_mr));
         
     }
     return num;
