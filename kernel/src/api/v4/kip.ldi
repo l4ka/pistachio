@@ -43,9 +43,9 @@
 		*(.data.KIP_SECTION.mdesc)
 
 #if defined(CONFIG_IS_32BIT)
-	_memory_descriptors_raw = (_memory_descriptors_offset << 16)
-		+ _memory_descriptors_size;
+	_memory_descriptors_raw = ABSOLUTE((_memory_descriptors_offset << 16)
+		+ _memory_descriptors_size);
 #elif defined(CONFIG_IS_64BIT)
-	_memory_descriptors_raw = (_memory_descriptors_offset << 32)
-		+ _memory_descriptors_size;
+	_memory_descriptors_raw = ABSOLUTE((_memory_descriptors_offset << 32)
+		+ _memory_descriptors_size);
 #endif
