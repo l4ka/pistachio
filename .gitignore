@@ -1,0 +1,5 @@
+*.pyc
+/build/
+user/autom4te.cache/
+user/configure
+user/config.h.in
