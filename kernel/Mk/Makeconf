@@ -1,7 +1,7 @@
 ## -*- mode: Makefile; -*-
 ######################################################################
 ##                
-## Copyright (C) 2001-2009,  Karlsruhe University
+## Copyright (C) 2001-2009, 2011,  Karlsruhe University
 ##                
 ## File path:     Mk/Makeconf
 ## Description:   Make settings for pistachio
@@ -82,15 +82,25 @@ endif
 
 # If CC was not given by user, default to GCC for target architecture
 ifeq "$(origin CC)" "default"
-CC=		$(CCACHE) $(TOOLPREFIX)gcc
+CC=		$(CCACHE) $(TOOLPREFIX)gcc 
 endif
 CC_VERSION	= $(shell echo __GNUC__ | $(CC) -E  - | grep -v "\#")
 CC_SUBVERSION	= $(shell echo __GNUC_MINOR__ | $(CC) -E  - | grep -v "\#")
 
 
-GCCINSTALLDIR?= $(dir $(shell $(CC) -print-libgcc-file-name))
-LIBGCCINC?= $(GCCINSTALLDIR)include
-LIBGCCDIR?= $(GCCINSTALLDIR)
+######################################################################
+#
+# Hardware specific options
+#
+# Known so far: CFLAGS_<arch>, CFLAGS_<cpu>, CFLAGS_<platform>
+#               ASMFLAGS_<arch> ASMFLAGS_<cpu>, ASMFLAGS_<platform>
+#		DEFINES_<arch>
+
+-include $(SRCDIR)/Mk/Makeconf.$(ARCH)
+
+
+LIBGCCDIR?= $(dir $(shell $(CC) $(CFLAGS) -print-libgcc-file-name))
+LIBGCCINC?= $(dir $(shell $(CC) $(CFLAGS) -print-file-name=include/stdarg.h))
 
 # Some CCs (e.g., the native FreeBSD gcc) do not follow the regular
 # gcc conventions when it comes to the gcc include files.
@@ -120,15 +130,6 @@ ifeq "$(SCHED)" ""
 SCHED=	rr
 endif
 
-######################################################################
-#
-# Hardware specific options
-#
-# Known so far: CFLAGS_<arch>, CFLAGS_<cpu>, CFLAGS_<platform>
-#               ASMFLAGS_<arch> ASMFLAGS_<cpu>, ASMFLAGS_<platform>
-#		DEFINES_<arch>
-
--include $(SRCDIR)/Mk/Makeconf.$(ARCH)
 
 
 # these macros will be undefined first - they may have default values
