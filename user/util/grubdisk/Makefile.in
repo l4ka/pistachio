@@ -35,10 +35,12 @@ top_srcdir=	@top_srcdir@
 top_builddir=	@top_builddir@
 
 APP=${top_builddir}/apps/bench/pingpong/pingpong
-
+STRIP=		$(TOOLPREFIX)strip
+	
 include $(top_srcdir)/Mk/l4.base.mk
 
 do-all:	bootdisk.img
+
 
 bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstart/kickstart ${top_builddir}/serv/sigma0/sigma0  \
 		${APP} ${kerneldir}/${KERNEL}
@@ -49,7 +51,7 @@ bootdisk.img:	grub.img mtoolsrc ${srcdir}/menu.lst ${top_builddir}/util/kickstar
 	dd if=grub.img of=bootdisk.img conv=notrunc > /dev/null
 	#@ Strip and zip binaries
 	cp -u ${top_builddir}/*/*/{kickstart,sigma0} ${kerneldir}/${KERNEL}  ${APP} . || exit 0
-	strip ${notdir ${APP}} sigma0 kickstart ${KERNEL}
+	$(STRIP) ${notdir ${APP}} sigma0 kickstart ${KERNEL}
 	gzip -f ${notdir ${APP}} sigma0 kickstart ${KERNEL}
 	cat ${srcdir}/menu.lst | sed -e "s/APP/${notdir ${APP}}/" > menu.lst
 	@# Copy the binaries to it
