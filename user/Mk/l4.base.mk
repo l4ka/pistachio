@@ -1,8 +1,8 @@
 ######################################################################
 ##                
-## Copyright (C) 2003, 2009-2010,  Karlsruhe University
+## Copyright (C) 2003, 2009-2011,  Karlsruhe University
 ##                
-## File path:     l4.base.mk
+## File path:     pistachio/pistachio-git/user/Mk/l4.base.mk
 ## Description:   Generic settings for Pistachio user-level build
 ##                
 ## Redistribution and use in source and binary forms, with or without
@@ -40,17 +40,14 @@ ECHO_MSG=	$(ECHO) ===\>
 MKDIRHIER=	$(top_srcdir)/../tools/mkdirhier
 
 CPPFLAGS+=	$(CPPFLAGS_$(ARCH))
-CFLAGS+=	-O2 -g -Wall -Wshadow  -Wconversion \
+CFLAGS+=	-O2 -g -Wall -Wshadow \
 		$(CFLAGS_$(ARCH))
 LDFLAGS+=	$(LDFLAGS_$(ARCH))
 
 ifeq ("$(CC_VERSION)", "4")
-ifeq ("$(CC_SUBVERSION)", "3")
 CFLAGS += -Wno-conversion
-endif
-ifeq ("$(CC_SUBVERSION)", "4")
-CFLAGS += -Wno-conversion
-endif
+else
+CFLAGS += -Wconversion
 endif
 
 

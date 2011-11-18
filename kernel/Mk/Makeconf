@@ -169,19 +169,16 @@ VFLAGS =
 
 # use optimization level of at least 1 - otherwise inlining will fail
 CCFLAGS += -fno-rtti -fno-builtin  -fomit-frame-pointer -fno-exceptions \
-	  -Wall -Wno-non-virtual-dtor -Wno-format  -Wconversion \
+	  -Wall -Wno-non-virtual-dtor -Wno-format   \
 	  $(CFLAGS_$(ARCH)) $(CFLAGS_$(CPU)) $(CFLAGS_$(PLATFORM)) 
 
 ifeq ("$(CC_VERSION)", "4")
+CCFLAGS += -Wno-conversion
 ifneq ("$(CC_SUBVERSION)", "0")
 CCFLAGS += -fno-stack-protector
 endif
-ifeq ("$(CC_SUBVERSION)", "3")
-CCFLAGS += -Wno-conversion
-endif
-ifeq ("$(CC_SUBVERSION)", "4")
-CCFLAGS += -Wno-conversion
-endif
+else
+CCFLAGS += -Wconversion
 endif
 
 ifeq ("$(CONFIG_DEBUG_SYMBOLS)","y")

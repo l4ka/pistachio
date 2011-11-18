@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2010,  Karlsruhe University
+ * Copyright (C) 2007-2011,  Karlsruhe University
  *                
  * File path:     api/v4/sched-rr/schedule_functions.h
  * Description:   
@@ -297,7 +297,6 @@ INLINE bool scheduler_t::schedule(tcb_t *dest1, tcb_t *dest2, const sched_flags_
 
 INLINE bool scheduler_t::schedule_interrupt(tcb_t *irq, tcb_t *handler)
 {
-    threadid_t irq_tid = irq->get_global_id();
     irq->set_tag(msg_tag_t::irq_tag());
     irq->set_partner(handler->get_global_id());
     irq->set_state(thread_state_t::polling);
