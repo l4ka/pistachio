@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2006, 2008-2010,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2006, 2008-2011,  Karlsruhe University
  *                
  * File path:     api/v4/smp.cc
  * Description:   Multiprocessor handling for cross-processor 
@@ -39,6 +39,16 @@
 cpuid_t	current_cpu UNIT("cpulocal");;
 
 #if defined(CONFIG_SMP)
+
+#ifdef CONFIG_SMP_IDLE_POLL
+void processor_sleep()
+{
+    x86_sleep();
+    process_xcpu_mailbox();
+}
+#endif
+
+
 
 //#define TRACE_IPI(x...) do { printf("CPU %d: ", get_current_cpu()); printf(x); } while(0)
 

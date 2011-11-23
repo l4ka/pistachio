@@ -1,6 +1,6 @@
 ######################################################################
 ##                
-## Copyright (C) 2003-2008, 2010,  Karlsruhe University
+## Copyright (C) 2003-2008, 2010-2011,  Karlsruhe University
 ##                
 ## File path:     config/x86.cml
 ## Description:   IA32 specific rules
@@ -138,6 +138,7 @@ unless ARCH_X86 suppress dependent X86_IO_FLEXPAGES
 
 require X86_IO_FLEXPAGES implies X86_SMALL_SPACES==n
 require X86_SMALL_SPACES implies X86_IO_FLEXPAGES==n
+require SMP implies IOAPIC==y
 
 
 choices x86_type
