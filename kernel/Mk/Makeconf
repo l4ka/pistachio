@@ -194,6 +194,7 @@ ASMFLAGS += $(ASMFLAGS_$(PLATFORM)) $(ASMFLAGS_$(ARCH)) $(ASMFLAGS_$(CPU))
 LIBDIRS += $(LIBGCCDIR)
 LIBS += $(LIBS_$(ARCH))
 LDFLAGS += -static -O2 $(LDFLAGS_$(ARCH)) $(addprefix -L,$(LIBDIRS))
+KLDFLAGS += $(LDFLAGS)  $(KLDFLAGS_$(ARCH))
 LDSCRIPT = $(SRCDIR)/src/platform/$(PLATFORM)/linker.lds
 
 
@@ -254,7 +255,7 @@ lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/src/generic/macros.h $(BUI
 # link the final binary
 $(ARCH)-kernel:	$(BUILDDIR)/Makeconf.local $(OBJS) lds.tmp
 	@$(ECHO_MSG) Linking $@
-	$(LD) $(LDFLAGS) -Tlds.tmp -o $@ $(OBJS) $(LIBS)
+	$(LD)  $(LDFLAGS) $(KLDFLAGS) -Tlds.tmp -o $@ $(OBJS) $(LIBS)
 	$(RM) lds.tmp
 
 

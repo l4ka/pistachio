@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2008-2010,  Karlsruhe University
+ * Copyright (C) 2008-2011,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x32/logging.h
  * Description:   
