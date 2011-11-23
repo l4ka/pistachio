@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2003, 2006-2009,  Karlsruhe University
+ * Copyright (C) 2002-2003, 2006-2009, 2011,  Karlsruhe University
  *                
  * File path:     arch/x86/sync.h
  * Description:   synchronization primitives for x86
@@ -72,7 +72,7 @@ INLINE void spinlock_t::lock()
 	"xchg	%1, %2				\n\t"
 	"test	$0xff, %2			\n\t"
 	"jnz	2f				\n\t"
-        ".section .spinlock     		\n\t"
+        ".subsection 2          		\n\t"
 	"2:					\n\t"
 	"mov $"MKSTR(SYNC_THRESHOLD)", %2	\n\t" 
 	"3:					\n\t"
@@ -98,13 +98,13 @@ INLINE void spinlock_t::lock()
 	"xchg	%1, %2				\n\t"
 	"test	$0xff, %2			\n\t"
 	"jnz	2f				\n\t"
-        ".section .spinlock     		\n\t"
+        ".subsection 2            		\n\t"
 	"2:					\n\t"
 	"rep; nop				\n\t"
         "testb $1, %1				\n\t"
         "jne    2b              		\n\t"
         "jmp    1b              		\n\t"
-        ".previous              		\n\t"
+        ".previous               		\n\t"
         : "=D" (dummy)
         : "m"(this->_lock), 
  	  "0"  ((word_t) 1)
