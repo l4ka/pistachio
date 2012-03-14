@@ -77,11 +77,11 @@ extern _C_ void __L4_SpaceControl(void);
 extern _C_ void __L4_ProcessorControl(void);
 extern _C_ void __L4_MemoryControl(void);
 
-typedef struct __L4_indirect
+typedef struct __L4_Indirect
 {
     L4_Word_t   edi;
     void      (*sys_call)();
-} __L4_indirect;
+} __L4_Indirect_t;
 
 
 L4_INLINE void * L4_KernelInterface (L4_Word_t *ApiVersion,
@@ -177,7 +177,7 @@ L4_INLINE L4_Word_t L4_ThreadControl (L4_ThreadId_t dest,
     L4_Word_t result;
     L4_Word_t dummy;
 
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = (L4_Word_t)UtcbLocation;
     in.sys_call = __L4_ThreadControl;
 
@@ -254,7 +254,7 @@ L4_INLINE L4_Word_t  L4_Schedule (L4_ThreadId_t dest,
     L4_Word_t result;
     L4_Word_t dummy;
 
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = PreemptionControl;
     in.sys_call = __L4_Schedule;
 
@@ -295,7 +295,7 @@ L4_INLINE L4_MsgTag_t L4_Ipc (L4_ThreadId_t to,
     L4_Word_t * utcb = __L4_X86_Utcb ();
 
 #if defined(__pic__)
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = (L4_Word_t)utcb;
     in.sys_call = __L4_Ipc;
 
@@ -370,7 +370,7 @@ L4_INLINE L4_MsgTag_t L4_Lipc (L4_ThreadId_t to,
 
 #if defined(__pic__)
 
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = (L4_Word_t)utcb;
     in.sys_call = __L4_Lipc;
 
@@ -467,7 +467,7 @@ L4_INLINE L4_Word_t L4_SpaceControl (L4_ThreadId_t SpaceSpecifier,
 {
     L4_Word_t result, dummy;
 
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = redirector.raw;
     in.sys_call = __L4_SpaceControl;
 
@@ -538,7 +538,7 @@ L4_INLINE L4_Word_t L4_MemoryControl (L4_Word_t control,
     L4_Word_t result, dummy;
     L4_Word_t * utcb = __L4_X86_Utcb ();
 
-    __L4_indirect in;
+    __L4_Indirect_t in;
     in.edi      = (L4_Word_t)utcb;
     in.sys_call = __L4_MemoryControl;
 
