@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2003-2007, 2010,  Karlsruhe University
+ * Copyright (C) 2003-2007, 2010, 2012,  Karlsruhe University
  *                
  * File path:     glue/v4-x86/x64/linker.lds
  * Description:   AMD64 PC99 Linker Script
@@ -37,7 +37,7 @@ OUTPUT_ARCH("i386:x86-64")
 BOOTMEM_SIZE	= 1024K;
 
 /* #define KERNEL_OFFSET 0  */
-_start_text_phys = 0x400000;
+_start_text_phys = 0x600000;
 _start_text = _start_text_phys + KERNEL_OFFSET;
 
 
