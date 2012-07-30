@@ -61,7 +61,7 @@ static void show_prio_queue( int depth, scheduler_t *scheduler, prio_queue_t *pr
     
     tcb_t *domain_tcb = prio_queue->get_domain_tcb();
     
-    printf( "priority queue %p pass %U domain tcb %p  depth %d\n", 
+    printf( "priority queue %p pass %llu domain tcb %p  depth %d\n", 
             prio_queue, prio_queue->get_global_pass(), domain_tcb, prio_queue->get_depth() );
 
     for (s16_t prio = MAX_PRIORITY; prio >= 0; prio--)

@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2010,  Karlsruhe University
+ * Copyright (C) 2007-2010, 2012,  Karlsruhe University
  *                
  * File path:     api/v4/sched-hs/schedule_functions.h
  * Description:   
@@ -25,7 +25,7 @@ INLINE void hs_sched_ktcb_t::account_pass()
 	ASSERT(tcb->is_local_cpu());
         sched_ktcb_t *sktcb = &tcb->sched_state; 
 
-        TRACEPOINT (SCHEDULE_DETAILS, "account pass %t %U += %d\n",
+        TRACEPOINT (SCHEDULE_DETAILS, "account pass %t %llu += %d\n",
                   tcb, sktcb->get_pass(), sktcb->get_stride());
         
 	sktcb->set_pass(sktcb->get_pass() + sktcb->get_stride());
@@ -297,7 +297,7 @@ INLINE void scheduler_t::set_accounted_tcb(tcb_t *tcb)
     scheduled_queue = tcb->sched_state.get_prio_queue();
     scheduled_queue->start_timeslice(now);
     
-    TRACEPOINT (SCHEDULE_DETAILS, "sat %t (q %t pass %U now %U))\n",
+    TRACEPOINT (SCHEDULE_DETAILS, "sat %t (q %t pass %llu now %llu))\n",
                 scheduled_tcb, scheduled_queue, scheduled_tcb->sched_state.get_pass(), now);
 
 }

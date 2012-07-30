@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2008, 2010,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2008, 2010, 2012,  Karlsruhe University
  *                
  * File path:     kdb/generic/linear_ptab_dump.cc
  * Description:   Linear page table dump
@@ -103,7 +103,6 @@ CMD(cmd_dump_ptab, cg)
     
     while (num > 0)
     {
-	
 	if (((++count % 4000) == 0) && get_choice ("Continue", "y/n", 'y') == 'n')
 	    break;
 
@@ -130,8 +129,10 @@ CMD(cmd_dump_ptab, cg)
 		// Print valid mapping
 		word_t pgsz = page_size (size);
 		word_t rwx = pg->reference_bits (space, size, vaddr);
-		printf ("%p [%p]:%s phys=%X map=%p %s%3d%cB %c%c%c "
-			"(%c%c%c) %s ",
+                word_t pgentsz = sizeof(pg->raw);
+                
+		printf ("%p [%p]:%s phys=%p map=%p %s%3d%cB %c%c%c "
+			"(%c%c%c) %s",
 			vaddr, pg->raw, spcptr, pg->address (space, size),
 			pg->mapnode (space, size, vaddr), spcpad,
 			(pgsz >= GB (1) ? pgsz >> 30 :

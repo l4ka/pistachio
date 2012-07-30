@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2010,  Karlsruhe University
+ * Copyright (C) 2007-2010, 2012,  Karlsruhe University
  *                
  * File path:     api/v4/sched-hs/schedule.cc
  * Description:   
@@ -181,7 +181,7 @@ tcb_t * scheduler_t::find_next_thread(prio_queue_t * prio_queue)
 		    if ( !search_tcb || (tcb->sched_state.get_pass() < search_tcb->sched_state.get_pass()) )
 			search_tcb = tcb;
 		    
-		    TRACEPOINT (SCHEDULE_DETAILS, "fnt search %t (pass %U) tcb %t (pass %U)\n",
+		    TRACEPOINT (SCHEDULE_DETAILS, "fnt search %t (pass %llu) tcb %t (pass %U)\n",
 				search_tcb, search_tcb->sched_state.get_pass(), 
 				tcb, tcb->sched_state.get_pass());
 

@@ -42,7 +42,7 @@ int print_tid (word_t val, word_t width, word_t precision, bool adjleft);
 
 
 /* convert nibble to lowercase hex char */
-#define hexchars(x) (((x) < 10) ? ('0' + (x)) : ('a' + ((x) - 10)))
+#define hexchars(x, uc) (((x) < 10) ? ('0' + (x)) : ((uc?'A':'a') + ((x) - 10)))
 
 /**
  *	Print hexadecimal value
@@ -63,7 +63,8 @@ int SECTION(SEC_KDEBUG) print_hex(const word_t val,
 				  int width = 0,
 				  int precision = 0,
 				  bool adjleft = false,
-				  bool nullpad = false)
+				  bool nullpad = false,
+    				  bool uppercase = false)
 {
     int i, n = 0;
     int nwidth = 0;
@@ -87,7 +88,7 @@ int SECTION(SEC_KDEBUG) print_hex(const word_t val,
 	for (i = width - nwidth; i > 0; i--, n++)
 	    putc (nullpad ? '0' : ' ');
     for (i = 4 * (nwidth - 1); i >= 0; i -= 4, n++)
-	putc (hexchars ((val >> i) & 0xF));
+	putc (hexchars ((val >> i) & 0xF, uppercase));
     if (adjleft)
 	for (i = width - nwidth; i > 0; i--, n++)
 	    putc (' ');
@@ -99,7 +100,8 @@ int SECTION(SEC_KDEBUG) print_hex64(const u64_t val,
                                     int width = 0,
                                     int precision = 0,
                                     bool adjleft = false,
-                                    bool nullpad = false)
+                                    bool nullpad = false,
+                                    bool uppercase = false)
 {
     int i, n = 0;
     int nwidth = 0;
@@ -123,13 +125,14 @@ int SECTION(SEC_KDEBUG) print_hex64(const u64_t val,
 	for (i = width - nwidth; i > 0; i--, n++)
 	    putc (nullpad ? '0' : ' ');
     for (i = 4 * (nwidth - 1); i >= 0; i -= 4, n++)
-	putc (hexchars ((val >> i) & 0xF));
+	putc (hexchars ((val >> i) & 0xF, uppercase));
     if (adjleft)
 	for (i = width - nwidth; i > 0; i--, n++)
 	    putc (' ');
 
     return n;
 }
+
 
 /**
  *	Print a string
@@ -271,7 +274,8 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
     int width = 8;
     int precision = 0;
     bool adjleft = false, nullpad = false;
-
+    int longs = 0;
+    
 #define arg(x) va_arg(args, x)
     
     printf_spin_lock.lock();
@@ -282,10 +286,11 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 
     while (*format)
     {
+        longs = 0;
 	switch (*(format))
 	{
 	case '%':
-	    width = precision = 0;
+	    width = precision = longs = 0;
 	    adjleft = nullpad = false;
 	reentry:
 	    switch (*(++format))
@@ -315,6 +320,7 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 		adjleft = true;
 		goto reentry;
 	    case 'l':
+                longs++;                    
 		goto reentry;
 		break;
 	    case 'c':
@@ -345,20 +351,23 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 		break;
 	    }
 	    case 'u':
-		n += print_dec(arg(long), width, nullpad ? '0' : ' ');
-		break;
-	    case 'U':
-		n += print_dec64(arg(u64_t), width, nullpad ? '0' : ' ');
+                if (longs < 2) 
+                    n += print_dec(arg(long), width, nullpad ? '0' : ' ');
+                else
+                    n += print_dec(arg(u64_t), width, nullpad ? '0' : ' ');
+                longs = 0;
 		break;
 	    case 'p':
-		precision = sizeof (word_t) * 2;
+		precision = (longs < 2 ? sizeof (word_t) * 2 : 16);
 	    case 'x':
-		n += print_hex(arg(long), width, precision,
-			       adjleft, nullpad);
-		break;
 	    case 'X':
-		n += print_hex64(arg(u64_t), width, precision,
-                                 adjleft, nullpad);
+                if (longs < 2) 
+                    n += print_hex(arg(long), width, precision,
+                                   adjleft, nullpad, (*(format) == 'X'));
+                else {
+                    n += print_hex(arg(u64_t), width, precision,
+                                   adjleft, nullpad, (*(format) == 'X'));
+                }                                       
 		break;
 	    case 's':
 	    {

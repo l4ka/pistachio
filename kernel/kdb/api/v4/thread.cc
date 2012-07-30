@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2004, 2007-2010,  Karlsruhe University
+ * Copyright (C) 2004, 2007-2010, 2012,  Karlsruhe University
  *                
  * File path:     kdb/api/v4/thread.cc
  * Description:   Kdebug stuff for V4 threads
@@ -40,7 +40,8 @@ int print_hex (const word_t val,
 	       int width,
 	       int precision,
 	       bool adjleft = false,
-	       bool nullpad = false);
+	       bool nullpad = false,
+               bool uppercase = false);
 int print_string (const char * s,
 		  const int width = 0,
 		  const int precision = 0);
