@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2008,  Karlsruhe University
+ * Copyright (C) 2007-2008, 2012,  Karlsruhe University
  *                
  * File path:     arch/x86/pgent.h
  * Description:   
@@ -38,7 +38,7 @@ class pgent_t
 public:
     union {
 	x86_pgent_t    pgent;
-	u32_t		raw;
+	word_t		raw;
     };
 
     enum pgsize_e X86_PGSIZES;
