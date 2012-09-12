@@ -341,13 +341,23 @@ int SECTION(SEC_KDEBUG) do_printf(const char* format_p, va_list args)
 	    }
 	    case 'd':
 	    {
-		long val = arg(long);
-		if (val < 0)
-		{
-		    putc('-');
-		    val = -val;
-		}
-		n += print_dec(val, width, nullpad ? '0' : ' ');
+                if (longs < 2) {
+                    long val = arg(long);
+                    if (val < 0)
+                    {
+                        putc('-');
+                        val = -val;
+                    }
+                    n += print_dec(val, width, nullpad ? '0' : ' ');
+                } else {
+                    u64_t val = arg(u64_t);
+                    if (val < 0)
+                    {
+                        putc('-');
+                        val = -val;
+                    }
+                    n += print_dec64(val, width, nullpad ? '0' : ' ');
+                }       
 		break;
 	    }
 	    case 'u':
