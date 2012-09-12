@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2007-2011,  Karlsruhe University
+ * Copyright (C) 2007-2012,  Karlsruhe University
  *                
  * File path:     api/v4/sched-rr/schedule_functions.h
  * Description:   
@@ -390,11 +390,11 @@ INLINE void scheduler_t::commit_schedule_parameters(schedule_req_t &req)
 
     if (req.processor_control != schedule_ctrl_t::nilctrl())
 	req.tcb->migrate_to_processor(req.processor_control.processor);
-	
+
     if (req.time_control != schedule_ctrl_t::nilctrl())
     {
 	req.tcb->sched_state.init_timeslice (req.time_control.timeslice);
-	req.tcb->sched_state.set_total_quantum (req.time_control.total_quantum);
+	req.tcb->sched_state.set_total_quantum (req.time_control.total_quantum.get_microseconds());
     }
 
 }

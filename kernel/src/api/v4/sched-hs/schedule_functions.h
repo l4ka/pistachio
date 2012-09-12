@@ -597,7 +597,7 @@ INLINE void scheduler_t::commit_schedule_parameters(schedule_req_t &req)
     if (req.time_control != schedule_ctrl_t::nilctrl())
     {
 	req.tcb->sched_state.init_timeslice (req.time_control.timeslice);
-	req.tcb->sched_state.set_total_quantum (req.time_control.total_quantum);
+	req.tcb->sched_state.set_total_quantum (req.time_control.total_quantum.get_microseconds());
     }
 
 }
