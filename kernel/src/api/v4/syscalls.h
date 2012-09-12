@@ -1,6 +1,6 @@
 /*********************************************************************
  *                
- * Copyright (C) 2002-2004, 2007-2009, 2011,  Karlsruhe University
+ * Copyright (C) 2002-2004, 2007-2009, 2011-2012,  Karlsruhe University
  *                
  * File path:     api/v4/syscalls.h
  * Description:   declaration of system calls
@@ -261,7 +261,8 @@ struct schedule_ctrl_t {
 	};
         threadid_t tid;
 	word_t raw;
-   };
+
+   } __attribute__((packed));
 
     inline void operator = (word_t raw) 
 	{ this->raw = raw; }
@@ -282,9 +283,7 @@ struct schedule_ctrl_t {
 	    return ctrl;
 	}
 
-
-}; 
-
+};
 
 /*
  * Error code values
