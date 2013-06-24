@@ -46,4 +46,7 @@
 		*(SORT(.ctors.1*))
 		*(SORT(.ctors.*))
                 *(.ctors)
+		/* GCC >4.7 */
+		*(SORT(.init_array.*))
+		*(.init_array)
                 QUAD(0)
