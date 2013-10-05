@@ -819,7 +819,7 @@ fpage_t space_t::mapctrl (fpage_t fpage, mdb_t::ctrl_t ctrl,
     word_t r_num[pgent_t::size_max];
 
     TRACEPOINT (FPAGE_MAPCTRL,
-		"<spc=%p>::mapctrl ([%d, %x %x] [%s], %x, %c)\n",
+		"<spc=%p>::mapctrl ([%d, %x %x] [%x], %s, %x %c)\n",
 		this, fpage.get_address (), 
 		fpage.get_size_log2 (), fpage.get_rwx (),
 		ctrl.raw, ctrl.string(),attribute,
