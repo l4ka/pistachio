@@ -126,4 +126,10 @@ strchr(const char *p, int ch)
 //http://www.novell.com/documentation/developer/clib/ndev_enu/data/sdk1274.html
 //http://www.linuxdoc.org/HOWTO/NLM-HOWTO-3.html
 
+
+/* Hive these off into <nwconio.h>, when we've got the dev environment configured... */  
+   
+   //Beep the PC speaker
+  //void RingTheBell  (void); 
+
 #endif /* !__USER__LIB__IO__LIB_H__ */
