@@ -122,4 +122,8 @@ strchr(const char *p, int ch)
     /* NOTREACHED */
 }
 
+//Begin NetWare-compatible functions
+//http://www.novell.com/documentation/developer/clib/ndev_enu/data/sdk1274.html
+//http://www.linuxdoc.org/HOWTO/NLM-HOWTO-3.html
+
 #endif /* !__USER__LIB__IO__LIB_H__ */
