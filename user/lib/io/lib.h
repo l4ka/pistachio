@@ -31,6 +31,9 @@
 #ifndef __USER__LIB__IO__LIB_H__
 #define __USER__LIB__IO__LIB_H__
 
+/* OpenBSD Definition, depends upon machine architecture */
+//typedef unsigned long size_t;
+//http://fxr.watson.org/fxr/source/lib/libkern/bzero.c?v=OPENBSD;im=10
 
 static unsigned strlen( const char *src )
 {
