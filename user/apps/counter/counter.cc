@@ -48,6 +48,8 @@ int main (void)
 	//while (counter < 0) {
 //printf(counter + "\n");//
 //}
-//RingTheBell();
+RingTheBell();
 strlen( "Whoopie" );
+
+return 0;
 }

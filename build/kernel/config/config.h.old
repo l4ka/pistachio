@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Sat, 03 May 2014 15:30:55 +0000 */
+/* At: Sat, 03 May 2014 15:58:57 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -41,12 +41,23 @@
 
 
 /* Kernel */
-#undef  CONFIG_EXPERIMENTAL
+#define CONFIG_EXPERIMENTAL 1
+
+/* Experimental Features */
+#define CONFIG_X_PAGER_EXREGS 1
+#define CONFIG_X_CTRLXFER_MSG 1
+#define CONFIG_X_EVT_LOGGING 1
+
+/* Kernel scheduling policy */
+#define CONFIG_SCHED_RR 1
+#undef  CONFIG_X_SCHED_HS
+
+
 #undef  CONFIG_IPC_FASTPATH
 #define CONFIG_DEBUG 1
 #undef  CONFIG_DEBUG_SYMBOLS
 #undef  CONFIG_PERFMON
-#undef  CONFIG_SPIN_WHEELS
+#define CONFIG_SPIN_WHEELS 1
 #undef  CONFIG_NEW_MDB
 #undef  CONFIG_STATIC_TCBS
 #undef  CONFIG_X86_SMALL_SPACES
@@ -55,7 +66,7 @@
 /* Debugger */
 
 /* Kernel Debugger Console */
-#undef  CONFIG_KDB_CONS_COM
+#define CONFIG_KDB_CONS_COM 1
 #define CONFIG_KDB_COMPORT 0x0
 #define CONFIG_KDB_COMSPEED 115200
 #define CONFIG_KDB_CONS_KBD 1

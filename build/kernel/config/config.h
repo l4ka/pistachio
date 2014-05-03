@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Sat, 03 May 2014 15:58:57 +0000 */
+/* At: Sat, 03 May 2014 19:25:44 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -41,15 +41,15 @@
 
 
 /* Kernel */
-#define CONFIG_EXPERIMENTAL 1
+#undef  CONFIG_EXPERIMENTAL
 
 /* Experimental Features */
-#define CONFIG_X_PAGER_EXREGS 1
-#define CONFIG_X_CTRLXFER_MSG 1
-#define CONFIG_X_EVT_LOGGING 1
+#undef  CONFIG_X_PAGER_EXREGS
+#undef  CONFIG_X_CTRLXFER_MSG
+#undef  CONFIG_X_EVT_LOGGING
 
 /* Kernel scheduling policy */
-#define CONFIG_SCHED_RR 1
+#undef  CONFIG_SCHED_RR
 #undef  CONFIG_X_SCHED_HS
 
 
