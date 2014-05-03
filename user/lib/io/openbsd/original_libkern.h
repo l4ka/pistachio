@@ -151,7 +151,7 @@ abs(j)
 void	 __assert(const char *, const char *, int, const char *)
 	    __attribute__ ((__noreturn__));
 int	 bcmp(const void *, const void *, size_t);
-void	 bzero(void *, size_t);
+//void	 bzero(void *, size_t);
 int	 ffs(int);
 void	*memchr(const void *, int, size_t);
 int	 memcmp(const void *, const void *, size_t);
