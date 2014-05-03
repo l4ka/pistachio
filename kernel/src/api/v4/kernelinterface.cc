@@ -213,12 +213,12 @@ bool memory_info_t::insert (memdesc_t::type_e type, word_t subtype,
     const word_t max_desc = (addr_word_t) &KIP_MEMDESCS_SIZE;
 
 //EVIL!
-    /*if (n >= max_desc)
+    if (n >= max_desc)
     {
 	printf ("Memory descriptor overflow (max=%d, n=%d)\n", max_desc, n);
 	enter_kdebug ("memdesc overflow");
 	return false;
-    }*/
+    }
 
     memdesc_t * md = get_memdesc (n++);
     md->set (type, subtype, virt, low, (addr_t) ((word_t) high - 1));
