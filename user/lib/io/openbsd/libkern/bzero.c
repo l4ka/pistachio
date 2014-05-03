@@ -29,17 +29,17 @@
  * SUCH DAMAGE.
  */
 
-#define LIBC_SCSS
+#define LIBC_SCCS
 
 #if defined(LIBC_SCCS) && !defined(lint)
 static char *rcsid = "$OpenBSD: bzero.c,v 1.7 2004/11/28 07:23:41 mickey Exp $";
 #endif /* LIBC_SCCS and not lint */
 
-#if !defined(_KERNEL) && !defined(_STANDALONE)
-#include <string.h>
-#else
+/* #if !defined(_KERNEL) && !defined(_STANDALONE)
+#include <l4io.h>
+#else */
 #include <openbsd/libkern.h>
-#endif
+//#endif
 
 /*
  * bzero -- vax movc5 instruction
