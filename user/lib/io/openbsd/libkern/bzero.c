@@ -29,6 +29,8 @@
  * SUCH DAMAGE.
  */
 
+#define LIBC_SCSS
+
 #if defined(LIBC_SCCS) && !defined(lint)
 static char *rcsid = "$OpenBSD: bzero.c,v 1.7 2004/11/28 07:23:41 mickey Exp $";
 #endif /* LIBC_SCCS and not lint */
@@ -36,7 +38,7 @@ static char *rcsid = "$OpenBSD: bzero.c,v 1.7 2004/11/28 07:23:41 mickey Exp $";
 #if !defined(_KERNEL) && !defined(_STANDALONE)
 #include <string.h>
 #else
-#include <lib/libkern/libkern.h>
+#include <openbsd/libkern.h>
 #endif
 
 /*
