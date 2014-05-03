@@ -33,6 +33,8 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
+#include <../lib/io/lib.h>
+
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
@@ -41,11 +43,11 @@ int main (void)
 {
    // printf ("Hello world, I will now allocate all available memory.\n\n");
 
-    int counter = 0;
+   // int counter = 0;
 
-	while (counter < 0) {
-printf(counter + "\n");
-}
-
-
+	//while (counter < 0) {
+//printf(counter + "\n");//
+//}
+//RingTheBell();
+strlen( "Whoopie" );
 }

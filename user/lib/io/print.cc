@@ -627,3 +627,8 @@ int __l4_printf(const char *fmt, ...)
 
     return r;
 }
+
+//NetWare thing, move this later
+void RingTheBell() {
+printf("YOU RANG THE BELL!");
+}

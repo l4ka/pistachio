@@ -46,6 +46,9 @@ int printf(const char *fmt, ...);
 void putc(int c);
 int getc(void);
 
+//NetWare thing, move later
+void RingTheBell();
+
 
 #ifdef __cplusplus
 }

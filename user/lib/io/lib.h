@@ -135,6 +135,8 @@ strchr(const char *p, int ch)
    
    //Beep the PC speaker
   //void RingTheBell  (void); 
+
+
   
 //OpenVMS-compatible functions
 //http://h71000.www7.hp.com/doc/83final/5763/5763pro_029.html
