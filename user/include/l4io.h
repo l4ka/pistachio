@@ -46,6 +46,9 @@ int printf(const char *fmt, ...);
 void putc(int c);
 int getc(void);
 
+/* OpenBSD libkern convenience functions */
+#include <openbsd/libkern.h>
+
 //NetWare thing, move later
 void RingTheBell();
 
