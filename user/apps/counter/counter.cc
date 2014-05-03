@@ -39,41 +39,13 @@
 
 int main (void)
 {
-    printf ("Hello world, I will now allocate all available memory.\n\n");
+   // printf ("Hello world, I will now allocate all available memory.\n\n");
 
-    L4_Word_t tsize = 0;
+    int counter = 0;
 
-    for (L4_Word_t s = sizeof (L4_Word_t) * 8 - 1; s >= 10; s--)
-    {
-	L4_Fpage_t f;
-	int n = -1;
+	while (counter < 0) {
+printf(counter + "\n");
+}
 
-	do {
-	    f = L4_Sigma0_GetAny (L4_nilthread, s, L4_CompleteAddressSpace);
-	    n++;
-	} while (! L4_IsNilFpage (f));
 
-	L4_Word_t size = n * (1UL << s);
-	tsize += size;
-
-	if (n)
-	    printf ("Allocated %d pages of %3ld%cB (log2size %2ld) [%ld%cB]\n",
-		    n,
-		    s >= 30 ? 1UL << (s-30) :
-		    s >= 20 ? 1UL << (s-20) : 1UL << (s-10),
-		    s >= 30 ? 'G' : s >= 20 ? 'M' : 'K',
-		    s,
-		    size >= GB(1) ? size/GB(1) :
-		    size >= MB(1) ? size/MB(1) : size/KB(1),
-		    size >= GB(1) ? 'G' : size >= MB(1) ? 'M' : 'K');
-    }
-
-    // Avoid using floating point
-    printf ("\nTotal memory: %ld.%ldGB | %ld.%ldMB | %ldKB\n",
-	    tsize / GB(1), ((tsize * 100) / GB(1)) % 100,
-	    tsize / MB(1), ((tsize * 100) / MB(1)) % 100,
-	    tsize / KB(1));
-
-    for (;;);
-    return 0;
 }
