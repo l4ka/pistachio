@@ -44,17 +44,19 @@
 
 int main (void)
 {
-   // printf ("Hello world, I will now allocate all available memory.\n\n");
+  char str [80];
+  int i;
 
-    //int counter = 0;
-
-	//for (counter; counter <= 0; counter ++) {
-//printf(toascii(counter) + "\n");//
-
-//printf("%d\n", counter++);
-}
-//RingTheBell();
-//strlen( "Whoopie" );
+  printf ("Enter your family name: ");
+  scanf ("%79s",str);  
+  printf ("Enter your age: ");
+  scanf ("%d",&i);
+  printf ("Mr. %s , %d years old.\n",str,i);
+  printf ("Enter a hexadecimal number: ");
+  scanf ("%x",&i);
+  printf ("You have entered %#x (%d).\n",i,i);
+  
+  return 0;
 
 return 0;
 }
