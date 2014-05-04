@@ -1,3 +1,12 @@
+l4test
+*.a
+*.o
+kickstart
+sigma0
+x86-kernel
+fd.img
+grub.iso
+*.*~
 *.pyc
 /build/
 user/autom4te.cache/
