@@ -36,7 +36,7 @@ top_builddir=	../..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-PROGRAM=	grabmem
+PROGRAM=	counter
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a
 

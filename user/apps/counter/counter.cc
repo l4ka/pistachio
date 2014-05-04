@@ -39,17 +39,22 @@
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
 
+//http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
+#define	toascii(c)	((c) & 0177)
+
 int main (void)
 {
    // printf ("Hello world, I will now allocate all available memory.\n\n");
 
-   // int counter = 0;
+    //int counter = 0;
 
-	//while (counter < 0) {
-//printf(counter + "\n");//
-//}
-RingTheBell();
-strlen( "Whoopie" );
+	//for (counter; counter <= 0; counter ++) {
+//printf(toascii(counter) + "\n");//
+
+//printf("%d\n", counter++);
+}
+//RingTheBell();
+//strlen( "Whoopie" );
 
 return 0;
 }
