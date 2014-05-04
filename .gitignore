@@ -5,6 +5,15 @@ l4test
 *.o
 kickstart
 sigma0
+user/serv/sigma0/.depend
+user/serv/sigma0/Makefile
+user/serv/sigma0/sigma0
+user/util/kickstart/.depend
+user/util/kickstart/.revision
+user/util/kickstart/Makefile
+user/util/kickstart/Makefile~
+user/util/kickstart/kickstart
+
 x86-kernel
 fd.img
 grub.iso
