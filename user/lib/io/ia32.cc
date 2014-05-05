@@ -41,6 +41,8 @@ extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
 
 #if defined(CONFIG_COMPORT)
 
+//RS-232/Serial port interfaces
+//http://wiki.osdev.org/Serial_Ports
 #if CONFIG_COMPORT == 0
 # define COMPORT 0x3f8
 #elif CONFIG_COMPORT == 1
@@ -115,6 +117,8 @@ int __l4_getc (void)
 #define COLOR 7
 #define NUM_LINES 25
 
+//Correspond with PS/2 keyboard interface
+//http://wiki.osdev.org/%228042%22_PS/2_Controller
 #define KBD_STATUS_REG		0x64	
 #define KBD_CNTL_REG		0x64	
 #define KBD_DATA_REG		0x60	
