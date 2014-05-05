@@ -39,24 +39,24 @@
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
 
+//http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
+
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
 #define	toascii(c)	((c) & 0177)
 
-int main (void)
-{
-  char str [80];
-  int i;
+//#define COW 2172
+//char* moo = "MO ";
+//void wrap() {
+  //  int i,j;
+    //for(i=0;doSomething(i);i++)
+      //  j=COW-moo[i&3],fputs(&j,stderr);
+//}
+//http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
+int main (void) {
+	//wrap();
 
-  printf ("Enter your family name: ");
-  scanf ("%79s",str);  
-  printf ("Enter your age: ");
-  scanf ("%d",&i);
-  printf ("Mr. %s , %d years old.\n",str,i);
-  printf ("Enter a hexadecimal number: ");
-  scanf ("%x",&i);
-  printf ("You have entered %#x (%d).\n",i,i);
-  
-  return 0;
-
-return 0;
+	return 0;
 }
+
+
+
