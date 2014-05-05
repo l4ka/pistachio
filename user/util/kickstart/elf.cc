@@ -317,8 +317,6 @@ bool elf_load (L4_Word_t file_start,
 	       L4_MemCheck_Func_t check)
 {
 
-    //Debugging ELF loader
-    printf("[elf.cc] : elf_load() was entered!"); 
 
     // Pointer to ELF file header
     ehdr_t* eh = (ehdr_t*) file_start;
@@ -337,6 +335,11 @@ bool elf_load (L4_Word_t file_start,
 
 #if defined(L4_32BIT) || defined(ALSO_ELF32)
     if (eh->is_32bit ())
+    //Debugging ELF loader
+    //printf("\n\n[elf.cc] : elf_load() was traversed!\n\n"); 
+
+        printf("<32> | "); //32-bitness
+
 	return elf_load32 (file_start, file_end,
 			   memory_start, memory_end, entry,
 			   check);
@@ -344,10 +347,15 @@ bool elf_load (L4_Word_t file_start,
 
 #if defined(L4_64BIT) || defined(ALSO_ELF64)
     if (eh->is_64bit ())
+
+        printf("<64> | "); //64-bitness
+
 	return elf_load64 (file_start, file_end,
 			   memory_start, memory_end, entry,
 			   check);
 #endif
+
+
 
     return false;
 }
