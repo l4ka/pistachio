@@ -29,9 +29,9 @@
 ##                
 ######################################################################
 
-srcdir=		@srcdir@
-top_srcdir=	@top_srcdir@
-top_builddir=	@top_builddir@
+srcdir=		.
+top_srcdir=	../..
+top_builddir=	../..
 
 include $(top_srcdir)/Mk/l4.base.mk
 
@@ -39,7 +39,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
 LIBRARY=	io
-SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c) $(wildcard openbsd/stdio/*.c)
+SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c)
 
 include $(top_srcdir)/Mk/l4.lib.mk
 
