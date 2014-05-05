@@ -316,6 +316,10 @@ bool elf_load (L4_Word_t file_start,
 	       L4_Word_t *type,
 	       L4_MemCheck_Func_t check)
 {
+
+    //Debugging ELF loader
+    printf("[elf.cc] : elf_load() was entered!"); 
+
     // Pointer to ELF file header
     ehdr_t* eh = (ehdr_t*) file_start;
 
