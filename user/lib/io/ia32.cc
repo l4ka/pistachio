@@ -187,7 +187,7 @@ void __l4_putc(int c)
 }
 
 //Hack to get strings from the keyboard
-char[] GetPolledKbdLine() {
+char *GetPolledKbdLine() {
   char[] data;
   int cookedChar;
   int charCount = 0;

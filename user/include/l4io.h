@@ -46,6 +46,8 @@ int printf(const char *fmt, ...);
 void putc(int c);
 int getc(void);
 
+char *GetPolledKbdLine();
+
 /* OpenBSD libkern convenience functions */
 #include <openbsd/libkern.h>
 
