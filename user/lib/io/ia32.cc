@@ -96,7 +96,7 @@ static void io_init( void )
 
 //Hack to get strings from the keyboard
 char GetPolledKbdLine() {
- // char *data;
+
   int cookedChar = __l4_getc();
   int charCount = 0;
 char data;
@@ -104,9 +104,6 @@ while (cookedChar != '\n') {
 
 charCount++;
 data = data +cookedChar;
-//data = data + __l4_getc();*/
-
-//return data;
 
 }
 
