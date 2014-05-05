@@ -69,6 +69,12 @@ L4_BootRec_t * init_bootinfo (L4_BootInfo_t * bi)
     bi->first_entry	= sizeof (*bi);
     bi->num_entries	= 0;
 
+    //Debug init_bootinfo()
+
+    printf("[bootinfo.cc] : init_bootinfo(), boot info record size & first entry: %d...\n\n", sizeof (*bi);
+    printf("[bootinfo.cc] : init_bootinfo(), boot info record version: %d...\n\n", L4_BOOTINFO_VERSION);
+    printf("[bootinfo.cc] : init_bootinfo(), have %d entries in the table...\n\n", bi->num_entries);
+
     return L4_BootInfo_FirstEntry (bi);
 }
 
