@@ -49,7 +49,7 @@ loader_format_t loader_formats[] = {
 
 void fail(int ec)
 {
-    printf("PANIC: FAIL in line %d\n", ec);
+    printf("PANIC: FAIL in line %d\n", ec); //This gets called somewhere, when we fail
     while(1);
 }
 
