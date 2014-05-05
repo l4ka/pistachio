@@ -55,6 +55,8 @@
 int main (void) {
 	//wrap();
 
+RingTheBell();
+
 	return 0;
 }
 
