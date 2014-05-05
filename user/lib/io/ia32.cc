@@ -186,6 +186,24 @@ void __l4_putc(int c)
     __l4_putc_cursor = __cursor;
 }
 
+//Hack to get strings from the keyboard
+char[] GetPolledKbdLine() {
+  char[] data;
+  int cookedChar;
+  int charCount = 0;
+
+while (cookedChar != "\n") {
+
+charCount++;
+data[charCount] = __l4_getc();
+
+
+}
+
+return data;
+
+}
+
 /* No SHIFT key support!!! */
 
 int __l4_getc()
@@ -201,7 +219,7 @@ int __l4_getc()
 		last_key = 0;
 	    else if (last_key != scancode)
 	    {
-		//printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);
+		printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);//was disabled
 		last_key = scancode;
 		c = keyb_layout[scancode];
 		if (c > 0) return c;
