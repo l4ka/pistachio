@@ -74,6 +74,7 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
     // Pointer to ELF file header
     ehdr_t* eh = (ehdr_t*) file_start;
 
+//Print the start/end ranges
     printf("  (%p-%p)",
            (void *) file_start,
            (void *) file_end);
@@ -338,7 +339,7 @@ bool elf_load (L4_Word_t file_start,
     //Debugging ELF loader
     //printf("\n\n[elf.cc] : elf_load() was traversed!\n\n"); 
 
-        printf("<32> | "); //32-bitness
+        printf("<32> | \n"); //32-bitness
 
 	return elf_load32 (file_start, file_end,
 			   memory_start, memory_end, entry,
@@ -348,7 +349,7 @@ bool elf_load (L4_Word_t file_start,
 #if defined(L4_64BIT) || defined(ALSO_ELF64)
     if (eh->is_64bit ())
 
-        printf("<64> | "); //64-bitness
+        printf("<64> | \n"); //64-bitness
 
 	return elf_load64 (file_start, file_end,
 			   memory_start, memory_end, entry,
