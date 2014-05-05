@@ -75,7 +75,7 @@ extern "C" void loader (void)
     // Flush caches (some archs don't like code in their D-cache)
     flush_cache();
 
-    printf("[kickstart.cc] Launching kernel ...\n");
+    printf("[kickstart.cc] : Launching kernel ...\n");
 
     // Start the kernel at its entry point
     launch_kernel (entry);

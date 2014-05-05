@@ -66,6 +66,8 @@ void flush_cache()
  */
 void launch_kernel(L4_Word_t entry)
 {
+    printf("[ia32.cc] : Inside launch_kernel(), trying to squeeze into 0x%d\n", entry);
+
     __asm__ __volatile__ ("jmp *%0" : : "r"(entry));
 }
 
