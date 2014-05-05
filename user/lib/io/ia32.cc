@@ -32,12 +32,13 @@
 #include <config.h>
 #include <l4/types.h>
 #include "ia32.h"
+//#include "lib.h" //HAX
 
-extern "C" void __l4_putc (int c);
+
 extern "C" void putc (int c) __attribute__ ((weak, alias ("__l4_putc")));
 extern "C" int __l4_getc (void);
 extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
-
+extern "C" void __l4_putc (int c);
 
 #if defined(CONFIG_COMPORT)
 
@@ -89,6 +90,27 @@ static void io_init( void )
         inb(LSR);
         inb(MSR);
         
+
+}
+
+
+//Hack to get strings from the keyboard
+char GetPolledKbdLine() {
+ // char *data;
+  int cookedChar = __l4_getc();
+  int charCount = 0;
+char data;
+while (cookedChar != '\n') {
+
+charCount++;
+data = data +cookedChar;
+//data = data + __l4_getc();*/
+
+//return data;
+
+}
+
+return data;
 
 }
 
@@ -186,23 +208,7 @@ void __l4_putc(int c)
     __l4_putc_cursor = __cursor;
 }
 
-//Hack to get strings from the keyboard
-char *GetPolledKbdLine() {
-  char[] data;
-  int cookedChar;
-  int charCount = 0;
 
-while (cookedChar != "\n") {
-
-charCount++;
-data[charCount] = __l4_getc();
-
-
-}
-
-return data;
-
-}
 
 /* No SHIFT key support!!! */
 

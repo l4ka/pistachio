@@ -54,7 +54,10 @@
 //http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
 int main (void) {
 	//wrap();
-
+//char *zone = "test";
+//printf(GetPolledKbdLine());
+//printf("%s, %s\n", GetPolledKbdLine());
+GetPolledKbdLine();
 RingTheBell();
 
 	return 0;

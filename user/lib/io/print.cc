@@ -75,7 +75,6 @@ int __l4_putchar (int c)
 }
 
 
-
 /*
  * Function print_string (s)
  *

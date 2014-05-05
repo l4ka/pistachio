@@ -40,14 +40,16 @@
 extern "C" {
 #endif
 
+char GetPolledKbdLine();
+
 int vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap);
 int snprintf(char *str, L4_Size_t size, const char *fmt, ...);
 int printf(const char *fmt, ...);
 void putc(int c);
 int getc(void);
 
-char *GetPolledKbdLine();
-
+//
+//extern "C" char *GetPolledKbdLine();
 /* OpenBSD libkern convenience functions */
 #include <openbsd/libkern.h>
 

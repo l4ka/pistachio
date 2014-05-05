@@ -41,6 +41,8 @@ extern inline L4_Word8_t inb(const L4_Word16_t port)
     return val;
 }
 
+//extern "C" char *GetPolledKbdLine();
+
 extern inline void outb(const L4_Word16_t port, const L4_Word8_t val)
 {
     __asm__ __volatile__ ("outb %0, %w1" : : "a"(val), "dN"(port));
