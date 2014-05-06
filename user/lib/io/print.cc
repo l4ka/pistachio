@@ -642,6 +642,15 @@ char GetPolledKbdLine() {
 //charCount++;
 //data[charCount] = cookedChar;
 
+/*
+        char str[256] = "hello";
+        char c = 'o';
+
+        append(str, c);
+
+        printf("%s\n", str);
+*/
+
 //printf("[print.cc] : the final answer is \'%X\'", data);
 
 
