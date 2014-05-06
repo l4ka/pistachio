@@ -33,7 +33,7 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
-#include <../lib/io/lib.h>
+//#include <../lib/io/lib.h>
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
@@ -57,7 +57,9 @@ int main (void) {
 //char *zone = "test";
 //printf(GetPolledKbdLine());
 //printf("%s, %s\n", GetPolledKbdLine());
-GetPolledKbdLine();
+//printf(GetPolledKbdLine());
+char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
+//GetPolledKbdLine();
 RingTheBell();
 
 	return 0;

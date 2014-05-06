@@ -627,6 +627,23 @@ int __l4_printf(const char *fmt, ...)
     return r;
 }
 
+//Hack to get strings from the keyboard
+char GetPolledKbdLine() {
+
+  int cookedChar = getc();
+  int charCount = 0;
+char data;
+while (cookedChar != '\n') {
+
+charCount++;
+data = data +cookedChar;
+
+}
+
+return data;
+
+}
+
 //NetWare thing, move this later
 void RingTheBell() {
 printf("YOU RANG THE BELL!");

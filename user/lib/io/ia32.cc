@@ -94,22 +94,6 @@ static void io_init( void )
 }
 
 
-//Hack to get strings from the keyboard
-char GetPolledKbdLine() {
-
-  int cookedChar = __l4_getc();
-  int charCount = 0;
-char data;
-while (cookedChar != '\n') {
-
-charCount++;
-data = data +cookedChar;
-
-}
-
-return data;
-
-}
 
 void __l4_putc(int c)
 {
@@ -155,6 +139,7 @@ static unsigned char keyb_layout[128] =
 	"\206\207\210\211\212\000\000789-456+1"		/* 0x40 - 0x4f */
 	"230\177\000\000\213\214\000\000\000\000\000\000\000\000\000\000" /* 0x50 - 0x5f */
 	"\r\000/";					/* 0x60 - 0x6f */
+
 
 void __l4_putc(int c)
 {
