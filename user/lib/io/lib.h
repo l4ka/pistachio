@@ -136,6 +136,8 @@ strchr(const char *p, int ch)
    //Beep the PC speaker
   //void RingTheBell  (void); 
 
+void append_str(char* s, char c);
+
 
   
 //OpenVMS-compatible functions

@@ -630,33 +630,22 @@ int __l4_printf(const char *fmt, ...)
 //Hack to get strings from the keyboard
 char GetPolledKbdLine() {
 
- // int cookedChar = getc();
-  //int charCount = 0;
-//char data[10];
 
-//char data = cookedChar;
-//while (cookedChar != '\n') {
+        char str[256] = "";
+        //char c = 'o';
 
-//printf("[print.cc] : entered char of \'%X\'", cookedChar);
+        
 
-//charCount++;
-//data[charCount] = cookedChar;
+        
 
-/*
-        char str[256] = "hello";
-        char c = 'o';
-
-        append(str, c);
-
-        printf("%s\n", str);
-*/
-
-//printf("[print.cc] : the final answer is \'%X\'", data);
 
 
         for(;;) {
                char c = getc();
                 printf("%02x\n", c);
+		append_str(str, c);
+		printf("%s\n", str);
+
 
 }
 //}
@@ -667,7 +656,7 @@ return getc();
 
 }
 //http://ubuntuforums.org/showthread.php?t=1016188
-void append(char* s, char c)
+void append_str(char* s, char c)
 {
 	int len = strlen(s);
 	s[len] = c;
