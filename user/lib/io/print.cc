@@ -631,20 +631,26 @@ int __l4_printf(const char *fmt, ...)
 char GetPolledKbdLine() {
 
 
-        char str[256] = "";
-        //char c = 'o';
-
-        
-
-        
-
+        //char str[256] = "";
+        //char c = '';
+	//char *str = "";
+//String test = "";
+// char c = 'o';
+//strcat();`
+       // char str[256] = "hello";
+     //append_str(str, c);
 
 
         for(;;) {
-               char c = getc();
+              char c = getc();
                 printf("%02x\n", c);
-		append_str(str, c);
-		printf("%s\n", str);
+
+        
+       
+   
+
+		//append_str(str, getc());
+		//printf("%s\n", str);
 
 
 }
@@ -653,7 +659,7 @@ char GetPolledKbdLine() {
 
 //printf("[print.cc] : the final answer is \'sX\'", data);
 return getc();
-
+//return str;
 }
 //http://ubuntuforums.org/showthread.php?t=1016188
 void append_str(char* s, char c)
