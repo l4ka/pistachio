@@ -635,8 +635,12 @@ char GetPolledKbdLine() {
 char data;
 while (cookedChar != '\n') {
 
+printf("[print.cc] : entered char of \'%s\'", cookedChar);
+
 charCount++;
 data = data +cookedChar;
+
+printf("[print.cc] : the final answer is \'%s\'", data);
 
 }
 
