@@ -656,31 +656,12 @@ while(c != 0x0d && strlen(pass) != (50 - 1)) {
 }
 pass[i] = '\0';
 printf("\nPass: %s\n", pass);
-//printf("%02x\n", c);
 
 
 return getc();
 
-
-      //  for(;;) {
-           
-
-
-
-
-
-//}
-return getc();
-
-//return data;
 }
-//}
-//}
 
-//printf("[print.cc] : the final answer is \'sX\'", data);
-
-//return str;
-//}
 //http://ubuntuforums.org/showthread.php?t=1016188
 void append_str(char* s, char c)
 {
