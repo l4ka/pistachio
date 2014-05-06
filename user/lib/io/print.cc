@@ -657,6 +657,13 @@ char GetPolledKbdLine() {
 return getc();
 
 }
+//http://ubuntuforums.org/showthread.php?t=1016188
+void append(char* s, char c)
+{
+	int len = strlen(s);
+	s[len] = c;
+	s[len + 1] = '\0';
+}
 
 //NetWare thing, move this later
 void RingTheBell() {
