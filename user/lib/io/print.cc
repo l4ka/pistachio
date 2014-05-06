@@ -628,7 +628,7 @@ int __l4_printf(const char *fmt, ...)
 }
 
 //Hack to get strings from the keyboard
-char GetPolledKbdLine() {
+char *GetPolledKbdLine() {
 
 char data;
 
@@ -658,7 +658,7 @@ pass[i] = '\0';
 printf("\nPass: %s\n", pass);
 
 
-return getc();
+return pass ;//getc();
 
 }
 

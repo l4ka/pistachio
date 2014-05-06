@@ -40,7 +40,7 @@
 extern "C" {
 #endif
 
-char GetPolledKbdLine();
+char *GetPolledKbdLine();
 
 int vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap);
 int snprintf(char *str, L4_Size_t size, const char *fmt, ...);
