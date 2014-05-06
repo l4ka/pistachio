@@ -631,95 +631,56 @@ int __l4_printf(const char *fmt, ...)
 char GetPolledKbdLine() {
 
 char data;
-/*
-http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
-int i = 0;
-for (;;)
-{
-    c = mygetch();
-    if (c == '\n')
-        break;
 
-    c = mygetch();
-    pass[i++] = c;
+//http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
+int c;
+int i = 0;
+char pass[50] = "";
+
+printf("Enter password: ");
+while(c != 0x0d && strlen(pass) != (50 - 1)) {
+    c = getc();
+    if(c == 0x0d) {
+        //ensure cannot backspace past prompt
+        if(i != 0) {
+            //simulate backspace by replacing with space
+            printf("\b \b");
+            //get rid of last character
+            //pass[i-1] = 0; i--;
+        }
+    } else {
+        //passed a character
+        pass[i] = (char)c; i++;
+        printf("*");
+    }
 }
 pass[i] = '\0';
-
----------------
-
-char c[2] = "";
-char pass[50] = "";
-char *end = pass + sizeof(pass) - 1;
-char *dst = pass;
-
-while (c[0] !=  '\n' && dst < end)
-{
-    c[0] = mygetch();
-    strcat(dst, c);
-    dst++;
-}
+printf("\nPass: %s\n", pass);
+//printf("%02x\n", c);
 
 
-*/
+return getc();
+
+
+      //  for(;;) {
+           
 
 
 
 
 
+//}
+return getc();
 
-
-
-       // char str[256] = "";
-        //char c = '';
-	//char *str = "";
-//String test = "";
-// char c = 'o';
-//strcat();`
-       // char str[256] = "hello";
-     //append_str(str, c);
-
-
-        for(;;) {
-             // char c = getc();
-               
-
-
-char c[2] = "";
-char pass[50] = "";
-char *end = pass + sizeof(pass) - 1;
-char *dst = pass;
-
-while (c[0] !=  '\n' && dst < end)
-{
-    c[0] = getc();
-    strcat(dst, c);
-    dst++;
-
-printf("%02x\n", c);
-}
-
-//data = c;
- 
-
-
-
-        //printf(strcat( str, c ));       
-   
-
-		//append_str(str, getc());
-		//printf("%s\n", str);
-
-
-//printf(data);
-return data;
+//return data;
 }
 //}
-
+//}
 
 //printf("[print.cc] : the final answer is \'sX\'", data);
-return getc();
+
 //return str;
-}
+//}
 //http://ubuntuforums.org/showthread.php?t=1016188
 void append_str(char* s, char c)
 {
