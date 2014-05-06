@@ -630,8 +630,46 @@ int __l4_printf(const char *fmt, ...)
 //Hack to get strings from the keyboard
 char GetPolledKbdLine() {
 
+char data;
+/*
+http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
+int i = 0;
+for (;;)
+{
+    c = mygetch();
+    if (c == '\n')
+        break;
 
-        //char str[256] = "";
+    c = mygetch();
+    pass[i++] = c;
+}
+pass[i] = '\0';
+
+---------------
+
+char c[2] = "";
+char pass[50] = "";
+char *end = pass + sizeof(pass) - 1;
+char *dst = pass;
+
+while (c[0] !=  '\n' && dst < end)
+{
+    c[0] = mygetch();
+    strcat(dst, c);
+    dst++;
+}
+
+
+*/
+
+
+
+
+
+
+
+
+       // char str[256] = "";
         //char c = '';
 	//char *str = "";
 //String test = "";
@@ -642,17 +680,38 @@ char GetPolledKbdLine() {
 
 
         for(;;) {
-              char c = getc();
-                printf("%02x\n", c);
+             // char c = getc();
+               
 
-        
-       
+
+char c[2] = "";
+char pass[50] = "";
+char *end = pass + sizeof(pass) - 1;
+char *dst = pass;
+
+while (c[0] !=  '\n' && dst < end)
+{
+    c[0] = getc();
+    strcat(dst, c);
+    dst++;
+
+printf("%02x\n", c);
+}
+
+//data = c;
+ 
+
+
+
+        //printf(strcat( str, c ));       
    
 
 		//append_str(str, getc());
 		//printf("%s\n", str);
 
 
+//printf(data);
+return data;
 }
 //}
 
