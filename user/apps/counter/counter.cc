@@ -58,7 +58,9 @@ int main (void) {
 //printf(GetPolledKbdLine());
 //printf("%s, %s\n", GetPolledKbdLine());
 //printf(GetPolledKbdLine());
-char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
+//char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
+
+printf(GetPolledKbdLine());
 //GetPolledKbdLine();
 RingTheBell();
 
