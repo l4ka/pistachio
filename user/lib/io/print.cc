@@ -632,18 +632,22 @@ char GetPolledKbdLine() {
 
   int cookedChar = getc();
   int charCount = 0;
-char data;
-while (cookedChar != '\n') {
+//char data[10];
 
-printf("[print.cc] : entered char of \'%X\'", cookedChar);
+char data = cookedChar;
+//while (cookedChar != '\n') {
 
-charCount++;
-data = data +cookedChar;
+//printf("[print.cc] : entered char of \'%X\'", cookedChar);
 
-printf("[print.cc] : the final answer is \'%X\'", data);
+//charCount++;
+//data[charCount] = cookedChar;
 
-}
+//printf("[print.cc] : the final answer is \'%X\'", data);
 
+//}
+
+
+//printf("[print.cc] : the final answer is \'sX\'", data);
 return data;
 
 }
