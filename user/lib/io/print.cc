@@ -630,11 +630,11 @@ int __l4_printf(const char *fmt, ...)
 //Hack to get strings from the keyboard
 char GetPolledKbdLine() {
 
-  int cookedChar = getc();
-  int charCount = 0;
+ // int cookedChar = getc();
+  //int charCount = 0;
 //char data[10];
 
-char data = cookedChar;
+//char data = cookedChar;
 //while (cookedChar != '\n') {
 
 //printf("[print.cc] : entered char of \'%X\'", cookedChar);
@@ -644,11 +644,17 @@ char data = cookedChar;
 
 //printf("[print.cc] : the final answer is \'%X\'", data);
 
+
+        for(;;) {
+               char c = getc();
+                printf("%02x\n", c);
+
+}
 //}
 
 
 //printf("[print.cc] : the final answer is \'sX\'", data);
-return data;
+return getc();
 
 }
 
