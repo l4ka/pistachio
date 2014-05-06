@@ -52,6 +52,8 @@ int getc(void);
 //extern "C" char *GetPolledKbdLine();
 /* OpenBSD libkern convenience functions */
 #include <openbsd/libkern.h>
+char *
+strcat(char *s, const char *append);
 
 //NetWare thing, move later
 void RingTheBell();
