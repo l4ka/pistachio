@@ -314,7 +314,7 @@ extern int reg_config_info[2];
 
 // config and reset funcitons
 
-extern int reg_config( void );
+extern "C" int reg_config(  );
 
 extern int reg_reset( unsigned char devRtrn );
 
