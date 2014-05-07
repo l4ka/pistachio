@@ -35,6 +35,9 @@
 
 //#include <../lib/io/lib.h>
 
+//ATA mini driver
+#include "mindrvr.h"
+
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
@@ -60,6 +63,7 @@ int main (void) {
 //printf(GetPolledKbdLine());
 //char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
 
+printf("[root-task] : Found %d PATA devices", reg_config());
 printf(GetPolledKbdLine());
 //GetPolledKbdLine();
 RingTheBell();
