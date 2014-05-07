@@ -1,0 +1,24 @@
+
+                    ------------------------
+                    MINDRVR HISTORY.TXT FILE
+                    ------------------------
+
+                         by Hale Landis
+
+Here is a brief list of the new and changed things in the last
+few versions of MINDRVR.
+
+Version 0A to 0F
+
+   Unreleased debug versions.
+
+Version 0G
+
+   First released version.
+
+Version 0H
+
+   Checking for BSY=0 and DRQ=0 in sub_select() was fixed to conform
+   to the ATA/ATAPI standards.
+
+/end/
