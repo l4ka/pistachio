@@ -88,10 +88,13 @@ unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 
 //Do like libsaio
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/mindrvr.c
+/*
 int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
 printf("[mindrver.c] Interrupt fired");
-return tmr_chk_timeout();
+int *val = tmr_chk_timeout();
+return val;
 }
+*/
 
 // You must supply a function that returns a system timer value. This
 // should be a value that increments at some constant rate.
@@ -1789,7 +1792,7 @@ static int exec_pci_ata_cmd( unsigned char dev,
    // checking for command completion...
    // wait for the PCI BM Interrupt=1 (see ATAIOINT.C)...
 
-   if ( SYSTEM_WAIT_INTR_OR_TIMEOUT() )       // time out ?
+   if ( tmr_chk_timeout() )       // time out ?
    {
       reg_cmd_info.to = 1;
       reg_cmd_info.ec = 73;
@@ -2077,7 +2080,7 @@ int dma_pci_packet( unsigned char dev,
       // checking for command completion...
       // wait for the PCI BM Active=0 and Interrupt=1 or PCI BM Error=1...
 
-      if ( SYSTEM_WAIT_INTR_OR_TIMEOUT() )    // time out ?
+      if ( tmr_chk_timeout() )    // time out ?
       {
          reg_cmd_info.to = 1;
          reg_cmd_info.ec = 73;
@@ -2370,7 +2373,7 @@ static void sub_wait_poll( unsigned char we, unsigned char pe )
 
    if ( we && int_use_intr_flag )
    {
-      if ( SYSTEM_WAIT_INTR_OR_TIMEOUT() )    // time out ?
+      if ( tmr_chk_timeout() )    // time out ?
       {
          reg_cmd_info.to = 1;
          reg_cmd_info.ec = we;
