@@ -40,9 +40,9 @@ PROGRAM=	counter
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a
 
-SRCS=		crt0-$(ARCH).S counter.cc mindrver.c
+SRCS=		crt0-$(ARCH).S counter.cc mindrvr.c
 
-LIBS+=		-ll4 -lio
+LIBS+=		-ll4 -lio 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
