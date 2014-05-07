@@ -79,6 +79,19 @@ unsigned char * pio_reg_addrs[9] =
 
 unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 
+//Functional stubs to integrate with L4
+int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
+return 1;
+}
+
+// You must supply a function that returns a system timer value. This
+// should be a value that increments at some constant rate.
+
+long SYSTEM_READ_TIMER( void ) {
+
+return 1;
+}
+
 //**************************************************************
 //
 // functions internal and private to MINDRVR

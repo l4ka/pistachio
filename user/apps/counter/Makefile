@@ -40,7 +40,7 @@ PROGRAM=	counter
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a
 
-SRCS=		crt0-$(ARCH).S counter.cc 
+SRCS=		crt0-$(ARCH).S counter.cc mindrver.c
 
 LIBS+=		-ll4 -lio
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
