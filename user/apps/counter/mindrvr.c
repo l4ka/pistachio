@@ -31,7 +31,7 @@
 // by any program using the MINDRVR code/functions.
 //********************************************************************
 
-#include "mindrvr.h"
+#include <mindrvr.h>
 
 //**************************************************************
 //
@@ -84,7 +84,7 @@ unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 #include <l4/types.h>
 #include <l4/thread.h>
 #include <l4/kip.h>
-#include <stdio.h>
+#include <l4io.h>
 
 //Do like libsaio
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/mindrvr.c
@@ -173,7 +173,7 @@ static int tmr_chk_timeout( void );
 //
 //*************************************************************
 
-int reg_config( void )
+int reg_config( )
 
 {
    int numDev = 0;

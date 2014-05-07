@@ -33,10 +33,12 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
+//ATA mini driver
+#include <mindrvr.h>
+
 //#include <../lib/io/lib.h>
 
-//ATA mini driver
-#include "mindrvr.h"
+
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
@@ -62,8 +64,9 @@ int main (void) {
 //printf("%s, %s\n", GetPolledKbdLine());
 //printf(GetPolledKbdLine());
 //char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
-
+//http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 printf("[root-task] : Found %d PATA devices", reg_config());
+//reg_config();
 printf(GetPolledKbdLine());
 //GetPolledKbdLine();
 RingTheBell();
