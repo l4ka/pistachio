@@ -84,9 +84,11 @@ unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 #include <l4/types.h>
 #include <l4/thread.h>
 #include <l4/kip.h>
+#include <stdio.h>
 
 int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
-return 1;
+printf("[mindrver.c] Interrupt fired");
+return 0;
 }
 
 // You must supply a function that returns a system timer value. This
