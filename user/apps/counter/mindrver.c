@@ -80,6 +80,11 @@ unsigned char * pio_reg_addrs[9] =
 unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 
 //Functional stubs to integrate with L4
+//#include <l4/syscalls.h>
+#include <l4/types.h>
+#include <l4/thread.h>
+#include <l4/kip.h>
+
 int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
 return 1;
 }
@@ -89,7 +94,7 @@ return 1;
 
 long SYSTEM_READ_TIMER( void ) {
 
-return 1;
+return L4_SystemClock().raw;
 }
 
 //**************************************************************
