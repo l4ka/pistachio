@@ -29,12 +29,14 @@
  * $Id: grabmem.cc,v 1.2 2004/02/26 19:11:07 skoglund Exp $
  *                
  ********************************************************************/
-#include <l4io.h>
-#include <l4/sigma0.h>
-#include <l4/kdebug.h>
+
 
 //ATA mini driver
 #include <mindrvr.h>
+
+#include <l4io.h>
+#include <l4/sigma0.h>
+#include <l4/kdebug.h>
 
 //#include <../lib/io/lib.h>
 
@@ -65,7 +67,7 @@ int main (void) {
 //printf(GetPolledKbdLine());
 //char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
-printf("[root-task] : Found %d PATA devices", reg_config());
+//printf("[root-task] : Found %d PATA devices", reg_config());
 //reg_config();
 printf(GetPolledKbdLine());
 //GetPolledKbdLine();
