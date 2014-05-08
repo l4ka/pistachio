@@ -67,7 +67,7 @@ int main (void) {
 //printf(GetPolledKbdLine());
 //char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
-//printf("[root-task] : Found %d PATA devices", reg_config());
+printf("[root-task] : Found %d PATA devices", reg_config());
 //reg_config();
 printf(GetPolledKbdLine());
 //GetPolledKbdLine();

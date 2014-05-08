@@ -31,6 +31,10 @@
 // by any program using the MINDRVR code/functions.
 //********************************************************************
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define MIN_ATA_DRIVER_VERSION "0H"
 
 //********************************************************************
@@ -41,9 +45,9 @@
 
 #define INCLUDE_ATA_DMA   1   // not zero to include ATA_DMA
 
-#define INCLUDE_ATAPI_PIO 1   // not zero to include ATAPI PIO
+#define INCLUDE_ATAPI_PIO 0   // not zero to include ATAPI PIO
 
-#define INCLUDE_ATAPI_DMA 1   // not zero to include ATAPI DMA
+#define INCLUDE_ATAPI_DMA 0   // not zero to include ATAPI DMA
 
 //********************************************************************
 //
@@ -56,7 +60,7 @@
 // is received and a non zero value if the interrupt is not received
 // within the time out period.
 
-extern int SYSTEM_WAIT_INTR_OR_TIMEOUT( void );
+//extern int SYSTEM_WAIT_INTR_OR_TIMEOUT( void );
 
 // You must supply a function that returns a system timer value. This
 // should be a value that increments at some constant rate.
@@ -314,7 +318,7 @@ extern int reg_config_info[2];
 
 // config and reset funcitons
 
-extern "C" int reg_config(  );
+extern int reg_config();
 
 extern int reg_reset( unsigned char devRtrn );
 
@@ -431,5 +435,9 @@ extern int dma_pci_packet( unsigned char dev,
                            unsigned char * dataBufAddr );
 
 #endif   // INCLUDE_ATAPI_DMA
+
+#if defined(__cplusplus)
+}
+#endif
 
 // end mindrvr.h
