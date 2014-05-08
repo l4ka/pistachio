@@ -50,6 +50,8 @@
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
 
+#define stdin GetPolledKbdLine()
+
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
@@ -57,6 +59,20 @@
 //http://www.dreamincode.net/forums/topic/192079-command-line-interpreter/
 
 #define	toascii(c)	((c) & 0177)
+
+/* Pull in the string handling functions from lib/io/lib.h, since linking/headers are dodgy... */
+unsigned strlen( const char *src )
+{
+    unsigned cnt = 0;
+
+    while( src && src[cnt] )
+	cnt++;
+    return cnt;
+}
+/* End for now */
+
+//https://github.com/toddfries/OpenBSD-lib-patches/edit/master/libc/stdio/fgets.c#
+
 
 void InitHwDev() {
 	printf("[root-task] : Found %d PATA devices", reg_config());
@@ -71,40 +87,57 @@ int Beep() {
 
 }
 
+char * sgets(char *buffer, int size)
+{
+        char letter = 0;
+        int count = 0;
+        while(letter != '\n' && count < size)
+        {
+                letter = getc();
+                if(letter != '\n')
+                {
+                        buffer[count] = letter;
+                        count++;
+                }
+        }
+        buffer[count] = '\0';
+        return buffer;
+}
+
 //http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1390514758
 int ShiritoriGame() {
-/*
-#include <stdio.h>
-#include <string.h>
+
+//#include <stdio.h>
+//#include <string.h>
 
 #define MAX 30
 
-int main(int argc, char *argv[]){
-char data[MAX][200] = {0};*/ /* 入力データ保存用 */
-/*int i,nIdx,n;
+//int main(int argc, char *argv[]){
+char data[MAX][200] = {0}; /* 入力データ保存用 */
+int i,nIdx,n;
 
 for(i=0;i<MAX;i++){
-printf("%02d番目：",i+1);
-fgets(data[i], sizeof(data[i]), stdin);
-n=strlen(data[i])-3; */ /* 文末の位置 */
-/*if( memcmp( &data[i][n], "ん", 2) == 0){
-printf("んが付いたから終了\n" );
+printf("%02d position：",i+1);
+sgets(data[i],  sizeof(data[i]));
+n=strlen(data[i])-3;  /* 文末の位置 */
+if( memcmp( &data[i][n], "n", 2) == 0){
+printf("Quitting from pressing '\n\' \n" );
 break;
 }
-if( i!=0 && *//* 初回は比較しない */ 
-/*memcmp( &data[i-1][nIdx], &data[i][0], 2) != 0){*/ /* 今回の文頭と前回の文末を比較*/
-printf("つながらないから終了\n" );
+if( i!=0 && /* 初回は比較しない */ 
+memcmp( &data[i-1][nIdx], &data[i][0], 2) != 0){ /* 今回の文頭と前回の文末を比較*/
+printf("Quit from disconnected\n" );
 break;;
 }
 nIdx =n;
 }
 if(i==MAX){
-printf("%d回で終了\n",MAX );
+printf("%d times of quit\n",MAX );
 }
 return 0;
 }
- */
-}
+ 
+
 
 int main (void) {
 

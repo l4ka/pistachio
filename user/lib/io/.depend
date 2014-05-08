@@ -1,16 +1,17 @@
 get_hex.o: get_hex.cc ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
- ../../include/l4io.h ../../lib/io/lib.h \
- /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/l4io.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
  ../../include/openbsd/libkern.h
 print.o: print.cc ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h ../../include/l4io.h \
- ../../lib/io/lib.h ../../include/openbsd/libkern.h lib.h
+ ../../include/openbsd/libkern.h lib.h
 ia32.o: ia32.cc ../../config.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h ia32.h
 bzero.o: openbsd/libkern/bzero.c ../../include/openbsd/libkern.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h
+memcmp.o: openbsd/libkern/memcmp.c ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h
 strcat.o: openbsd/string/strcat.c ../../include/string.h
 strcmp.o: openbsd/string/strcmp.c ../../include/string.h

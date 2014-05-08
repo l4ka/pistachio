@@ -154,7 +154,7 @@ int	 bcmp(const void *, const void *, size_t);
 //void	 bzero(void *, size_t);
 int	 ffs(int);
 void	*memchr(const void *, int, size_t);
-int	 memcmp(const void *, const void *, size_t);
+//int	 memcmp(const void *, const void *, size_t);
 u_long	 random(void);
 void	 srandom(u_long);
 int	 scanc(u_int, const u_char *, const u_char [], int);
