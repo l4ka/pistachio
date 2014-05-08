@@ -42,9 +42,9 @@
 #define ACTIVE_CMD 0
 #define CMD_RESULT 1
 
-#define FINISHED 0
-#define FAILED 1
-#define WAITING 2
+#define FINISHED 0x00
+#define FAILED 0x01
+#define WAITING 0x02
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
@@ -87,7 +87,9 @@ printf(iEnvStatus[ACTIVE_CMD]);
 
 while(WAITING) {
 
-if (iEnvStatus[ACTIVE_CMD] == "beep") {
+if (iEnvStatus[ACTIVE_CMD] == "beep\0" || iEnvStatus[ACTIVE_CMD] == "beep"
+|| iEnvStatus[ACTIVE_CMD] == "beep\0\n" || iEnvStatus[ACTIVE_CMD] == "beep\n") {
+printf("Entered beep\n");
 	iEnvStatus[CMD_RESULT] = (char*)Beep();
 	
 	printf("\n%s\n\n", (char*)iEnvStatus[CMD_RESULT]);
@@ -97,15 +99,15 @@ if (iEnvStatus[ACTIVE_CMD] == "beep") {
 	printf(iEnvStatus[ACTIVE_CMD]);
 	
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
-	//break;
 	
 	
 }
 
  else {
+
+
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
-	printf(iEnvStatus[ACTIVE_CMD]);
-	//break;
+	printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();	
 	
 }
