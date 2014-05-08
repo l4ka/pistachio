@@ -87,22 +87,25 @@ int Beep() {
 	return status;
 
 }
-
+//http://stackoverflow.com/questions/4346598/gets-function-in-c
 char * sgets(char *buffer, int size)
 {
-        char letter = 0;
+/*        char letter = 0;
         int count = 0;
-        while(letter != '\n' && count < size)
+        while(letter != 0x0d && count < size)
         {
-                letter = getc();
-                if(letter != '\n')
+                letter = (char)getc();
+		printf("%s", letter);
+                if(letter != 0x0d)
                 {
                         buffer[count] = letter;
                         count++;
                 }
         }
         buffer[count] = '\0';
-        return buffer;
+        return buffer;*/
+//HAX
+	return GetPolledKbdLine();
 }
 
 //http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1390514758
@@ -120,6 +123,7 @@ int i,nIdx,n;
 for(i=0;i<MAX;i++){
 printf("%02d position：",i+1);
 sgets(data[i],  sizeof(data[i]));
+//data[MAX][i] = atoi(GetPolledKbdLine());
 n=strlen(data[i])-3;  /* 文末の位置 */
 if( memcmp( &data[i][n], "n", 2) == 0){
 printf("Quitting from pressing '\n\' \n" );
