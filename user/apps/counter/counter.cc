@@ -45,6 +45,7 @@
 #define FINISHED 0x00
 #define FAILED 0x01
 #define WAITING 0x02
+#define RUNNING 0x03
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
@@ -167,6 +168,20 @@ printf("Entered beep\n");
 	
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 	
+}
+
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "shiritori") == 0)
+{
+printf("Entered shiritori\n");
+	iEnvStatus[CMD_RESULT] = (char*)ShiritoriGame();
+	
+	//printf("\n%d\n\n", (char*)iEnvStatus[CMD_RESULT]);
+
+	//Return to prompt
+	iEnvStatus[CMD_RESULT] = (char*)RUNNING;
+	//printf(iEnvStatus[ACTIVE_CMD]);
+	
+	//iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 	
 }
 
