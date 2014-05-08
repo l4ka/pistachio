@@ -34,6 +34,8 @@
 
 #include <l4/types.h>
 
+// BAD IDEA #include <lib/io/lib.h>
+
 #include "stdarg.h"
 
 #ifdef __cplusplus
@@ -54,6 +56,10 @@ int getc(void);
 #include <openbsd/libkern.h>
 char *
 strcat(char *s, const char *append);
+
+int
+obsd_strcmp(const char *s1, const char *s2);
+
 
 //NetWare thing, move later
 void RingTheBell();
