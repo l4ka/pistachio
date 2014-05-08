@@ -38,6 +38,14 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
+/* Track the environment status */
+#define ACTIVE_CMD 0
+#define CMD_RESULT 1
+
+#define FINISHED 0
+#define FAILED 1
+#define WAITING 2
+
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
@@ -56,15 +64,12 @@ void InitHwDev() {
 
 int Beep() {
 
-	int status = 0;
+	int status = FINISHED;
 	RingTheBell();
 	
 	return status;
 
 }
-
-/* Track the environment status */
-#define ACTIVE_CMD 0
 
 
 
@@ -73,12 +78,28 @@ int main (void) {
 char *iEnvStatus[255];
 
 InitHwDev();
-Beep();
 
+iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+
 printf(iEnvStatus[ACTIVE_CMD]);
 
+while(WAITING) {
+if (iEnvStatus[ACTIVE_CMD] == "beep") {
+	iEnvStatus[CMD_RESULT] = (char*)Beep();
+	
+	printf("\n%s\n\n", (char*)iEnvStatus[CMD_RESULT]);
 
+	//Return to prompt
+	iEnvStatus[CMD_RESULT] = (char*)WAITING;
+	printf(iEnvStatus[ACTIVE_CMD]);
+}
+
+ else {
+	iEnvStatus[CMD_RESULT] = (char*)WAITING;
+	printf(iEnvStatus[ACTIVE_CMD]);
+}
+}
 
 	return 0;
 }
