@@ -2,7 +2,7 @@
 # Automatically generated, don't edit
 #
 # Generated on: tyson-VirtualBox
-# At: Sat, 03 May 2014 15:58:57 +0000
+# At: Sat, 03 May 2014 19:25:44 +0000
 # Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013
 
 #
@@ -59,19 +59,19 @@ CONFIG_APIC_TIMER_TICK=1000
 #
 # Kernel
 #
-CONFIG_EXPERIMENTAL=y
+# CONFIG_EXPERIMENTAL is not set
 
 #
 # Experimental Features
 #
-CONFIG_X_PAGER_EXREGS=y
-CONFIG_X_CTRLXFER_MSG=y
-CONFIG_X_EVT_LOGGING=y
+# CONFIG_X_PAGER_EXREGS is not set
+# CONFIG_X_CTRLXFER_MSG is not set
+# CONFIG_X_EVT_LOGGING is not set
 
 #
 # Kernel scheduling policy
 #
-CONFIG_SCHED_RR=y
+# CONFIG_SCHED_RR is not set
 # CONFIG_X_SCHED_HS is not set
 
 

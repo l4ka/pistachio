@@ -2,7 +2,7 @@
 # Automatically generated, don't edit
 #
 # Generated on: tyson-VirtualBox
-# At: Sat, 03 May 2014 19:25:44 +0000
+# At: Thu, 08 May 2014 01:33:39 +0000
 # Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013
 
 #
@@ -49,7 +49,7 @@ CONFIG_PLAT_PC99=y
 #
 # Miscellaneous
 #
-CONFIG_IOAPIC=n
+CONFIG_IOAPIC=y
 CONFIG_MAX_IOAPICS=2
 CONFIG_APIC_TIMER_TICK=1000
 
@@ -95,7 +95,7 @@ CONFIG_X86_SMALL_SPACES=n
 CONFIG_KDB_CONS_COM=y
 CONFIG_KDB_COMPORT=0x0
 CONFIG_KDB_COMSPEED=115200
-CONFIG_KDB_CONS_KBD=y
+CONFIG_KDB_CONS_KBD=n
 CONFIG_KDB_BOOT_CONS=0
 
 CONFIG_KDB_DISAS=n

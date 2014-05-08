@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Sat, 03 May 2014 19:25:44 +0000 */
+/* At: Thu, 08 May 2014 01:33:39 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -33,7 +33,7 @@
 
 
 /* Miscellaneous */
-#undef  CONFIG_IOAPIC
+#define CONFIG_IOAPIC 1
 #define CONFIG_MAX_IOAPICS 2
 #define CONFIG_APIC_TIMER_TICK 1000
 
@@ -69,7 +69,7 @@
 #define CONFIG_KDB_CONS_COM 1
 #define CONFIG_KDB_COMPORT 0x0
 #define CONFIG_KDB_COMSPEED 115200
-#define CONFIG_KDB_CONS_KBD 1
+#undef  CONFIG_KDB_CONS_KBD
 #define CONFIG_KDB_BOOT_CONS 0
 
 #undef  CONFIG_KDB_DISAS
