@@ -87,14 +87,13 @@ printf(iEnvStatus[ACTIVE_CMD]);
 
 while(WAITING) {
 
-//if (iEnvStatus[ACTIVE_CMD] == "beep\0" || iEnvStatus[ACTIVE_CMD] == "beep"
-//|| iEnvStatus[ACTIVE_CMD] == "beep\0\n" || iEnvStatus[ACTIVE_CMD] == "beep\n") {
+
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") == 0)
 {
 printf("Entered beep\n");
 	iEnvStatus[CMD_RESULT] = (char*)Beep();
 	
-	printf("\n%s\n\n", (char*)iEnvStatus[CMD_RESULT]);
+	printf("\n%D\n\n", (char*)iEnvStatus[CMD_RESULT]);
 
 	//Return to prompt
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
