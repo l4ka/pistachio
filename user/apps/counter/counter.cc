@@ -46,6 +46,7 @@
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
 //http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
+//http://www.dreamincode.net/forums/topic/192079-command-line-interpreter/
 
 #define	toascii(c)	((c) & 0177)
 
@@ -53,13 +54,23 @@ void InitHwDev() {
 	printf("[root-task] : Found %d PATA devices", reg_config());
 }
 
+int Beep() {
+
+	int status = 0;
+	RingTheBell();
+	
+	return status;
+
+}
+
 int main (void) {
 
 InitHwDev();
+Beep();
 
 printf(GetPolledKbdLine());
 
-RingTheBell();
+
 
 	return 0;
 }
