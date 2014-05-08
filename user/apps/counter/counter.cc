@@ -63,12 +63,20 @@ int Beep() {
 
 }
 
+/* Track the environment status */
+#define ACTIVE_CMD 0
+
+
+
 int main (void) {
+
+char *iEnvStatus[255];
 
 InitHwDev();
 Beep();
 
-printf(GetPolledKbdLine());
+iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+printf(iEnvStatus[ACTIVE_CMD]);
 
 
 
