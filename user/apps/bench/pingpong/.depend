@@ -7,5 +7,6 @@ pingpong.o: pingpong.cc ../../../config.h ../../../include/l4/kip.h \
  ../../../include/l4/schedule.h ../../../include/l4/kdebug.h \
  ../../../include/l4/ia32/kdebug.h ../../../include/l4io.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
- ../../../include/l4/arch.h ../../../include/l4/ia32/arch.h ia32.h \
- ../../../include/l4/tracebuffer.h ../../../include/l4/ia32/tracebuffer.h
+ ../../../include/openbsd/libkern.h ../../../include/l4/arch.h \
+ ../../../include/l4/ia32/arch.h ia32.h ../../../include/l4/tracebuffer.h \
+ ../../../include/l4/ia32/tracebuffer.h

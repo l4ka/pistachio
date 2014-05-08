@@ -51,21 +51,10 @@
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
 #define	toascii(c)	((c) & 0177)
 
-//#define COW 2172
-//char* moo = "MO ";
-//void wrap() {
-  //  int i,j;
-    //for(i=0;doSomething(i);i++)
-      //  j=COW-moo[i&3],fputs(&j,stderr);
-//}
+
 //http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
 int main (void) {
-	//wrap();
-//char *zone = "test";
-//printf(GetPolledKbdLine());
-//printf("%s, %s\n", GetPolledKbdLine());
-//printf(GetPolledKbdLine());
-//char test = GetPolledKbdLine();//invalid conversion from ‘char’ to ‘const char*’ ;
+
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 printf("[root-task] : Found %d PATA devices", reg_config());
 //reg_config();

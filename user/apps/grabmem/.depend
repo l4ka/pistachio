@@ -2,8 +2,8 @@ crt0-ia32.o: crt0-ia32.S ../../config.h
 grabmem.o: grabmem.cc ../../include/l4io.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
- ../../include/l4/sigma0.h ../../include/l4/kip.h \
- ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
- ../../include/l4/message.h ../../include/l4/ipc.h \
- ../../include/l4/thread.h ../../include/l4/kdebug.h \
- ../../include/l4/ia32/kdebug.h
+ ../../include/openbsd/libkern.h ../../include/l4/sigma0.h \
+ ../../include/l4/kip.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/ipc.h ../../include/l4/thread.h \
+ ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h

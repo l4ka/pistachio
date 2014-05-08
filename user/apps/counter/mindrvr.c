@@ -100,7 +100,7 @@ return val;
 // should be a value that increments at some constant rate.
 
 long SYSTEM_READ_TIMER( void ) {
-printf("[mindrver.c] : Trying to access system clock via RPC");
+printf("[mindrver.c] : Trying to access system clock via RPC\n");
 return L4_SystemClock().raw;
 }
 
@@ -175,7 +175,7 @@ static int tmr_chk_timeout( void );
 int reg_config()
 
 {
-   printf("[minidrvr.c] : Inside reg_config()\n");
+   printf("[mindrver.c] : Inside reg_config()\n");
    
    int numDev = 0;
    unsigned char sc;
