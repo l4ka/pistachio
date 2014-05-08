@@ -38,28 +38,27 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
-//#include <../lib/io/lib.h>
-
-
-
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
 
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
-
+//http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
+//http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
+
 #define	toascii(c)	((c) & 0177)
 
+void InitHwDev() {
+	printf("[root-task] : Found %d PATA devices", reg_config());
+}
 
-//http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
 int main (void) {
 
-//http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
-printf("[root-task] : Found %d PATA devices", reg_config());
-//reg_config();
+InitHwDev();
+
 printf(GetPolledKbdLine());
-//GetPolledKbdLine();
+
 RingTheBell();
 
 	return 0;
