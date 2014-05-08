@@ -93,11 +93,17 @@ if (iEnvStatus[ACTIVE_CMD] == "beep") {
 	//Return to prompt
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
 	printf(iEnvStatus[ACTIVE_CMD]);
+	break;
+	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+	
 }
 
  else {
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
 	printf(iEnvStatus[ACTIVE_CMD]);
+	break;
+	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();	
+	
 }
 }
 
