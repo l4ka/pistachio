@@ -125,14 +125,14 @@ printf("%02d position：",i+1);
 sgets(data[i],  sizeof(data[i]));
 //data[MAX][i] = atoi(GetPolledKbdLine());
 n=strlen(data[i])-3;  /* 文末の位置 */
-if( memcmp( &data[i][n], "n", 2) == 0){
+if( memcmp( &data[i][n], "n", 1) == 0){
 printf("Quitting from pressing '\n\' \n" );
 break;
 }
 if( i!=0 && /* 初回は比較しない */ 
-memcmp( &data[i-1][nIdx], &data[i][0], 2) != 0){ /* 今回の文頭と前回の文末を比較*/
+memcmp( &data[i-1][nIdx], &data[i][0], 1) != 0){ /* 今回の文頭と前回の文末を比較*/
 printf("Quit from disconnected\n" );
-break;;
+break;
 }
 nIdx =n;
 }
