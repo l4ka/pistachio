@@ -1,7 +1,7 @@
-#include <l4/types.h>
-
 #ifndef __LIBKERN_H__
 #define __LIBKERN_H__
+
+#include <l4/types.h>
 
 /* Export bzero() */
 void	 bzero(void *, size_t);
