@@ -27,6 +27,8 @@
 #include <stddef.h>
 #include "abi_namespace.h"
 
+#include <liballoc.h>
+
 namespace ABI_NAMESPACE
 {
 	struct __class_type_info;
