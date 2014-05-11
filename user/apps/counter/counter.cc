@@ -74,6 +74,22 @@ unsigned strlen( const char *src )
 
 //https://github.com/toddfries/OpenBSD-lib-patches/edit/master/libc/stdio/fgets.c#
 
+int ShellHelp() {
+	printf("\n\n This shell supports the following commands: \n");
+	
+	printf("\n\t * beep          : Beep the PC speaker.\n");
+	printf("\n\t * help, h, Help : Print this shell help notice.\n");
+	printf("\n\t * shiritori     : Start the Shiritori game \(buggy!\).\n");
+
+	printf("\n\n");
+
+	//Return to interpreter...
+//	iEnvStatus[CMD_RESULT] = (char*)WAITING;
+//	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+
+return FINISHED;
+	//main();	
+}
 
 void InitHwDev() {
 	printf("[root-task] : Found %d PATA devices", reg_config());
@@ -174,6 +190,16 @@ printf("Entered beep\n");
 	
 }
 
+//Help the user...
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "help") == 0 || 
+obsd_strcmp(iEnvStatus[ACTIVE_CMD], "h") == 0 ||
+obsd_strcmp(iEnvStatus[ACTIVE_CMD], "Help") == 0 ) 
+{
+	ShellHelp();
+
+}
+
+
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "shiritori") == 0)
 {
 printf("Entered shiritori\n");
@@ -191,6 +217,8 @@ printf("Entered shiritori\n");
 
  else {
 
+	printf("\n\n[root-task] : Unsupported command, please type \"help\", or wait...\n\n");
+	ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
 	printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
