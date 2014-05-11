@@ -1,0 +1,23 @@
+
+
+
+Usage:
+
+	make linux
+	LD_PRELOAD=../liballoc.so ./mtest
+
+.. and then just ..
+
+	./mtest
+
+	... to compare the results between liballoc and
+	    the default malloc/free implementations ...
+	
+
+
+
+This is an arbitrary test which does not simulate real-life 
+events enough to fully guage the performance of the library.  
+However, it's primarily used to test correctness. 
+
+

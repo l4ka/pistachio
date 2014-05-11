@@ -1,0 +1,26 @@
+
+This is a step-by-step instruction guide detailing how to
+implement the library on your own system.
+
+
+1. Copy the "liballoc.c" and "liballoc.h" files into
+   your working directory. (Whatever project you want
+   to use it in).
+
+2. Create the hooks that the library needs:
+
+     Make a new file called "liballoc_hooks.c" (or
+	 whatever) and implement the functions detailed 
+	 in the README and explained in "liballoc.h"
+
+	 Look at "linux.c" for an example. It implements
+	 the hooks for a Linux system.
+	 
+3. Be sure to include the "liballoc.h" header
+   into your C/C++ files that are using the
+   malloc/free/memory operations. (So that
+   malloc/free/etc are declared.. obviously.)
+
+4. Compile as per your normal method and test.
+
+
