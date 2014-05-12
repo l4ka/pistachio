@@ -1,7 +1,7 @@
 crt0-ia32.o: crt0-ia32.S ../../config.h
-counter.o: counter.cc ../../include/mindrvr.h ../../include/l4io.h \
- ../../include/l4/types.h ../../include/l4/ia32/types.h \
- ../../include/l4/ia32/specials.h \
+counter.o: counter.cc ../../include/liballoc.h ../../include/mindrvr.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
  ../../include/openbsd/libkern.h ../../include/l4/sigma0.h \
  ../../include/l4/kip.h ../../include/l4/ia32/syscalls.h \

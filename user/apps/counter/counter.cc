@@ -30,6 +30,7 @@
  *                
  ********************************************************************/
 
+#include <liballoc.h>
 
 //ATA mini driver
 #include <mindrvr.h>
@@ -89,6 +90,27 @@ int ShellHelp() {
 
 return FINISHED;
 	//main();	
+}
+
+
+//http://www.codingunit.com/c-tutorial-the-functions-malloc-and-free
+int MallocTestOne() {
+	int *ptr_one;
+
+		ptr_one = (int *)malloc(sizeof(int));
+
+		if (ptr_one == 0)
+		{
+			printf("ERROR: Out of memory\n");
+			return FAILED;
+		}
+
+		*ptr_one = 25;
+		printf("%d\n", *ptr_one);
+
+		free(ptr_one);
+
+		return FINISHED;
 }
 
 void InitHwDev() {
@@ -189,6 +211,15 @@ printf("Entered beep\n");
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 	
 }
+
+
+//Do a malloc test
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "malloc_test_1") == 0) 
+{
+	MallocTestOne();
+
+}
+
 
 //Help the user...
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "help") == 0 || 
