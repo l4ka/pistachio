@@ -20,4 +20,7 @@ liballoc_hooks.o: liballoc_hooks.c ../../include/liballoc.h \
  ../../include/l4/space.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
- ../../include/l4/message.h
+ ../../include/l4/message.h ../../include/l4/kip.h \
+ ../../include/l4/thread.h ../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../config.h

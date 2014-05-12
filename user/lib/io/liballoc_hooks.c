@@ -1,6 +1,13 @@
 #include <liballoc.h>
 #include <l4/space.h>
 
+#include <l4/kip.h>
+#include <l4/thread.h>
+#include <l4io.h>
+#include <config.h>
+
+//#include <arch.h>
+
 //http://www.cse.unsw.edu.au/~cs9242/05/project/l4uman-x2.pdf
 //https://lists.ira.uni-karlsruhe.de/pipermail/l4ka/2008-April/002072.html
 
@@ -33,10 +40,60 @@ return 0;
  * \return NULL if the pages were not allocated.
  * \return A pointer to the allocated memory.
  */
+
+L4_Word_t
+do_safe_mem_touch( void *addr )
+{
+	volatile L4_Word_t *ptr;
+	L4_Word_t copy;
+
+	ptr = (L4_Word_t*) addr;
+	copy = *ptr;
+	*ptr = copy;
+
+	return copy;
+}
+
+
 extern void* liballoc_alloc(int aPagesReq) {
 
+//HACK
+#define PAGE_BITS		(12)
+#define PAGE_SIZE		(1 << PAGE_BITS)
+#define SCRATCHMEM_START        (16*1024*1024)
 
-return NULL;
+	static char *free_page = (char*) SCRATCHMEM_START;
+
+	int touch = aPagesReq;
+	void *ret = free_page;
+
+	L4_Word_t count = aPagesReq;
+
+	free_page += count * PAGE_SIZE;
+
+	
+	/* should we fault the pages in? */
+	if( touch != 0 )
+	{
+		char *addr = (char*) ret;
+		L4_Word_t i;
+
+		/* touch each page */
+		for( i = 0; i < count; i++ )
+		{
+			do_safe_mem_touch( (void*) addr );
+			for (int j=0; j<PAGE_SIZE; j++)
+			    addr[j] = 0;
+				
+			addr += PAGE_SIZE;
+			
+		}
+	}
+
+	return (void*) ret;
+
+
+//return NULL;
 }
 
 /** This frees previously allocated memory. The void* parameter passed
