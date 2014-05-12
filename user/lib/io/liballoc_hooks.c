@@ -26,49 +26,6 @@ return 0;
 }
 
 
-void *
-la_get_pages( L4_Word_t count, int touch )
-{ 
-
-
-	void *ret = free_page;
-
-	free_page += count * PAGE_SIZE; 
-	
-	/* should we fault the pages in? */
-	if( touch != 0 )
-	{
-		char *addr = (char*) ret;
-		L4_Word_t i;
-
-		/* touch each page */
-		for( i = 0; i < count; i++ )
-		{
-			la_safe_mem_touch( (void*) addr );
-			for (int j=0; j<PAGE_SIZE; j++)
-			    addr[j] = 0;
-				
-			addr += PAGE_SIZE;
-			
-		}
-	}
-
-	return (void*) ret;
-}
-
-L4_Word_t
-la_safe_mem_touch( void *addr )
-{
-	volatile L4_Word_t *ptr;
-	L4_Word_t copy;
-
-	ptr = (L4_Word_t*) addr;
-	copy = *ptr;
-	*ptr = copy;
-
-	return copy;
-}
-
 /** This is the hook into the local system which allocates pages. It
  * accepts an integer parameter which is the number of pages
  * required.  The page size was set up in the liballoc_init function.
@@ -78,9 +35,8 @@ la_safe_mem_touch( void *addr )
  */
 extern void* liballoc_alloc(int aPagesReq) {
 
-return la_get_pages(aPagesReq, 0);
 
-//return NULL;
+return NULL;
 }
 
 /** This frees previously allocated memory. The void* parameter passed
