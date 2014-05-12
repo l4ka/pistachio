@@ -90,7 +90,7 @@ unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/mindrvr.c
 /*
 int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
-printf("[mindrver.c] Interrupt fired");
+printf("[mindrvr.c] Interrupt fired");
 int *val = tmr_chk_timeout();
 return val;
 }
@@ -100,7 +100,7 @@ return val;
 // should be a value that increments at some constant rate.
 
 long SYSTEM_READ_TIMER( void ) {
-printf("[mindrver.c] : Trying to access system clock via RPC\n");
+printf("[mindrvr.c] : Trying to access system clock via RPC\n");
 return L4_SystemClock().raw;
 }
 
@@ -175,7 +175,7 @@ static int tmr_chk_timeout( void );
 int reg_config()
 
 {
-   printf("[mindrver.c] : Inside reg_config()\n");
+   printf("[mindrvr.c] : Inside reg_config()\n");
    
    int numDev = 0;
    unsigned char sc;
