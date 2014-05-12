@@ -85,12 +85,8 @@ int ShellHelp() {
 
 	printf("\n\n");
 
-	//Return to interpreter...
-//	iEnvStatus[CMD_RESULT] = (char*)WAITING;
-//	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
-return FINISHED;
-	//main();	
+return FINISHED;	
 }
 
 
@@ -129,22 +125,7 @@ int Beep() {
 //http://stackoverflow.com/questions/4346598/gets-function-in-c
 char * sgets(char *buffer, int size)
 {
-/*        char letter = 0;
-        int count = 0;
-        while(letter != 0x0d && count < size)
-        {
-                letter = (char)getc();
-		printf("%s", letter);
-                if(letter != 0x0d)
-                {
-                        buffer[count] = letter;
-                        count++;
-                }
-        }
-        buffer[count] = '\0';
-        return buffer;*/
-//HAX
-	return GetPolledKbdLine();
+	return GetPolledKbdLine(); //HAX
 }
 
 //http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1390514758
@@ -181,7 +162,6 @@ printf("%d times of quit\n",MAX );
 return 0;
 }
  
-
 
 int main (void) {
 
@@ -237,13 +217,8 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "shiritori") == 0)
 printf("Entered shiritori\n");
 	iEnvStatus[CMD_RESULT] = (char*)ShiritoriGame();
 	
-	//printf("\n%d\n\n", (char*)iEnvStatus[CMD_RESULT]);
-
 	//Return to prompt
 	iEnvStatus[CMD_RESULT] = (char*)RUNNING;
-	//printf(iEnvStatus[ACTIVE_CMD]);
-	
-	//iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 	
 }
 
