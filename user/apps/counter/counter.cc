@@ -1,9 +1,10 @@
 /*********************************************************************
  *                
  * Copyright (C) 2003-2004,  Karlsruhe University
+ * Copyright (C) 2014, Tyson Key <tyson.key@gmail.com>
  *                
- * File path:     grabmem/roottask.cc
- * Description:   A simple root task
+ * File path:     counter/counter.cc
+ * Description:   System root task (superserver)
  *                
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,6 +113,38 @@ int MallocTestOne() {
 
 void InitHwDev() {
 	printf("[root-task] : Found %d PATA devices", reg_config());
+/* static int exec_pio_data_in_cmd(
+ unsigned char dev,
+unsigned char * bufAddr,
+long numSect, int multiCnt ) 
+CMD_READ_SECTORS http://www.t13.org/documents/UploadedDocuments/project/d1410r3b-ATA-ATAPI-6.pdf
+
+int reg_pio_data_in_lba28(0, CMD_READ_SECTORS, 0x0, 0x00, LBA?, placeToDump, 0x00, 0x00)
+
+int reg_pio_data_in_lba28( unsigned char dev,         // device (0 or 1)
+ 
+                           unsigned char cmd,         // command register
+ 
+                           int fr,                    // feature register
+ 
+                           int sc,                    // sector count
+ 
+                           long lba,                  // LBA
+ 
+                           unsigned char * bufAddr,   // buffer address
+ 
+                           int numSect,               // number of sectors to transfer
+ 
+                           int multiCnt );            // current multiple count
+ 
+
+*/
+
+	printf("[root-task] : PATA device 0 reset status: %d ", reg_reset(0));
+
+//int result = exec_pio_data_in_cmd(0,
+
+
 }
 
 int Beep() {
