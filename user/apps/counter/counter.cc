@@ -32,6 +32,7 @@
  ********************************************************************/
 
 #include <liballoc.h>
+#include <cstring>
 
 //ATA mini driver
 #include <mindrvr.h>
@@ -199,6 +200,12 @@ return 0;
 int main (void) {
 
 char *iEnvStatus[255];
+
+//auto shiny = 0;
+// int *car = new int;
+//car = (int)shiny;
+
+//car = 0;
 
 InitHwDev();
 
