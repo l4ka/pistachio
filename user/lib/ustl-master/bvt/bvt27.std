@@ -1,0 +1,25 @@
+----------------------------------------------------------------------
+ Testing functionality from typet.h
+----------------------------------------------------------------------
+sizeof(NullType) = 1
+Int2Type(42)::value = 42
+Type2Type type value = 56
+int == int is true
+float == int is false
+PrintInt 567
+Base is SuperSubclass from Derived is true
+Base is SuperSubclass from Base is true
+Base is SuperSubclassStrict from Derived is true
+Base is SuperSubclassStrict from Base is false
+
+----------------------------------------------------------------------
+ Testing functionality from typelist.h
+----------------------------------------------------------------------
+Length of IntTypesList is 4
+PrintShort 1234
+PrintFloat 1235.00
+PrintShort 1236
+Index of double in AllTypesList is 5
+Index of float in NoFloatList is -1
+Index of double in NoFloatList is 4
+Index of double in ReversedList is 0

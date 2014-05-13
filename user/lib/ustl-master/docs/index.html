@@ -1,0 +1,724 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>uSTL - the small STL library</title>
+    <link rel="stylesheet" type="text/css" href="style/default.css" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/xhtml+xml; charset=ISO-8859-1" />
+    <meta name="google-site-verification" content="S9iQApfE2dgPHT2qGSIReLxv3tQ7AGQpmi29EChwOSg" />
+    <meta name="Description" content="API and usage description for uSTL, a size-optimized STL implementation" />
+    <meta name="Keywords" content="C++, STL, template, bloat, optimization" />
+    <meta name="author" content="Mike Sharov" />
+    <meta name="date" content="2013-11-14" />
+</head>
+<body>
+
+<div class="banner">
+    <h1>uSTL</h1>
+    <div class="motto">Candy for the optimization nut in you</div>
+</div>
+<hr class="banner" />
+
+<h2><a name="Introduction">Introduction</a></h2>
+<p>
+The C++ standard template library (STL) is a collection of common
+containers and algorithms in template form. Unfortunately its standard
+incarnation shipped with gcc is implemented without much concern for code
+size.  Not only is the library itself large, the current version being
+over a megabyte in size, but with all the code you instantiate by using a
+vector for each of your containers, it is easy to become fearful and opt
+for using static arrays instead or, worse yet, abandon C++ altogether
+for C.  This is especially painful to former DOS assembly programmers
+like myself, who fret endlessly when the size of the executable crosses
+the magic 64k boundary, forgetting that nobody cares about memory anymore.
+</p><p>
+Of course, these days everyone has gigabytes of RAM and has no compunction
+about loading up OpenOffice, whose source tree is over a gigabyte in
+size. Why then bother with saving a kilobyte of code here and there? I
+can't really say. Maybe it's that warm fuzzy knowledge that you are making
+maximum possible use of your computer's resources. Maybe it's that thrill
+you get after expressing your program's functionality in the fewest
+possible instructions and the minimum imaginable overhead. Or maybe it
+really is of no importance and any code bloat will be easily overcome
+by faster processors in some near future. I just know what I like, and
+it's the sight of clean, concise, and fast code. Therefore this library.
+</p>
+<h2>Contents</h2>
+<ul>
+    <li><a href="#Installation">Installation</a></li>
+    <li><a href="#Containers">Containers and Iterators</a></li>
+    <li><a href="#Strings">Strings</a></li>
+    <li><a href="#Algorithms">Algorithms</a></li>
+    <li><a href="#Memblocks">Memblock and Memlink</a></li>
+    <li><a href="#Streams">Streams</a></li>
+    <li><a href="#Arrays">Arrays</a></li>
+    <li><a href="#Exceptions">Exceptions</a></li>
+    <li><a href="#Savings">Template Bloat Be Gone</a></li>
+    <li><a href="#Contact">Bug reporting</a></li>
+    <li><a href="html/index.html">Doxygen reference</a></li>
+</ul>
+<h2><a name="Installation">Installation</a></h2>
+<p>
+To start with you'll need a decent compiler. Although uSTL will compile
+under gcc 2.95, some features require at least gcc 3.4 and are simply
+turned off with an older version. The minimum requirement to enable
+C++11 features is gcc 4.6 or clang 3.2.
+</p><p>
+The latest version of uSTL can always be downloaded from its GitHub
+<a href="https://github.com/msharov/ustl/releases/latest">release page</a>.
+If you like living dangerously, you can pull the working branch directly from
+<a href="https://github.com/msharov/ustl">git@github.com:msharov/ustl.git</a>.
+The mainline source should build on any unix-based system, including
+Linux, BSD, MacOS, SunOS, and Solaris. Windows-based systems and embedded
+platforms, are not, and will not be supported by the mainline. However,
+if you make a port, I'll be happy to mention it here. After unpacking:
+</p><pre>
+./configure
+make install
+</pre><p>
+<kbd>./configure --help</kbd> lists available build options.
+You might want to specify a different installation prefix with
+<kbd>--prefix=/usr</kbd>; the default destination is /usr/local.
+Developers will want to build with <kbd>--with-debug</kbd> to get a
+lot of assert error checking, which I highly recommend. If you have
+gcc 4.4 or later, you may want to also use <kbd>--force-inline</kbd>
+(see the bottom of this page for a fuller explanation). If you are the
+type to edit configuration manually, it's in Config.mk and config.h. When
+it's built, you can run the included tests with <kbd>make check</kbd>.
+Finally, here's a simple hello world application:
+</p><pre>
+#include &lt;ustl.h&gt;
+using namespace ustl;
+
+int main (void)
+{
+    cout &lt;&lt; "Hello world!\n";
+    return (EXIT_SUCCESS);
+}
+</pre><p>
+If you have at least gcc 3.4, uSTL is built as a standalone library,
+without linking to libstdc++ (except on BSD platforms where gcc does not
+support it) Because g++ links to it by default, you'll need to link your
+applications with gcc, or to pass <kbd>-nodefaultlibs -lc</kbd> to g++
+if you want to use uSTL to completely replace libstdc++.  This is where
+the actual space savings happen. (If you want to see just how much you can
+save, skip to the <a href="#Savings">Template Bloat Be Gone</a> section)
+</p>
+<h2><a name="Containers">Containers and Iterators</a></h2>
+<p>
+STL containers provide a generic abstraction to arrays, linked lists,
+and other methods of memory allocation. They offer the advantages
+of type-safety, the peace of mind that comes from never having to
+malloc anything again, and a standard access API called iterators. Each
+container's API is equivalent to that of a simple array, with iterators
+being the equivalent of pointers into the array. The uniform access
+API allows creation of standardized algorithms, discussed futher down,
+that work on any container. Here are some examples of using vector,
+the container representing a simple array:
+</p><pre>
+vector&lt;int&gt; v;
+v.push_back (1);
+v.emplace_back (2);
+v[1] = 0;
+v.erase (v.begin() + 1);
+v.pop_back();
+v.insert (v.begin(), 4);
+v.resize (15);
+</pre><p>
+As you can see, a vector is basically the same thing as the arrays
+you use now, except that it is resizable. The function names
+ought to be self-explanatory with the exception of the addressing
+arguments. You can do index addressing and get free bounds checking
+with asserts. Incidentally, I highly recommend you work with a debug
+build when writing code; uSTL is chock full of various asserts checking
+for error conditions. In the optimized build, most such errors will be
+silently ignored where possible and will cause crashes where not. That
+is so because they are programmer errors, existing because you have a
+bug in your code, not because the user did something wrong, or because
+of some system failure. Programmer errors assert. User or system errors
+throw exceptions.
+</p><p>
+Vectors are addressed with iterators, which are just like pointers (and
+usually are). Calling begin() gives you the pointer to the first element,
+calling end() gives you the pointer to the end of the last element. No,
+not the last element, the end of it, or, more accurately, the end of the
+array. It's that way so you can keep incrementing an iterator until it
+is equal to the end() value, at which point you know you have processed
+all the elements in the list. This brings me to demonstrate how you
+ought to do that:
+</p><pre>
+foreach (vector&lt;int&gt;::iterator, i, v)
+    if (*i &lt; 5 || *i &gt; 10)
+	*i = 99;
+</pre><p>
+Although the foreach macro is a uSTL-only extension, it is a one-liner
+you can easily copy out of uutility.h if you ever want to switch back to
+regular STL.  It is a great way to ensure you don't forget to increment
+the counter or run past the end of the vector. The only catch to be aware
+of, when inside an iterator loop, is that if you modify the container,
+by adding or removing entries, you have to update the iterator, since the
+container memory storage may have moved when resized. So, for example,
+if you wish to remove certain types of elements, you'd need to do use
+an index loop or something like:
+</p><pre>
+foreach (vector&lt;CEmployee&gt;::iterator, i, employees)
+    if (i-&gt;m_Salary &gt; 50000 || i-&gt;m_Performance &lt; 100)
+	--(i = employees.erase (i));
+</pre><p>
+This is pretty much all there is to say about containers. Create them,
+use them, resize them, that's what they are for. There are other
+container types, but you will probably not use them much. There's
+<code>set</code>, which is a perpetually sorted vector, useful when you
+want to binary_search a large collection. There's <code>map</code> which
+is an associative container where you can look up entries by key. Its
+utility goes down drastically when you have complex objects that need to
+be searched with more than one parameter, in which cast you are better
+off with vector and foreach. I have never needed the others, and do
+not recommend their use. Their implementations are fully functional,
+but do not conform to STL complexity guarantees and are implemented as
+aliases to vector, which naturally changes their performance parameters.
+</p>
+<h2><a name="Strings">Strings</a></h2>
+<p>
+Every program uses strings, and STL was kind enough to provide a
+specification. uSTL deviates a bit from the standard by not implementing
+wchar strings. There is only one <code>string</code> class, which assumes
+all your strings will be UTF8-encoded, and provides some additional
+functionality to make working with those easier. I did that for the same
+reason I dropped the locale classes; bloat. It is simply too expensive to
+implement the standard locale classes, as the enormous size of libstdc++
+illustrates. If you need them, you can still include them from libstdc++,
+but it may be just as simple to use the locale support provided by libc
+through printf, which may be called through <code>format</code> functions
+in string and ostringstream.
+</p><p>
+Anyway, back to strings. You can think of the string object as a
+char vector with some additional operations built-in, like searching,
+concatenation, etc.
+</p><pre>
+string s ("Hello");
+s += ' ';
+s += "world?";
+s.replace (s.find ('?'), 1, "!");
+s[3] = s[s.find_first_of("lxy")];
+s[s.rfind('w')] = 'W';
+s.format ("A long %zd number of 0x%08lX\n", 345u, 0x12345);
+cout &lt;&lt; s &lt;&lt; endl;
+</pre><p>
+A nonstandard behaviour you may encounter is from linked strings created
+by the string constructor when given a null-terminated const string. In
+the above example, the constructor links when given a const string and
+stays as a const link until the space is added. If you try to write to it,
+you'll get an assert telling you to use copy_link first to convert the
+link into a copy. Resizing the linked object automatically does that for
+you, so most of the time it is transparent. You may also encounter another
+instance of this if you try getting iterators from such an object. The
+compiler uses the non-const accessors by default for local objects,
+so you may need to declare it as a const string if you don't wish to
+copy_link. Why does uSTL string link instead of copying?  To save space
+and time. All those strings are already in memory, so why waste heap
+space and processor time to copy them if you just want to read them? I
+thought it a good tradeoff, considering that it is trasparent for the
+most common uses.
+</p><p>
+Other nonstandard extensions include a <code>format</code> function to
+give you the functionality of sprintf for string objects. Another is
+the UTF8 stuff. Differing a bit from the standard, <code>size</code>
+returns the string length in bytes, <code>length</code> in characters.
+You can iterate by characters instead of bytes with a special utf8
+iterator:
+</p><pre>
+for (string::utf8_iterator i = s.utf8_begin(); i &lt; s.utf8_end(); ++ i)
+    DrawChar (*i);
+</pre><p>
+or just copy all the chars into an array and iterate over that:
+</p><pre>
+vector&lt;wchar_t&gt; result (s.length());
+copy (s.utf8_begin(), s.utf8_end(), result.begin());
+</pre><p>
+To write wide characters to the string, wchar_t values can be directly
+given to push_back, insert, append, or assign, in the same way as the
+char ones.
+</p><p>
+A few words must be said regarding reading wide characters. The shortest
+possible rule to follow is "don't!" I have received a few complaints about
+the fact that all offsets given to and returned by string functions are
+byte offsets and not character offsets. The problem with modifying or even
+looking for specific wide characters is that you are not supposed to know
+what they are. Your strings will be localized into many languages and it
+is impossible for you to know how the translation will be accomplished.
+As a result, whenever you are hardcoding a specific character value,
+or a specific character length (like a three-character extension),
+you are effectively hardcoding yourself into a locale. The only valid
+operation on localized strings is parsing it via standard delimiters,
+treating anything between those delimiters as opaque blocks. For this
+reason, whenever you think you need to do something at a particular
+character offset, you should recognize it as a mistake and find the
+offset by the content that is supposed to be there.
+</p><p>
+If this philosophy is consistently followed, it becomes clear that
+actual character boundaries are entirely irrelevant. There are only
+two exceptions to this: first occurs if you are writing a text editor
+and want to insert user data at a character position, the second occurs
+if you are writing a font renderer and want to translate characters to
+glyphs. In both cases you should make use of the utf8_iterator to find
+character boundaries and values. Given that these two cases apply to
+just a handful of people who are involved in implementing user interface
+frameworks, I believe that the opacity restriction is well justified by
+the amount of code space it saves for the vast majority of library users.
+</p>
+<h2><a name="Algorithms">Algorithms</a></h2>
+<p>
+Algorithms are the other half of STL. They are simply templated common
+tasks that take iterator arguments, and as a result, work with any
+container. Most will take an iterator range, like (v.begin(), v.end()),
+but you can, of course operate on a subset of a container by giving a
+different one. Because the usual operation is to use the whole container,
+uSTL provides versions of most algorithms that take container arguments
+instead of the iterator range.  Here are the algorithms you will actually
+find useful:
+</p><pre>
+copy (v1, v2.begin());		// Copies vector v1 to vector v2.
+fill (v, 5);			// Fills v with fives.
+copy_n (v1, 5, v2.begin());	// Copies first five elements only.
+fill_n (v.begin() + 5, 10, 5);	// Fills elements 5-15 with fives.
+sort (v);			// Sorts v.
+find (v, 14);			// Finds 14 in v, returning its iterator.
+binary_search (v, 13);		// Looks up 13 with binary search in a sorted vector.
+lower_bound (v, 13);		// Returns the iterator to where you want to insert 13.
+iota (v.begin(), v.end(), 0);	// Puts 0,1,2,3,4,... into v.
+reverse (v);			// Reverses all the elements in v.
+</pre><p>
+The rest you can discover for yourself. There are obscure mathematical
+operations, like inner_product, set operations, heap operations, and
+lots and lots of predicate algorithms. The latter are algorithms that
+take a functor (an object that can be called like a function) and were
+supposed to help promote code reuse by encapsulating common operations.
+For example, STL expects you to use the <code>for_each</code> algorithm and
+write a little functor for all your iterative tasks:
+</p><pre>
+class CCompareAndReplace {
+public:
+    CCompareAndReplace (int minValue, int maxValue, int badValue)
+	: _minValue (minValue), _maxValue (maxValue), _badValue (badValue) {}
+    void operator (int&amp; v) {
+	if (v &lt; _minValue || v &gt; _maxValue)
+	    v = _badValue;
+    }
+private:
+    int _minValue;
+    int _maxValue;
+    int _badValue;
+};
+
+for_each (v.begin(), v.end(), CCompareAndReplace (5, 10, 99));
+</pre><p>
+And yes, it really does work. Doesn't always generate much bloat either,
+since the compiler can often see right through all this trickery and
+expand the for_each into a loop without actually creating the functor
+object. However, the compiler has a much harder time when you start
+using containers of complex objects or operating on member variables
+and member functions.  Since that is what you will most likely have in
+any real code outside the academic world, the utility of predicate
+algorithms is questionable.  Their readability is even more so,
+considering that the above fifteen line example can be written as a
+three line iterative foreach loop. Finally, there is the problem of
+where to put the functor. It just doesn't seem to "belong" anywhere in
+the object-oriented world. (C++11 changes that somewhat with lambda
+functions) Sorry, Stepanov, I just don't see how these things can be
+anything but an ugly, bloated hindrance.
+</p>
+<h2><a name="Memblocks">Memblocks and Memlinks</a></h2>
+<p>
+The STL specification is only about containers and algorithms, the stuff
+described from here on is totally non-standard, so by using them you'll
+have to stick with uSTL as your STL implementation. I think it's worth
+it, but, of course, the choice is up to you.
+</p><p>
+The major difference between the standart STL implementation and uSTL is
+that the former has memory management stuff all over the place, while
+the latter keeps it all together in the <code>memblock</code> class. Normally
+STL containers are resized by calling <code>new</code> to create more storage
+and then copying the elements there from the old one. This method wastes
+space by fragmenting memory, wastes time by copying all the existing data
+to the new location, and wastes codespace by having to instantiate all
+the resizing code for each and every container type you have. This method
+is also absolutely necessary to do this resizing in a perfectly object-safe
+way. The uSTL way is to manage memory as an opaque, typeless block, and
+then use the container templates to cast it to an appropriate pointer type.
+</p><p>
+This works just fine, except for one little catch: there is one type
+of object you can't store in uSTL containers -- the kind that has pointers
+to itself. In other implementations, resizing actually creates new objects
+in the new location and destroys them in the old location. uSTL simply
+memcpys them there without calling the copy constructor. In other words,
+the object can not rely on staying at the same address. Most objects really
+don't care. Note that this is not the same thing as doing a bitwise copy,
+that you were rightly warned against before! It's a bitwise <em>move</em>
+that doesn't create a new object, but simply relocates an existing one.
+</p><p>
+What this one small concession does is allow aggregation of all memory
+management in one place, namely, the <code>memblock</code> class. All the
+containers are thus converted mostly into typecasting wrappers that
+exist to ensure type safety. Look at the assembly code and you'll see
+mostly calls to memblock's functions. This is precisely the feature
+that allows reduction in code instantiated by container templates.
+</p><p>
+However, memblock's usefulness doesn't end there! It can now replace
+all your dynamically allocated buffers that you use for unstructured
+data. Need to read a file? Don't use new to allocate memory; use a
+memblock! It even has a friendly read_file member function for just
+that purpose. Need to write a file? Use the write_file call! Unless
+you are working with a database or some really large archive, you
+should be able to load all your files this way. Imagine, not having
+to worry about file I/O again! It's much nicer to work with data in
+memory; you know how long it is, so you know when to stop. You can
+seek with impunity, and any operations have the cost of a memcpy.
+</p><p>
+Memblock is derived from memlink, an object for linking to a memory
+block. Now you get to store a pointer and the size of whatever it
+points to, but with uSTL you can use a memlink object to keep them
+together, reducing source clutter and making your code easier to
+read and maintain. You can link to constant blocks too with cmemlink,
+from which memlink is derived. Because all three are in a single
+hierarchy, you never need to care whether you're working on an
+allocated block or on somebody else's allocated block. Pointers are
+kept together with block sizes, memory is freed when necessary,
+and you never have to call new or delete again. Who needs garbage
+collection? Memblocks give you the same functionality at a fraction
+of the cost.
+</p><p>
+Linking is not limited to memlink. You can link memblock objects.
+You can link string objects. You can even link containers! Now
+you can use alloca to create a vector on the stack; use the
+<code>typed_alloca_link(v,int,99)</code> macro. All linked objects
+will allocate memory and copy the linked data when you increase their
+size. You can also do it explicitly by calling <code>copy_link</code>.
+Why link? It's cheaper than copying and easier than keeping track
+of pointers. For example, here's a line parser:
+</p><pre>
+string buf, line;
+buf.read_file ("some_config_file.txt");
+for (uoff_t i = 0; i &lt; buf.size(); i += line.size() + 1) {
+    line.link (buf.iat(i), buf.iat (buf.find ('\n',i)));
+    process_line (line);
+}
+</pre><p>
+This way process_line gets a string object instead of a pointer and
+a size. If you don't rely on the string being null-terminated, which
+basically means not using libc functions on it, this is all you need.
+Otherwise buf will have to be writable and you can replace the newline
+with a null. In either case you are using no extra heap. The overhead
+of link is negligible in most cases, but if you really want to do this
+in a tight loop, you can use relink call, which expands completely
+inline into one or two instructions, avoiding the virtual unlink() call.
+</p>
+<h2><a name="Streams">Streams</a></h2>
+<p>
+The C++ standard library provides global stream objects called cin,
+cout, and cerr to replace printf and friends for accessing stdin, stdout,
+and stderr, respectively. uSTL versions work mostly the same as the
+standard ones (yes, the <code>format</code> call is a uSTL extension). Most
+calls use snprintf for output and thus use whatever locale libc uses.
+</p><pre>
+cout &lt;&lt; "Hello world!" &lt;&lt; endl;
+cout &lt;&lt; 456 &lt;&lt; ios::hex &lt;&lt; 0x1234 &lt;&lt; endl;
+cerr.format ("You objects are at 0x%08X\n", &amp;o);
+</pre><p>
+String-writing streams are also available:
+</p><pre>
+ostringstream os;
+os &lt;&lt; "Writing " &lt;&lt; n &lt;&lt; " objects somewhere" &lt;&lt; endl;
+cout &lt;&lt; os.str() &lt;&lt; endl;
+</pre><p>
+fstream is a file access interface with exception handling for errors:
+</p><pre>
+fstream f;
+// C++ standard says that fstream does not throw by default,
+f.exceptions (fstream::allbadbits);	// so this enables throwing.
+f.open ("file.dat", ios::in | ios::out); // throws file_exception
+f.read (buf, bufSize);			// let's read something
+f.seek (334455);			// go somewhere
+f.write (buf2, buf2Size);		// and write something
+f.fnctl (FCNTLID(F_SETFL), O_NONBLOCK); // yup, ALL file operations
+memlink l = f.mmap (bufSize, offset);	// even mmap
+fill (l, 0);
+f.msync (l);
+f.munmap (l);
+f.close();	// also throws file_exception (with filename!)
+</pre><p>
+istream and ostream, which are not really usable by themselves in the
+standard implementation, are hijacked by uSTL to implement binary data
+input and output:
+</p><pre>
+const size_t writtenSize =
+    Align (stream_size_of(number) +
+           stream_size_of(ctr)) + 
+    stream_size_of(n) +
+    stream_size_of(v);
+memblock buf (writtenSize);
+ostream os (buf);
+os &lt;&lt; number &lt;&lt; ctr;
+os.align();
+os &lt;&lt; n &lt;&lt; v;
+</pre><p>
+These operations are all very efficient, approaching a straight memcpy
+in performance. ostream will not resize the buffer, hence the necessity
+to estimate the final size. Most stream_size_of calls are computed at
+compile time and thus produce no code. Because the data is written as
+is, it is necessary to consider proper data alignment; for example,
+a 4 byte int can not be written at stream offset 2. Some architectures
+(Macs) actually crash when doing it; Intel processors just do it slowly.
+Hence the need to pack the data to a proper "grain". The default align
+call will pack to the maximum necessary grain, but can be given an
+argument to change that. In case you're wondering, the reason for all
+these idiosyncracies is optimization. The smallest and fastest possible
+code to dump your stuff into a binary file is produced by this method.
+uSTL defines flow operators to write integral values, strings, and
+containers, but you can custom-serialize your objects like this:
+</p><pre>
+namespace myns {
+
+/// Some class I want to serialize
+class CMyClass {
+public:
+    void		read (istream&amp; is);
+    void		write (ostream&amp; os) const;
+    size_t		stream_size (void) const;
+private:
+    vector&lt;int&gt;		m_Elements;	///&lt; A bunch of elements.
+    size_t		m_SomeSize;	///&lt; Some integral value.
+    MyObject		m_SomeObject;	///&lt; Some other streamable object.
+}
+
+/// Reads the object from stream \p is.
+void CMyClass::read (istream&amp; is)
+{
+    is &gt;&gt; m_Elements &gt;&gt; m_SomeSize &gt;&gt; m_SomeObject;
+}
+
+/// Writes the object to stream \p os.
+void CMyClass::write (ostream&amp; os) const
+{
+    os &lt;&lt; m_Elements &lt;&lt; m_SomeSize &lt;&lt; m_SomeObject;
+}
+
+/// Returns the size of the written object.
+size_t CMyClass::stream_size (void) const
+{
+    return (stream_size_of (m_Elements) +
+	    stream_size_of (m_SomeSize) +
+	    stream_size_of (m_SomeObject));
+}
+
+} // namespace myns
+</pre>
+<h2><a name="Arrays">Arrays</a></h2>
+<p>
+One last container I'll mention is <code>array</code>, which is
+a fixed-size array of identical elements. There is also the older
+version of this called <code>tuple</code>, with template parameters
+in reversed order, written for uSTL before C++11 came out with
+<code>array</code>. These classes are good for graphical objects like
+points, sizes, rectangles, triangles, etc. tuples have SIMD instruction
+optimizations, which may or may not be a benefit. Any C-style fixed
+size-array works better as one of these, since it becomes a standard
+STL container, which you can use with any algorithm, copy by assignment,
+initialize in the constructor, etc.
+</p><pre>
+typedef short int coord_t;
+typedef tuple&lt;2, coord_t&gt;	Point2d;
+typedef tuple&lt;2, coord_t&gt;	Size2d;
+typedef array&lt;Point2d, 2&gt;	Rect;
+
+Rect r (Point2d (1,2), Point2d (3,4));
+r += Size2d (4, 4);
+r[1] -= Size2d (1, 1);
+foreach (Rect::iterator, i, r)
+    TransformPoint (*i);
+Point2d pt (1, 2);
+pt += r[0];
+pt *= 2;
+</pre>
+<h2><a name="Exceptions">Exceptions</a></h2>
+<p>
+uSTL implements all the standard exception classes defined by the
+C++ standard. The exception tree is standalone, but is derived
+from std::exception when compiling with libstdc++ for ease of
+catching everything. uSTL exceptions implement some additional useful
+features. First, they are completely serializable. You can write them
+as a binary blob into a file, send them over a network, and handle them
+somewhere else. Each exception will print an informative error message
+directly to a text stream, reducing your try/catch block to:
+</p><pre>
+try {
+    DoSomething();
+} catch (exception&amp; e) {
+    cerr &lt;&lt; "Error: " &lt;&lt; e &lt;&lt; endl;
+    #ifndef NDEBUG
+	cerr &lt;&lt; e.backtrace();
+    #endif
+} catch (...) {
+    cerr &lt;&lt; "Unexpected fatal error has occured.\n";
+}
+</pre><p>
+Second, each exception stores a backtrace (callstack) at the time
+of throwing and can print that backtrace as easily as the above
+example illustrates. While it is indeed a good practice to design
+your exceptions so that you should not care where it was thrown from,
+situations occasionally arise while debugging where knowing the thrower
+is useful to fix the bug a little faster than otherwise.
+</p><p>
+Finally, there are additional exception classes for dealing with libc
+function errors, file errors, and stream classes. libc_exception can
+be thrown whenever a libc function fails, immediately telling you
+what the function call was and the errno description of the failure.
+file_exception, thrown by fstream operations, also contains the file name,
+which can be pretty darn useful. stream_bounds_exception is extremely
+useful in debugging corrupted data, as it tells you exactly where the
+corruption starts and what you were trying to read there.
+</p>
+<h2><a name="Savings">Template Bloat Be Gone</a></h2>
+<p>
+So how much space are you going to save and where? Allow me to demonstrate with
+the following small program. I'm basically creating a vector and exercise the
+most common operations. Those are resize, push_back, insert, and erase, which
+you use pretty much every time you have a vector.
+</p><pre>
+#if USING_USTL
+    #include &lt;ustl.h&gt;
+    using namespace ustl;
+#else
+    #include &lt;vector&gt;
+    using namespace std;
+#endif
+
+int main (void)
+{
+    vector&lt;int&gt; v;
+    v.resize (30);
+    for (size_t i = 0; i &lt; v.size(); ++ i)
+	v[i] = i;
+    v.push_back (57);
+    v.insert (v.begin() + 20, 555);
+    v.erase (v.begin() + 3);
+    return (EXIT_SUCCESS);
+}
+</pre><p>
+Feel free to compile it and see for yourself. I'm compiling on a Core i7
+with gcc 4.7.2 and <kbd>-Os -DNDEBUG=1 -march=native</kbd>. The libstdc++
+version is linked implicitly with it, and uSTL version is linked with gcc
+(instead of g++) and <kbd>-lustl</kbd>. Both executables are stripped.
+The libstdc++ version looks like this:
+</p><pre>
+% ls -l std/tes
+6896 tes
+% size std/tes
+text	data	bss	dec	hex	filename
+3522	656	8	4186	105a	std/tes
+% size -A std/tes.o
+std/tes.o:
+section                                                                                                      size
+.group                                                                                                          8
+.group                                                                                                          8
+.group                                                                                                          8
+.group                                                                                                          8
+.group                                                                                                          8
+.text                                                                                                          11
+.data                                                                                                           0
+.bss                                                                                                            0
+.text._ZNKSt6vectorIiSaIiEE12_M_check_lenEmPKc                                                                 61
+.text._ZNSt11__copy_moveILb0ELb1ESt26random_access_iterator_tagE8__copy_mIiEEPT_PKS3_S6_S4_                    45
+.text._ZNSt20__copy_move_backwardILb0ELb1ESt26random_access_iterator_tagE13__copy_move_bIiEEPT_PKS3_S6_S4_     58
+.rodata.str1.1                                                                                                 45
+.text._ZNSt6vectorIiSaIiEE14_M_fill_insertEN9__gnu_cxx17__normal_iteratorIPiS1_EEmRKi                         386
+.text._ZNSt6vectorIiSaIiEE13_M_insert_auxEN9__gnu_cxx17__normal_iteratorIPiS1_EERKi                           232
+.text.startup                                                                                                 294
+.gcc_except_table                                                                                              20
+.comment                                                                                                       18
+.note.GNU-stack                                                                                                 0
+.eh_frame                                                                                                     368
+Total                                                                                                        1578
+</pre><p>
+The uSTL version looks like this:
+</p><pre>
+% ls -l ustl/tes
+5704 tes
+% size ustl/tes
+text	data	bss	dec	hex	filename
+2383	640	8	3031	bd7	ustl/tes
+% size -A ustl/tes.o
+ustl/tes.o:
+section             size
+.text                  0
+.data                  0
+.bss                   0
+.text.startup        277
+.gcc_except_table     19
+.comment              18
+.note.GNU-stack        0
+.eh_frame             72
+Total                386
+</pre><p>
+As you can see, the libstdc++ version instantiates quite a bit of code
+for just this one vector type, with out-of-line functions for copy, move,
+insert, and fill. Because uSTL aggregates memory management into a single
+location (the memblock class), all of those calls can be efficiently
+forwarded there, saving about a kilobyte of code. 1k doesn't seem like
+much, but consider that you get it for <em>every type of container you
+instantiate</em>! An int vector here, a float vector here, a bunch of
+object containers there, and before you know it you are using half your
+executable just for container overhead.
+</p><p>
+But wait, there is more! Let's look at the total memory footprint:
+</p><pre>
+% footprint std/tes
+   text	   data	    bss	    dec	    hex	filename
+   3522	    656	      8	   4186	   105a	tes
+  83357	    968	    664	  84989	  14bfd	libgcc_s.so.1
+1031819	   1100	     72	1032991	  fc31f	libm.so.6
+ 935489	  36200	  85088	1056777	 102009	libstdc++.so.6
+1715642	  20560	  17800	1754002	 1ac392	libc.so.6
+3769829	  59484	 103632	3932945	 3c0311	(TOTALS)
+
+% footprint ustl/tes
+   text	   data	    bss	    dec	    hex	filename
+   2383	    640	      8	   3031	    bd7	tes
+  83357	    968	    664	  84989	  14bfd	libgcc_s.so.1
+ 151398	  10848	  73240	 235486	  397de	libustl.so.2
+1715642	  20560	  17800	1754002	 1ac392	libc.so.6
+1952780	  33016	  91712	2077508	 1fb344	(TOTALS)
+</pre><p>
+As you can see, the footprint for the uSTL version is 47% smaller,
+saving 1855437 bytes. If you don't count libc, measuring only the
+C++-specific overhead, libstdc++ loads 2178943 while libustl only 323506,
+<em>seven times less</em>! Finally, most of uSTL's size comes from gcc's
+support libraries; if you compile uSTL configured <kbd>--with-libstdc++</kbd>
+option, then you'll see that it only takes up 72322 bytes, of which only
+23350 are used by .text, meaning that only about a third of the library
+size is my fault. gcc developers will have to reduce the size of libsupc++
+before any further size reduction would be practical.
+</p><p>
+One final note concerns the current gcc versions, 4.4 and later. gcc
+developers have decided, for various reasons, to treat the inline keyword
+as nothing more than a hint to the optimizer, resulting in a lot less
+inlining for uSTL-using code.  You can see which functions fail to inline
+if you turn on -Winline warning. Back in gcc 3 days there were various
+parameters that could be tweaked to get the inlining to happen. These no
+longer seem to work. Because it takes quite a bit of code to make these
+failures happen, I am unable to submit a gcc bug for it. Simple examples
+don't exhibit inlining failures and submitting the entire uSTL codebase
+seems inappropriate. Therefore I've pretty much given up on it. The only
+solution I can come up with is to just clobber the optimizer over the head
+with <code>#define inline __attribute__((always_inline)) inline</code>. It
+is enabled if you configure with <kbd>--force-inline</kbd>. The above
+examples are compiled with this option.
+</p>
+<h2><a name="Contact">Bug reporting</a></h2>
+<p>
+Report bugs through the
+<a href="https://github.com/msharov/ustl/issues">project issue tracker</a>.
+</p>
+</body>
+</html>

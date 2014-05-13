@@ -1,0 +1,498 @@
+#! /bin/bash
+#
+# This file is free software, distributed under the MIT License.
+######################################################################
+#### Project Configuration ###########################################
+######################################################################
+
+PKG_NAME="ustl"
+PKG_VERSTR="v1.6"
+
+PKG_BUGREPORT="Mike Sharov <msharov@users.sourceforge.net>"
+
+# Files that get created by this script
+FILES="Config.mk config.h"
+
+# Package options
+COMPONENTS='
+{
+name=[without-shared]
+desc=[do not build the shared library]
+seds=[s/^\(BUILD_SHARED\)/#\1/]
+}{
+name=[with-static]
+desc=[	build the static library]
+seds=[s/^#\(BUILD_STATIC\)/\1/;s/-fPIC/-fPIC -ffunction-sections -fdata-sections/;s/-gc-sections/-gc-sections -static-libgcc/]
+}{
+name=[with-debug]
+desc=[	compile for debugging]
+seds=[s/^#\(DEBUG\)/\1/]
+}{
+name=[with-demangler]
+desc=[demangle C++ symbols in backtrace]
+seds=[s/#undef \(WANT_NAME_DEMANGLING\)/#define \1 1/]
+}{
+name=[without-bounds]
+desc=[disable runtime bounds checking on stream reads/writes]
+seds=[s/#define \(WANT_STREAM_BOUNDS_CHECKING\) 1/#undef \1/]
+}{
+name=[without-fastcopy]
+desc=[disable specializations for copy/fill]
+seds=[s/#define \(WANT_UNROLLED_COPY\) 1/#undef \1/]
+}{
+name=[without-mmx]
+desc=[	disable use of MMX/SSE/3dNow! instructions]
+seds=[s/#define \(WANT_MMX\) 1/#undef \1/]
+}{
+name=[force-inline]
+desc=[make inline keyword mean always inline, not just a hint]
+seds=[s/#undef \(WANT_ALWAYS_INLINE\)/#define \1 1/]
+}{
+name=[with-libstdc++]
+desc=[link with libstdc++]
+seds=[s/#define \(WITHOUT_LIBSTDCPP\) 1/#undef \1/;s/\(NOLIBSTDCPP\)/#\1/]
+}';
+
+# Header files
+HEADERS="assert.h ctype.h errno.h fcntl.h float.h inttypes.h limits.h stdio.h
+locale.h alloca.h signal.h stdarg.h stddef.h sys/stat.h sys/types.h stdint.h
+stdlib.h string.h time.h unistd.h math.h stdlib.h sys/mman.h execinfo.h";
+
+# Libraries
+LIBS="supc++ gcc_eh SystemStubs"
+
+# First pair is used if nothing matches
+PROGS="CC=gcc CC=clang CC=cc CXX=g++ CXX=clang++ CXX=c++ DOXYGEN=doxygen LD=ld AR=ar RANLIB=ranlib RANLIB=touch INSTALL=install"
+
+# Environment variables
+ENVIRONS="CXXFLAGS LDFLAGS"
+
+# Automatic vars
+[ -d .git ] && PKG_VERSTR=`git describe --always`
+PKG_MAJOR=`expr "$PKG_VERSTR" : 'v\([0-9]*\)\.[0-9]*'`
+PKG_MINOR=`expr "$PKG_VERSTR" : 'v[0-9]*\.\([0-9]*\)'`
+PKG_STRING="$PKG_NAME $PKG_VERSTR"
+
+# Miscellaneous substitutions
+CUSTSUBS="s/@PKG_NAME@/$PKG_NAME/g
+s/@PKG_VERSION@/"0x$PKG_MAJOR${PKG_MINOR}0"/g
+s/@PKG_VERSTR@/$PKG_VERSTR/g
+s/@PKG_TARNAME@/$PKG_NAME/g
+s/@PKG_STRING@/$PKG_STRING/g
+s/@PKG_UNAME@/`echo $PKG_NAME|tr a-z A-Z`/g
+s/@PKG_BUGREPORT@/$PKG_BUGREPORT/g
+s/@PKG_MAJOR@/$PKG_MAJOR/g
+s/@PKG_MINOR@/$PKG_MINOR/g"
+
+######################################################################
+#### The rest of the file is configuration code. Leave it alone. #####
+######################################################################
+
+die() { rm -f config.sed config.cpu config.cpu.c; exit; }
+
+#### Compile the configurator and generate initial config.sed ########
+
+if [ -z "$CC" ]; then
+    for i in gcc g++ cc c++ c89 c99; do
+	CC=`which $i 2>/dev/null` && break
+    done
+fi
+[ -z "$CC" ] && "No C compiler found" && die
+
+# Determine gcc private directory
+PSTDDEF=`echo "#include <stddef.h>"|$CC -E -|grep stddef.h|head -n1|cut -d' ' -f3|cut -d'"' -f2`
+PINCDIR=`dirname $PSTDDEF`
+PLIBDIR=`dirname $PINCDIR`
+if [ -d $PLIBDIR/lib ]; then PLIBDIR=$PLIBDIR/lib; fi
+
+# Create and build the C configurator
+cat>config.cpu.c<<\SRC
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/param.h>
+
+#if defined(__GNUC__) && (__i386__ || __x86_64) && !defined(__PIC__)
+static uint cpuid_supported (void)
+{
+    unsigned long forig, fnew;
+    asm ("pushf\n\tpop\t%0\n\t"
+	"mov\t%0, %1\n\txor\t$0x200000, %0\n\t"
+	"push\t%0\n\tpopf\n\tpushf\n\tpop\t%0"
+	: "=r"(fnew), "=r"(forig));
+    return (fnew != forig);
+}
+
+static uint cpuid (void)
+{
+    #define i_cpuid(a,r,c,d)	asm("cpuid":"=a"(r),"=c"(c),"=d"(d):"0"(a):"ebx")
+    const uint amdBits = 0xC9480000, extFeatures = 0x80000000, amdExtensions = 0x80000001;
+    uint r, c, d, caps;
+    if (!cpuid_supported()) return (0);
+    i_cpuid (0, r, c, d);
+    if (!r) return (0);
+    i_cpuid (1, r, c, d);
+    caps = (d & ~amdBits);
+    i_cpuid (extFeatures, r, c, d);
+    if (r != extFeatures) {
+	i_cpuid (amdExtensions, r, c, d);
+	caps |= d & amdBits;
+    }
+    return (caps);
+}
+#else
+static uint cpuid (void) { return (0); }
+#endif
+#define SET(c,v) "s/#undef \\(" #c "\\)/#define \\1 " #v "/g\n"
+
+int main (void)
+{
+    typedef struct { char bit, name[11]; } SCpuCaps;
+    static const short int boCheck=0x0001;
+    static const char boNames[2][16]={"BIG","LITTLE"};
+    static const SCpuCaps s_CpuCaps[]={
+	{  0, "FPU"		},
+	{  2, "EXT_DEBUG"	},
+	{  4, "TIMESTAMPC"	},
+	{  5, "MSR"		},
+	{  8, "CMPXCHG8"	},
+	{  9, "APIC"		},
+	{ 11, "SYSCALL"		},
+	{ 12, "MTRR"		},
+	{ 15, "CMOV"		},
+	{ 16, "FCMOV"		},
+	{ 22, "SSE "		},
+	{ 23, "MMX"		},
+	{ 24, "FXSAVE"		},
+	{ 25, "SSE "		},
+	{ 26, "SSE2"		},
+	{ 30, "EXT_3DNOW"	},
+	{ 31, "3DNOW"		}
+    };
+    uint i, caps;
+
+    printf ("s/ \\?@INLINE_OPTS@/");
+#if __GNUC__ >= 3
+    #if __clang__
+    #elif __GNUC__ >= 4
+	printf (" -fvisibility-inlines-hidden -fno-threadsafe-statics -fno-enforce-eh-specs");
+    #elif __GNUC_MINOR__ >= 4
+	printf (" --param max-inline-insns-single=1024"
+		" \\\\\\n\\t\\t--param large-function-growth=65535"
+		" \\\\\\n\\t\\t--param inline-unit-growth=1024");
+    #else
+	printf (" -finline-limit=65535");
+    #endif
+#else
+    printf ("/g\ns/-Wredundant-decls/-Wno-redundant-decls");
+#endif
+    printf ("/g\n");
+#if __GNUC__ != 3
+    printf ("s/ \\?@libgcc_eh@//g\n");
+#endif
+#if __i386__
+    printf ("s/ \\?-fPIC//g\n");
+#endif
+#if defined(__GNUC__) || defined(__GLIBC_HAVE_LONG_LONG)
+    printf (SET(HAVE_LONG_LONG,1) SET(SIZE_OF_LONG_LONG,%zd), sizeof(long long));
+#endif
+#if defined(__GNUC__) || (__WORDSIZE == 64) || defined(__ia64__)
+#ifndef BSD
+    printf (SET(HAVE_INT64_T,1));
+#endif
+#endif
+#ifndef __APPLE__
+    if (sizeof(size_t) == sizeof(unsigned long) && sizeof(size_t) != sizeof(uint))
+#endif
+	printf (SET(SIZE_T_IS_LONG,1));
+#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
+    printf (SET(HAVE_VECTOR_EXTENSIONS,1));
+#else
+    printf ("s/ \\?-Wshadow//g\n");
+#endif
+    printf ("s/@BYTE_ORDER@/%s_ENDIAN/g\n"
+	SET(RETSIGTYPE,void)
+	"s/#undef const/\\/\\* #define const \\*\\//g\n"
+	"s/#undef inline/\\/\\* #define inline __inline \\*\\//g\n"
+	"s/#undef off_t/\\/\\* typedef long off_t; \\*\\//g\n"
+	"s/#undef size_t/\\/\\* typedef long size_t; \\*\\//g\n"
+	SET(SIZE_OF_CHAR,%zd)
+	SET(SIZE_OF_SHORT,%zd)
+	SET(SIZE_OF_INT,%zd)
+	SET(SIZE_OF_LONG,%zd)
+	SET(SIZE_OF_POINTER,%zd)
+	SET(SIZE_OF_SIZE_T,%zd)
+	SET(LSTAT_FOLLOWS_SLASHED_SYMLINK,1),
+	boNames [(uint)(*((const char*)&boCheck))], sizeof(char),
+	sizeof(short), sizeof(int), sizeof(long), sizeof(void*), sizeof(size_t));
+
+    caps = cpuid();
+    for (i = 0; i < sizeof(s_CpuCaps)/sizeof(SCpuCaps); ++i)
+	if (caps & (1 << s_CpuCaps[i].bit))
+	    printf (SET(CPU_HAS_%s,1), s_CpuCaps[i].name);
+#if __GNUC__ >= 3
+    printf ("s/ \\?@PROCESSOR_OPTS@/");
+    #if (__clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 2)) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+	printf (" -std=c++11 -march=native");
+    #else
+	if (caps & (1<<23))		printf (" -mmmx");
+	if (caps & ((1<<22)|(1<<25)))	printf (" -msse -mfpmath=sse");
+	if (caps & (1<<26))		printf (" -msse2");
+	if (caps & ((1<<30)|(1<<31)))	printf (" -m3dnow");
+    #endif
+    printf ("/g\n");
+#else
+    printf ("s/ \\?@PROCESSOR_OPTS@//g\n");
+#endif
+    return (0);
+}
+SRC
+$CC -o config.cpu config.cpu.c
+[ ! -x config.cpu ] && echo "Configurator build failed" && die
+./config.cpu > config.sed
+
+#### Set host-dependent options ######################################
+
+SYSNAME=`uname|tr A-Z a-z`
+[ "`uname -m|tr A-Z a-z`" = "alpha" ] && SYSNAME="alpha"
+case "$SYSNAME" in
+    *solaris*| *sun*)	SYSNAME="sun";;
+    *darwin*| *osx*)	SYSNAME="mac";;
+    *alpha*)		SYSNAME="alpha";;
+    *bsd*)		SYSNAME="bsd";;
+    *)			SYSNAME="linux";;
+esac
+
+if [ "$SYSNAME" = "sun" ]; then
+    echo "s/-Wredundant-decls/-Wno-redundant-decls/g
+	s/@SHBLDFL@/-G/g" >>config.sed
+else
+    echo 's/#undef \(HAVE_THREE_CHAR_TYPES\)/#define \1 1/g' >>config.sed
+fi
+if [ "$SYSNAME" = "bsd" ]; then
+    echo 's/ \?@libgcc_eh@//g
+	s/#define WITHOUT_LIBSTDCPP 1/#undef WITHOUT_LIBSTDCPP/g
+	s/NOLIBSTDCPP	= -nodefaultlibs /#NOLIBSTDCPP	= -nodefaultlibs/g
+	s/-Wredundant-decls/-Wno-redundant-decls/g
+	s/-Winline/-Wno-inline/g
+	s/#define HAVE_VA_COPY 1/#undef HAVE_VA_COPY/g' >>config.sed
+fi
+if [ "$SYSNAME" = "linux" -o "$SYSNAME" = "bsd" ]; then
+    echo 's/@SHBLDFL@/-shared -Wl,-soname=$1/g' >>config.sed
+elif [ "$SYSNAME" = "alpha" ]; then
+    echo "s/BUILD_SHARED	= 1 /#BUILD_SHARED	= 1/g
+	s/#BUILD_STATIC	= 1/BUILD_STATIC	= 1 /g" >>config.sed
+fi
+if [ "$SYSNAME" = "mac" ]; then
+    echo 's/ \?@libgcc_eh@//g
+	s/@SYSWARNS@/-Wno-long-double/g
+	s/lib$1.so/lib$1.dylib/g
+	s/lib$1.so.${MAJOR}.${MINOR}.${BUILD}/lib$1.${MAJOR}.${MINOR}.${BUILD}.dylib/g
+	s/lib$1.so.${MAJOR}.${MINOR}/lib$1.${MAJOR}.${MINOR}.dylib/g
+	s/lib$1.so.${MAJOR}/lib$1.${MAJOR}.dylib/g
+	s/@SHBLDFL@/-Wl,-single_module -compatibility_version 1 -current_version 1 -install_name $1 -Wl,-Y,1455 -dynamiclib -mmacosx-version-min=10.4/g' >>config.sed
+else
+    echo 's/ \?@SYSWARNS@//g' >>config.sed
+fi
+if [ "$SYSNAME" = "alpha" -o "$SYSNAME" = "mac" ]; then
+    echo 's/#undef \(SIZE_OF_BOOL\)/#define \1 SIZE_OF_LONG/g' >>config.sed
+else
+    echo 's/#undef \(SIZE_OF_BOOL\)/#define \1 SIZE_OF_CHAR/g' >>config.sed
+fi
+if [ "$SYSNAME" = "linux" ]; then
+    echo 's/#undef \(HAVE_RINTF\)/#define \1 1/g' >>config.sed
+else
+    echo 's/ \?-mfpmath=sse//g' >>config.sed
+fi
+if [ "$SYSNAME" = "mac" -o "$SYSNAME" = "bsd" ]; then
+    echo 's/#define \(HAVE_STRSIGNAL\) 1/#undef \1/g' >>config.sed
+fi
+
+#### Printing helper functions #######################################
+
+PrintComponents() {
+    local cc name desc
+    cc=$COMPONENTS
+    echo "Options:"
+    while [ ! -z "$cc" ]; do
+	name=`expr "$cc" : '[^}]*name=\[\([^]]*\)\]'`
+	desc=`expr "$cc" : '[^}]*desc=\[\([^]]*\)\]'`
+	echo "  --$name	$desc"
+	cc=`expr "$cc" : '[^}]*}\(.*\)'`
+    done
+    echo
+}
+
+PrintHelp() {
+    echo "This program configures $PKG_STRING to adapt to many kinds of systems.
+
+Usage: configure [OPTION]...
+
+Configuration:
+  -h, --help		display this help and exit
+  -V, --version		display version information and exit
+
+Installation directories:
+  --prefix=PREFIX	architecture-independent files [/usr/local]
+  --exec-prefix=EPREFIX	architecture-dependent files [PREFIX]
+  --bindir=DIR		user executables [EPREFIX/bin]
+  --sbindir=DIR		system admin executables [EPREFIX/sbin]
+  --libexecdir=DIR	program executables [EPREFIX/libexec]
+  --datadir=DIR		read-only architecture-independent data [PREFIX/share]
+  --sysconfdir=DIR	read-only single-machine data [PREFIX/etc]
+  --sharedstatedir=DIR	modifiable architecture-independent data [PREFIX/com]
+  --localstatedir=DIR	modifiable single-machine data [PREFIX/var]
+  --libdir=DIR		object code libraries [EPREFIX/lib]
+  --includedir=DIR	C header files [PREFIX/include]
+  --oldincludedir=DIR	C header files for non-gcc [/usr/include]
+  --gccincludedir=DIR	GCC internal header files [PREFIX/include]
+  --infodir=DIR		info documentation [PREFIX/info]
+  --mandir=DIR		man documentation [PREFIX/man]
+
+System types:
+  --build=BUILD		configure for building on BUILD [guessed]
+  --host=HOST		cross-compile to build programs to run on HOST [BUILD]
+"
+    PrintComponents
+    echo "Report bugs to $PKG_BUGREPORT."
+}
+
+PrintVersion() {
+    echo "$PKG_NAME configure $PKG_VERSTR"
+}
+
+SubVar() {
+    local esc2
+    esc2=`echo $2 | sed 's/\//\\\&/g'`
+    eval ac_var_$1='$esc2';
+    echo "s/@$1@/$esc2/g" >>config.sed
+}
+
+SubComp() {
+    local cc name seds
+    cc=$COMPONENTS
+    while [ ! -z "$cc" ]; do
+	name=`expr "$cc" : '[^}]*name=\[\([^]]*\)\]'`
+	seds=`expr "$cc" : '[^}]*seds=\[\([^]]*\)\]'`
+	[ "$name" = "$1" ] && echo $seds >>config.sed
+	cc=`expr "$cc" : '[^}]*}\(.*\)'`
+    done
+}
+
+for i in $*; do
+    case $i in
+	--)		break;;
+	--version |-V)	PrintVersion && die;;
+	--help |-h |-?)	PrintHelp && die;;
+	--*=*)		SubVar `expr "$i" : '--\([^=]*\)='` `expr "$i" : '[^=]*=\(.*\)'`;;
+	--*)		SubComp `expr "$i" : '--\(.*\)'`;;
+	*)		echo "Error: unrecognized option \"$i\"" && die;;
+    esac
+done
+
+#### Set directory prefixes ##########################################
+
+echo "s/@prefix@/${ac_var_prefix:=\/usr\/local}/g
+s/@exec_prefix@/${ac_var_exec_prefix:=$ac_var_prefix}/g
+s/@bindir@/$ac_var_exec_prefix\/bin/g
+s/@sbindir@/$ac_var_exec_prefix\/sbin/g
+s/@libexecdir@/$ac_var_exec_prefix\/libexec/g
+s/@datarootdir@/${ac_var_datarootdir:=$ac_var_prefix\/share}/g
+s/@datadir@/$ac_var_datarootdir/g
+s/@sysconfdir@/$ac_var_prefix\/etc/g
+s/@sharedstatedir@/$ac_var_prefix\/com/g
+s/@localstatedir@/$ac_var_prefix\/var/g
+s/@includedir@/${ac_var_includedir:=$ac_var_prefix\/include}/g
+s/@oldincludedir@/${ac_var_oldincludedir:=\/usr\/include}/g
+s/@docdir@/${ac_var_docdir:=$ac_var_datarootdir\/doc\/$PKG_NAME}/g
+s/@infodir@/$ac_var_datarootdir\/info/g
+s/@htmldir@/$ac_var_docdir/g
+s/@dvidir@/$ac_var_docdir/g
+s/@pdfdir@/$ac_var_docdir/g
+s/@psdir@/$ac_var_docdir/g
+s/@libdir@/${ac_var_libdir:=$ac_var_exec_prefix\/lib}/g
+s/@localedir@/$ac_var_datarootdir\/locale/g
+s/@mandir@/$ac_var_datarootdir\/man/g
+s/@gccincludedir@/${ac_var_gccincludedir:=`echo $PINCDIR | sed 's/\//\\\&/g'`}/g
+s/@gcclibdir@/${ac_var_gcclibdir:=`echo $PLIBDIR | sed 's/\//\\\&/g'`}/g
+s/@customincdir@/${ac_var_customincdir:=$ac_var_prefix\/include}/g
+s/@customlibdir@/${ac_var_customlibdir:=$ac_var_prefix\/lib}/g" >>config.sed
+
+if [ "$ac_var_prefix" != "\/usr\/local" -a "$ac_var_prefix" != "\/usr" ]; then
+    echo "s/ \?@CUSTOMINCDIR@/ -I$ac_var_customincdir/g
+s/ \?@CUSTOMLIBDIR@/ -L$ac_var_customlibdir/g" >>config.sed
+else
+    echo "s/ \?@CUSTOMINCDIR@//g
+s/ \?@CUSTOMLIBDIR@//g" >>config.sed
+fi
+
+#### Find headers, libs, programs, and subs ##########################
+
+SubHeadLibsProgs() {
+local INCPATH LIBPATH LIBSUFFIX found pname pcall esciv
+INCPATH="$ac_var_oldincludedir $ac_var_includedir $ac_var_gccincludedir $ac_var_customincdir"
+INCPATH=`echo $INCPATH | sed 's/\\\\//g'`
+for i in $HEADERS; do
+    for p in $INCPATH; do
+	if [ -r "$p/$i" ]; then
+	    echo 's/#undef \(HAVE_'`echo $i|tr a-z/.- A-Z___`'\)/#define \1 1/' >>config.sed
+	    break
+	fi
+    done
+done
+
+LIBPATH="`echo $LD_LIBRARY_PATH | tr ':' ' '` $ac_var_libdir $ac_var_gcclibdir $ac_var_customlibdir /usr/lib /usr/local/lib /lib"
+LIBPATH=`echo $LIBPATH | sed 's/\\\\//g'`
+LIBSUFFIX="so a la dylib"
+for i in $LIBS; do
+    found=
+    for p in $LIBPATH; do
+	for s in $LIBSUFFIX; do
+	    if [ -r "$p/lib$i.$s" ]; then
+		found=" -l$i"
+		break
+	    fi
+	done
+	[ -z "$found" ] || break
+    done
+    echo "s/ \?@lib$i@/$found/g" >>config.sed
+done
+
+for i in $PROGS; do
+    pname=`expr "$i" : '\([^=]*\)=[^=]*'`
+    pcall=`expr "$i" : '[^=]*=\([^=]*\)'`
+    esciv="`eval echo \$\{$pname\}|sed 's/\//\\\\\//g'`"
+    # First check if an environment variable is set
+    [ ! -z "$esciv" ] && echo "s/@$pname@/$esciv/g" >>config.sed
+    # Check if the program exists
+    [ -x `which $pcall 2>/dev/null` ] && echo "s/@$pname@/$pcall/g" >>config.sed
+done
+# If nothing found in first loop, set the first pair anyway.
+for i in $PROGS; do
+    pname=`expr "$i" : '\([^=]*\)=[^=]*'`
+    pcall=`expr "$i" : '[^=]*=\([^=]*\)'`
+    echo "s/@$pname@/$pcall/g" >>config.sed
+done
+# And, finally, the environment variables
+for i in $ENVIRONS; do
+    esciv="`eval echo '"'\$\{$i\}'"'|sed 's/\//\\\&/g'`"
+    [ ! -z "$esciv" ] && esciv=" $esciv"
+    echo "s/ \?@$i@/$esciv/g" >>config.sed
+done
+echo "$CUSTSUBS" >>config.sed
+}
+SubHeadLibsProgs
+
+#### Apply substitutions to all files ################################
+
+for i in $FILES; do
+    sed -f config.sed $i.in > $i
+done
+
+touch config.status
+echo "#! /bin/sh
+$0 $*
+`tail -n+3 config.status`" > config.status.new
+chmod u+x config.status.new
+mv config.status.new config.status
+
+die

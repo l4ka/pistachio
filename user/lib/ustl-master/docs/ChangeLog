@@ -1,0 +1,393 @@
+2013-02-14 Release 2.0
+	* Some C++11 features implemented. All containers now have move
+	    operations, emplace, and initializer lists. noexcept and
+	    constexpr added where appropriate.
+	* Conform string API to standard
+	    All standard member functions are now present
+	    API change: insert(s,c,n) to insert(s,n,c)
+	* Compilation with clang is now supported. clang 3.2 required.
+	* Change margin allocation strategy to pow2 growth from +64
+	* reserve will now use margin allocation by default, resize is still exact
+	* Detect sys/mman.h and make it optional
+	* Do not close stdin,stdout,stderr on exit
+	* Do not use %m to format errors
+	* Enable copy-on-write in memblock erase
+	* Replace header guards with pragma once
+	* Stop stripping zeroes when assigning specified-length strings
+
+2012-02-18 Release 1.6
+	* Fixed compilation with c++0x
+	    alignof is a keyword in c++0x, so the stream version usually not needed now.
+	    On the other hand, alignof can not be overloaded, so stream_align_of is the
+	    new name for the old alignof. Most code should not require changes due to this.
+	* Fix iat in string, which did not handle npos argument correctly, sometimes
+	    resulting in failures of other functions using it, like substr.
+
+2011-03-16 Release 1.5
+	* Updated set, map, and multimap with full set of insert, erase, and search overloads
+	* Added public lower_bound, upper_bound, and equal_range to map, as per standard
+	* Added comparator parameter to set, multiset, map, and multimap.
+	* Implemented FirstBit, Rol, Ror, and a generic NextPow2
+	* Remove memlink copy because it conflicts with string copy
+	* Operators returning a new value should be const
+	* Added char* + string operator, and a noarg erase
+	* Added --force-inline configure option
+	* Removed all references to stdc++ headers when not using libstdc++
+	* Fixed minor glitches compiling with clang++
+	* Other small fixes
+
+2010-03-21 Release 1.4
+	* Fixed crash in destructor of empty vector, introduced by 1.3
+	* Fixed list merge, which previously did not compile
+	* Some portability changes to configure so it will work with dash
+	    when escape char processing bug is fixed (Ubuntu bug #268929)
+
+2009-08-04 Release 1.3
+	* Some API changes to comply with the current C++ standard
+	    binary_search algo returns true, not the found iterator
+	    stack and queue are now type templates, not container adaptors.
+	    Correctly set eof and fail flags in all stream functions
+		This allows the use of the non-exception path in streams
+		verify_remaining will no longer throw unless exceptions are on in the stream
+		verify_remaining will return false if space is insufficient and set flags
+		exceptions are on by default in istream and ostream and off elsewhere
+	    Updated return values of stream functions to match the standard
+	    what() on message exceptions returns the text passed to the ctor
+	    set insert also returns an iterator/bool pair
+	    map insert now returns an iterator,bool pair
+	* streamsize and streamoff types defined
+	* Added string resize with a value arg
+	* Added standalone getline
+	* Added numeric_limits digits and digits10
+	* Name demangling is now an option, off by default, removing ~20k
+	* A new and improved nonrecursive make system
+	* Numerous small size and speed optimizations
+	* A few minor bugfixes
+
+2008-02-17 Release 1.2
+	* Fixed ifstream readsome to work correctly on nonblocking fds.
+	* Yet another try at fixing noalias rearrangments.
+		Added a memory clobber and +g to noalias templates.
+	* Added dtors template which will embody range destructors for
+		destroy and vector dtor instead of vector deallocate. It is
+		called by destroy through a selector template, turning it off
+		completely for integral types. This removes empty deallocate
+		instantiations for integral type vectors.
+	* Fixed bitset stream_size (bits-words confusion)
+	* Added workaround for compile error when printing a char array.
+	* Added static_assert from Loki.
+
+2007-09-02 Release 1.1
+	* Due to the demise of SourceForge compile farm, this and subsequent
+		releases are not as well tested the previous ones. So please
+		report compilation problems, if any, on non-x86_64 platforms.
+	* Fixed various aliasing problems complained about by gcc 4.2.
+	* Added noalias_cast<type>(v) to aid in working around the above
+		aliasing problem. The aliased variables also must be
+		explicitly touched by an empty asm statement or something.
+	* Reimplemented stream_size_of as a template stack because the old
+		implmentation is invalid in gcc 4.2+ due to a change in
+		overloaded set lookup scope. vector and tuple now have the
+		standard read/write/stream_size members.
+	* Reimplemented flow operators as templates.
+	* STD_STREAMABLE and TEXT_STREAMABLE are no longer necessary.
+	* Merged some template metaprogramming stuff from Alexandrescu's Loki
+		library, including typelists and type traits.
+	* Implemented generic macro list macros. See metamac.h.
+	* Fixed some bsconf warnings.
+	* memblock is_linked now correctly returns true when linked to NULL.
+	* Added back() to string.
+	* Fixed a memory leak in CBacktrace GetSymbols.
+	* Changed written exception data to look like an IFF chunk.
+	* Removed "memory" from some simd spec clobber lists.
+	* Reduced the amount of code generated by vector stream templates.
+	* talign will no longer generate a temp object when called with
+		non-trivial classes. Uses NullValue template to avoid.
+	* Linking with gcc instead of using -nodefaultlibs is simpler.
+	* Removed link number overloads. Sadly, I don't know what this will
+		break, if anything. On my machine the only case is link(p,0),
+		which generates an ambiguity error and is easily fixed by
+		explicitly casting the zero to a size_t. The benefit is
+		cleaner code and fewer problems for the Symbian port, so the
+		change stays until/unless somebody reports it as a problem.
+	* Added long4grain and ptr4grain wrappers to explicitly write long
+		values on 4-grain, even on 64bit platforms.
+
+2006-10-27 Release 1.0 SVN 428
+	* API CHANGE: ostringstream now works like std::ostringstream, with
+		an internal buffer instead of writing to an external one
+		through a link. Instead of passing the buffer to the ctor,
+		write directly to a default-constructed stream object and
+		assign buf = os.str() when finished.
+	* Format change: containers will now write their size as a uint32_t
+		instead of size_t to allow binary compatibility with 64 bit
+		architectures. On 32 bit machines this makes no difference.
+	* Renamed fdostringstream to ofstream.
+	* Renamed fdistringstream to ifstream.
+	* Renamed iterator_swap to iter_swap, as in the standard.
+	* file.h/cc was removed; fstream replaces its functionality.
+	* Added most remaining i/ostringstream functions that make sense in
+		this implementation: str, put, get, getline, ignore, peek,
+		readsome, putback, unget, tellg, seekg, sync, flush, seekp,
+		tellp, good. The rest will probably not be implemented at
+		all, since they reference streambufs which don't exist in uSTL.
+	* Implemented fstream and used it in ifstream/ofstream.
+	* Added remaining algorithms: find_end, find_first_of, includes,
+		is_sorted, lexicographical_compare, max_element, min_element,
+		partial_sort, partial_sort_copy, partition, next_permutation,
+		prev_permutation, reverse_copy, rotate_copy, search, search_n,
+		set_difference, set_intersection, set_symmetric_difference,
+		set_union, and stable_partition. All the algorithms defined by
+		the C++ standard are now implemented.
+	* Made ios_base and ios classes instead of namespaces and derived
+		all stream objects from ios_base. Pulled up state and all
+		related functions into it. The only problem with this is that
+		end() conflicts with seekdir end, so you'll need to use
+		ios scope when you want the latter.
+	* Align container ends on 4 grain.
+		While this is not very friendly to 64bit architectures, it is
+		the only way to allow writing containers portably. It is
+		better to always align to an arbitrary value than to align to
+		a platform-dependent one.
+	* Removed non-const data pointer from memlink.
+		While enforcing const-correctness is a good thing, the errors
+		this catches are relatively rare and are all programmer errors.
+		I must concede that the benefits of having memblocks, strings,
+		and containers be 16 bytes in size is a great advantage in both
+		speed and codesize. As a result, one needs to be more mindful
+		to not modify memlink-derived objects that are linked to const
+		data; before this change it would have caused a crash, now it
+		might or might not do that, as with regular pointers.
+	* Added CBacktrace class for printing backtrace information.
+	* x86_64 cleanup and improvements, including MMX support.
+	* Micro-optimization pass for size. Saved 24% (32k)!
+	* exception now creates a backtrace when thrown.
+	* Do cout.flush() before read in cin, like std does.
+	* max_size() on linked objects should return size(), because it is.
+	* >=, <=, and compare templates no longer require == (>= is !<)
+	* Pulled rotate code into rotate_fast for memory blocks.
+	* stream_bounds_exception demangles type names.
+	* set,map,multiset,multimap now instantiate less crud.
+	* Abandoned any attempt to use the goddamned byteswap.h.
+	* Implemented bitset any, none, and count.
+	* New popcount algorithms.
+	* Implemented compose1 and compose2 extensions.
+	* Support building as a .dylib on MacOS.
+	* Removed --without-cout configure option.
+
+2005-11-10 Release 0.8
+	* API CHANGE: changed all string's find members to return offsets
+		instead of iterators. That's what the STL standard requires.
+		Also added standard-required replace/inserts with offset
+		arguments. Yes, this is a bit painful. I was using it a lot...
+		But it's all for the better. I promise!
+	* Removed char_at and ichar from string; use utf8_begin/end instead.
+	* Iterator-based string insert now return an iterator, like vector.
+	* Added more wchar_t overloads to string, include append and assign.
+	* Updated bsconf to use malloc instead of static buffers.
+	* construct/destruct will now disappear for integral types.
+		Integral types have no destructors/constructors.
+	* Fixed istream_iterator to read on construction and in operator++
+		as the standard says. Unfortunately, this makes it almost
+		totally useless, since using it as a source for copy will
+		always overread by one because copy will call ++ past the
+		end, which will read one element past the end. This behaviour
+		is understandable when reading to EOF (which is the only
+		example ever shown for using it), but worthless when you
+		have a fixed number of elements you want to read. I'm only
+		using it to implement utf8 from streams, so, having fixed
+		that to not overread, I'll chalk it up to standard
+		compliance.
+	* Made istream_iterator default constructible and implemented the
+		EOF check during reading. This should make read-to-EOF
+		scenario possible.
+	* Made streams runtime bounds checking on by default.
+	* Added operator-- to istream_iterator to do unputs.
+		This works only once for variable-length types because there
+		is no way to know the length to back up to get the element
+		before the currently cached one. Constant-length types can
+		be unput multiple times, and can use -= and - operators.
+	* fdistringstream underflow will no longer erase the entire buffer.
+		This helps to keep ungetc working most of the time.
+	* Similarly fixed utf8in_iterator to read on construction.
+		This fixed the double-advance bug in utf8in_iterator.
+	* Fixed utf8in_iterator to not read ahead (except in constructor)
+		before operator++ is called. This ensures that it does not
+		read past the end of the string if it isn't 0-terminated.
+		(Although it will still do so if you call ++)
+	* Field width should be padded with spaces, not zeroes.
+	* Implemented some heap algorithms.
+	* Added VectorRange macro.
+	* Added relink() call to memlinks for faster resizing.
+		relink does the work of link, but without calling unlink.
+	* Added to string substr and like functions.
+	* Moved simd fill into ualgobase.cc
+	* configure now recompiles bsconf if its sources change.
+	* Fixed a rare off-by-one error in ostringstream vprintf.
+	* Removed fdostringstream printf, since ostringstream has it already.
+	* Fixed bsconf crash when all inline options are enabled.
+	* Fixed crash when NULL filename given to file_exception.
+	* Corrected potential buffer overflow in file_exception and sistream.
+	* Fixed string rfind for strings; was returning a wrong value sometimes.
+	* Added copy_link call to memblock to make a copy of linked data.
+	* Added assert to memlink begin() to warn when writing to a const block.
+	* Makefile now correctly uses ${MAKE} to recurse.
+	* Removed all usage of "y" in SIMD asm blocks; gcc<4-> movd, not movq.
+		This fixes problems with MMX fround on some platforms.
+	* Removed SSE3 detection from bsconf; it just doesn't work!
+	* Added BYTE_ORDER detection in bsconf.
+	* Made BYTE_ORDER and bswap always defined.
+
+2005-06-28 Release 0.7-1
+	* Now compiles with gcc 4.0.0
+	* Standard exception constructors now take const char* instead
+		of string&; this generates much less code.
+	* Fixed reversed conditional ostringstream.format
+		This was causing a seek exception sometimes.
+	* Added ostringstream.vformat
+	* Added FPU registers to reset_mmx modlist; apparently gcc doesn't
+		know that they are shared with MMX registers.
+	* Moved simd copy into ualgobase.cc; they are not inlined anyway.
+	* Added workaround for BSD which has no __va_copy.
+		I wonder why nobody reported this as a bug. Is anyone running
+		BSD out there? Anyone? Anyone at all? Is the damn thing dead?
+	* So it now compiles on BSD again... Whoohoo...
+
+2005-04-16 Release 0.7
+	* Removed vector inheritance from memblock.
+		There are just too many problems with treating a vector
+		this way. You can still do it explicitly by linking a
+		memblock to the vector. Removing the inheritance causes
+		vector to be non-virtual, which drastically reduces
+		instantiation cost.
+	* Removed elementSize, elementBytes member functions from cmemlink.
+		Only vector inheritance needed elementSize.
+	* Restricted vector link calls to T* instead of void*.
+		This way there would be explicit casts to warn of weirdness.
+	* Optimized vector push_back
+	* ostream will now zero bytes skipped by align.
+	* memblock will no longer zero newly allocated storage.
+	* Inlined empty constructors on map,multimap,set,multiset.
+	* NUMERIC_LIMITS macros to facilitate specialization.
+	* Fixed string vformat problem crashing on x86_64
+		Because vsnprintf is called twice, need to copy arglist.
+	* Added an rm before ln in install to avoid "already exists" errors.
+		SunOS still doesn't know about the -f flag...
+	* Split the distribution into ustl and ustl-docs
+	* New SIZE_OF_BOOL system substitution in bsconf
+		Only Alpha and Mac have bool as a long, so a define is better.
+	* Fixed configure being confused with multiple gcc versions.
+	* Reduced Align code for nonstandard values.
+	* Pulled up vector/tuple stream operators into generic container
+		templates in uctrstm.h and made use of resulting macros.
+	* New TEMPLATE_TYPE macros to allow template building with macros.
+	* Fixed SSE3 detection in bsconf; thanks to Aloysius Indrayanto.
+	* Fixed get_temporary_buffer to return size in elements, not in bytes.
+		This is the proper behaviour as specified in the C++ standard.
+	* Now using libc qsort in the sort algorithm.
+		This may give you trouble if you are using a custom comparator
+		that requires initialization outside the constructor. You can
+		write a wrapper class that does the initialization in the
+		constructor. Or, you can use stable_sort.
+		I'm doing this to both speed up the common case and to reuse
+		the functionality already linked to in libc. If you really
+		need to have a sort with a parametrized comparator and don't
+		want to change your code, file a bug report and I'll change
+		it back. I just don't think anyone is using this type of
+		construction.
+	* Finished heap algorithms.
+	* Added priority_queue.
+	* Added deque as a define to list.
+	* Added noalias template to circumvent the type-punned pointer
+		dereference warning given by gcc 4.1.0+
+
+2005-01-17 Release 0.6
+	* The library is relicensed under the MIT License (was LGPL)
+	* Dropped support for locale due to its great complexity and ugliness.
+		You can include <locale> from libstdc++ if you still want it.
+	* ostringstream now uses snprintf for all integer types, so the output
+		will be localized according to libc locale settings. As a side
+		effect of this, you will not be able to print negative hex
+		numbers any more (as in -6AD4), not that it was a good idea...
+	* tuple will no longer align at the end:
+		This affects you if you write tuples with small elements
+		off default grain. For example, writing tuple<2,int16>
+		on grain 2 would have aligned prior to this change, causing
+		sub-optimal packing if you wrote an array of such tuples,
+		since each one only needs grain 2 alignment.
+	* Fixed incorrect use of __alignof__ in pair stream operators.
+	* Added size_t ul-or-ui detection code to bsconf and fixed the
+		size_t/pointer overload in uutility to use it.
+	* Added erase(iterator,const_iterator) overload for string
+	* Added alloca_link macro.
+	* cmemlink will now throw bad_alloc if linking to !p && n.
+	* multiset and multimap will insert equal elements in order.
+		I wasn't able to find any guidance concerning the order of
+		equal elements; it appears to be unspecified. Prior to this
+		change equal elements were inserted in reverse order, which
+		is bad idea because it causes a larger copy to make space.
+		(Note that multimap only compares the key, since the mapped
+		value is not required to have an operator<. If you want them
+		sorted, you can use sort() on it.)
+	* Fixed remove_copy algorithms to not require value operator !=.
+	* bool will now be written as a byte regardless of the type size.
+	* sistream now handles 64bit types correctly.
+
+2004-11-11 Release 0.5
+	* configure will now properly enable mmx compiler flags.
+	* configure has a --with-profile option.
+	* Fixed a bug in ostringstream format inserting extra '\0'
+	* Fixed a bug in string find which sometimes did not match at the
+		beginning of the text.
+	* ostringstream will now use faster paged allocation.
+	* New alignof specializations for cmemlink(size_t) and string(1)
+	* Fixed tuple's value constructors to zero unspecified values.
+	* Added parentheses around ctr argument in foreach for computed vars.
+	* General simd interface for tuple optimization.
+	* Proper link interface in vector, that takes element count.
+	* set_terminate and set_unxpected prototypes are now available.
+	* LOOKUP_TEXT_STREAMABLE macro for printing through name arrays.
+	* Fixed iterator_swap to take iterators by value (reference& swap bad)
+	* Container random_shuffle.
+	* vformat method for string to allow implementation of custom printfs.
+	* TestAndSet inline utility function with the cmpxchg instruction.
+	* Fixed tuple stream_size_of to add up the elements if nonintegral.
+	* Added is_integral member to numeric_limits for specialization aid.
+	* Changed limits is_signed from a function to a bool like SGI does it.
+
+2004-07-28 Release 0.4-3
+	* A ChangeLog! After all these years...
+	* SIMD instruction support for fill and copy
+	* matrix template (on top of tuple)
+		3dNow! instructions are supported for vector transforms.
+	* New utility templates
+	    absv		- absolute value.
+	    sign		- -1 for negative, 0 for 0, 1 for positive
+	    abs_distance	- returns an absolute value of the difference.
+	    distance		- now returns ptrdiff_t, as in SGI STL.
+	    size_of_elements	- useful for working with static arrays in
+				  templates; returns sizeof(T) * n.
+	    pack_type		- useful for unrolling loops, packs a small
+				  type into a big one.
+	    alignof		- recommended alignment for a type (uses GCC
+				  __alignof__ extension, if available)
+	    eachfor		- same as foreach, but for reverse_iterator
+	* get_temporary_buffer implemented using alloca and macros
+	* Updated rotate to use alloca for small moves.
+		This should speed up vector operations, like insert and erase.
+	* Fixed copy_backward to actually copy backward rather than reverse.
+	* Made resize virtual in memblock to properly handle strings.
+	* sostream/sistream will handle wchar_t properly (as utf8 read/write)
+	* ustring.cc: fixed multiple wchar_t insert
+	* ustring.cc: changed allocation strategy to simply reserve the space
+		for the null terminator instead of tweaking size() all the
+		time. It's cleaner and saner this way.
+	* benchmarking tool in bvt	
+	* More functions implemented in bitset.
+	* Added --with-static and --without-shared flags to configure.
+
+2004-05-22 Release 0.4-2
+	* ostringstreams will now correctly resize the buffer as needed.
+	* Fixed floating point output
+		(well, not really, just switched to using snprintf)
+

@@ -1,0 +1,10 @@
+memblock{26}: abcdefghijklmnopqrstuvwxyz
+memblock{26}: abcdefghijklmnopqrstuvwxyz
+memblock{26}: abcdefghijklmnopqrstuvwxyz
+memblock{35}: abcde---------fghijklmnopqrstuvwxyz
+memblock{28}: ab-----fghijklmnopqrs=======
+memblock{28}: ab---TESTTESTTESTpqrs=======
+memblock{50}: ab---TESTTESTTESTpqrs=====-+=-+=-+=-+=-+=-+=-+=-+=
+memblock{0}: 
+memblock{39}: ab---TESTTESTTESTpqrs=====-+=-+=-+=-+=-
+Capacity 64, shrunk 39

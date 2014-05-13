@@ -1,0 +1,13 @@
+Correct number of bytes written
+Values:
+char:    0x12
+u_char:  0x12
+bool:    1
+int:     0x12345678
+u_int:   0x12345678
+long:    0x12345678
+u_long:  0x12345678
+float:   0.12345678
+double:  0.1234567891234568
+short:   0x1234
+u_short: 0x1234

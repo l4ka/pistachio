@@ -1,0 +1,28 @@
+h1			{ text-align: center; }
+a.elRef, a.el, caption	{ font-weight: bold }
+a.code, a.el		{ text-decoration: none }
+a.code, a.codeRef	{ color: #4444ee }
+dl.el			{ margin-left: -1cm }
+div.fragment		{ width: 100%; border: none; background-color: #eeeeee }
+div.ah			{ background-color: black; font-weight: bold; color: #ffffff; margin-bottom: 3px; margin-top: 3px }
+div.groupHeader		{ margin-left: 16px; margin-top: 12px; margin-bottom: 6px; font-weight: bold }
+div.groupText		{ margin-left: 16px; font-style: italic; font-size: smaller }
+td.md, td.mdname1, td.mdname, td.indexkey	{ font-weight: bold }
+td.indexvalue		{ font-style: italic }
+td.indexkey, td.indexvalue {
+   padding-right  : 10px;
+   padding-top    : 2px;
+   padding-left   : 10px;
+   padding-bottom : 2px;
+   margin-left    : 0px;
+   margin-right   : 0px;
+   margin-top     : 2px;
+   margin-bottom  : 2px
+}
+span.keyword		{ color: #008000 }
+span.keywordtype	{ color: #604020 }
+span.keywordflow	{ color: #e08000 }
+span.comment		{ color: #800000 }
+span.preprocessor	{ color: #806020 }
+span.stringliteral	{ color: #002080 }
+span.charliteral	{ color: #008080 }

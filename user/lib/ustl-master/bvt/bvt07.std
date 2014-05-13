@@ -1,0 +1,32 @@
+123456789012345678901234567890
+abcdefghijklmnopqrstuvwxyz
+123456789012345678901234567890
+12345678901234567890
+s3.size() = 20, max_size() = (SIZE_MAX/elsize)-1, capacity() = 63
+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$
+HelloWorld
+Concatenated HelloWorld string.
+s1 < s2
+s1 == s1
+s1 == s4
+56789 == 56789
+&s1[7] = 89012345678901234567890
+initial:		123456789012345678901234567890
+erase(5,find(9)-5)	123459012345678901234567890
+erase(5,5)		1234545678901234567890
+push_back('x')		1234545678901234567890x
+pop_back()
+insert(10,#)		1234545678#901234567890
+replace(0,5,@)		@45678#901234567890
+8 found at 7
+9 found at 8
+7 rfound at 26
+7 rfound again at 16
+67 rfound at 25
+X was not rfound
+[456] found at 3
+[456] last found at 25
+s2 is empty [], capacity 5 bytes
+<31 bytes of 31> Format '<const] 42, [rfile>, 0xDEADBEEF'
+Custom vararg MyFormat: '<const] 42, [rfile>, 0xDEADBEEF'
+hash_value(s2) = 95A714F3, string::hash(s2) = 95A714F3
