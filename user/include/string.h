@@ -8,6 +8,11 @@
 
 // BAD IDEA #include <lib/io/lib.h>
 
+//Should be exposed in stddef, says http://stackoverflow.com/questions/924664/why-is-null-undeclared
+#ifndef NULL
+	#define NULL ((void *)0)
+#endif
+
 #include "stdarg.h"
 
 #ifdef __cplusplus
@@ -16,7 +21,7 @@ extern "C" {
 
 //BSD rindex(), like strrchr()
 //https://github.com/toddfries/OpenBSD-lib-patches/blob/master/libc/string/rindex.c
-rindex(const char *p, int ch);
+char * rindex(const char *p, int ch);
 
 #ifdef __cplusplus
 }

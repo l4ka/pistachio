@@ -13,8 +13,13 @@ bzero.o: openbsd/libkern/bzero.c ../../include/openbsd/libkern.h \
  ../../include/l4/ia32/specials.h
 memcmp.o: openbsd/libkern/memcmp.c ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h
-strcat.o: openbsd/string/strcat.c ../../include/string.h
-strcmp.o: openbsd/string/strcmp.c ../../include/string.h
+rindex.o: openbsd/string/rindex.c ../../include/string.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strcat.o: openbsd/string/strcat.c ../../include/string.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strcmp.o: openbsd/string/strcmp.c ../../include/string.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+swab.o: openbsd/string/swab.c ../../include/unistd.h
 liballoc.o: liballoc.c ../../include/liballoc.h
 liballoc_hooks.o: liballoc_hooks.c ../../include/liballoc.h \
  ../../include/l4/space.h ../../include/l4/types.h \
