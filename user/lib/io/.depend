@@ -23,8 +23,6 @@ swab.o: openbsd/string/swab.c ../../include/unistd.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
-localeconv.o: openbsd/locale/localeconv.c sys/localedef.h \
- ../../include/locale.h
 liballoc.o: liballoc.c ../../include/liballoc.h
 liballoc_hooks.o: liballoc_hooks.c ../../include/liballoc.h \
  ../../include/l4/space.h ../../include/l4/types.h \

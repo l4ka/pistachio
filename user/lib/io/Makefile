@@ -35,12 +35,12 @@ top_builddir=	../..
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-
+#$(wildcard openbsd/locale/*.c)
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
 LIBRARY=	io
 SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c) \
- $(wildcard openbsd/stdio/*.c)  $(wildcard openbsd/string/*.c) $(wildcard openbsd/locale/*.c) liballoc.c liballoc_hooks.c becompat.c
+ $(wildcard openbsd/stdio/*.c)  $(wildcard openbsd/string/*.c)  liballoc.c liballoc_hooks.c becompat.c
 
 include $(top_srcdir)/Mk/l4.lib.mk
 
