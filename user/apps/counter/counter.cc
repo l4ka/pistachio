@@ -32,7 +32,7 @@
  ********************************************************************/
 
 #include <liballoc.h>
-#include <cstring>
+//#include <cstring>
 
 //ATA mini driver
 #include <mindrvr.h>
