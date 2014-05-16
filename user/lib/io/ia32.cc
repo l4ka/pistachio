@@ -207,7 +207,10 @@ int __l4_getc()
 		last_key = 0;
 	    else if (last_key != scancode)
 	    {
-		printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);//was disabled
+//Why doesn't this printf() work, if the serial port's disabled?
+#ifdef 	CONFIG_COMPORT
+	printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);//was disabled
+#endif
 		last_key = scancode;
 		c = keyb_layout[scancode];
 		if (c > 0) return c;
