@@ -37,3 +37,4 @@ becompat.o: becompat.c ../../include/stdio.h ../../include/l4io.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
  ../../include/openbsd/libkern.h
+l64a.o: l64a.c ../../include/stdlib.h
