@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+//Define of size_t
+#include <liballoc.h>
+
 char * l64a(long value);
 int l64a_r(long value, char *buffer, int buflen);
 
