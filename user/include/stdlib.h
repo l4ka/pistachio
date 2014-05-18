@@ -13,6 +13,10 @@ extern "C" {
 char * l64a(long value);
 int l64a_r(long value, char *buffer, int buflen);
 
+void *
+bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
+	int (*compar)(const void *, const void *));
+
 
 #ifdef __cplusplus
 }
