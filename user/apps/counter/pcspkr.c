@@ -37,12 +37,14 @@ WITH THE SOFTWARE.
 #include <stdio.h>
 #include <lib/io/ia32.h>
 
+#include <pcspkr_shim.h>
+
 #define outportb outb
 #define inportb inb
 #define uint8_t int
 #define uint32_t unsigned long
 
-static void note(int length, int freq) {
+ void note(int length, int freq) {
 
 	uint32_t div = 11931800 / freq;
 	uint8_t  t;
@@ -65,7 +67,7 @@ static void note(int length, int freq) {
 
 }
 
-void TetrisTheme() {
+int TetrisTheme() {
 	//fprintf(tty, "beep\n");
 	printf("beep\n");
 
@@ -89,6 +91,6 @@ void TetrisTheme() {
 	note(20, 10465);
 	note(20, 10465);
 
-	//return 0;
+	return 0;
 }
 

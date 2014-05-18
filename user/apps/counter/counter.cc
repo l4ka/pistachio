@@ -41,6 +41,9 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
+//ToAru PC speaker shim, move later
+#include <pcspkr_shim.h>
+
 /* Track the environment status */
 #define ACTIVE_CMD 0
 #define CMD_RESULT 1
@@ -84,6 +87,7 @@ int ShellHelp() {
 	printf("\n\t * help, h, Help : Print this shell help notice.\n");
 	printf("\n\t * malloc_test_1 : Test the liballoc port (should return 25).\n");
 	printf("\n\t * shiritori     : Start the Shiritori game \(buggy!\).\n");
+	printf("\n\t * tettheme      : Play part of the Tetris theme. \n");
 
 	printf("\n\n");
 
@@ -217,6 +221,18 @@ printf(iEnvStatus[ACTIVE_CMD]);
 
 while(WAITING) {
 
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "tettheme") == 0) {
+	
+	iEnvStatus[CMD_RESULT] = (char*)TetrisTheme();
+
+       //Return to prompt
+        iEnvStatus[CMD_RESULT] = (char*)WAITING;
+        printf(iEnvStatus[ACTIVE_CMD]);
+
+        iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+
+
+}
 
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") == 0)
 {
