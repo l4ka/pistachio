@@ -42,8 +42,8 @@ LIBRARY=	streams
 SRCS=		except.c file_funcs.c globals.c indir_ops.c ipc_funcs.c\
          memory_funcs.c NXLogError.c streams.c streams_doprnt.c\
          streams_doscan.c streams_internal.c
-
-#Need to move DragonFlyBSD stuff to own directory - l64a/calloc
+#http://www.opensource.apple.com/source/Libc/Libc-167/threads.subproj/cthreads.h?txt
+#http://www.opensource.apple.com/source/objc4/objc4-235/runtime/error.h?txt defines NXExceptionRaiser
 include $(top_srcdir)/Mk/l4.lib.mk
 
 test:
