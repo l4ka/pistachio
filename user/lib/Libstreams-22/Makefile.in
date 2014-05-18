@@ -29,20 +29,19 @@
 ##                
 ######################################################################
 
-srcdir=		.
-top_srcdir=	../..
-top_builddir=	../..
+srcdir=		@srcdir@
+top_srcdir=	@top_srcdir@
+top_builddir=	@top_builddir@
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-#$(wildcard openbsd/locale/*.c)
+
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
 LIBRARY=	io
-SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c) \
- $(wildcard openbsd/stdio/*.c)  $(wildcard openbsd/string/*.c)  liballoc.c liballoc_hooks.c becompat.c dragonflybsd/l64a.c dragonflybsd/calloc.c dragonflybsd/bsearch.c
+SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c) $(wildcard openbsd/stdio/*.c) liballoc.c liballoc_hooks.c becompat.c
 
-#Need to move DragonFlyBSD stuff to own directory - l64a/calloc
+
 include $(top_srcdir)/Mk/l4.lib.mk
 
 test:
