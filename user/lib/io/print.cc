@@ -652,6 +652,7 @@ while(c != 0x0d && strlen(pass) != (60 - 1)) {
         //passed a character
         pass[i] = (char)c; i++;
         printf("*");
+	//printf("\n %s\n", pass);
     }
 }
 pass[i] = '\0';
