@@ -218,7 +218,7 @@ printf(iEnvStatus[ACTIVE_CMD]);
 while(WAITING) {
 
 
-if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") || obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep\n") == 0)
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") == 0)
 {
 printf("Entered beep\n");
 	iEnvStatus[CMD_RESULT] = (char*)Beep();
