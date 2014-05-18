@@ -268,9 +268,9 @@ printf("Entered shiritori\n");
 	ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
-	printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
+
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();	
-	
+		printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
 }
 
 }

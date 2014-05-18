@@ -633,6 +633,8 @@ char *GetPolledKbdLine() {
 char data;
 
 //http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
+//http://web.cs.mun.ca/~michael/c/ascii-table.html
+
 int c;
 int i = 0;
 char pass[60] = "";
@@ -640,13 +642,13 @@ char pass[60] = "";
 printf("Enter password: ");
 while(c != 0x0d && strlen(pass) != (60 - 1)) {
     c = getc();
-    if(c == 0x0d) {
+    if(c == "\b" /* 0x08, backspace */) {
         //ensure cannot backspace past prompt
         if(i != 0) {
             //simulate backspace by replacing with space
             printf("\b \b");
             //get rid of last character
-            //pass[i-1] = 0; i--;
+            pass[i-1] = 0; i--;
         }
     } else {
         //passed a character
