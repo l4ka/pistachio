@@ -218,7 +218,7 @@ printf(iEnvStatus[ACTIVE_CMD]);
 while(WAITING) {
 
 
-if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") == 0)
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep") || obsd_strcmp(iEnvStatus[ACTIVE_CMD], "beep\n") == 0)
 {
 printf("Entered beep\n");
 	iEnvStatus[CMD_RESULT] = (char*)Beep();
@@ -268,9 +268,9 @@ printf("Entered shiritori\n");
 	ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
-	printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
+
 	iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();	
-	
+		printf("Entered: %s", iEnvStatus[ACTIVE_CMD]);
 }
 
 }
