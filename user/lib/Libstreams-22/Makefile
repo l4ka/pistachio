@@ -38,9 +38,10 @@ include $(top_srcdir)/Mk/l4.base.mk
 #$(wildcard openbsd/locale/*.c)
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
-LIBRARY=	io
-SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) $(wildcard openbsd/libkern/*.c) \
- $(wildcard openbsd/stdio/*.c)  $(wildcard openbsd/string/*.c)  liballoc.c liballoc_hooks.c becompat.c dragonflybsd/l64a.c dragonflybsd/calloc.c dragonflybsd/bsearch.c
+LIBRARY=	streams
+SRCS=		except.c file_funcs.c globals.c indir_ops.c ipc_funcs.c\
+         memory_funcs.c NXLogError.c streams.c streams_doprnt.c\
+         streams_doscan.c streams_internal.c
 
 #Need to move DragonFlyBSD stuff to own directory - l64a/calloc
 include $(top_srcdir)/Mk/l4.lib.mk
