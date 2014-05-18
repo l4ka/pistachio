@@ -633,48 +633,25 @@ char *GetPolledKbdLine() {
 char data;
 
 //http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
-//http://web.cs.mun.ca/~michael/c/ascii-table.html
-
 int c;
 int i = 0;
-char pass[50] = "";
+char pass[60] = "";
 
-<<<<<<< HEAD
-//printf("Enter password: ");
-while(c != 0x0d && strlen(pass) != (60 - 1)) {
-=======
 printf("Enter password: ");
-while(c != 0x0d && strlen(pass) != (50 - 1)) {
->>>>>>> parent of 30ac71d... Increase the size of the keyboard input buffer
+while(c != 0x0d && strlen(pass) != (60 - 1)) {
     c = getc();
-<<<<<<< HEAD
-<<<<<<< HEAD
-    if(c == 0x08 /* 0x08, \b, backspace */) {
-=======
-    if(c == "\b" /* 0x08, backspace */) {
->>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
-=======
-    if(c == "\b" /* 0x08, backspace */) {
->>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
+    if(c == 0x0d) {
         //ensure cannot backspace past prompt
         if(i != 0) {
             //simulate backspace by replacing with space
             printf("\b \b");
             //get rid of last character
-            pass[i-1] = 0; i--;
+            //pass[i-1] = 0; i--;
         }
     } else {
         //passed a character
         pass[i] = (char)c; i++;
-<<<<<<< HEAD
-
-=======
         printf("*");
-<<<<<<< HEAD
->>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
-=======
->>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
-	//printf("\n %s\n", pass);
     }
 }
 pass[i] = '\0';
