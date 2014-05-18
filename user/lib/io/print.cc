@@ -635,10 +635,10 @@ char data;
 //http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
 int c;
 int i = 0;
-char pass[50] = "";
+char pass[60] = "";
 
 printf("Enter password: ");
-while(c != 0x0d && strlen(pass) != (50 - 1)) {
+while(c != 0x0d && strlen(pass) != (60 - 1)) {
     c = getc();
     if(c == 0x0d) {
         //ensure cannot backspace past prompt
