@@ -117,6 +117,8 @@ int MallocTestOne() {
 }
 
 void InitHwDev() {
+
+TetrisTheme();
 	printf("[root-task] : Found %d PATA devices", reg_config());
 /* static int exec_pio_data_in_cmd(
  unsigned char dev,
