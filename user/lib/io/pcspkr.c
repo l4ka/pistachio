@@ -44,6 +44,10 @@ WITH THE SOFTWARE.
 #define uint8_t int
 #define uint32_t unsigned long
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
  void note(int length, int freq) {
 
 	uint32_t div = 11931800 / freq;
@@ -93,4 +97,7 @@ int TetrisTheme() {
 
 	return 0;
 }
+#ifdef __cplusplus
+}
+#endif
 
