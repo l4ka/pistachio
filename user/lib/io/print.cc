@@ -648,7 +648,11 @@ while(c != 0x0d && strlen(pass) != (50 - 1)) {
 >>>>>>> parent of 30ac71d... Increase the size of the keyboard input buffer
     c = getc();
 <<<<<<< HEAD
+<<<<<<< HEAD
     if(c == 0x08 /* 0x08, \b, backspace */) {
+=======
+    if(c == "\b" /* 0x08, backspace */) {
+>>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
 =======
     if(c == "\b" /* 0x08, backspace */) {
 >>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
@@ -666,6 +670,9 @@ while(c != 0x0d && strlen(pass) != (50 - 1)) {
 
 =======
         printf("*");
+<<<<<<< HEAD
+>>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
+=======
 >>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
 	//printf("\n %s\n", pass);
     }

@@ -4321,6 +4321,7 @@ config.status:823: creating Makefile
 config.status:823: creating config.h
 config.status:998: config.h is unchanged
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -4456,5 +4457,7 @@ config.status:823: creating config.h
 config.status:998: config.h is unchanged
 =======
 >>>>>>> parent of 30ac71d... Increase the size of the keyboard input buffer
+=======
+>>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
 =======
 >>>>>>> ba2613df2454634a3c927a5a25052a8e94eed635
