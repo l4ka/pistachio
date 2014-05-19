@@ -91,6 +91,8 @@ int ShellHelp() {
 
 	printf("\n\n");
 
+printf("다른 여자 만나니까 좋더라");
+
 
 return FINISHED;	
 }
