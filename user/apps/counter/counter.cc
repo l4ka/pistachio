@@ -93,7 +93,7 @@ int ShellHelp() {
 
 printf("\n다른 여자 만나니까 좋더라\n");
 
-printf("Raw system clock time: %D\n\n",L4_SystemClock().raw);
+printf("Raw system clock time: %d\n\n",L4_SystemClock().raw);
 
 
 return FINISHED;	
