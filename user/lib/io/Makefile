@@ -39,7 +39,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
 LIBRARY=	io
-SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) getpagesize.c pcspkr.c $(wildcard openbsd/libkern/*.c) \
+SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS) sqlite3.c getpagesize.c pcspkr.c $(wildcard openbsd/libkern/*.c) \
  $(wildcard openbsd/stdio/*.c)  $(wildcard openbsd/string/*.c) sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c dragonflybsd/l64a.c dragonflybsd/calloc.c dragonflybsd/bsearch.c
 
 #Need to move DragonFlyBSD stuff to own directory - l64a/calloc
