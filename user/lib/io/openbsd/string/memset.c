@@ -32,7 +32,7 @@
  */
 
 #include <sys/types.h>
-#include "stand.h"
+//#include "stand.h"
 
 void *
 memset(void *s1, int c, size_t n)
