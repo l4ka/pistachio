@@ -33,7 +33,8 @@
 /*static char *sccsid = "from: @(#)strlen.c	5.5 (Berkeley) 1/26/91";*/
 #endif /* LIBC_SCCS and not lint */
 
-//#include "stand.h"
+#include <sys/types.h>
+#include <liballoc.h>
 
 size_t
 strlen(const char *str)
