@@ -8,9 +8,11 @@
 /*-----------------------------------------------------------------------*/
 
 #include "diskio.h"		/* FatFs lower layer API */
-#include "usbdisk.h"	/* Example: USB drive control */
-#include "atadrive.h"	/* Example: ATA drive control */
-#include "sdcard.h"		/* Example: MMC/SDC contorl */
+//#include "usbdisk.h"	/* Example: USB drive control */
+//#include "atadrive.h"	/* Example: ATA drive control */
+//#include "sdcard.h"		/* Example: MMC/SDC contorl */
+
+#include <mindrvr.h> //ATA driver
 
 /* Definitions of physical drive number for each media */
 #define ATA		0
@@ -38,14 +40,14 @@ DSTATUS disk_initialize (
 		return stat;
 
 	case MMC :
-		result = MMC_disk_initialize();
+		//result = MMC_disk_initialize();
 
 		// translate the reslut code here
 
 		return stat;
 
 	case USB :
-		result = USB_disk_initialize();
+		//result = USB_disk_initialize();
 
 		// translate the reslut code here
 
@@ -76,14 +78,14 @@ DSTATUS disk_status (
 		return stat;
 
 	case MMC :
-		result = MMC_disk_status();
+		//result = MMC_disk_status();
 
 		// translate the reslut code here
 
 		return stat;
 
 	case USB :
-		result = USB_disk_status();
+		//result = USB_disk_status();
 
 		// translate the reslut code here
 
@@ -111,6 +113,16 @@ DRESULT disk_read (
 	switch (pdrv) {
 	case ATA :
 		// translate the arguments here
+/* 
+extern int reg_pio_data_in_lba28( unsigned char dev, unsigned char cmd,
+                                  unsigned int fr, unsigned int sc,
+                                  unsigned long lba,
+                                  unsigned char * bufAddr,
+                                  long numSect, int multiCnt );
+
+
+reg_pio_data_in_lba28(pdrv,CMD,
+*/
 
 		result = ATA_disk_read(buff, sector, count);
 
@@ -121,7 +133,7 @@ DRESULT disk_read (
 	case MMC :
 		// translate the arguments here
 
-		result = MMC_disk_read(buff, sector, count);
+		//result = MMC_disk_read(buff, sector, count);
 
 		// translate the reslut code here
 
@@ -130,7 +142,7 @@ DRESULT disk_read (
 	case USB :
 		// translate the arguments here
 
-		result = USB_disk_read(buff, sector, count);
+		//result = USB_disk_read(buff, sector, count);
 
 		// translate the reslut code here
 
