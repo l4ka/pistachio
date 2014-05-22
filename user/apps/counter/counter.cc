@@ -158,7 +158,7 @@ FATFS* fileSys;
 //int result = exec_pio_data_in_cmd(0,
 disk_initialize (0);
 
-printf("[root-task] : f_mount(default drive, %d)",f_mount(fileSys, NULL, 1));
+printf("[root-task] : f_mount(default drive, %d)",f_mount(fileSys, "drive0:/", 1));
 //char[] firstSector;
 //disk_read (0, firstSector, 0, 1);
 
