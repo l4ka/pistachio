@@ -75,8 +75,8 @@ DSTATUS disk_status (
 
 	switch (pdrv) {
 	case ATA :
-		result = ATA_disk_status();
-
+		//result = ATA_disk_status();
+		result = int_ata_status; //Porbably doesn't work
 		// translate the reslut code here
 
 		return stat;
