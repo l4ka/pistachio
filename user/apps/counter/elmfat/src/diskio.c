@@ -33,9 +33,13 @@ DSTATUS disk_initialize (
 
 	switch (pdrv) {
 	case ATA :
-		result = ATA_disk_initialize();
+		//result = ATA_disk_initialize();
+
+		result = reg_reset(0);
+		printf("[diskio] : Found %d PATA devices", reg_config());
 
 		// translate the reslut code here
+		printf("[diskio] : PATA device 0 reset status: %d ", result);
 
 		return stat;
 

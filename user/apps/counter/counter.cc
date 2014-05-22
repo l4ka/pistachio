@@ -122,8 +122,8 @@ int MallocTestOne() {
 
 void InitHwDev() {
 
-TetrisTheme();
-	printf("[root-task] : Found %d PATA devices", reg_config());
+//TetrisTheme();
+	//printf("[root-task] : Found %d PATA devices", reg_config());
 /* static int exec_pio_data_in_cmd(
  unsigned char dev,
 unsigned char * bufAddr,
@@ -151,7 +151,7 @@ int reg_pio_data_in_lba28( unsigned char dev,         // device (0 or 1)
 
 */
 
-	printf("[root-task] : PATA device 0 reset status: %d ", reg_reset(0));
+	//printf("[root-task] : PATA device 0 reset status: %d ", reg_reset(0));
 
 //int result = exec_pio_data_in_cmd(0,
 
