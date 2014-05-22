@@ -551,7 +551,13 @@ const BYTE ExCvt[] = _EXCVT;	/* Upper conversion table for extended characters *
    Module Private Functions
 
 ---------------------------------------------------------------------------*/
+#include <l4/sigma0.h>
+#include <l4/kdebug.h>
 
+//Evil hack
+DWORD get_fattime (void) {
+	return L4_SystemClock().raw;
+}
 
 /*-----------------------------------------------------------------------*/
 /* String functions                                                      */
