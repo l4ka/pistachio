@@ -7,10 +7,16 @@
 /* storage control module to the FatFs module with a defined API.        */
 /*-----------------------------------------------------------------------*/
 
+
+
+#include <l4io.h>
+
 #include "diskio.h"		/* FatFs lower layer API */
 //#include "usbdisk.h"	/* Example: USB drive control */
 //#include "atadrive.h"	/* Example: ATA drive control */
 //#include "sdcard.h"		/* Example: MMC/SDC contorl */
+
+#include "ff.h"
 
 #include <mindrvr.h> //ATA driver
 
@@ -19,6 +25,9 @@
 #define MMC		1
 #define USB		2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*-----------------------------------------------------------------------*/
 /* Inidialize a Drive                                                    */
@@ -43,19 +52,19 @@ DSTATUS disk_initialize (
 
 		return stat;
 
-	case MMC :
+	//case MMC :
 		//result = MMC_disk_initialize();
 
 		// translate the reslut code here
 
-		return stat;
+		//return stat;
 
-	case USB :
+	//case USB :
 		//result = USB_disk_initialize();
 
 		// translate the reslut code here
 
-		return stat;
+		//return stat;
 	}
 	return STA_NOINIT;
 }
@@ -176,29 +185,29 @@ DRESULT disk_write (
 	case ATA :
 		// translate the arguments here
 
-		result = ATA_disk_write(buff, sector, count);
+		//result = ATA_disk_write(buff, sector, count);
 
 		// translate the reslut code here
 
 		return res;
 
-	case MMC :
+	//case MMC :
 		// translate the arguments here
 
-		result = MMC_disk_write(buff, sector, count);
+		//result = MMC_disk_write(buff, sector, count);
 
 		// translate the reslut code here
 
-		return res;
+		//return res;
 
-	case USB :
+	//case USB :
 		// translate the arguments here
 
-		result = USB_disk_write(buff, sector, count);
+		//result = USB_disk_write(buff, sector, count);
 
 		// translate the reslut code here
 
-		return res;
+		//return res;
 	}
 	return RES_PARERR;
 }
@@ -210,7 +219,7 @@ DRESULT disk_write (
 /*-----------------------------------------------------------------------*/
 
 #if _USE_IOCTL
-DRESULT disk_ioctl (
+ DRESULT disk_ioctl (
 	BYTE pdrv,		/* Physical drive nmuber (0..) */
 	BYTE cmd,		/* Control code */
 	void *buff		/* Buffer to send/receive control data */
@@ -223,30 +232,35 @@ DRESULT disk_ioctl (
 	case ATA :
 		// pre-process here
 
-		result = ATA_disk_ioctl(cmd, buff);
+		//result = ATA_disk_ioctl(cmd, buff);
 
 		// post-process here
 
 		return res;
 
-	case MMC :
+	//case MMC :
 		// pre-process here
 
-		result = MMC_disk_ioctl(cmd, buff);
+		//result = MMC_disk_ioctl(cmd, buff);
 
 		// post-process here
 
-		return res;
+		//return res;
 
-	case USB :
+	//case USB :
 		// pre-process here
 
-		result = USB_disk_ioctl(cmd, buff);
+		//result = USB_disk_ioctl(cmd, buff)
 
 		// post-process here
 
-		return res;
+		//return res;
 	}
 	return RES_PARERR;
+}
+#endif
+
+
+#ifdef __cplusplus
 }
 #endif
