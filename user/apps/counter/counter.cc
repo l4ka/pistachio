@@ -36,6 +36,8 @@
 
 //ATA mini driver
 #include <mindrvr.h>
+#include "elmfat/src/diskio.h"
+#include "elmfat/src/ff.h"
 
 #include <l4io.h>
 #include <l4/sigma0.h>
@@ -154,7 +156,9 @@ int reg_pio_data_in_lba28( unsigned char dev,         // device (0 or 1)
 	//printf("[root-task] : PATA device 0 reset status: %d ", reg_reset(0));
 
 //int result = exec_pio_data_in_cmd(0,
-
+disk_initialize (0);
+//char[] firstSector = new char[];
+//disk_read (0, firstSector, 0, 1);
 
 }
 
