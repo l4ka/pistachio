@@ -40,6 +40,8 @@ DSTATUS disk_initialize (
 	DSTATUS stat;
 	int result;
 
+	printf("[diskio] : Inside disk_initialize(%x)", pdrv);
+
 	switch (pdrv) {
 	case ATA :
 		//result = ATA_disk_initialize();
@@ -81,6 +83,8 @@ DSTATUS disk_status (
 {
 	DSTATUS stat;
 	int result;
+
+	printf("[diskio] : Inside disk_status(%x)", pdrv);
 
 	switch (pdrv) {
 	case ATA :
