@@ -127,6 +127,8 @@ DRESULT disk_read (
 	DRESULT res;
 	int result;
 
+printf("[diskio] : Inside disk_read(%d, BUFF, %d, %d)\n", pdrv, sector, count);
+
 	switch (pdrv) {
 	case ATA :
 		// translate the arguments here
