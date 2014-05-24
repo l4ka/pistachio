@@ -40,17 +40,17 @@ DSTATUS disk_initialize (
 	DSTATUS stat;
 	int result;
 
-	printf("[diskio] : Inside disk_initialize(%x)", pdrv);
+	printf("[diskio] : Inside disk_initialize(%x)\n", pdrv);
 
 	switch (pdrv) {
 	case ATA :
 		//result = ATA_disk_initialize();
 
 		result = reg_reset(0);
-		printf("[diskio] : Found %d PATA devices", reg_config());
+		printf("[diskio] : Found %d PATA devices\n", reg_config());
 
 		// translate the reslut code here
-		printf("[diskio] : PATA device 0 reset status: %d ", result);
+		printf("[diskio] : PATA device 0 reset status: %d \n", result);
 
 		return stat;
 
@@ -84,7 +84,7 @@ DSTATUS disk_status (
 	DSTATUS stat;
 	int result;
 
-	printf("[diskio] : Inside disk_status(%x)", pdrv);
+	printf("[diskio] : Inside disk_status(%x)\n", pdrv);
 
 	switch (pdrv) {
 	case ATA :
