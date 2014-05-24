@@ -2382,7 +2382,7 @@ FRESULT f_mount (
 	FRESULT res;
 	const TCHAR *rp = path;
 
-	printf("[ff] : Inside f_mount(FS, %s, %d", path, opt);
+	printf("\n\n[ff] : Inside f_mount(FS, %s, %d) \n\n", path, opt);
 
 
 	vol = get_ldnumber(&rp);
