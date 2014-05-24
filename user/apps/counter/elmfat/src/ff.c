@@ -2387,6 +2387,9 @@ FRESULT f_mount (
 
 
 	vol = get_ldnumber(&rp);
+
+	printf("[ff] : Selected volume: %d\n", vol);
+
 	if (vol < 0) return FR_INVALID_DRIVE;
 	cfs = FatFs[vol];					/* Pointer to fs object */
 
