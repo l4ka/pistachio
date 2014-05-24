@@ -2180,6 +2180,7 @@ FRESULT find_volume (	/* FR_OK(0): successful, !=0: any error occurred */
 	WORD nrsv;
 	FATFS *fs;
 
+printf("\n\n[ff] : Inside find_volume(%s) \n\n", path);
 
 	/* Get logical drive number from the path name */
 	*rfs = 0;
