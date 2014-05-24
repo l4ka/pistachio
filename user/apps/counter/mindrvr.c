@@ -100,7 +100,10 @@ return val;
 // should be a value that increments at some constant rate.
 
 long SYSTEM_READ_TIMER( void ) {
-printf("[mindrvr.c] : Trying to access system clock via RPC\n");
+//printf("[mindrvr.c] : Trying to access system clock via RPC\n");
+
+is_computer_on();
+
 return L4_SystemClock().raw;
 }
 
