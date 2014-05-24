@@ -1,5 +1,166 @@
 Not Open Source, but available from http://dcoj.wmh3.com/geekstuff/basic/basic.c. Users can manually modify the userland Makefile as needed... 
 
+Need to implement a stub version of some POSIX process APIs:
+
+  * int system(const char *command);
+
+Second Build |
+--------------
+
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow -DLUA_COMPAT_ALL -std=c++11 -DINT_MAX -DUCHAR_MAX -Wno-conversion -std=c99 -c basic.c -o basic.o
+cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C [enabled by default]
+In file included from ../../include/stdio.h:3:0,
+                 from basic.c:36:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+basic.c: In function ‘main’:
+basic.c:87:7: warning: implicit declaration of function ‘tolower’ [-Wimplicit-function-declaration]
+       argv[1] = tolower(argv[1]);
+       ^
+basic.c:87:15: warning: assignment makes pointer from integer without a cast [enabled by default]
+       argv[1] = tolower(argv[1]);
+               ^
+basic.c:90:7: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
+       if(argv[1][0] == '-' && argv [1][1] == '-' && argv [1][2]=='h' && argv[1][3]=='e' && argv[1][4] == 'l' && argv[1][5] == 'p' && (strlen(argv[1])) == 6)
+       ^
+basic.c:90:135: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+       if(argv[1][0] == '-' && argv [1][1] == '-' && argv [1][2]=='h' && argv[1][3]=='e' && argv[1][4] == 'l' && argv[1][5] == 'p' && (strlen(argv[1])) == 6)
+                                                                                                                                       ^
+basic.c:93:11: warning: implicit declaration of function ‘exit’ [-Wimplicit-function-declaration]
+           exit (0);
+           ^
+basic.c:93:11: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+basic.c:100:13: warning: implicit declaration of function ‘lineInt’ [-Wimplicit-function-declaration]
+             lineInt(argv[2], tokens, tokendefs);
+             ^
+basic.c:101:13: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+             exit (0);
+             ^
+basic.c:105:11: error: unknown type name ‘FILE’
+           FILE *f;
+           ^
+basic.c:108:4: warning: implicit declaration of function ‘fopen’ [-Wimplicit-function-declaration]
+    if((f = fopen (argv[1], "rt")))
+    ^
+basic.c:108:10: warning: assignment makes pointer from integer without a cast [enabled by default]
+    if((f = fopen (argv[1], "rt")))
+          ^
+basic.c:111:8: warning: implicit declaration of function ‘fgets’ [-Wimplicit-function-declaration]
+        while(fgets(line, 65536, f) != NULL)
+        ^
+basic.c:111:36: warning: comparison between pointer and integer [enabled by default]
+        while(fgets(line, 65536, f) != NULL)
+                                    ^
+basic.c:126:4: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+    exit(0);
+    ^
+basic.c:134:3: warning: implicit declaration of function ‘GetAvailableMemory’ [-Wimplicit-function-declaration]
+   int availMem = GetAvailableMemory();
+   ^
+basic.c:145:5: warning: implicit declaration of function ‘gets’ [-Wimplicit-function-declaration]
+     gets(str);
+     ^
+basic.c:148:19: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     for(i=0; i <= strlen(str) - 1; i++)
+                   ^
+basic.c:153:5: warning: implicit declaration of function ‘strtok’ [-Wimplicit-function-declaration]
+     tok = strtok(str," ");
+     ^
+basic.c:153:9: warning: assignment makes pointer from integer without a cast [enabled by default]
+     tok = strtok(str," ");
+         ^
+basic.c:155:19: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     for(i=0; i <= strlen(tok) - 1; i++)
+                   ^
+basic.c:167:11: warning: implicit declaration of function ‘tokDet’ [-Wimplicit-function-declaration]
+           if(tokDet(tok, strBackup, tokens, tokendefs, VERSION, REV))
+           ^
+basic.c: In function ‘tokDet’:
+basic.c:199:67: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+   if(tok[0]=='e' && tok[1]=='x' && tok[2]=='i' && tok[3]=='t' && (strlen(tok))==4)
+                                                                   ^
+basic.c:202:5: warning: incompatible implicit declaration of built-in function ‘exit’ [enabled by default]
+     exit(0);
+     ^
+basic.c:204:67: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+   if(tok[0]=='h' && tok[1]=='e' && tok[2]=='l' && tok[3]=='p' && (strlen(tok))==4)
+                                                                   ^
+basic.c:225:7: error: invalid use of undefined type ‘struct sysinfo’
+       printf("Approx. %i bytes free to C\n%i processes running\nUptime is %i\n", GetAvailableMemory(), info.procs, info.uptime);
+       ^
+basic.c:225:7: error: invalid use of undefined type ‘struct sysinfo’
+basic.c:226:7: error: invalid use of undefined type ‘struct sysinfo’
+       if(info.procs==0 && info.uptime==0) printf("\nError retrieving data, the system returned zeroes. Are you root?\n");
+       ^
+basic.c:226:7: error: invalid use of undefined type ‘struct sysinfo’
+basic.c:249:7: warning: implicit declaration of function ‘strchr’ [-Wimplicit-function-declaration]
+       char *q1 = strchr (comStr,'"');
+       ^
+basic.c:249:18: warning: incompatible implicit declaration of built-in function ‘strchr’ [enabled by default]
+       char *q1 = strchr (comStr,'"');
+                  ^
+basic.c:249:7: warning: passing argument 1 of ‘strchr’ from incompatible pointer type [enabled by default]
+       char *q1 = strchr (comStr,'"');
+       ^
+basic.c:249:7: note: expected ‘const char *’ but argument is of type ‘char **’
+basic.c:274:31: warning: left-hand operand of comma expression has no effect [-Wunused-value]
+           char * str = ("%.*s", q1-1, q1+1);
+                               ^
+basic.c:274:37: warning: left-hand operand of comma expression has no effect [-Wunused-value]
+           char * str = ("%.*s", q1-1, q1+1);
+                                     ^
+basic.c:275:29: warning: assignment makes integer from pointer without a cast [enabled by default]
+           str[strlen(str)-1]=NULL;
+                             ^
+basic.c:293:21: warning: assignment makes integer from pointer without a cast [enabled by default]
+               str[i]=NULL;
+                     ^
+basic.c:295:11: warning: implicit declaration of function ‘memset’ [-Wimplicit-function-declaration]
+           memset(&str[0], 0, sizeof(str));
+           ^
+basic.c:295:11: warning: incompatible implicit declaration of built-in function ‘memset’ [enabled by default]
+basic.c:295:36: warning: argument to ‘sizeof’ in ‘memset’ call is the same expression as the destination; did you mean to provide an explicit length? [-Wsizeof-pointer-memaccess]
+           memset(&str[0], 0, sizeof(str));
+                                    ^
+basic.c:303:16: warning: comparison of distinct pointer types lacks a cast [enabled by default]
+       if(comStr=="print")
+                ^
+basic.c:303:16: warning: comparison with string literal results in unspecified behavior [-Waddress]
+basic.c:309:18: warning: incompatible implicit declaration of built-in function ‘strchr’ [enabled by default]
+       char *q1 = strchr (comStr,'"');
+                  ^
+basic.c:309:7: warning: passing argument 1 of ‘strchr’ from incompatible pointer type [enabled by default]
+       char *q1 = strchr (comStr,'"');
+       ^
+basic.c:309:7: note: expected ‘const char *’ but argument is of type ‘char **’
+basic.c: In function ‘lineInt’:
+basic.c:406:19: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     for(i=0; i <= strlen(str) - 1; i++)
+                   ^
+basic.c:411:9: warning: assignment makes pointer from integer without a cast [enabled by default]
+     tok = strtok(str," ");
+         ^
+basic.c:413:19: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     for(i=0; i <= strlen(tok) - 1; i++)
+                   ^
+basic.c:417:12: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     if(tok[strlen(tok)-1]=='\n')
+            ^
+basic.c:423:12: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     if(tok[strlen(tok)-1]=='\n') printf("ugh!");
+            ^
+basic.c:438:11: warning: passing argument 2 of ‘tokDet’ from incompatible pointer type [enabled by default]
+           if(tokDet(tok, strBackup, tokens, tokendefs))
+           ^
+basic.c:193:5: note: expected ‘char **’ but argument is of type ‘char *’
+ int tokDet (char * tok, char * comStr[65536], string tokens[NUMTOKENS], string tokendefs[NUMTOKENS])
+     ^
+make: *** [basic.o] Error 1
+
+End of Second Build |
+---------------------
+
 First Build |
 -------------
 

@@ -17,6 +17,8 @@ void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 	int (*compar)(const void *, const void *));
 
+//Dummy implementation for WaterFront BASIC
+int system(const char *command);
 
 #ifdef __cplusplus
 }
