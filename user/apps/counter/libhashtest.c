@@ -55,7 +55,7 @@ stresstest (void)
 	hash_free (table);
 }
 
-int main ()
+int texmain ()
 {
 	simpletest ();
 	stresstest ();
