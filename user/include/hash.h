@@ -79,15 +79,16 @@
 #ifndef _HASH_H
 #define _HASH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <liballoc.h>
 
 #undef uintptr_t
 #define uintptr_t unsigned long int
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 struct hashtable {
 	struct hashentry **table;
 	unsigned int size;
