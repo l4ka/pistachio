@@ -83,7 +83,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "hash.h"
+#include <hash.h>
+
+//extern "C" 
+//{
+#include <liballoc.h>
+//}
 
 void
 hash_free (struct hashtable *tablestruct)
