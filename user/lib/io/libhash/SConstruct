@@ -1,3 +1,0 @@
-Import("env")
-lib = env.MyLibrary("hash", LIBS=["c"])
-Return("lib")
