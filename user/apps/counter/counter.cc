@@ -46,6 +46,8 @@
 //ToAru PC speaker shim, move later
 #include <pcspkr_shim.h>
 
+
+
 /* Track the environment status */
 #define ACTIVE_CMD 0
 #define CMD_RESULT 1
@@ -97,8 +99,10 @@ printf("\n다른 여자 만나니까 좋더라\n");
 
 printf("Raw system clock time: %d\n\n",L4_SystemClock().raw);
 
+//texmain();
 
 return FINISHED;	
+
 }
 
 
