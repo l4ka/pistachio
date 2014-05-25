@@ -80,6 +80,11 @@
 #define _HASH_H
 
 #include <stdint.h>
+#include <liballoc.h>
+
+#undef uintptr_t
+#define uintptr_t unsigned long int
+
 
 struct hashtable {
 	struct hashentry **table;
