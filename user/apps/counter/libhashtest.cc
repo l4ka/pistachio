@@ -5,6 +5,10 @@
 #include <hash.h>
 #include <stdio.h>
 #include <liballoc.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 struct teststruct {
 	int key;
 	void *value;
@@ -59,4 +63,6 @@ int main ()
 	
 	return 0;
 }
-
+#ifdef __cplusplus
+}
+#endif

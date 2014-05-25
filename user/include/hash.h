@@ -85,7 +85,9 @@
 #undef uintptr_t
 #define uintptr_t unsigned long int
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 struct hashtable {
 	struct hashentry **table;
 	unsigned int size;
@@ -104,5 +106,8 @@ uintptr_t hash_hash(uintptr_t key);
 void *hash_lookup (struct hashtable *tablestruct, uintptr_t key);
 int hash_insert (struct hashtable *tablestruct, uintptr_t key, void *value);
 void hash_remove (struct hashtable *tablestruct, uintptr_t key);
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !_HASH_H */
