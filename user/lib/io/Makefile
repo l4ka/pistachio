@@ -40,7 +40,7 @@ powerpc_SRCS=	1275tree.cc fdt.cc
 
 LIBRARY=	io
 SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c $(wildcard openbsd/libkern/*.c) \
- $(wildcard openbsd/stdio/*.c) openbsd/memcpy.c  $(wildcard openbsd/string/*.c) sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c dragonflybsd/l64a.c dragonflybsd/calloc.c dragonflybsd/bsearch.c 
+ $(wildcard openbsd/stdio/*.c) openbsd/memcpy.c  $(wildcard openbsd/string/*.c) sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c dragonflybsd/l64a.c dragonflybsd/calloc.c dragonflybsd/bsearch.c libhash/src/hash.c libhash/src/hash_free.c
 
 #Need to move DragonFlyBSD stuff to own directory - l64a/calloc
 include $(top_srcdir)/Mk/l4.lib.mk
