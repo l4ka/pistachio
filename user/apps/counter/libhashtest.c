@@ -2,7 +2,7 @@
 /* Hash test functions */
 #include <assert.h>
 
-#include "hash.h"
+#include <hash.h>
 #include <stdio.h>
 #include <liballoc.h>
 struct teststruct {

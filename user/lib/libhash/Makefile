@@ -39,7 +39,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 #ia32_OBJS=	ia32-syscall-stubs.S
 
 LIBRARY=	hash
-SRCS=		src/hash.c src/hash_free.c  ../io/liballoc.c  ../io/liballoc_hooks.c
+SRCS=		src/hash.c src/hash_free.c  
 
 
 include $(top_srcdir)/Mk/l4.lib.mk
