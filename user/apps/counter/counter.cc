@@ -30,7 +30,7 @@
  * $Id: grabmem.cc,v 1.2 2004/02/26 19:11:07 skoglund Exp $
  *                
  ********************************************************************/
-
+//http://cvs.savannah.gnu.org/viewvc/*checkout*/hurd/hurd-l4/libc/hurd-l4/sysdeps/l4/gettimeofday.c?revision=1.1
 #include <liballoc.h>
 //#include <cstring>
 
