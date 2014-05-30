@@ -203,6 +203,9 @@ int __l4_getc()
 	while (status & KBD_STAT_OBF) {
 	    unsigned char scancode;
 	    scancode = kbd_read_input();
+
+	if (scancode = 0x1d /* Ctrl + C, maybe? */) printf("[kbd] : Ctrl+C pressed");
+
 	    if (scancode & 0x80)
 		last_key = 0;
 	    else if (last_key != scancode)
