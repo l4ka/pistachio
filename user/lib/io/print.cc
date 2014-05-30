@@ -650,7 +650,7 @@ while(c != 0x0d && strlen(pass) != (60 - 1)) {
             printf("\b \b");
             //get rid of last character
             //pass[i-1] = 0; i--;
-        }if (c = 0x03/* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");}
+        }//if (c = 0x03 /* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");pass = 0x03; }
     } else {
         //passed a character
         pass[i] = (char)c; i++;
