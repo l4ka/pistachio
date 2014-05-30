@@ -641,9 +641,9 @@ printf("Enter password: ");
 while(c != 0x0d && strlen(pass) != (60 - 1)) {
     c = getc();
 
-if (c = 0x03/* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");}
 
-    else if (c == 0x0d) {
+
+    if (c == 0x0d) {
         //ensure cannot backspace past prompt
         if(i != 0) {
             //simulate backspace by replacing with space
@@ -657,6 +657,8 @@ if (c = 0x03/* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");}
         printf("*");
     }
 }
+if (c = 0x03/* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");}
+
 pass[i] = '\0';
 printf("\nPass: %s\n", pass);
 
