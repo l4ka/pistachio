@@ -1,5 +1,11 @@
 #include <l4/types.h>
 
+//Rand wants this
+//http://fxr.watson.org/fxr/source/sys/types.h?v=OPENBSD
+typedef unsigned int    u_int;
+
+#define	RAND_MAX	2147483647 // Like Linux
+
 //Really?
 size_t strlen(const char *str);
 
