@@ -11,6 +11,7 @@ extern "C" {
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
+/* Pseudo-random sequence generation */
 int rand_r(u_int *seed);
 int rand(void);
 void srand(u_int seed);
@@ -21,6 +22,15 @@ int l64a_r(long value, char *buffer, int buflen);
 void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 	int (*compar)(const void *, const void *));
+
+
+
+//Really?
+size_t strlen(const char *str);
+
+void * calloc(size_t num, size_t size);
+void * memset(void *s1, int c, size_t n);
+void * memcpy(void *s1, const void *s2, size_t n);
 
 //Dummy implementation for WaterFront BASIC
 int system(const char *command);

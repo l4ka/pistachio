@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+//http://www.cplusplus.com/reference/cstdlib/
 
 #include <l4/types.h>
 
@@ -14,12 +15,8 @@ typedef unsigned int    u_int;
 
 #define	RAND_MAX	2147483647 // Like Linux
 
-//Really?
-size_t strlen(const char *str);
 
-//
-void * memset(void *s1, int c, size_t n);
-void * memcpy(void *s1, const void *s2, size_t n);
+
 
 
 #ifdef __cplusplus
