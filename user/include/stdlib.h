@@ -9,6 +9,11 @@ extern "C" {
 #include <liballoc.h>
 
 #include <sys/cdefs.h>
+#include <sys/types.h>
+
+int rand_r(u_int *seed);
+int rand(void);
+void srand(u_int seed);
 
 char * l64a(long value);
 int l64a_r(long value, char *buffer, int buflen);

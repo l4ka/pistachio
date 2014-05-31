@@ -1,3 +1,11 @@
+#ifndef __SYS_TYPES_H__
+#define __SYS_TYPES_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <l4/types.h>
 
 //Rand wants this
@@ -12,4 +20,12 @@ size_t strlen(const char *str);
 //
 void * memset(void *s1, int c, size_t n);
 void * memcpy(void *s1, const void *s2, size_t n);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+#endif /* !__SYS_TYPES_H__ */
 
