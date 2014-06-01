@@ -1,4 +1,4 @@
-#include <liballoc.h>
+#include <nwmalloc.h>
 #include <l4/space.h>
 
 #include <l4/kip.h>
@@ -57,9 +57,6 @@ do_safe_mem_touch( void *addr )
 
 extern void* liballoc_alloc(int aPagesReq) {
 
-//HACK
-#define PAGE_BITS		(12)
-#define PAGE_SIZE		(1 << PAGE_BITS)
 #define SCRATCHMEM_START        (16*1024*1024)
 
 	static char *free_page = (char*) SCRATCHMEM_START;
@@ -69,7 +66,7 @@ extern void* liballoc_alloc(int aPagesReq) {
 
 	L4_Word_t count = aPagesReq;
 
-	free_page += count * PAGE_SIZE;
+	free_page += count * NWGetPageSize();
 
 	
 	/* should we fault the pages in? */
@@ -82,10 +79,10 @@ extern void* liballoc_alloc(int aPagesReq) {
 		for( i = 0; i < count; i++ )
 		{
 			do_safe_mem_touch( (void*) addr );
-			for (int j=0; j<PAGE_SIZE; j++)
+			for (int j=0; j<NWGetPageSize(); j++)
 			    addr[j] = 0;
 				
-			addr += PAGE_SIZE;
+			addr += NWGetPageSize();
 			
 		}
 	}
