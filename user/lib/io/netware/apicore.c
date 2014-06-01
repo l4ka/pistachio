@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-  size_t NWGetPageSize  (void) {
+size_t NWGetPageSize(void) {
 
 //HACK based on example code, as used in our liballoc port...
 #define PAGE_BITS		(12)
