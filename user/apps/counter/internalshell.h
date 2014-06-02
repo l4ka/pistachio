@@ -29,6 +29,7 @@ class InternalShell
 {
 public:
     InternalShell();
+    int ShellHelp();
 };
 
 #endif // INTERNALSHELL_H
