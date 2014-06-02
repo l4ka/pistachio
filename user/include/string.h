@@ -23,6 +23,8 @@ extern "C" {
 //https://github.com/toddfries/OpenBSD-lib-patches/blob/master/libc/string/rindex.c
 char * rindex(const char *p, int ch);
 
+char * index(const char *p, int ch);
+
 int strncasecmp(const char *s1, const char *s2, size_t n);
 
 int strcasecmp(const char *s1, const char *s2);
