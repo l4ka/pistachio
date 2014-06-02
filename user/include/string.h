@@ -4,7 +4,7 @@
 #ifndef __STRING_H__
 #define __STRING_H__
 
-//#include <l4/types.h>
+#include <sys/types.h>
 
 // BAD IDEA #include <lib/io/lib.h>
 
@@ -22,6 +22,14 @@ extern "C" {
 //BSD rindex(), like strrchr()
 //https://github.com/toddfries/OpenBSD-lib-patches/blob/master/libc/string/rindex.c
 char * rindex(const char *p, int ch);
+
+int strncasecmp(const char *s1, const char *s2, size_t n);
+
+int strcasecmp(const char *s1, const char *s2);
+
+
+
+
 
 #ifdef __cplusplus
 }
