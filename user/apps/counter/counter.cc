@@ -31,20 +31,6 @@
  *                
  ********************************************************************/
 //http://cvs.savannah.gnu.org/viewvc/*checkout*/hurd/hurd-l4/libc/hurd-l4/sysdeps/l4/gettimeofday.c?revision=1.1
-#include <liballoc.h>
-//#include <cstring>
-
-//ATA mini driver
-#include <mindrvr.h>
-#include "elmfat/src/diskio.h"
-#include "elmfat/src/ff.h"
-
-#include <l4io.h>
-#include <l4/sigma0.h>
-#include <l4/kdebug.h>
-
-//ToAru PC speaker shim, move later
-#include <pcspkr_shim.h>
 
 //Include the internal shell header...
 #include "internalshell.h"
