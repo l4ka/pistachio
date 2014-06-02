@@ -39,6 +39,8 @@ strtok_r(char *s, const char *delim, char **last);
 char *
 strtok(char *s, const char *delim);
 
+char * strdup(const char *str);
+
 
 size_t strspn(const char *s1, const char *s2);
 
