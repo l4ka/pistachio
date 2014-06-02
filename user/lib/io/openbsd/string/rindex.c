@@ -30,12 +30,14 @@
 
 #include <string.h>
 
-char *
-#ifdef STRRCHR
-strrchr(const char *p, int ch)
-#else
-rindex(const char *p, int ch)
-#endif
+char * strrchr(const char *p, int ch) {
+
+return rindex(p,ch);
+
+}
+
+char * rindex(const char *p, int ch)
+
 {
 	char *save;
 

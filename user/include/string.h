@@ -31,7 +31,7 @@ int strcasecmp(const char *s1, const char *s2);
 
 int obsd_strcmp(const char *s1, const char *s2);
 
-
+char * strrchr(const char *p, int ch);
 
 
 #ifdef __cplusplus
