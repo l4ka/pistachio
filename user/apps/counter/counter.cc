@@ -235,7 +235,8 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "help") == 0 ||
 obsd_strcmp(iEnvStatus[ACTIVE_CMD], "h") == 0 ||
 obsd_strcmp(iEnvStatus[ACTIVE_CMD], "Help") == 0 ) 
 {
-    InternalShell::ShellHelp();
+    InternalShell ish;
+    ish.ShellHelp();
 
 }
 
@@ -252,8 +253,10 @@ printf("Entered shiritori\n");
 
  else {
 
-	printf("\n\n[root-task] : Unsupported command, please type \"help\", or wait...\n\n");
-    InternalShell::ShellHelp();
+    printf("\n\n[root-task] : Unsupported command, please type \"help\", or wait...\n\n");
+
+    InternalShell ish;
+    ish.ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
 
