@@ -33,6 +33,13 @@ int obsd_strcmp(const char *s1, const char *s2);
 
 char * strrchr(const char *p, int ch);
 
+char *
+strtok_r(char *s, const char *delim, char **last);
+
+char *
+strtok(char *s, const char *delim);
+
+
 size_t strspn(const char *s1, const char *s2);
 
 #ifdef __cplusplus
