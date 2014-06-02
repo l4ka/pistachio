@@ -42,6 +42,11 @@ strtok(char *s, const char *delim);
 
 size_t strspn(const char *s1, const char *s2);
 
+//Android/Bionic version, not locale-aware...
+size_t
+strxfrm(char *s1, const char *s2, size_t n);
+
+
 #ifdef __cplusplus
 }
 #endif
