@@ -47,7 +47,7 @@
 #include <pcspkr_shim.h>
 
 //Include the internal shell header...
-#include <internalshell.h>
+#include "internalshell.h"
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
