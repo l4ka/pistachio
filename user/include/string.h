@@ -27,6 +27,7 @@ int strncasecmp(const char *s1, const char *s2, size_t n);
 
 int strcasecmp(const char *s1, const char *s2);
 
+int obsd_strcmp(const char *s1, const char *s2);
 
 
 

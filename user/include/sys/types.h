@@ -16,6 +16,7 @@ typedef unsigned int    u_int;
 #define	RAND_MAX	2147483647 // Like Linux
 
 void * memset(void *s1, int c, size_t n);
+size_t strlen(const char *str);
 
 
 
