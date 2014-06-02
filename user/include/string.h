@@ -41,6 +41,12 @@ strtok(char *s, const char *delim);
 
 char * strdup(const char *str);
 
+char *
+strcat(char *s, const char *append);
+
+size_t
+strlcat(char *dst, const char *src, size_t siz);
+
 
 size_t strspn(const char *s1, const char *s2);
 

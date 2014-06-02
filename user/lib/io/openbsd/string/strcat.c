@@ -29,11 +29,11 @@
  * SUCH DAMAGE.
  */
 
-#if !defined(_KERNEL) && !defined(_STANDALONE)
+//#if !defined(_KERNEL) && !defined(_STANDALONE)
 #include <string.h>
-#else
-#include <lib/libkern/libkern.h>
-#endif
+//#else
+//#include <lib/libkern/libkern.h>
+//#endif
 
 #if defined(APIWARN)
 __warn_references(strcat,
