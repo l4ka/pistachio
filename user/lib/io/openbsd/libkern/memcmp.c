@@ -34,6 +34,7 @@
 static char *rcsid = "$OpenBSD: memcmp.c,v 1.5 2003/06/02 23:28:09 millert Exp $";
 #endif /* LIBC_SCCS and not lint */
 
+#include <string.h>
 //#include "stand.h"
 //#include <lib/libkern/libkern.h>
 #include <l4/types.h>

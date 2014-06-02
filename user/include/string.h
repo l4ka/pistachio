@@ -42,10 +42,16 @@ strtok(char *s, const char *delim);
 char * strdup(const char *str);
 
 char *
+strchr(const char *p, int ch);
+
+char *
 strcat(char *s, const char *append);
 
 size_t
 strlcat(char *dst, const char *src, size_t siz);
+
+int
+memcmp(const void *s1, const void *s2, size_t n);
 
 
 size_t strspn(const char *s1, const char *s2);
