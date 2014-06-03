@@ -177,12 +177,6 @@ int main (void) {
 
 char *iEnvStatus[255];
 
-//auto shiny = 0;
-// int *car = new int;
-//car = (int)shiny;
-
-//car = 0;
-
 InitHwDev();
 
 iEnvStatus[CMD_RESULT] = (char*)WAITING;
