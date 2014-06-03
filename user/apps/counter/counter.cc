@@ -184,6 +184,7 @@ iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
 printf(iEnvStatus[ACTIVE_CMD]);
 
+    InternalShell ish;
 
 while(WAITING) {
 
@@ -229,7 +230,7 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "help") == 0 ||
 obsd_strcmp(iEnvStatus[ACTIVE_CMD], "h") == 0 ||
 obsd_strcmp(iEnvStatus[ACTIVE_CMD], "Help") == 0 ) 
 {
-    InternalShell ish;
+
     ish.ShellHelp();
 
 }
@@ -249,7 +250,7 @@ printf("Entered shiritori\n");
 
     printf("\n\n[root-task] : Unsupported command, please type \"help\", or wait...\n\n");
 
-    InternalShell ish;
+
     ish.ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
