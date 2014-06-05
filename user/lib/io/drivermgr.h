@@ -28,9 +28,9 @@ public:
     /* Return the total number of allocated pages, globally */
 
 private:
-    int iDriverCount; //Number of registered drivers
+    L4_Word_t iDriverCount; //Number of registered drivers
     //The list of drivers (linked list/hash map/table?)
-    int iPageCount; //Number of allocated pages?
+    L4_Word_t iPageCount; //Number of allocated pages?
 
 };
 
