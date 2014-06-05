@@ -24,8 +24,10 @@ public:
     /* Return a list of drivers, types, synopses, versions, and PID/thread IDs */
 
     /* Return the number of registered drivers, globally */
+    L4_Word_t GetDriverCount();
 
     /* Return the total number of allocated pages, globally */
+    L4_Word_t GetPageCount();
 
 private:
     L4_Word_t iDriverCount; //Number of registered drivers
