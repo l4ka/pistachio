@@ -6,13 +6,31 @@ class DriverMgr
 public:
     DriverMgr();
 
+    //Constructor taking
+
     /* Register a driver by name
 
-      aDriverName
-      aDriverType
-
+      aName
+      aType
+      aHook
+      aSynopsis
+      aVersion
 
      */
+
+    /* Unregister a driver by name */
+    /* Unregister a driver by ordinal */
+
+    /* Return a list of drivers, types, synopses, and versions */
+
+    /* Return the number of registered drivers, globally */
+
+    /* Return the total number of allocated pages, globally */
+
+private:
+    int iDriverCount; //Number of registered drivers
+    //The list of drivers (linked list/hash map/table?)
+    int iPageCount; //Number of allocated pages?
 
 };
 
