@@ -6,7 +6,7 @@ class DriverMgr
 public:
     DriverMgr();
 
-    //Constructor taking
+    //Constructor taking L4 thread/page to sit in?
 
     /* Register a driver by name
 
