@@ -21,7 +21,7 @@ public:
     /* Unregister a driver by name */
     /* Unregister a driver by ordinal */
 
-    /* Return a list of drivers, types, synopses, and versions */
+    /* Return a list of drivers, types, synopses, versions, and PID/thread IDs */
 
     /* Return the number of registered drivers, globally */
 
