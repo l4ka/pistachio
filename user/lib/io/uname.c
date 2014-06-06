@@ -1,5 +1,5 @@
 #include <sys/utsname.h>
-
+#include <string.h>
 
 
 //struct utsname {
@@ -21,6 +21,13 @@
     strcpy(name->version,  version_string);
     strcpy(name->machine,  __kernel_arch);
     strcpy(name->domainname, "");*/
+
+        strcpy(aUtsName->sysname, "Enryo");
+        strcpy(aUtsName->nodename,"noname");
+        strcpy(aUtsName->release, "0");
+        strcpy(aUtsName->version, "0");
+        strcpy(aUtsName->machine, "Intel-Pentium2-only");
+        strcpy(aUtsName->domainname, "noname.tld");
 
     return 0;
     }
