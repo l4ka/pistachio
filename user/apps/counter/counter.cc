@@ -186,9 +186,12 @@ iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 printf(iEnvStatus[ACTIVE_CMD]);
 
 //Try initialising uname
-uname();
 
-print("%s",aUtsName->sysname);
+utsname *n;
+
+uname(n);
+
+printf("%s",n->sysname);
 
 //Lambda example from http://www.drdobbs.com/cpp/lambdas-in-c11/240168241?pgno=1
 auto sum = [](int x, int y) -> int { return x + y; };

@@ -60,6 +60,6 @@ struct utsname {
 //int	uname __P((struct utsname *));
 //__END_DECLS
 
-int	uname(struct utsname *aUtsName) ;
+extern "C" int	uname(struct utsname *aUtsName) ;
 
 #endif	/* !_SYS_UTSNAME_H_ */

@@ -11,7 +11,7 @@
 //};
 
 //https://github.com/klange/toaruos/blob/94c976a903181df453f39d2a264f85c9a7c90246/kernel/sys/syscall.c
-
+extern "C"
     int	uname(struct utsname *aUtsName) {
 
         strcpy(aUtsName->sysname, "Enryo");
