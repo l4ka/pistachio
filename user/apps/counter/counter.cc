@@ -189,7 +189,7 @@ printf(iEnvStatus[ACTIVE_CMD]);
 //Try initialising uname
 
 uname(blah);
-print("\n\nToday's recipe is brought to you by %s\n. A car you can trust!\n\n", blah->sysname);
+printf("\n\nToday's recipe is brought to you by %s\n. A car you can trust!\n\n", blah->sysname);
 
 //Lambda example from http://www.drdobbs.com/cpp/lambdas-in-c11/240168241?pgno=1
 auto sum = [](int x, int y) -> int { return x + y; };
