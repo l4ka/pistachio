@@ -184,6 +184,11 @@ iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
 printf(iEnvStatus[ACTIVE_CMD]);
 
+//Lambda example from http://www.drdobbs.com/cpp/lambdas-in-c11/240168241?pgno=1
+auto sum = [](int x, int y) -> int { return x + y; };
+
+printf("\n\n%d\n\n",sum(1,2));
+
     InternalShell ish;
 
 while(WAITING) {
