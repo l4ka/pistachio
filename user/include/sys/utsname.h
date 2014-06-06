@@ -51,6 +51,7 @@ struct utsname {
 	char	release[_SYS_NMLN];	/* Release level. */
 	char	version[_SYS_NMLN];	/* Version level. */
 	char	machine[_SYS_NMLN];	/* Hardware type. */
+	char 	domainname[_SYS_NMLN];  /* Domain name. */
 };
 
 #include <sys/cdefs.h>
