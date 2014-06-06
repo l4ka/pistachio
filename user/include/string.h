@@ -53,6 +53,8 @@ strlcat(char *dst, const char *src, size_t siz);
 int
 memcmp(const void *s1, const void *s2, size_t n);
 
+char *
+strcpy(char *to, const char *from);
 
 size_t strspn(const char *s1, const char *s2);
 
