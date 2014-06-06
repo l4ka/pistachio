@@ -45,6 +45,10 @@
 #define	SYS_NMLN	_SYS_NMLN
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct utsname {
 	char	sysname[_SYS_NMLN];	/* Name of this OS. */
 	char	nodename[_SYS_NMLN];	/* Name of this network node. */
@@ -60,6 +64,12 @@ struct utsname {
 //int	uname __P((struct utsname *));
 //__END_DECLS
 
-extern "C" int	uname(struct utsname *aUtsName) ;
+int uname(struct utsname *aUtsName);
+
+#ifdef __cplusplus
+}
+#endif
+
+
 
 #endif	/* !_SYS_UTSNAME_H_ */

@@ -1,6 +1,9 @@
 #include <sys/utsname.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 //struct utsname {
    // char	sysname[_SYS_NMLN];	/* Name of this OS. */
@@ -11,8 +14,7 @@
 //};
 
 //https://github.com/klange/toaruos/blob/94c976a903181df453f39d2a264f85c9a7c90246/kernel/sys/syscall.c
-extern "C"
-    int	uname(struct utsname *aUtsName) {
+int	uname(struct utsname *aUtsName) {
 
         strcpy(aUtsName->sysname, "Enryo");
         strcpy(aUtsName->nodename,"noname");
@@ -23,3 +25,8 @@ extern "C"
 
     return 0;
     }
+
+#ifdef __cplusplus
+}
+#endif
+
