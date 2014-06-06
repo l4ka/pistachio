@@ -34,6 +34,7 @@
 
 //Include the internal shell header...
 #include "internalshell.h"
+#include <sys/utsname.h>
 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
@@ -183,6 +184,11 @@ iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
 printf(iEnvStatus[ACTIVE_CMD]);
+
+//Try initialising uname
+uname();
+
+print("%s",aUtsName->sysname);
 
 //Lambda example from http://www.drdobbs.com/cpp/lambdas-in-c11/240168241?pgno=1
 auto sum = [](int x, int y) -> int { return x + y; };
