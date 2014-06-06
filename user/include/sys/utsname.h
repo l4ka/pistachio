@@ -37,7 +37,7 @@
 #ifndef	_SYS_UTSNAME_H_
 #define	_SYS_UTSNAME_H_
 
-#include <sys/featuretest.h>
+//#include <sys/featuretest.h>
 
 #define	_SYS_NMLN	256
 
@@ -55,8 +55,10 @@ struct utsname {
 
 #include <sys/cdefs.h>
 
-__BEGIN_DECLS
-int	uname __P((struct utsname *));
-__END_DECLS
+//__BEGIN_DECLS
+//int	uname __P((struct utsname *));
+//__END_DECLS
+
+int	uname(struct utsname *aUtsName) ;
 
 #endif	/* !_SYS_UTSNAME_H_ */
