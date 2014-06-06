@@ -10,7 +10,17 @@
   //  char	machine[_SYS_NMLN];	/* Hardware type. */
 //};
 
+//https://github.com/klange/toaruos/blob/94c976a903181df453f39d2a264f85c9a7c90246/kernel/sys/syscall.c
+
     int	uname(struct utsname *aUtsName) {
+
+        /*
+    strcpy(name->sysname,  __kernel_name);
+    strcpy(name->nodename, hostname);
+    strcpy(name->release,  version_number);
+    strcpy(name->version,  version_string);
+    strcpy(name->machine,  __kernel_arch);
+    strcpy(name->domainname, "");*/
 
     return 0;
     }
