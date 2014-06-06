@@ -14,14 +14,6 @@
 
     int	uname(struct utsname *aUtsName) {
 
-        /*
-    strcpy(name->sysname,  __kernel_name);
-    strcpy(name->nodename, hostname);
-    strcpy(name->release,  version_number);
-    strcpy(name->version,  version_string);
-    strcpy(name->machine,  __kernel_arch);
-    strcpy(name->domainname, "");*/
-
         strcpy(aUtsName->sysname, "Enryo");
         strcpy(aUtsName->nodename,"noname");
         strcpy(aUtsName->release, "0");
