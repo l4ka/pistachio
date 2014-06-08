@@ -38,7 +38,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 #$(wildcard openbsd/locale/*.c)
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
-#ia32_OBJS=      libhash/src/arch-ia32/try_lock.S
+ia32_OBJS=      libhash/src/arch-ia32/try_lock.S
 
 
 LIBRARY=	io
