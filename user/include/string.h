@@ -87,6 +87,9 @@ size_t strspn(const char *s1, const char *s2);
 size_t
 strxfrm(char *s1, const char *s2, size_t n);
 
+int
+timingsafe_bcmp(const void *b1, const void *b2, size_t n);
+
 
 #ifdef __cplusplus
 }
