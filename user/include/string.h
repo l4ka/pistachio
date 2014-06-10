@@ -35,6 +35,10 @@ int strcasecmp(const char *s1, const char *s2);
 
 int obsd_strcmp(const char *s1, const char *s2);
 
+void *
+memmem(const void *l, size_t l_len, const void *s, size_t s_len);
+
+
 char * strrchr(const char *p, int ch);
 
 int
