@@ -27,6 +27,7 @@ char * index(const char *p, int ch);
 
 int ffs(int mask);
 int fls(int mask);
+int ffsl(long mask);
 
 void *
 memrchr(const void *s, int c, size_t n);

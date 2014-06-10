@@ -29,7 +29,7 @@
  * $FreeBSD: head/lib/libc/string/ffsl.c 251069 2013-05-28 20:57:40Z emaste $
  */
 
-#include <strings.h>
+#include <string.h>
 
 /*
  * Find First Set bit
