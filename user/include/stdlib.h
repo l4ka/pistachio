@@ -14,6 +14,9 @@ extern "C" {
 //Temporary definition from http://riot-os.org/api/quad_8h_source.html
 typedef long long quad_t;
 
+quad_t qabs(quad_t j);
+
+
 /* Pseudo-random sequence generation */
 int rand_r(u_int *seed);
 int rand(void);
@@ -21,6 +24,13 @@ void srand(u_int seed);
 
 char * l64a(long value);
 int l64a_r(long value, char *buffer, int buflen);
+
+int abs(int j);
+
+int
+heapsort(void *vbase, size_t nmemb, size_t size,
+    int (*compar)(const void *, const void *));
+
 
 void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
