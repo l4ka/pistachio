@@ -31,7 +31,7 @@
  */
 
 #include <sys/types.h>
-#include <errno.h>
+//#include <errno.h>
 #include <stdlib.h>
 
 /*
@@ -141,7 +141,7 @@ heapsort(void *vbase, size_t nmemb, size_t size,
 		return (0);
 
 	if (!size) {
-		errno = EINVAL;
+//		errno = EINVAL;
 		return (-1);
 	}
 

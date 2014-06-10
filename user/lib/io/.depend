@@ -26,6 +26,14 @@ memcmp.o: openbsd/libkern/memcmp.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+abs.o: openbsd/stdlib/abs.c ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h
+heapsort.o: openbsd/stdlib/heapsort.c ../../include/sys/types.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h
 strxfrm.o: android/strxfrm.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
@@ -129,6 +137,13 @@ hash.o: libhash/src/hash.c ../../include/stdint.h ../../include/stdlib.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  ../../include/assert.h ../../include/hash.h
+binary_tree.o: binary_tree.c ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/string.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/binary_tree/binary_tree.h ../../include/stdint.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h
 rand.o: openbsd/rand.c ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  ../../include/stdlib.h ../../include/liballoc.h \
