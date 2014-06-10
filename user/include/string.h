@@ -27,6 +27,8 @@ char * index(const char *p, int ch);
 
 int ffs(int mask);
 
+char * strsignal(int sig);
+
 char * strsep(char **stringp, const char *delim);
 
 size_t strxfrm(char *dst, const char *src, size_t n);
