@@ -13,7 +13,7 @@ extern "C" {
 //http://fxr.watson.org/fxr/source/sys/types.h?v=OPENBSD
 typedef unsigned int    u_int;
 
-
+#define CHAR_BIT 8
 #define	RAND_MAX	2147483647 // Like Linux
 
 typedef unsigned long long u_quad_t;
