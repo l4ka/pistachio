@@ -47,8 +47,8 @@ struct que_elem {
 #ifdef __cplusplus
 extern "C" {
 #endif
-// void	*bsearch ((const void *, const void *, size_t, size_t,
-//			      int (*)(const void *, const void *)));
+ void	*bsearch (const void *, const void *, size_t, size_t,
+			      int (*)(const void *, const void *));
  //int	 hcreate ((unsigned int));
  //void	 hdestroy ((void));
  //ENTRY	*hsearch ((ENTRY, ACTION));
