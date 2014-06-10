@@ -32,6 +32,17 @@ typedef enum {
 	leaf
 } VISIT;
 
+//http://gitweb.dragonflybsd.org/dragonfly.git/blob_plain/c8dd1ae615f4c3a6042727e69e5c05434f781224:/include/search.h
+typedef	struct node {
+	char         *key;
+	struct node  *llink, *rlink;
+} node_t;
+
+struct que_elem {
+	struct que_elem *next;
+	struct que_elem *prev;
+};
+
 //__BEGIN_DECLS
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +57,7 @@ extern "C" {
 			    //  int (*)(const void *, const void *)));
  //void	*lsearch ((const void *, const void *, size_t *, size_t,
 			     // int (*)(const void *, const void *)));
- //void	 insque ((void *, void *));
+ void	 insque (void *, void *);
  //void	 remque ((void *));
 
  void	*tdelete (const void *, void **,
