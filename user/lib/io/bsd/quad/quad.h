@@ -50,7 +50,7 @@
  * quads and 64-bit longs, for instance, or 96-bit arithmetic on machines
  * with 48-bit longs.
  */
-
+#include <endian.h>
 #include <sys/types.h>
 #include <limits.h>
 
