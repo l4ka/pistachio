@@ -35,6 +35,11 @@ rand.o: openbsd/stdlib/rand.c ../../include/sys/types.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h ../../include/stdlib.h \
  ../../include/liballoc.h ../../include/sys/cdefs.h
+tsearch.o: openbsd/stdlib/tsearch.c ../../include/search.h \
+ ../../include/sys/cdefs.h ../../include/machine/ansi.h \
+ ../../include/stdlib.h ../../include/liballoc.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h
 strxfrm.o: android/strxfrm.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
@@ -42,6 +47,14 @@ strxfrm.o: android/strxfrm.c ../../include/string.h \
 bzero.o: openbsd/string/bzero.c ../../include/openbsd/libkern.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h
+explicit_bzero.o: openbsd/string/explicit_bzero.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+ffs.o: openbsd/string/ffs.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 index.o: openbsd/string/index.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
@@ -105,6 +118,10 @@ strsep.o: openbsd/string/strsep.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strsignal.o: openbsd/string/strsignal.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h ../../include/limits.h
 strspn.o: openbsd/string/strspn.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
