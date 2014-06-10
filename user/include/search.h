@@ -32,7 +32,7 @@ typedef enum {
 	leaf
 } VISIT;
 
-__BEGIN_DECLS
+//__BEGIN_DECLS
 extern void	*bsearch __P((const void *, const void *, size_t, size_t,
 			      int (*)(const void *, const void *)));
 extern int	 hcreate __P((unsigned int));
@@ -53,6 +53,6 @@ extern void	*tfind __P((const void *, void * const *,
 extern void	*tsearch __P((const void *, void **, 
 			      int (*)(const void *, const void *)));
 extern void      twalk __P((const void *, void (*)(const void *, VISIT, int)));
-__END_DECLS
+//__END_DECLS
 
 #endif
