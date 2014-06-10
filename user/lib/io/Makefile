@@ -43,9 +43,8 @@ ia32_OBJS=      libhash/src/arch-ia32/try_lock.S
 
 LIBRARY=	io
 SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
- $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)  $(wildcard android/*.c) $(wildcard bsd/string/*.c) sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c $(wildcard dragonflybsd/*.c) \
- libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c netware/apicore.c uname.c nap.c \
-$(wildcard p9rune/*.c)
+ $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)  $(wildcard android/*.c) $(wildcard bsd/string/*.c) sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c $(wildcard bsd/quad/*.c) \
+ libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c)
 
 #btree_core.c bt_modify.c
 
