@@ -11,6 +11,9 @@ extern "C" {
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
+//Temporary definition from http://riot-os.org/api/quad_8h_source.html
+typedef long long quad_t;
+
 /* Pseudo-random sequence generation */
 int rand_r(u_int *seed);
 int rand(void);
