@@ -58,7 +58,7 @@ extern "C" {
  //void	*lsearch ((const void *, const void *, size_t *, size_t,
 			     // int (*)(const void *, const void *)));
  void	 insque (void *, void *);
- //void	 remque ((void *));
+ void	 remque (void *);
 
  void	*tdelete (const void *, void **,
 			      int (*)(const void *, const void *));
