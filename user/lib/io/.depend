@@ -19,13 +19,6 @@ pcspkr.o: pcspkr.c ../../include/stdio.h ../../include/l4io.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
  ../../include/openbsd/libkern.h ../../lib/io/ia32.h \
  ../../include/pcspkr_shim.h
-bzero.o: openbsd/libkern/bzero.c ../../include/openbsd/libkern.h \
- ../../include/l4/types.h ../../include/l4/ia32/types.h \
- ../../include/l4/ia32/specials.h
-memcmp.o: openbsd/libkern/memcmp.c ../../include/string.h \
- ../../include/sys/types.h ../../include/l4/types.h \
- ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
- /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 abs.o: openbsd/stdlib/abs.c ../../include/stdlib.h \
  ../../include/liballoc.h ../../include/sys/cdefs.h \
  ../../include/sys/types.h ../../include/l4/types.h \
@@ -46,13 +39,24 @@ strxfrm.o: android/strxfrm.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+bzero.o: openbsd/string/bzero.c ../../include/openbsd/libkern.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h
 index.o: openbsd/string/index.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+memcmp.o: openbsd/string/memcmp.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 memcpy.o: openbsd/string/memcpy.c ../../include/sys/types.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h
+memmem.o: openbsd/string/memmem.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 memset.o: openbsd/string/memset.c ../../include/sys/types.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h
@@ -76,6 +80,10 @@ strcmp.o: openbsd/string/strcmp.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strcoll.o: openbsd/string/strcoll.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 strcpy.o: openbsd/string/strcpy.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
@@ -93,11 +101,23 @@ strlcat.o: openbsd/string/strlcat.c ../../include/sys/types.h \
 strlen.o: openbsd/string/strlen.c ../../include/sys/types.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h ../../include/liballoc.h
+strsep.o: openbsd/string/strsep.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 strspn.o: openbsd/string/strspn.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strstr.o: openbsd/string/strstr.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
 strtok.o: openbsd/string/strtok.c ../../include/string.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+strxfrm.o: openbsd/string/strxfrm.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
