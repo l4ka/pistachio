@@ -49,10 +49,10 @@ extern "C" {
  //void	 insque ((void *, void *));
  //void	 remque ((void *));
 
- //void	*tdelete ((const void *, void **,
-			     // int (*)(const void *, const void *)));
- //void	*tfind ((const void *, void * const *,
-			      //int (*)(const void *, const void *)));
+ void	*tdelete (const void *, void **,
+			      int (*)(const void *, const void *));
+ void	*tfind (const void *, void * const *,
+			      int (*)(const void *, const void *));
 void *
 tsearch(const void *vkey, void **vrootp,
     int (*compar)(const void *, const void *));
