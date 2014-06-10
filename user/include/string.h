@@ -51,6 +51,8 @@ strcoll(const char *s1, const char *s2);
 
 char *
 strtok_r(char *s, const char *delim, char **last);
+void
+explicit_bzero(void *p, size_t n);
 
 char *
 strtok(char *s, const char *delim);
