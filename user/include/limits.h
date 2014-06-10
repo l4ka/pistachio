@@ -1,0 +1,1 @@
+#define NL_TEXTMAX	255
