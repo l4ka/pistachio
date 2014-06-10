@@ -26,6 +26,8 @@ char * rindex(const char *p, int ch);
 char * index(const char *p, int ch);
 
 int ffs(int mask);
+int fls(int mask);
+
 
 char * strsignal(int sig);
 
