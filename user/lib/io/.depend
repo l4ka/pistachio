@@ -196,3 +196,4 @@ uname.o: uname.c ../../include/sys/utsname.h ../../include/sys/cdefs.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h
+nap.o: nap.c
