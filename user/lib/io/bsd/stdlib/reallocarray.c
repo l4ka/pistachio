@@ -26,6 +26,10 @@
  */
 #define MUL_NO_OVERFLOW	(1UL << (sizeof(size_t) * 4))
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t) -1)
+#endif 
+
 void *
 reallocarray(void *optr, size_t nmemb, size_t size)
 {
