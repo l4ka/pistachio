@@ -16,6 +16,9 @@ extern "C" {
 
 quad_t qabs(quad_t j);
 
+void *
+reallocarray(void *optr, size_t nmemb, size_t size);
+
 
 /* Pseudo-random sequence generation */
 int rand_r(u_int *seed);
