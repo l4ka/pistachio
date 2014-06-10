@@ -10,6 +10,7 @@
 #define _SEARCH_H_
 #include <sys/cdefs.h>
 #include <machine/ansi.h>
+#include <sys/types.h>
 
 #ifdef	_BSD_SIZE_T_
 typedef	_BSD_SIZE_T_	size_t;
