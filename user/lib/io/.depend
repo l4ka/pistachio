@@ -34,6 +34,14 @@ heapsort.o: openbsd/stdlib/heapsort.c ../../include/sys/types.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h ../../include/stdlib.h \
  ../../include/liballoc.h ../../include/sys/cdefs.h
+qabs.o: openbsd/stdlib/qabs.c ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h
+rand.o: openbsd/stdlib/rand.c ../../include/sys/types.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h
 strxfrm.o: android/strxfrm.c ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
@@ -144,10 +152,6 @@ binary_tree.o: binary_tree.c ../../include/stdlib.h \
  ../../include/string.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
  ../../include/binary_tree/binary_tree.h ../../include/stdint.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h
-rand.o: openbsd/rand.c ../../include/sys/types.h ../../include/l4/types.h \
- ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
- ../../include/stdlib.h ../../include/liballoc.h \
- ../../include/sys/cdefs.h
 apicore.o: netware/apicore.c ../../include/nwmalloc.h \
  ../../include/liballoc.h
 uname.o: uname.c ../../include/sys/utsname.h ../../include/sys/cdefs.h \
