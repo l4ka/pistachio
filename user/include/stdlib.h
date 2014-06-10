@@ -12,7 +12,7 @@ extern "C" {
 #include <sys/types.h>
 
 //Temporary definition from http://riot-os.org/api/quad_8h_source.html
-typedef long long quad_t;
+//typedef long long quad_t;
 
 quad_t qabs(quad_t j);
 
