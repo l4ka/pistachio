@@ -36,26 +36,28 @@ typedef enum {
 #ifdef __cplusplus
 extern "C" {
 #endif
- void	*bsearch ((const void *, const void *, size_t, size_t,
-			      int (*)(const void *, const void *)));
- int	 hcreate ((unsigned int));
- void	 hdestroy ((void));
- ENTRY	*hsearch ((ENTRY, ACTION));
+// void	*bsearch ((const void *, const void *, size_t, size_t,
+//			      int (*)(const void *, const void *)));
+ //int	 hcreate ((unsigned int));
+ //void	 hdestroy ((void));
+ //ENTRY	*hsearch ((ENTRY, ACTION));
 
- void	*lfind ((const void *, const void *, size_t *, size_t,
-			      int (*)(const void *, const void *)));
- void	*lsearch ((const void *, const void *, size_t *, size_t,
-			      int (*)(const void *, const void *)));
- void	 insque ((void *, void *));
- void	 remque ((void *));
+// void	*lfind ((const void *, const void *, size_t *, size_t,
+			    //  int (*)(const void *, const void *)));
+ //void	*lsearch ((const void *, const void *, size_t *, size_t,
+			     // int (*)(const void *, const void *)));
+ //void	 insque ((void *, void *));
+ //void	 remque ((void *));
 
- void	*tdelete ((const void *, void **,
-			      int (*)(const void *, const void *)));
- void	*tfind ((const void *, void * const *,
-			      int (*)(const void *, const void *)));
- void	*tsearch ((const void *, void **, 
-			      int (*)(const void *, const void *)));
- void      twalk ((const void *, void (*)(const void *, VISIT, int)));
+ //void	*tdelete ((const void *, void **,
+			     // int (*)(const void *, const void *)));
+ //void	*tfind ((const void *, void * const *,
+			      //int (*)(const void *, const void *)));
+void *
+tsearch(const void *vkey, void **vrootp,
+    int (*compar)(const void *, const void *));
+
+ void      twalk (const void *, void (*)(const void *, VISIT, int));
 //__END_DECLS
 #ifdef __cplusplus
 }

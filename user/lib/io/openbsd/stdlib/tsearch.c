@@ -20,7 +20,9 @@ typedef struct node_t {
     struct node_t *left, *right;
 } node;
 
+#ifdef __cplusplus
 extern "C" {
+#endif
 /* find or insert datum into search tree */
 void *
 tsearch(const void *vkey, void **vrootp,
@@ -118,4 +120,7 @@ twalk(const void *vroot, void (*action)(const void *, VISIT, int))
     if (root != (node *)0 && action != (void (*)(const void *, VISIT, int))0)
 	trecurse(root, action, 0);
 }
+#ifdef __cplusplus
 }
+#endif
+
