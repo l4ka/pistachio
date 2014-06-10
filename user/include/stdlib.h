@@ -24,6 +24,8 @@ void srand(u_int seed);
 
 char * l64a(long value);
 int l64a_r(long value, char *buffer, int buflen);
+long a64l(const char *s);
+
 
 int abs(int j);
 
