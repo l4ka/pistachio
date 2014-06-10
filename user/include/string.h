@@ -33,6 +33,9 @@ int obsd_strcmp(const char *s1, const char *s2);
 
 char * strrchr(const char *p, int ch);
 
+int
+strcoll(const char *s1, const char *s2);
+
 char *
 strtok_r(char *s, const char *delim, char **last);
 
