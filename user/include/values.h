@@ -5,3 +5,6 @@ void sputl(l, buffer)
 register long l;
 register char *buffer;
 
+long  sgetl(buffer)
+register char *buffer;
+
