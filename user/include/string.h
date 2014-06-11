@@ -23,6 +23,9 @@ extern "C" {
 void *
 memcpy(void *s1, const void *s2, size_t n);
 
+char *
+strerror(int num);
+
 void *
 memccpy(void *t, const void *f, int c, size_t n);
 
