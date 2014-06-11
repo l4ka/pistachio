@@ -51,13 +51,13 @@
 #define	_X	0x40
 #define	_B	0x80
 
-__BEGIN_DECLS
+//__BEGIN_DECLS
 
 extern const char	*_ctype_;
 extern const short	*_tolower_tab_;
 extern const short	*_toupper_tab_;
 
-#if defined(__GNUC__) || defined(_ANSI_LIBRARY)
+//#if defined(__GNUC__) || defined(_ANSI_LIBRARY)
 int	isalnum(int);
 int	isalpha(int);
 int	iscntrl(int);
@@ -71,22 +71,22 @@ int	isupper(int);
 int	isxdigit(int);
 int	tolower(int);
 int	toupper(int);
-
-#if __BSD_VISIBLE || __ISO_C_VISIBLE >= 1999 || __POSIX_VISIBLE > 200112 \
+ 
+/* #if __BSD_VISIBLE || __ISO_C_VISIBLE >= 1999 || __POSIX_VISIBLE > 200112 \
     || __XPG_VISIBLE > 600
 int	isblank(int);
 #endif
-
-#if __BSD_VISIBLE || __XPG_VISIBLE
+*/
+//#if __BSD_VISIBLE || __XPG_VISIBLE
 int	isascii(int);
 int	toascii(int);
 int	_tolower(int);
 int	_toupper(int);
-#endif /* __BSD_VISIBLE || __XPG_VISIBLE */
+//#endif /* __BSD_VISIBLE || __XPG_VISIBLE */
 
-#endif /* __GNUC__ || _ANSI_LIBRARY */
+//#endif /* __GNUC__ || _ANSI_LIBRARY */
 
-#if !defined(_ANSI_LIBRARY)
+/* #if !defined(_ANSI_LIBRARY)
 
 __only_inline int isalnum(int _c)
 {
@@ -184,12 +184,12 @@ __only_inline int _tolower(int _c)
 __only_inline int _toupper(int _c)
 {
 	return (_c - 'a' + 'A');
-}
-#endif /* __BSD_VISIBLE || __XPG_VISIBLE */
+} */
+//#endif /* __BSD_VISIBLE || __XPG_VISIBLE */
 
-#endif /* !_ANSI_LIBRARY */
+//#endif /* !_ANSI_LIBRARY */
 
-__END_DECLS
+//__END_DECLS
 
 #endif /* !_CTYPE_H_ */
 
