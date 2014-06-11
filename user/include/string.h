@@ -23,6 +23,10 @@ extern "C" {
 void *
 memcpy(void *s1, const void *s2, size_t n);
 
+void *
+memccpy(void *t, const void *f, int c, size_t n);
+
+
 //Probably breaks stuff...
 int strcmp(const char *aString1, const char *aString2); 
 
