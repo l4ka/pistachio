@@ -19,6 +19,10 @@
 extern "C" {
 #endif
 
+char *
+strncpy(char *dst, const char *src, size_t n);
+
+
 //The triad...
 void *
 memcpy(void *dst0, const void *src0, size_t length);
