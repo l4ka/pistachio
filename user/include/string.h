@@ -19,6 +19,9 @@
 extern "C" {
 #endif
 
+size_t
+strcspn(const char *s1, const char *s2);
+
 
 int
 strncmp(const char *s1, const char *s2, size_t n);
