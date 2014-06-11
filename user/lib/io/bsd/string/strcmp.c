@@ -41,6 +41,11 @@
 /*
  * Compare strings.
  */
+
+int strcmp(const char *aString1, const char *aString2) {
+	return obsd_strcmp(aString1, aString2);
+}
+
 int
 obsd_strcmp(const char *s1, const char *s2)
 {

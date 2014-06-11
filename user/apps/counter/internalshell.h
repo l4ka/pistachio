@@ -16,6 +16,7 @@
 //ToAru PC speaker shim, move later
 #include <pcspkr_shim.h>
 
+#include <cstring>
 /* Track the environment status */
 #define ACTIVE_CMD 0
 #define CMD_RESULT 1

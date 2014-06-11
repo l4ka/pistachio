@@ -35,7 +35,8 @@
 //Include the internal shell header...
 #include "internalshell.h"
 #include <sys/utsname.h>
-
+ 
+//#include <cstring> 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)

@@ -19,6 +19,13 @@
 extern "C" {
 #endif
 
+//Try exporting this for cstring...
+void *
+memcpy(void *s1, const void *s2, size_t n);
+
+//Probably breaks stuff...
+int strcmp(const char *aString1, const char *aString2); 
+
 //BSD rindex(), like strrchr()
 //https://github.com/toddfries/OpenBSD-lib-patches/blob/master/libc/string/rindex.c
 char * rindex(const char *p, int ch);
