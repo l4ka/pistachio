@@ -1,10 +1,62 @@
 crt0-ia32.o: crt0-ia32.S ../../config.h
-basic.o: basic.c ../../include/stdio.h ../../include/l4io.h \
+counter.o: counter.cc internalshell.h ../../include/liballoc.h \
+ ../../include/mindrvr.h elmfat/src/diskio.h elmfat/src/integer.h \
+ elmfat/src/ff.h elmfat/src/ffconf.h ../../include/l4io.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
- ../../include/openbsd/libkern.h ../../include/string.h \
- ../../include/sys/types.h \
- /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h ../../include/stdlib.h \
- ../../include/liballoc.h ../../include/sys/cdefs.h \
- ../../include/sys/sysinfo.h
+ ../../include/openbsd/libkern.h ../../include/l4/sigma0.h \
+ ../../include/l4/kip.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/ipc.h ../../include/l4/thread.h \
+ ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h \
+ ../../include/pcspkr_shim.h ../../include/cstring ../../include/cstddef \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/string.h \
+ ../../include/sys/types.h ../../include/sys/utsname.h \
+ ../../include/sys/cdefs.h
+libhashtest.o: libhashtest.c ../../include/assert.h ../../include/hash.h \
+ ../../include/stdint.h ../../include/liballoc.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h
+mindrvr.o: mindrvr.c ../../include/mindrvr.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/thread.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/kip.h ../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h
+ff.o: elmfat/src/ff.c elmfat/src/ff.h elmfat/src/integer.h \
+ elmfat/src/ffconf.h elmfat/src/diskio.h ../../include/l4/sigma0.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/kip.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4/ipc.h \
+ ../../include/l4/thread.h ../../include/l4/kdebug.h \
+ ../../include/l4/ia32/kdebug.h
+diskio.o: elmfat/src/diskio.c ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h elmfat/src/diskio.h elmfat/src/integer.h \
+ elmfat/src/ff.h elmfat/src/ffconf.h ../../include/mindrvr.h
+mt19937ar.o: mt19937ar.c ../../include/stdio.h ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h
+internalshell.o: internalshell.cc internalshell.h \
+ ../../include/liballoc.h ../../include/mindrvr.h elmfat/src/diskio.h \
+ elmfat/src/integer.h elmfat/src/ff.h elmfat/src/ffconf.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/l4/sigma0.h \
+ ../../include/l4/kip.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/ipc.h ../../include/l4/thread.h \
+ ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h \
+ ../../include/pcspkr_shim.h ../../include/cstring ../../include/cstddef \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/string.h \
+ ../../include/sys/types.h
