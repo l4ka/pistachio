@@ -3,6 +3,7 @@
 #include <l4io.h>
 
 #define EOF (-1)
+#include <sys/types.h>
 
 //Be BeOS-compatible...
 int is_computer_on();

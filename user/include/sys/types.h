@@ -9,9 +9,24 @@ extern "C" {
 
 #include <l4/types.h>
 
+/* L4 defines these:
+
+   * typedef unsigned int            L4_Word32_t;
+
+   * typedef unsigned short          L4_Word16_t;
+
+   * typedef unsigned char           L4_Word8_t;
+
+   * typedef unsigned long           L4_Word_t;
+
+*/
+
 //Rand wants this
 //http://fxr.watson.org/fxr/source/sys/types.h?v=OPENBSD
 typedef unsigned int    u_int;
+typedef unsigned int    uint8_t; 
+
+typedef L4_Word32_t int32_t;
 
 #define CHAR_BIT 8
 #define	RAND_MAX	2147483647 // Like Linux

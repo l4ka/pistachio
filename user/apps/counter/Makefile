@@ -41,13 +41,13 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/libmutex/libmutex.a \
 
-SRCS=		crt0-$(ARCH).S  counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc  
+SRCS=		crt0-$(ARCH).S $(wildcard pforth_v27/csrc/*.c) # counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc  
 
 LIBS+=		-ll4 -lio -lmutex 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
-CFLAGS_ia32 += -DLUA_COMPAT_ALL -std=c++11 -DINT_MAX -DUCHAR_MAX
+CFLAGS_ia32 += -DLUA_COMPAT_ALL -DPF_NO_CLIB -std=c++11 -DINT_MAX -DUCHAR_MAX
 
 include $(top_srcdir)/Mk/l4.prog.mk

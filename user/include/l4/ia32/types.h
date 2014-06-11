@@ -39,6 +39,7 @@
 
 typedef unsigned int __attribute__((__mode__(__DI__))) L4_Word64_t;
 typedef unsigned int		L4_Word32_t;
+
 typedef unsigned short		L4_Word16_t;
 typedef unsigned char		L4_Word8_t;
 
