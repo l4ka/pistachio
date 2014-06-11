@@ -56,3 +56,4 @@ toupper(int c)
 		return(c);
 	return((_toupper_tab_ + 1)[c]);
 }
+

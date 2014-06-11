@@ -2,6 +2,8 @@
 #define __STDIO_H__
 #include <l4io.h>
 
+#define EOF (-1)
+
 //Be BeOS-compatible...
 int is_computer_on();
 
