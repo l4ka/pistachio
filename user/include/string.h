@@ -29,6 +29,9 @@ int strcmp(const char *aString1, const char *aString2);
 char *
 strpbrk(const char *s1, const char *s2);
 
+void *
+memchr(const void *s, int c, size_t n);
+
 
 //BSD rindex(), like strrchr()
 //https://github.com/toddfries/OpenBSD-lib-patches/blob/master/libc/string/rindex.c
