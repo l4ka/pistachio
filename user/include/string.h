@@ -19,6 +19,18 @@
 extern "C" {
 #endif
 
+//The triad...
+void *
+memcpy(void *dst0, const void *src0, size_t length);
+
+void *
+memmove(void *dst0, const void *src0, size_t length);
+
+void
+bcopy(const void *src0, void *dst0, size_t length);
+
+
+
 //Try exporting this for cstring...
 void *
 memcpy(void *s1, const void *s2, size_t n);
