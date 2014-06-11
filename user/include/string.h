@@ -19,6 +19,10 @@
 extern "C" {
 #endif
 
+char *
+strncat(char *dst, const char *src, size_t n);
+
+
 size_t
 strcspn(const char *s1, const char *s2);
 
