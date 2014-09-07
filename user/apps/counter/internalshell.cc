@@ -12,6 +12,7 @@ int InternalShell::ShellHelp() {
     printf("\n\t * malloc_test_1 : Test the liballoc port (should return 25).\n");
     printf("\n\t * shiritori     : Start the Shiritori game \(buggy!\).\n");
     printf("\n\t * tettheme      : Play part of the Tetris theme. \n");
+    printf("\n\t * strtod        : Test the strtod() function. \n");
 
     printf("\n\n");
 
