@@ -19,6 +19,8 @@ quad_t qabs(quad_t j);
 void *
 reallocarray(void *optr, size_t nmemb, size_t size);
 
+// Functions for working with floats
+// double strtod (CONST char *s00, char **se);
 
 /* Pseudo-random sequence generation */
 int rand_r(u_int *seed);
