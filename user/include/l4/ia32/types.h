@@ -55,6 +55,9 @@ typedef signed long		L4_SignedWord_t;
 typedef unsigned int		L4_Size_t;
 typedef unsigned int		size_t; //Alias for BSD compatibility
 
+//Defined for BSD compatibility
+typedef unsigned long int 	uint32_t;
+
 typedef L4_Word64_t		L4_Paddr_t;
 
 #endif /* !__L4__X86__TYPES_H__ */
