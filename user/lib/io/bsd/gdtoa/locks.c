@@ -4,4 +4,6 @@
 
 #include <stdio.h>
 
+#define NULL 0
+
 void *__dtoa_locks[] = { NULL, NULL };
