@@ -20,16 +20,18 @@
 #include <sys/_types.h>
 #include <sys/limits.h>
 
-__BEGIN_DECLS
+//__BEGIN_DECLS
 /*
  * ANSI/POSIX
  */
 extern char __infinity[];
-#if __GNUC_PREREQ__(3, 3) && !defined(__vax__)
-#define HUGE_VAL	__builtin_huge_val()
-#else /* __GNUC_PREREQ__(3, 3) && !__vax__ */
-#define HUGE_VAL	(*(double *)(void *)__infinity)
-#endif /* __GNUC_PREREQ__(3, 3) && !__vax__ */
+
+//#if __GNUC_PREREQ__(3, 3) && !defined(__vax__)
+//#define HUGE_VAL	__builtin_huge_val()
+//#else /* __GNUC_PREREQ__(3, 3) && !__vax__ */
+//#define HUGE_VAL	(*(double *)(void *)__infinity)
+//#endif /* __GNUC_PREREQ__(3, 3) && !__vax__ */
+
 
 /*
  * C99
@@ -480,6 +482,6 @@ int __signbitl(long double);
 #if __BSD_VISIBLE && defined(__vax__)
 double infnan(int);
 #endif /* __BSD_VISIBLE && defined(__vax__) */
-__END_DECLS
+//__END_DECLS
 
 #endif /* !_MATH_H_ */
