@@ -35,6 +35,8 @@
 //Include the internal shell header...
 #include "internalshell.h"
 #include <sys/utsname.h>
+
+#include <stdlib.h>
  
 //#include <cstring> 
 #define KB(x) (x*1024)
@@ -200,6 +202,26 @@ printf("\n\n%d\n\n",sum(1,2));
     InternalShell ish;
 
 while(WAITING) {
+
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "strtod") == 0) {
+	
+	iEnvStatus[CMD_RESULT] = (char*)RUNNING;
+//http://www.cplusplus.com/reference/cstdlib/strtod/
+  char szOrbits[] = "365.24 29.53";
+  char* pEnd;
+  double d1, d2;
+  d1 = strtod (szOrbits, &pEnd);
+  d2 = strtod (pEnd, NULL);
+  printf ("The moon completes %.2f orbits per Earth year.\n", d1/d2);
+
+       //Return to prompt
+        iEnvStatus[CMD_RESULT] = (char*)WAITING;
+        printf(iEnvStatus[ACTIVE_CMD]);
+
+        iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+
+
+}
 
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "tettheme") == 0) {
 	
