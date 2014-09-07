@@ -32,6 +32,12 @@ extern char __infinity[];
 //#define HUGE_VAL	(*(double *)(void *)__infinity)
 //#endif /* __GNUC_PREREQ__(3, 3) && !__vax__ */
 
+#define	FP_INFINITE	0x01
+#define	FP_NAN		0x02
+#define	FP_NORMAL	0x04
+#define	FP_SUBNORMAL	0x08
+#define	FP_ZERO		0x10
+
 
 /*
  * C99
@@ -60,11 +66,7 @@ extern char __nan[];
 #endif /* !__vax__ */
 #endif /* __GNUC_PREREQ__(3, 3) && !__vax__ */
 
-#define	FP_INFINITE	0x01
-#define	FP_NAN		0x02
-#define	FP_NORMAL	0x04
-#define	FP_SUBNORMAL	0x08
-#define	FP_ZERO		0x10
+
 
 #define FP_ILOGB0	(-INT_MAX)
 #define FP_ILOGBNAN	INT_MAX
