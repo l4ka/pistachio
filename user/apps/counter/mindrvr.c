@@ -886,6 +886,10 @@ int reg_pio_data_in_lba28( unsigned char dev, unsigned char cmd,
 
 {
 
+printf("\n\n[mindrvr] Inside reg_pio_data_in_lba28() : \
+	dev: %d, char: %x, fr: %d, sc: %d, lba: %d, buffAddr: %s, numSect: %d, multiCnt: %d\n\n",
+		dev, cmd, fr, sc, lba, bufAddr, numSect, multiCnt); 
+
    reg_cmd_info.cmd = cmd;
    reg_cmd_info.fr = fr;
    reg_cmd_info.sc = sc;
