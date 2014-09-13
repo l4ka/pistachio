@@ -137,8 +137,9 @@ printf("\n\n[root-task] : f_mount(default drive, %d)\n\n",f_mount(fileSys, "driv
 //	UINT count
 
 BYTE iData;
-int readRes = disk_read(0, &iData, 0, 1);
+int readRes = disk_read(0, &iData, 0, 10);
 printf("\n[counter] : Result of reading sector is %d\n", readRes);
+printf((char*)iData);
 }
 
 int Beep() {
