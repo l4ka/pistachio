@@ -178,7 +178,7 @@ static int tmr_chk_timeout( void );
 int reg_config()
 
 {
-   printf("[mindrvr.c] : Inside reg_config()\n");
+   printf("\n\n[mindrvr.c] : Inside reg_config()\n\n");
    
    int numDev = 0;
    unsigned char sc;
@@ -703,7 +703,7 @@ static int exec_pio_data_in_cmd( unsigned char dev,
 
 {
 
-printf("[mindrvr] : Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt)");
+printf("\n\n[mindrvr] : Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt) \n\n");
 
    unsigned char status;
    long wordCnt;
@@ -732,7 +732,7 @@ printf("[mindrvr] : Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt)
    // Start the command by setting the Command register.  The drive
    // should immediately set BUSY status.
 
-printf("[mindrvr] : Sending packet 0x%x, 0x%x", CB_CMD, reg_cmd_info.cmd);
+printf("\n\n[mindrvr] : Sending packet 0x%x, 0x%x\n\n", CB_CMD, reg_cmd_info.cmd);
    pio_outbyte( CB_CMD, reg_cmd_info.cmd );
 
    // Waste some time by reading the alternate status a few times.
@@ -776,7 +776,7 @@ printf("[mindrvr] : Sending packet 0x%x, 0x%x", CB_CMD, reg_cmd_info.cmd);
       else
          status = int_ata_status;
 
-printf("[mindrvr] : PIO incoming packet status : %x", status);
+printf("\n\n[mindrvr] : PIO incoming packet status : %x\n\n", status);
 
       // If there was a time out error, go to READ_DONE.
 
