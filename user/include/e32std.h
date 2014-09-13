@@ -1,3 +1,6 @@
+#pragma once
+#include <string.h>
+
 //http://developer.nokia.com/community/wiki/Fundamental_Types_in_symbian
 
 //We don't have DLLs
