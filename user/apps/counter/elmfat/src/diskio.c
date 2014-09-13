@@ -145,7 +145,7 @@ reg_pio_data_in_lba28(CB_DH_DEV0,CMD_READ_SECTORS, 0x00, count, sector, buff, co
 
 		//result = ATA_disk_read(buff, sector, count);
 		result = reg_pio_data_in_lba28(CB_DH_DEV0,CMD_READ_SECTORS, 0x00, count, sector, buff, count, count);
-
+		printf("\n\n[diskio] : Buffer contained : %x\n\n", buff);
 		// translate the reslut code here
 
 		return res;
