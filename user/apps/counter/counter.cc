@@ -87,6 +87,8 @@ int MallocTestOne() {
 }
 
 void InitHwDev() {
+//Hello at 0x8c0000?
+//volatile char *myPointer = (volatile char *)0x8c0000;
 
 //TetrisTheme();
 	//printf("[root-task] : Found %d PATA devices", reg_config());
@@ -125,6 +127,8 @@ disk_initialize (0);
 printf("[root-task] : f_mount(default drive, %d)",f_mount(fileSys, "drive0:/", 1));
 //char[] firstSector;
 //disk_read (0, firstSector, 0, 1);
+
+
 
 }
 
@@ -198,6 +202,9 @@ printf("\n\nToday's recipe is brought to you by %s.\n A car you can trust!\n\n",
 auto sum = [](int x, int y) -> int { return x + y; };
 
 printf("\n\n%d\n\n",sum(1,2));
+
+//char *myPointer = (char *)0x8c0000;
+//printf(myPointer);
 
     InternalShell ish;
 
