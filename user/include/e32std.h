@@ -7,6 +7,10 @@
 #define EXPORT_C 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //These are supposed to be defined in e32def.h, in Symbian OS
 typedef unsigned int TUint;
 typedef unsigned char TUint8;
@@ -22,3 +26,9 @@ typedef	Int64	TInt64;
 //Real number types
 typedef double TReal;
 typedef double TReal64;
+
+
+#ifdef __cplusplus
+}
+#endif
+
