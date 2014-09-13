@@ -823,6 +823,8 @@ printf("[mindrvr] : PIO incoming packet status : %x", status);
       if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_ERR ) )
       {
          reg_cmd_info.ec = 31;
+	printf("\n\n[mindrvr] : Encountered a generic error (31) - busy; disk full; general error\n\n");
+
          break;   // go to READ_DONE
       }
 
@@ -831,6 +833,8 @@ printf("[mindrvr] : PIO incoming packet status : %x", status);
       if ( ( status & CB_STAT_DRQ ) == 0 )
       {
          reg_cmd_info.ec = 32;
+
+printf("\n\n[mindrvr] : The DRQ was toggled on (32)\n\n");
          break;   // go to READ_DONE
       }
 
@@ -847,6 +851,7 @@ printf("[mindrvr] : PIO incoming packet status : %x", status);
          if ( status & ( CB_STAT_BSY | CB_STAT_DF | CB_STAT_DRQ | CB_STAT_ERR ) )
          {
             reg_cmd_info.ec = 33;
+printf("\n\n[mindrvr] : Data transfer was succcessful (33)\n\n");
             break;   // go to READ_DONE
          }
 
