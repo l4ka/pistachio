@@ -9,6 +9,7 @@
 
 //These are supposed to be defined in e32def.h, in Symbian OS
 typedef unsigned int TUint;
+typedef unsigned char TUint8;
 typedef long int TInt32;
 
 //Symbian ints are always signed, unless marked as unsigned explicitly
