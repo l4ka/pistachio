@@ -702,6 +702,9 @@ static int exec_pio_data_in_cmd( unsigned char dev,
                             long numSect, int multiCnt )
 
 {
+
+printf("[mindrvr] : Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt)");
+
    unsigned char status;
    long wordCnt;
 
@@ -718,6 +721,7 @@ static int exec_pio_data_in_cmd( unsigned char dev,
 
    if ( sub_select( dev ) )
    {
+	
       return 1;
    }
 
@@ -728,6 +732,7 @@ static int exec_pio_data_in_cmd( unsigned char dev,
    // Start the command by setting the Command register.  The drive
    // should immediately set BUSY status.
 
+printf("[mindrvr] : Sending packet 0x%x, 0x%x", CB_CMD, reg_cmd_info.cmd);
    pio_outbyte( CB_CMD, reg_cmd_info.cmd );
 
    // Waste some time by reading the alternate status a few times.
@@ -770,6 +775,8 @@ static int exec_pio_data_in_cmd( unsigned char dev,
          status = pio_inbyte( CB_STAT );
       else
          status = int_ata_status;
+
+printf("[mindrvr] : PIO incoming packet status : %x", status);
 
       // If there was a time out error, go to READ_DONE.
 
