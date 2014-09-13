@@ -127,7 +127,7 @@ DRESULT disk_read (
 	DRESULT res;
 	int result;
 
-printf("[diskio] : Inside disk_read(%d, BUFF, %d, %d)\n", pdrv, sector, count);
+printf("\n[diskio] : Inside disk_read(%d, BUFF, %d, %d)\n", pdrv, sector, count);
 
 	switch (pdrv) {
 	case ATA :
@@ -145,6 +145,7 @@ reg_pio_data_in_lba28(CB_DH_DEV0,CMD_READ_SECTORS, 0x00, count, sector, buff, co
 
 		//result = ATA_disk_read(buff, sector, count);
 		result = reg_pio_data_in_lba28(CB_DH_DEV0,CMD_READ_SECTORS, 0x00, count, sector, buff, count, count);
+printf("\n[diskio] : Result of reading sector is %d\n", result);
 		// translate the reslut code here
 
 		return res;
