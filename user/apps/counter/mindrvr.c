@@ -878,6 +878,8 @@ printf("\n\n[mindrvr] : Data transfer was succcessful (33)\n\n");
    // All done.  The return values of this function are described in
    // MINDRVR.H.
 
+printf("\n\n[mindrvr] : Bye from exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt) - code %x\n\n", reg_cmd_info.ec);
+
    if ( reg_cmd_info.ec )
       return 1;
    return 0;
