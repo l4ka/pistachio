@@ -41,7 +41,7 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/libmutex/libmutex.a \
 
-SRCS=		crt0-$(ARCH).S  counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc sha256.cc #um_rand.cc 
+SRCS=		crt0-$(ARCH).S  counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc #sha256.cc #um_rand.cc 
 # $(wildcard pforth_v27/csrc/*.c)
 LIBS+=		-ll4 -lio -lmutex 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
