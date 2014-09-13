@@ -130,6 +130,15 @@ printf("[root-task] : f_mount(default drive, %d)",f_mount(fileSys, "drive0:/", 1
 
 
 
+//DRESULT disk_read (
+//	BYTE pdrv,		/* Physical drive nmuber (0..) */
+//	BYTE *buff,		/* Data buffer to store read data */
+//	DWORD sector,	/* Sector address (LBA) */
+//	UINT count
+
+BYTE iData;
+disk_read(0, &iData, 0, 1);
+
 }
 
 int Beep() {
