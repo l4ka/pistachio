@@ -17,6 +17,7 @@ extern "C" {
 int putenv(char *str);
 int setenv(const char *name, const char *value, int rewrite);
 int unsetenv(const char *name);
+char *getenv(const char *name);
 
 //Temporary definition from http://riot-os.org/api/quad_8h_source.html
 //typedef long long quad_t;
