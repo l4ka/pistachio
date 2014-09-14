@@ -77,9 +77,20 @@ extern long SYSTEM_READ_TIMER( void );
 //
 //********************************************************************
 
+//http://wiki.osdev.org/PCI_IDE_Controller
+//http://wiki.osdev.org/ATA/ATAPI_using_DMA
+//https://github.com/peterbjornx/posnk/blob/master/newkern/driver/block/pata/ata.c#L35
+//http://wiki.osdev.org/ATA_PIO_Mode
+
+/*
+Judging from http://wiki.osdev.org/ATA_read/write_sectors, and http://forge.voodooprojects.org/p/chameleon/source/tree/51//branches/prasys/i386/libsaio/mindrvr.h, it's a case of plugging in the right magic numbers for ports
+*/
+
+//An ATA bus typically has 9 I/O ports that control its behavior. For the primary bus, these I/O ports are 0x1F0 through 0x1F7, and 0x3F6 (see the directions below for usage details)
+
 // ATA Command Block base address
 // (the address of the ATA Data register)
-#define PIO_BASE_ADDR1 ( (unsigned char *) 0x1000 )
+#define PIO_BASE_ADDR1 ( (unsigned char *) 0x1F00 ) //was 0x1000
 
 // ATA Control Block base address
 // (the address of the ATA DevCtrl
