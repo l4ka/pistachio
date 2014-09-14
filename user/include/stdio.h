@@ -8,5 +8,8 @@
 //Be BeOS-compatible...
 int is_computer_on();
 
+//Print debugging text with a file name/class tag
+void EDebugPrintf(const char *aTag, const char *aText);
+
 #endif /* !__STDIO_H__ */
 
