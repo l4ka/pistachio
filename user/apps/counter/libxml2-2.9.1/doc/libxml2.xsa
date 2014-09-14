@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<!DOCTYPE xsa PUBLIC "-//LM Garshol//DTD XML Software Autoupdate 1.0//EN//XML" "http://www.garshol.priv.no/download/xsa/xsa.dtd">
+<xsa>
+  <vendor>
+    <name>Daniel Veillard</name>
+    <email>daniel@veillard.com</email>
+    <url>http://veillard.com/</url>
+  </vendor>
+  <product id="libxml2">
+    <name>libxml2</name>
+    <version>2.9.0</version>
+    <last-release> Sep 11 2012</last-release>
+    <info-url>http://xmlsoft.org/</info-url>
+    <changes>   -  Features:
+    A few new API entry points,
+    More resilient push parser mode,
+    A lot of portability improvement,
+    Faster XPath evaluation
+  
+   -  Documentation:
+    xml2-config.1 markup error (Christian Weisgerber),
+    libxml(3) manpage typo fix (John Bradshaw),
+    More cleanups to the documentation part of libxml2 (Daniel Richard G)
+  
+   -  Portability:
+    Bug 676544 - fails to build with --without-sax1 (Akira TAGOH),
+    fix builds not having stdint.h (Rob Richards),
+    GetProcAddressA is available only on WinCE (Daniel Veillard),
+    More updates and cleanups on autotools and Makefiles (Daniel Richard G),
+    More changes for Win32 compilation (Eric Zurcher),
+    Basic changes for Win32 builds of release 2.9.0: compile buf.c (Eric Zurcher),
+    Bundles all generated files for python into the distribution (Daniel Richard G),
+    Fix compiler warnings of wincecompat.c (Patrick Gansterer),
+    Fix non __GNUC__ build (Patrick Gansterer),
+    Fix windows unicode build (Patrick Gansterer),
+    clean redefinition of {v}snprintf in C-source (Roumen Petrov),
+    use xmlBuf... if DEBUG_INPUT is defined (Roumen Petrov),
+    fix runtests to use pthreads support for various Unix platforms (Daniel Richard G),
+    Various "make distcheck" and portability fixups 2nd part (Daniel Richard G),
+    Various "make distcheck" and portability fixups (Daniel Richard G),
+    Fix compilation on older Visual Studio (Daniel Veillard)
+  
+   -  Bug Fixes:
+    Change the XPath code to percolate allocation errors (Daniel Veillard),
+    Fix reuse of xmlInitParser (Daniel Veillard),
+    Fix potential crash on entities errors (Daniel Veillard),
+    initialize var (Rob Richards),
+    Fix the XPath arity check to also check the XPath stack limits (Daniel Veillard),
+    Fix problem with specific and generic error handlers (Pietro Cerutti),
+    Avoid a potential infinite recursion (Daniel Veillard),
+    Fix an XSD error when generating internal automata (Daniel Veillard),
+    Patch for xinclude of text using multibyte characters (Vitaly Ostanin),
+    Fix a segfault on XSD validation on pattern error (Daniel Veillard),
+    Fix missing xmlsave.h module which was ignored in recent builds (Daniel Veillard),
+    Add a missing element check (Daniel Veillard),
+    Adding various checks on node type though the API (Daniel Veillard),
+    Namespace nodes can't be unlinked with xmlUnlinkNode (Daniel Veillard),
+    Fix make dist to include new private header files (Daniel Veillard),
+    More fixups on the push parser behaviour (Daniel Veillard),
+    Strengthen behaviour of the push parser in problematic situations (Daniel Veillard),
+    Enforce XML_PARSER_EOF state handling through the parser (Daniel Veillard),
+    Fixup limits parser (Daniel Veillard),
+    Do not fetch external parsed entities (Daniel Veillard),
+    Fix an error in previous commit (Aron Xu),
+    Fix entities local buffers size problems (Daniel Veillard),
+    Fix parser local buffers size problems (Daniel Veillard),
+    Fix a failure to report xmlreader parsing failures (Daniel Veillard)
+  
+   -  Improvements:
+    Keep libxml2.syms when running "make distclean" (Daniel Veillard),
+    Allow to set the quoting character of an xmlWriter (Csaba Raduly),
+    Keep non-significant blanks node in HTML parser (Daniel Veillard),
+    Add a forbidden variable error number and message to XPath (Daniel Veillard),
+    Support long path names on WNT (Michael Stahl),
+    Improve HTML escaping of attribute on output (Daniel Veillard),
+    Handle ICU_LIBS as LIBADD, not LDFLAGS to prevent linking errors (Arfrever Frehtes Taifersar Arahesis),
+    Switching XPath node sorting to Timsort (Vojtech Fried),
+    Optimizing '//' in XPath expressions (Nick Wellnhofer),
+    Expose xmlBufShrink in the public tree API (Daniel Veillard),
+    Visible HTML elements close the head tag (Conrad Irwin),
+    Fix file and line report for XSD SAX and reader streaming validation (Daniel Veillard),
+    Fix const qualifyer to definition of xmlBufferDetach (Daniel Veillard),
+    minimize use of HAVE_CONFIG_H (Roumen Petrov),
+    fixup regression in Various "make distcheck" and portability fixups (Roumen Petrov),
+    Add support for big line numbers in error reporting (Daniel Veillard),
+    Avoid using xmlBuffer for serialization (Daniel Veillard),
+    Improve compatibility between xmlBuf and xmlBuffer (Daniel Veillard),
+    Provide new accessors for xmlOutputBuffer (Daniel Veillard),
+    Improvements for old buffer compatibility (Daniel Veillard),
+    Expand the limit test program (Daniel Veillard),
+    Improve error reporting on parser errors (Daniel Veillard),
+    Implement some default limits in the XPath module (Daniel Veillard),
+    Introduce some default parser limits (Daniel Veillard),
+    Cleanups and new limit APIs for dictionaries (Daniel Veillard),
+    Fixup for buf.c (Daniel Veillard),
+    Cleanup URI module memory allocation code (Daniel Veillard),
+    Extend testlimits (Daniel Veillard),
+    More avoid quadratic behaviour (Daniel Veillard),
+    Impose a reasonable limit on PI size (Daniel Veillard),
+    first version of testlimits new test (Daniel Veillard),
+    Avoid quadratic behaviour in some push parsing cases (Daniel Veillard),
+    Impose a reasonable limit on comment size (Daniel Veillard),
+    Impose a reasonable limit on attribute size (Daniel Veillard),
+    Harden the buffer code and make it more compatible (Daniel Veillard),
+    More cleanups for input/buffers code (Daniel Veillard),
+    Cleanup function xmlBufResetInput(), to set input from Buffer (Daniel Veillard)
+    Swicth the test program for characters to new input buffers (Daniel Veillard),
+    Convert the HTML tree module to the new buffers (Daniel Veillard),
+    Convert of the HTML parser to new input buffers (Daniel Veillard),
+    Convert the writer to new output buffer and save APIs (Daniel Veillard),
+    Convert XMLReader to the new input buffers (Daniel Veillard),
+    New saving functions using xmlBuf and conversion (Daniel Veillard),
+    Provide new xmlBuf based saving functions (Daniel Veillard),
+    Convert XInclude to the new input buffers (Daniel Veillard),
+    Convert catalog code to the new input buffers (Daniel Veillard),
+    Convert C14N to the new Input buffer (Daniel Veillard),
+    Convert xmlIO.c to the new input and output buffers (Daniel Veillard),
+    Convert XML parser to the new input buffers (Daniel Veillard),
+    Incompatible change to the Input and Output buffers (Daniel Veillard),
+    Adding new encoding function to deal with the new structures (Daniel Veillard),
+    Convert XPath to xmlBuf (Daniel Veillard),
+    Adding a new buf module for buffers (Daniel Veillard),
+    Memory error within SAX2 reuse common framework (Daniel Veillard),
+    Fix xmllint --xpath node initialization (Daniel Veillard)
+  
+   -  Cleanups:
+    Various cleanups to avoid compiler warnings (Daniel Veillard),
+    Big space and tab cleanup (Daniel Veillard),
+    Followup to LibXML2 docs/examples cleanup patch (Daniel Veillard),
+    Second round of cleanups for LibXML2 docs/examples (Daniel Richard),
+    Remove all .cvsignore as they are not used anymore (Daniel Veillard),
+    Fix a Timsort function helper comment (Daniel Veillard),
+    Small cleanup for valgrind target (Daniel Veillard),
+    Patch for portability of latin characters in C files (Daniel Veillard),
+    Cleanup some of the parser code (Daniel Veillard),
+    Fix a variable name in comment (Daniel Veillard),
+    Regenerated testapi.c (Daniel Veillard),
+    Regenerating docs and API files (Daniel Veillard),
+    Small cleanup of unused variables in test (Daniel Veillard),
+    Expand .gitignore with more files (Daniel Veillard)
+  
+
+</changes>
+  </product>
+</xsa>
