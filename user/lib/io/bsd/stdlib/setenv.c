@@ -52,7 +52,7 @@ putenv(char *str)
 	for (cp = str; *cp && *cp != '='; ++cp)
 		;
 	if (*cp != '=') {
-		errno = EINVAL;
+		//errno = EINVAL;
 		return (-1);			/* missing `=' in string */
 	}
 
@@ -95,13 +95,13 @@ setenv(const char *name, const char *value, int rewrite)
 	int l_value, offset = 0;
 
 	if (!name || !*name) {
-		errno = EINVAL;
+//		errno = EINVAL;
 		return (-1);
 	}
 	for (np = name; *np && *np != '='; ++np)
 		;
 	if (*np) {
-		errno = EINVAL;
+//		errno = EINVAL;
 		return (-1);			/* has `=' in name */
 	}
 
@@ -160,13 +160,13 @@ unsetenv(const char *name)
 	int offset = 0;
 
 	if (!name || !*name) {
-		errno = EINVAL;
+//		errno = EINVAL;
 		return (-1);
 	}
 	for (np = name; *np && *np != '='; ++np)
 		;
 	if (*np) {
-		errno = EINVAL;
+//		errno = EINVAL;
 		return (-1);			/* has `=' in name */
 	}
 
