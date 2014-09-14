@@ -1,5 +1,5 @@
 //#include "lib9.h"
-//#include "utfdef.h"
+#include "utfdef.h"
 
 //http://swtch.com/usr/local/plan9/include/utf.h
 
