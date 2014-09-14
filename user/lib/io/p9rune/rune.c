@@ -13,8 +13,8 @@
  */
 #include <stdarg.h>
 #include <string.h>
-#include "utf.h"
-#include "utfdef.h"
+#include <utf.h>
+#include <utfdef.h>
 
 enum
 {
