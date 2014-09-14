@@ -13,6 +13,11 @@ extern "C" {
 
 #include <gdtoa.h>
 
+//POSIX style environment variables
+int putenv(char *str);
+int setenv(const char *name, const char *value, int rewrite);
+int unsetenv(const char *name);
+
 //Temporary definition from http://riot-os.org/api/quad_8h_source.html
 //typedef long long quad_t;
 
