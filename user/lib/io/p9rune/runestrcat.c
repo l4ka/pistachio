@@ -14,8 +14,8 @@
  */
 #include <stdarg.h>
 #include <string.h>
-#include "utf.h"
-#include "utfdef.h"
+#include <utf.h>
+#include <utfdef.h>
 
 Rune*
 runestrcat(Rune *s1, Rune *s2)
