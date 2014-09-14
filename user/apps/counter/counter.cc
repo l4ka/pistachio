@@ -36,6 +36,7 @@
 #include "internalshell.h"
 #include <sys/utsname.h>
 
+#include <stdio.h>
 #include <stdlib.h>
  
 //#include <cstring> 
@@ -306,7 +307,7 @@ printf("Entered shiritori\n");
 
  else {
 
-    printf("\n\n[root-task] : Unsupported command, please type \"help\", or wait...\n\n");
+    EDebugPrintf("root-task", "Unsupported command, please type \"help\", or wait...");
 
 
     ish.ShellHelp();
