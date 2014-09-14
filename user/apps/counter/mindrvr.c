@@ -88,13 +88,13 @@ unsigned char pio_xfer_width = PIO_DEFAULT_XFER_WIDTH;
 
 //Do like libsaio
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/mindrvr.c
-/*
-int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
-printf("[mindrvr.c] Interrupt fired");
-int *val = tmr_chk_timeout();
-return val;
-}
-*/
+
+//int SYSTEM_WAIT_INTR_OR_TIMEOUT( void ) {
+//printf("[mindrvr.c] Interrupt fired");
+//int *val = tmr_chk_timeout();
+//return val;
+//}
+
 
 // You must supply a function that returns a system timer value. This
 // should be a value that increments at some constant rate.
