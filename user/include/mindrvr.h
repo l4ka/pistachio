@@ -101,7 +101,7 @@ Judging from http://wiki.osdev.org/ATA_read/write_sectors, and http://forge.vood
 // the BMIDE Command register for
 // the Primary or Secondary side of
 // the PCI ATA controller)
-#define PIO_BMIDE_BASE_ADDR ( (unsigned char *) 0x3000 ) //Change to 0x0000?
+#define PIO_BMIDE_BASE_ADDR ( (unsigned char *) 0x0000 ) //Change to 0x0000 from 0x3000?
 
 // Size of the ATA Data register - allowed values are 8, 16 and 32
 #define PIO_DEFAULT_XFER_WIDTH 16

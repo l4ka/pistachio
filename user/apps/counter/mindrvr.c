@@ -179,6 +179,9 @@ int reg_config()
 
 {
    printf("\n\n[mindrvr.c] : Inside reg_config()\n\n");
+   printf("\n\n[mindrvr.c] : PIO_BASE_ADDR1 was set to : %x\n\n", PIO_BASE_ADDR1);
+   printf("\n\n[mindrvr.c] : PIO_BASE_ADDR2 was set to : %x\n\n", PIO_BASE_ADDR2);
+
    
    int numDev = 0;
    unsigned char sc;
