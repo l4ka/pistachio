@@ -13,6 +13,9 @@ extern "C" {
 
 #include <gdtoa.h>
 
+//Wrapper of free()
+void cfree(void *p);
+
 //POSIX style environment variables
 int putenv(char *str);
 int setenv(const char *name, const char *value, int rewrite);
