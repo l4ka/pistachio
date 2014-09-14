@@ -49,8 +49,8 @@ sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/gdtoa/*.c)  \
  libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c \
-netware/apicore.c uname.c nap.c \ 
-$(wildcard p9rune/*.c) debug.cc
+netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) \
+debug.cc \
 
 #btree_core.c bt_modify.c
 
