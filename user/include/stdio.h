@@ -5,13 +5,19 @@
 #define EOF (-1)
 #include <sys/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //Be BeOS-compatible...
 int is_computer_on();
 
-extern "C" {
-	//Print debugging text with a file name/class tag
-	void EDebugPrintf(const char *aTag, const char *aText);
+//Print debugging text with a file name/class tag
+void EDebugPrintf(const char *aTag, const char *aText);
+
+#ifdef __cplusplus
 }
+#endif
 
 #endif /* !__STDIO_H__ */
 
