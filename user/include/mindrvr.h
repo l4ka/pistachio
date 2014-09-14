@@ -90,18 +90,18 @@ Judging from http://wiki.osdev.org/ATA_read/write_sectors, and http://forge.vood
 
 // ATA Command Block base address
 // (the address of the ATA Data register)
-#define PIO_BASE_ADDR1 ( (unsigned char *) 0x1F00 ) //was 0x1000
+#define PIO_BASE_ADDR1 ( (unsigned char *) 0x1F0 ) //was 0x1000
 
 // ATA Control Block base address
 // (the address of the ATA DevCtrl
 //  and AltStatus registers)
-#define PIO_BASE_ADDR2 ( (unsigned char *) 0x2000 )
+#define PIO_BASE_ADDR2 ( (unsigned char *) 0x3F6 ) //was 0x2000
 
 // BMIDE base address (address of
 // the BMIDE Command register for
 // the Primary or Secondary side of
 // the PCI ATA controller)
-#define PIO_BMIDE_BASE_ADDR ( (unsigned char *) 0x3000 )
+#define PIO_BMIDE_BASE_ADDR ( (unsigned char *) 0x3000 ) //Change to 0x0000?
 
 // Size of the ATA Data register - allowed values are 8, 16 and 32
 #define PIO_DEFAULT_XFER_WIDTH 16
