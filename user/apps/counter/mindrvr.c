@@ -32,6 +32,7 @@
 //********************************************************************
 
 #include <mindrvr.h>
+#include <stdio.h>
 
 //**************************************************************
 //
@@ -706,7 +707,7 @@ static int exec_pio_data_in_cmd( unsigned char dev,
 
 {
 
-printf("\n\n[mindrvr] : Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt) \n\n");
+EDebugPrintf("mindrvr", "Inside exec_pio_data_in_cmd(dev, bufAddr, numSect, multiCnt)");
 
    unsigned char status;
    long wordCnt;
