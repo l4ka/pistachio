@@ -9,6 +9,11 @@
 extern "C" {
 #endif
 
+//This is a hack, we should replace it with something nicer, ASAP
+extern int *stdin;
+extern int *stdout;
+extern int *stderr;
+
 //Be BeOS-compatible...
 int is_computer_on();
 
