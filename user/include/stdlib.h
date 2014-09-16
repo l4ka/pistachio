@@ -60,6 +60,7 @@ void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 	int (*compar)(const void *, const void *));
 
+div_t div(int num, int denom);
 
 
 //Really?
