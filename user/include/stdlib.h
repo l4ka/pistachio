@@ -59,6 +59,7 @@ long a64l(const char *s);
 
 
 int abs(int j);
+long labs(long j);
 
 int
 heapsort(void *vbase, size_t nmemb, size_t size,
