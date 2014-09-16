@@ -27,6 +27,10 @@ typedef struct {
 //Wrapper of free()
 void cfree(void *p);
 
+int
+atoi(const char *str);
+
+
 //POSIX style environment variables
 int putenv(char *str);
 int setenv(const char *name, const char *value, int rewrite);
