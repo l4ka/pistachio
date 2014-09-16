@@ -4,4 +4,6 @@
 //This probably won't work
 extern int errno;
 
+#define EINVAL 22
+
 #endif
