@@ -116,6 +116,9 @@ void * calloc(size_t num, size_t size);
 void * memset(void *s1, int c, size_t n);
 void * memcpy(void *s1, const void *s2, size_t n);
 
+double
+atof(const char *ascii);
+
 void
 qsort(void *aa, size_t n, size_t es, int (*cmp)(const void *, const void *));
 
