@@ -13,6 +13,12 @@ extern "C" {
 
 #include <gdtoa.h>
 
+//From http://unix.superglobalmegacorp.com/xnu/newsrc/bsd/include/stdlib.h.html
+typedef struct {
+	int quot;		/* quotient */
+	int rem;		/* remainder */
+} div_t;
+
 //Wrapper of free()
 void cfree(void *p);
 
