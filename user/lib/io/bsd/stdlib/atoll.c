@@ -31,8 +31,7 @@
 #include <stdlib.h>
 
 long long
-atoll(str)
-	const char *str;
+atoll(const char *str);
 {
 	return(strtoll(str, (char **)NULL, 10));
 }
