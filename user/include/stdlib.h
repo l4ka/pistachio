@@ -19,6 +19,11 @@ typedef struct {
 	int rem;		/* remainder */
 } div_t;
 
+typedef struct {
+	long quot;		/* quotient */
+	long rem;		/* remainder */
+} ldiv_t;
+
 //Wrapper of free()
 void cfree(void *p);
 
@@ -62,6 +67,8 @@ bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 
 div_t div(int num, int denom);
 
+ldiv_t ldiv(long num, long denom);
+
 //Radix sort...
 
 int
@@ -89,6 +96,8 @@ void * memcpy(void *s1, const void *s2, size_t n);
 
 //Dummy implementation for WaterFront BASIC
 int system(const char *command);
+
+long long llabs(long long j);
 
 #ifdef __cplusplus
 }
