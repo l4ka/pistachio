@@ -24,6 +24,12 @@ typedef struct {
 	long rem;		/* remainder */
 } ldiv_t;
 
+//http://freebsd70.unixmanpages.net/man3/lldiv.html
+typedef struct {
+	long long quot; /* Quotient. */
+	long long rem;  /* Remainder. */
+} lldiv_t;
+
 //Wrapper of free()
 void cfree(void *p);
 
@@ -81,6 +87,9 @@ jrand48(unsigned short xseed[3]);
 div_t div(int num, int denom);
 
 ldiv_t ldiv(long num, long denom);
+
+lldiv_t
+lldiv(long long num, long long denom);
 
 //Radix sort...
 
