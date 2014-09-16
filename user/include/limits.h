@@ -14,3 +14,7 @@
 #define QUAD_MAX        LLONG_MAX       /* max value for a quad_t */
 
 #define INT_MAX         0x7fffffff      /* max value for an int */
+
+#define LONG_MAX	9223372036854775807L
+
+#define LONG_MIN	(-LONG_MAX - 1L)
