@@ -38,7 +38,8 @@ void * memset(void *s1, int c, size_t n);
 size_t strlen(const char *str);
 
 
-
+//For compatibility with OpenBSD
+typedef unsigned char u_char;
 
 #ifdef __cplusplus
 }
