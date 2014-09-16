@@ -35,8 +35,7 @@ void cfree(void *p);
 
 int atoi(const char *str);
 long atol(const char *str);
-long long
-atoll(const char *str);
+long long atoll(const char *str);
 
 
 //POSIX style environment variables
