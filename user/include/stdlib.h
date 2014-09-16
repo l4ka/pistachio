@@ -64,6 +64,11 @@ int
 heapsort(void *vbase, size_t nmemb, size_t size,
     int (*compar)(const void *, const void *));
 
+char *
+ecvt(double value, int ndigit, int *decpt, int *sign);
+
+char *
+fcvt(double value, int ndigit, int *decpt, int *sign);
 
 void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
