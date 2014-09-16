@@ -52,7 +52,7 @@ putenv(char *str)
 	for (cp = str; *cp && *cp != '='; ++cp)
 		;
 	if (*cp != '=') {
-		//errno = EINVAL;
+		errno = EINVAL;
 		return (-1);			/* missing `=' in string */
 	}
 
