@@ -70,15 +70,15 @@ radixsort(const u_char **a, int n, const u_char *tab, u_int endch);
 int
 sradixsort(const u_char **a, int n, const u_char *tab, u_int endch);
 
-void
-r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch);
+//void
+//r_sort_a(const u_char **a, int n, int i, const u_char *tr, u_int endch);
 
-void
-r_sort_b(const u_char **a, const u_char **ta, int n, int i, const u_char *tr,
-    u_int endch);
+//void
+//r_sort_b(const u_char **a, const u_char **ta, int n, int i, const u_char *tr,
+ //   u_int endch);
 
-static __inline void
-simplesort(const u_char **a, int n, int b, const u_char *tr, u_int endch);
+//static __inline void
+//simplesort(const u_char **a, int n, int b, const u_char *tr, u_int endch);
 
 //Really?
 size_t strlen(const char *str);
