@@ -74,6 +74,9 @@ void *
 bsearch(const void *key, const void *base0, size_t nmemb, size_t size,
 	int (*compar)(const void *, const void *));
 
+long
+jrand48(unsigned short xseed[3]);
+
 div_t div(int num, int denom);
 
 ldiv_t ldiv(long num, long denom);
