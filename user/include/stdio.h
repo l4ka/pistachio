@@ -15,6 +15,8 @@ extern "C" {
 
 //Do like OpenBSD for now...
 typedef	struct __sFILE {
+	unsigned char *_p;	/* current position in (some) buffer */
+	int	_r;		/* read space left for getc() */
 } FILE;
 
 extern FILE __sF[];
