@@ -121,7 +121,7 @@ typedef unsigned long		__psize_t;
 typedef long double		__double_t;
 typedef long double		__float_t;
 typedef long			__ptrdiff_t;
-typedef	unsigned long		__size_t;
+//typedef	unsigned long		__size_t;
 typedef	long			__ssize_t;
 #if defined(__GNUC__) && __GNUC__ >= 3
 typedef	__builtin_va_list	__va_list;
