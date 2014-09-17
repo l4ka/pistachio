@@ -28,6 +28,8 @@ typedef unsigned int    u_int;
 typedef unsigned int    uint8_t; 
 
 typedef L4_Word32_t int32_t;
+typedef	unsigned short		uint16_t;
+typedef	signed char	int8_t;
 
 #define CHAR_BIT 8
 #define	RAND_MAX	2147483647 // Like Linux
