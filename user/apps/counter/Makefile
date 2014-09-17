@@ -28,7 +28,7 @@
 ## $Id: Makefile.in,v 1.2 2004/04/22 15:08:18 skoglund Exp $
 ##                
 ######################################################################
-
+#dcoj.wmh3.com/geekstuff/basic/winbasic.c
 srcdir=		.
 top_srcdir=	../..
 top_builddir=	../..
@@ -41,7 +41,9 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/libmutex/libmutex.a \
 
-SRCS=		crt0-$(ARCH).S  counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc #libxml2-2.9.1/SAX.c #sha256.cc #um_rand.cc 
+SRCS=		crt0-$(ARCH).S  counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc
+
+# libxml2-2.9.1/SAX.c #sha256.cc #um_rand.cc 
 # $(wildcard pforth_v27/csrc/*.c)
 LIBS+=		-ll4 -lio -lmutex 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
