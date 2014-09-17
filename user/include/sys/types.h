@@ -8,6 +8,7 @@ extern "C" {
 //http://www.cplusplus.com/reference/cstdlib/
 
 #include <l4/types.h>
+#include <sys/_types.h>
 
 /* L4 defines these:
 
@@ -40,7 +41,7 @@ size_t strlen(const char *str);
 
 //For compatibility with OpenBSD
 typedef unsigned char u_char;
-
+typedef __uint16_t u_int16_t;
 #ifdef __cplusplus
 }
 #endif
