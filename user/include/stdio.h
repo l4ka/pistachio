@@ -17,6 +17,7 @@ extern "C" {
 typedef	struct __sFILE {
 	unsigned char *_p;	/* current position in (some) buffer */
 	int	_r;		/* read space left for getc() */
+	short	_flags;		/* flags, below; this FILE is free if 0 */
 } FILE;
 
 extern FILE __sF[];
