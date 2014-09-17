@@ -1,0 +1,15 @@
+http://git.savannah.gnu.org/cgit/hurd/libpthread.git/commit/?id=a0bca9895bca67591127680860077b2658830e96
+http://git.savannah.gnu.org/cgit/hurd/libpthread.git/log/
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/include/pthread/pthread.h?root=hurd&view=markup
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/include/pthread/pthread.h?root=hurd&view=log
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/include/pthread/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/include/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/pthread/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/include/?root=hurd
+http://cvs.savannah.gnu.org/viewvc/hurd-l4/libpthread/sysdeps/l4/bits/pthread-np.h?root=hurd&r1=1.2&r2=1.3
+https://github.com/aosm/Libc/blob/master/stdio/FreeBSD/_flock_stub.c
+https://github.com/aosm/Libc/blob/master/stdio/FreeBSD/_flock_stub.c
+https://github.com/aosm/Libc/blob/master/stdio/FreeBSD/_flock_stub.c
+ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/lib/libc/stdio/fgets.c
