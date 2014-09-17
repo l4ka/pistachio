@@ -11,3 +11,4 @@
 u_int32_t htonl(u_int32_t x);
 u_int16_t htons(u_int16_t x);
 u_int32_t ntohl(u_int32_t x);
+u_int16_t ntohs(u_int16_t x);
