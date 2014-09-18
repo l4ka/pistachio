@@ -2,8 +2,8 @@
 #include <stdarg.h>
 #include <fmt.h>
 #include "plan9.h"
-#include "fmt.h"
-#include "fmtdef.h"
+
+#include <fmtdef.h>
 
 int
 sprint(char *buf, char *fmt, ...)

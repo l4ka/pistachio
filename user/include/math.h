@@ -27,7 +27,7 @@
 extern char __infinity[];
 
 //#if __GNUC_PREREQ__(3, 3) && !defined(__vax__)
-//#define HUGE_VAL	__builtin_huge_val()
+#define HUGE_VAL	__builtin_huge_val()
 //#else /* __GNUC_PREREQ__(3, 3) && !__vax__ */
 //#define HUGE_VAL	(*(double *)(void *)__infinity)
 //#endif /* __GNUC_PREREQ__(3, 3) && !__vax__ */

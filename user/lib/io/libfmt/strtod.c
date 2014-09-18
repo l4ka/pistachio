@@ -6,8 +6,8 @@
 #include <string.h>
 #include <errno.h>
 #include "plan9.h"
-#include "fmt.h"
-#include "fmtdef.h"
+#include <fmt.h>
+#include <fmtdef.h>
 
 static ulong
 umuldiv(ulong a, ulong b, ulong c)
