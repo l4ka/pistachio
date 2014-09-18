@@ -5,12 +5,15 @@
 #define EOF (-1)
 #include <sys/types.h>
 
+#include <lib9.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //https://github.com/haiku/haiku/blob/449f7f5a7b9d381c1eeab3ddfbdba0db0ce05c22/headers/posix/stdio.h
 //ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/include/stdio.h defines FILE as a structure
+
 
 
 //Do like OpenBSD for now...

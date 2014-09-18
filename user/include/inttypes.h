@@ -41,6 +41,8 @@
  * an integer of type int_fast32_t.
  */
 
+
+
 /* fprintf macros for signed integers */
 #define	PRId8			"d"		/* int8_t */
 #define	PRId16			"d"		/* int16_t */
@@ -248,6 +250,9 @@ typedef struct {
 	intmax_t rem;		/* remainder */
 } imaxdiv_t;
 
+
+//This already exists elsewhere
+//typedef unsigned long int uintptr_t ;
 //__BEGIN_DECLS
 intmax_t	imaxabs(intmax_t);
 imaxdiv_t	imaxdiv(intmax_t, intmax_t);
