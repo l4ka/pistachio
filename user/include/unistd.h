@@ -6,6 +6,8 @@
 
 #include "stdarg.h"
 
+extern char **environ; //Tres dumb
+
 #ifdef __cplusplus
 extern "C" {
 #endif

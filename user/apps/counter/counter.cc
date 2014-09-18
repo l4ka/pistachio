@@ -48,6 +48,8 @@
 
 #define stdin GetPolledKbdLine()
 
+extern char** environ;
+
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 //http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
@@ -233,7 +235,7 @@ int setenv(const char *name, const char *value, int overwrite);
 iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
-//setenv("CMD_RESULT", (char*)WAITING, 1);
+setenv("CMD_RESULT", (char*)WAITING, 1);
 //setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
 
 printf(iEnvStatus[ACTIVE_CMD]);

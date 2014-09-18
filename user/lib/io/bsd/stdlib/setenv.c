@@ -32,6 +32,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <unistd.h>
+
 char *__findenv(const char *name, int len, int *offset);
 
 extern char **environ;
