@@ -87,6 +87,9 @@ int MallocTestOne() {
 		return FINISHED;
 }
 
+//Hack to import the test function.....
+#include "p9fmt_test2.c"
+
 void InitHwDev() {
 //Hello at 0x8c0000?
 //volatile char *myPointer = (volatile char *)0x8c0000;
@@ -224,6 +227,8 @@ printf("\n\n%d\n\n",sum(1,2));
 //printf(myPointer);
 
     InternalShell ish;
+
+	p9fmt_test2();
 
 while(WAITING) {
 
