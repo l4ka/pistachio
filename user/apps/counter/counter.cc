@@ -36,8 +36,10 @@
 #include "internalshell.h"
 #include <sys/utsname.h>
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
  
 //#include <cstring> 
 #define KB(x) (x*1024)
@@ -222,10 +224,21 @@ char *iEnvStatus[255];
 struct utsname blah;
 InitHwDev();
 
+/*
+int setenv(const char *name, const char *value, int overwrite);
+
+
+*/
+
 iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
+//setenv("CMD_RESULT", (char*)WAITING, 1);
+//setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
+
 printf(iEnvStatus[ACTIVE_CMD]);
+
+//printf(getenv("ACTIVE_CMD"));
 
 //Try initialising uname
 
@@ -242,7 +255,7 @@ printf("\n\n%d\n\n",sum(1,2));
 
     InternalShell ish;
 
-	p9fmt_test2();
+//	p9fmt_test2();
 
 while(WAITING) {
 
