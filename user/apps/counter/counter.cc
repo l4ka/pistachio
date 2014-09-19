@@ -242,6 +242,10 @@ setenv("ACTIVE_CMD", iEnvStatus[ACTIVE_CMD], 1);
 
 printf(getenv("ACTIVE_CMD"));
 
+setenv("NIXNADA", "Bada bing", 1);
+
+printf(getenv("NIXNADA"));
+
 //Try initialising uname
 
 uname(&blah);
