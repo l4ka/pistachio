@@ -11,7 +11,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern char **environ = 0; //Tres dumb
+char **environ; //Tres dumb
 extern char **__environ;
 //BSD swab
 void swab(const void *from, void *to, size_t len);
