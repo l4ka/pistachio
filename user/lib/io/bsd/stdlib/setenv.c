@@ -10,6 +10,8 @@
   * Author: Wietse Venema, Eindhoven University of Technology, The Netherlands.
   */
 
+#include <unistd.h>
+
 #ifndef lint
 static char sccsid[] = "@(#) setenv.c 1.1 93/03/07 22:47:58";
 #endif

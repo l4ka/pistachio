@@ -10,6 +10,8 @@
 static char sccsid[] = "@(#) environ.c 1.2 94/03/23 16:09:46";
 #endif
 
+#include <unistd.h>
+
 /* System libraries. */
 
 extern char **environ;
