@@ -48,7 +48,7 @@
 
 #define stdin GetPolledKbdLine()
 
-extern char** environ;
+//extern char** environ;
 
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c

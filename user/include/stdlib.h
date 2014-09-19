@@ -11,6 +11,8 @@ extern "C" {
 #include <sys/cdefs.h>
 #include <sys/types.h>
 
+#include <unistd.h>
+
 #include <gdtoa.h>
 
 //From http://unix.superglobalmegacorp.com/xnu/newsrc/bsd/include/stdlib.h.html
