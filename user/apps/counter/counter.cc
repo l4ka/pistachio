@@ -236,7 +236,7 @@ iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
 //setenv("CMD_RESULT", (char*)WAITING, 1);
-setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
+setenv("ACTIVE_CMD", iEnvStatus[ACTIVE_CMD], 1);
 
 //printf(iEnvStatus[ACTIVE_CMD]);
 
