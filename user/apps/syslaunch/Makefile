@@ -28,7 +28,6 @@
 ## $Id: Makefile.in,v 1.2 2004/04/22 15:08:18 skoglund Exp $
 ##                
 ######################################################################
-#dcoj.wmh3.com/geekstuff/basic/winbasic.c
 srcdir=		.
 top_srcdir=	../..
 top_builddir=	../..
@@ -36,22 +35,19 @@ top_builddir=	../..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-PROGRAM=	counter
+PROGRAM=	syslaunch
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
 		$(top_builddir)/lib/libmutex/libmutex.a \
 		$(top_builddir)/lib/libl4e/libl4e.a\
 		$(top_builddir)/lib/libelf/libelf.a
 
-SRCS=		crt0-$(ARCH).S   counter.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc
-
-# libxml2-2.9.1/SAX.c #sha256.cc #um_rand.cc 
-#SRCS=           crt0-$(ARCH).S   $(wildcard pforth_v27/csrc/*.c) $(wildcard pforth_v27/csrc/posix/*.c)
+SRCS=		crt0-$(ARCH).S  
 LIBS+=		-ll4 -lio -lmutex -ll4e -lelf 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
-CFLAGS_ia32 += -DLUA_COMPAT_ALL -std=c++11 -DINT_MAX -DUCHAR_MAX
+CFLAGS_ia32 += -std=c++11 
 
 include $(top_srcdir)/Mk/l4.prog.mk
