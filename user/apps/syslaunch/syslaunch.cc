@@ -12,8 +12,11 @@ void SysLaunch::WaitForCmd() {
 }
 
 int main(void) {
-    SysLaunch *launch = new SysLaunch();
-    launch->WaitForCmd();
+    //SysLaunch *launch = new SysLaunch();
+    //launch->WaitForCmd();
+    //int *test;
+    //test = new int(1);
+    malloc(2);
 
     return 0;
 }

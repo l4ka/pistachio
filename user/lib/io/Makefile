@@ -45,7 +45,7 @@ LIBRARY=	io
 SRCS=		get_hex.cc  print.cc $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
  $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)\
   $(wildcard android/*.c)  $(wildcard bsd/net/*.c) $(wildcard bsd/string/*.c) \
-sputl.c sgetl.c liballoc.c liballoc_hooks.c becompat.c \
+sputl.c sgetl.c liballoc.c liballoc_hooks.cc becompat.c \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/gdtoa/*.c)  \
  libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c \
