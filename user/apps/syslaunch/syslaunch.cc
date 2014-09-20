@@ -16,7 +16,7 @@ void SysLaunch::VerBanner() {
     struct utsname utsName;
     uname(&utsName);
 
-    printf("\n Welcome to %s %d.%d! Running on %s.\n", utsName.sysname,
+    printf("\n Welcome to %s %s.%s! Running on %s.\n", utsName.sysname,
            utsName.release, utsName.version, utsName.nodename);
 }
 
