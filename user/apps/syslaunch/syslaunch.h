@@ -7,7 +7,6 @@ class SysLaunch
 {
 public:
     SysLaunch();
-private:
     void WaitForCmd();
 };
 

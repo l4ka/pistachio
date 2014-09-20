@@ -12,8 +12,8 @@ void SysLaunch::WaitForCmd() {
 }
 
 int main(void) {
-    SysLaunch::SysLaunch launch;
-    launch.WaitForCmd();
+    SysLaunch *launch = new SysLaunch();
+    launch->WaitForCmd();
 
     return 0;
 }
