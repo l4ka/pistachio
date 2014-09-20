@@ -1,11 +1,13 @@
 #include "syslaunch.h"
 
-SysLaunch::SysLaunch()
+SysLaunch::SysLaunch():
+    iScreenNbr(0)
 {
     this->VerBanner();
 
     EDebugPrintf("SysLaunch", "Created new instance of SysLaunch...");
     printf("This system uses %d-sized pages\n", (int)l4e_min_pagesize());
+    printf("Switching to screen %d\n", iScreenNbr);
 
     /* Set the POSIX UID to root (0) */
     setenv("UID", "0", 1);

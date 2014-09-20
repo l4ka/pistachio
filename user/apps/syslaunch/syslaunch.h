@@ -20,6 +20,9 @@ public:
     SysLaunch();
     void WaitForCmd();
     void VerBanner();
+
+private:
+    int iScreenNbr;
 };
 
 #endif // SYSLAUNCH_H
