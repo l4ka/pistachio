@@ -1,23 +1,23 @@
 #include <stddef.h>
-#include <stdlib.h>
-#include <l4e/misc.h>
+#include <liballoc.h>
+
  
  void *operator new(size_t size)
 {
-    return calloc(size, l4e_min_pagesize();
+    return malloc(size);
 }
  
 void *operator new[](size_t size)
 {
-    return calloc(size, l4e_min_pagesize();
+    return malloc(size);
 }
  
  void operator delete(void *p)
 {
-    cfree(p);
+    free(p);
 }
  
 void operator delete[](void *p)
 {
-    cfree(p);
+    free(p);
 }
