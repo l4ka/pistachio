@@ -36,7 +36,7 @@ top_builddir=	..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-SUBDIRS=	l4 io libmutex  
+SUBDIRS=	l4 io libmutex libl4e libelf 
 
 post-clean:
 	rm -f *.a
