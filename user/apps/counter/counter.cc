@@ -47,7 +47,6 @@
 
 #define stdin GetPolledKbdLine()
 
-
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
 //http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
@@ -91,33 +90,6 @@ void strerror_r_improved(int err, char *str, size_t str_len)
 
 void InitHwDev() {
 
-/* static int exec_pio_data_in_cmd(
- unsigned char dev,
-unsigned char * bufAddr,
-long numSect, int multiCnt ) 
-CMD_READ_SECTORS http://www.t13.org/documents/UploadedDocuments/project/d1410r3b-ATA-ATAPI-6.pdf
-
-int reg_pio_data_in_lba28(0, CMD_READ_SECTORS, 0x0, 0x00, LBA?, placeToDump, 0x00, 0x00)
-
-int reg_pio_data_in_lba28( unsigned char dev,         // device (0 or 1)
- 
-                           unsigned char cmd,         // command register
- 
-                           int fr,                    // feature register
- 
-                           int sc,                    // sector count
- 
-                           long lba,                  // LBA
- 
-                           unsigned char * bufAddr,   // buffer address
- 
-                           int numSect,               // number of sectors to transfer
- 
-                           int multiCnt );            // current multiple count
- 
-
-*/
-
 FATFS* fileSys;
 
 disk_initialize (0);
@@ -151,10 +123,6 @@ char * sgets(char *buffer, int size)
 
 //http://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1390514758
 int ShiritoriGame() {
-
-//#include <stdio.h>
-//#include <string.h>
-
 #define MAX 30
 
 //int main(int argc, char *argv[]){
@@ -164,7 +132,6 @@ int i,nIdx,n;
 for(i=0;i<MAX;i++){
 printf("%02d position：",i+1);
 sgets(data[i],  sizeof(data[i]));
-//data[MAX][i] = atoi(GetPolledKbdLine());
 n=strlen(data[i])-3;  /* 文末の位置 */
 if( memcmp( &data[i][n], "n", 1) == 0){
 printf("Quitting from pressing '\n\' \n" );
@@ -187,18 +154,8 @@ return 0;
 int main (void) {
 
 char *iEnvStatus[255];
-
-
-
 struct utsname blah;
 InitHwDev();
-
-/*
-int setenv(const char *name, const char *value, int overwrite);
-
-
-*/
-
 iEnvStatus[CMD_RESULT] = (char*)WAITING;
 iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 
@@ -243,8 +200,6 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "strtod") == 0) {
         printf(iEnvStatus[ACTIVE_CMD]);
 
         iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
-
-
 }
 
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "tettheme") == 0) {
