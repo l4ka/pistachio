@@ -16,6 +16,8 @@ int main(void) {
     //launch->WaitForCmd();
     //int *test;
     //test = new int(1);
+
+    printf("The clock says: %x\n", L4_SystemClock().raw);
     malloc(2);
     int *test = new int(1);
 
