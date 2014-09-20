@@ -58,17 +58,6 @@
 
 #define	toascii(c)	((c) & 0177)
 
-/* Pull in the string handling functions from lib/io/lib.h, since linking/headers are dodgy... */
-unsigned strlen( const char *src )
-{
-    unsigned cnt = 0;
-
-    while( src && src[cnt] )
-	cnt++;
-    return cnt;
-}
-/* End for now */
-
 //https://github.com/toddfries/OpenBSD-lib-patches/edit/master/libc/stdio/fgets.c#
 
 ///////////////////
