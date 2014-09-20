@@ -2,6 +2,8 @@
 
 SysLaunch::SysLaunch()
 {
+    EDebugPrintf("SysLaunch", "Created new instance of SysLaunch...");
+    printf("This system uses %d-sized pages", (int)l4e_min_pagesize());
 }
 
 void SysLaunch::WaitForCmd() {
@@ -12,8 +14,8 @@ void SysLaunch::WaitForCmd() {
 }
 
 int main(void) {
-    //SysLaunch *launch = new SysLaunch();
-    //launch->WaitForCmd();
+    SysLaunch launch;
+
     //int *test;
     //test = new int(1);
 
@@ -21,5 +23,6 @@ int main(void) {
     malloc(2);
     int *test = new int(1);
 
+    launch.WaitForCmd();
     return 0;
 }

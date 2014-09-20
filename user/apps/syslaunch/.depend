@@ -13,4 +13,4 @@ syslaunch.o: syslaunch.cc syslaunch.h ../../include/liballoc.h \
  ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
  ../../include/l4/message.h ../../include/l4/ipc.h \
  ../../include/l4/thread.h ../../include/l4/kdebug.h \
- ../../include/l4/ia32/kdebug.h
+ ../../include/l4/ia32/kdebug.h ../../include/l4e/misc.h

@@ -89,6 +89,10 @@
 #include <stdint.h>
 #include <l4/types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Return minimum pagesize in the system
  *
@@ -109,5 +113,9 @@ L4_Word_t l4e_min_pagebits(void);
  * \return Fpage of largest covering page
  */
 L4_Fpage_t l4e_biggest_fpage(uintptr_t addr, uintptr_t base, uintptr_t end);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _L4E_MISC_H_ */

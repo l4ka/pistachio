@@ -8,6 +8,8 @@
 #include <l4/sigma0.h>
 #include <l4/kdebug.h>
 
+#include <l4e/misc.h>
+
 
 
 class SysLaunch
