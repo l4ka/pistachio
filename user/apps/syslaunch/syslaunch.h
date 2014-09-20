@@ -11,6 +11,7 @@
 #include <l4e/misc.h>
 
 #include <sys/utsname.h>
+#include <binary_tree/binary_tree.h>
 
 
 
