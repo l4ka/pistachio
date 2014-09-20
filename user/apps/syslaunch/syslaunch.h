@@ -10,6 +10,8 @@
 
 #include <l4e/misc.h>
 
+#include <sys/utsname.h>
+
 
 
 class SysLaunch
@@ -17,6 +19,7 @@ class SysLaunch
 public:
     SysLaunch();
     void WaitForCmd();
+    void VerBanner();
 };
 
 #endif // SYSLAUNCH_H
