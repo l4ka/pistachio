@@ -1,4 +1,6 @@
+#pragma once
 
+#include <cdefs.h>
 
 //Defined for NICTA's ELF loader
 typedef	unsigned long long	uint64_t;

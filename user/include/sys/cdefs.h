@@ -15,6 +15,6 @@
 
 //#ifdef uintptr_t
 	//#undef uintptr_t
-	#define uintptr_t unsigned long int
+//	#define uintptr_t unsigned long int
 //#endif
 
