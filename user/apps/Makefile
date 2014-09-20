@@ -36,7 +36,7 @@ top_builddir=	..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-SUBDIRS=	bench grabmem l4test counter
+SUBDIRS=	bench grabmem l4test counter syslaunch
 
 
 include $(top_srcdir)/Mk/l4.subdir.mk

@@ -98,6 +98,8 @@ printf("\n\n[root-task] : f_mount(default drive, %d)\n\n",f_mount(fileSys, "driv
 
 BYTE iData;
 
+
+
 for (int pos = 0; pos < 250; pos++) {
 
 int readRes = disk_read(0, &iData, pos, 250);
@@ -152,7 +154,7 @@ return 0;
  
 
 int main (void) {
-
+int *test = new int(1);
 char *iEnvStatus[255];
 struct utsname blah;
 InitHwDev();

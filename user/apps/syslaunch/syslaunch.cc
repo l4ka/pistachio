@@ -1,4 +1,4 @@
-#include "syslaunch.h"
+#include <syslaunch.h>
 
 SysLaunch::SysLaunch()
 {
@@ -17,6 +17,7 @@ int main(void) {
     //int *test;
     //test = new int(1);
     malloc(2);
+    int *test = new int(1);
 
     return 0;
 }

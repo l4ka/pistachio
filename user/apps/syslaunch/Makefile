@@ -42,12 +42,12 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/libl4e/libl4e.a\
 		$(top_builddir)/lib/libelf/libelf.a
 
-SRCS=		crt0-$(ARCH).S syslaunch.cc
+SRCS=		crt0-$(ARCH).S test.cc #syslaunch.cc
 LIBS+=		-ll4 -lio -lmutex -ll4e -lelf 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
 CXXFLAGS_powerpc+=	-fno-rtti
-CFLAGS_ia32 += -std=c++11 
+CFLAGS_ia32 += -std=c++11  -DINT_MAX -DUCHAR_MAX
 
 include $(top_srcdir)/Mk/l4.prog.mk
