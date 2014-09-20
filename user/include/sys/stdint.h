@@ -7,6 +7,8 @@
 #undef intmax_t
 #undef uintmax_t
 
+//#undef uintptr_t
+
 #define intmax_t long long int
 #define uintmax_t unsigned long int
 
