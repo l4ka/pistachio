@@ -2,22 +2,22 @@
 #include <stdlib.h>
 #include <l4e/misc.h>
  
-inline void *operator new(size_t size)
+ void *operator new(size_t size)
 {
     return calloc(size, l4e_min_pagesize();
 }
  
-inline void *operator new[](size_t size)
+void *operator new[](size_t size)
 {
     return calloc(size, l4e_min_pagesize();
 }
  
-inline void operator delete(void *p)
+ void operator delete(void *p)
 {
     cfree(p);
 }
  
-inline void operator delete[](void *p)
+void operator delete[](void *p)
 {
     cfree(p);
 }

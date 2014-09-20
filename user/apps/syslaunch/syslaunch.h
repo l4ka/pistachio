@@ -2,6 +2,7 @@
 #define SYSLAUNCH_H
 
 #include <stdio.h>
+//#include <new>
 
 class SysLaunch
 {
