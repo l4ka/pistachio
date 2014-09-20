@@ -1,0 +1,12 @@
+crt0-ia32.o: crt0-ia32.S
+pingpong.o: pingpong.cc ../../../config.h ../../../include/l4/kip.h \
+ ../../../include/l4/types.h ../../../include/l4/ia32/types.h \
+ ../../../include/l4/ia32/specials.h ../../../include/l4/ia32/syscalls.h \
+ ../../../include/l4/ia32/vregs.h ../../../include/l4/message.h \
+ ../../../include/l4/ipc.h ../../../include/l4/thread.h \
+ ../../../include/l4/schedule.h ../../../include/l4/kdebug.h \
+ ../../../include/l4/ia32/kdebug.h ../../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../../include/openbsd/libkern.h ../../../include/l4/arch.h \
+ ../../../include/l4/ia32/arch.h ia32.h ../../../include/l4/tracebuffer.h \
+ ../../../include/l4/ia32/tracebuffer.h
