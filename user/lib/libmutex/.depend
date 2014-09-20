@@ -1,0 +1,10 @@
+mutex.o: src/mutex.c ../../include/mutex/mutex.h \
+ ../../include/l4/thread.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h
+mutex.o: src/arch-ia32/mutex.c ../../include/mutex/mutex.h \
+ ../../include/l4/thread.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h

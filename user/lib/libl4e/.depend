@@ -1,0 +1,93 @@
+bootinfo.o: src/bootinfo.c ../../include/l4/bootinfo.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/kip.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4e/bootinfo.h \
+ ../../include/l4e/regions.h ../../include/stdint.h \
+ ../../include/sys/cdefs.h ../../include/stdio.h ../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h ../../include/elf/elf.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
+ ../../include/elf/elf32.h ../../include/elf/elf64.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/assert.h
+l4e_find_mem_in_region.o: src/l4e_find_mem_in_region.c \
+ ../../include/l4e/regions.h ../../include/stdint.h \
+ ../../include/sys/cdefs.h ../../include/stdio.h ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h
+l4e_find_physmem.o: src/l4e_find_physmem.c ../../include/l4/kip.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/kcp.h ../../include/assert.h ../../include/stdio.h \
+ ../../include/l4io.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
+ ../../include/inttypes.h ../../include/sys/stdint.h \
+ ../../include/sys/cdefs.h ../../include/stdint.h \
+ ../../include/l4e/regions.h ../../include/l4e/bootinfo.h
+l4e_find_virtmem.o: src/l4e_find_virtmem.c ../../include/l4/kip.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
+ ../../include/l4/kcp.h ../../include/assert.h ../../include/stdio.h \
+ ../../include/l4io.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
+ ../../include/inttypes.h ../../include/sys/stdint.h \
+ ../../include/sys/cdefs.h ../../include/stdint.h \
+ ../../include/l4e/regions.h ../../include/l4e/bootinfo.h
+l4e_remove_chunk.o: src/l4e_remove_chunk.c ../../include/l4e/regions.h \
+ ../../include/stdint.h ../../include/sys/cdefs.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h ../../include/assert.h
+misc.o: src/misc.c ../../include/l4e/misc.h ../../include/stdint.h \
+ ../../include/sys/cdefs.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/kip.h ../../include/l4/ia32/syscalls.h \
+ ../../include/l4/ia32/vregs.h ../../include/l4/message.h
+regions.o: src/regions.c ../../include/l4/kip.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4/kcp.h ../../include/assert.h \
+ ../../include/stdio.h ../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
+ ../../include/inttypes.h ../../include/sys/stdint.h \
+ ../../include/sys/cdefs.h ../../include/stdint.h \
+ ../../include/l4e/regions.h ../../include/l4e/bootinfo.h \
+ ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h
+sigma0.o: src/sigma0.c ../../include/stdio.h ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h ../../include/l4/ipc.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4/thread.h \
+ ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h \
+ ../../include/l4/space.h ../../include/l4e/misc.h ../../include/stdint.h \
+ ../../include/sys/cdefs.h ../../include/l4e/sigma0.h
+thread.o: src/thread.c ../../include/l4e/thread.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/ipc.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4/thread.h

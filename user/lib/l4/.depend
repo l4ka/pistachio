@@ -1,0 +1,11 @@
+debug.o: debug.cc ../../include/l4/kip.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h ../../include/l4/tracebuffer.h \
+ ../../include/l4/thread.h ../../include/l4/ia32/tracebuffer.h
+ia32.o: ia32.cc ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/l4/kdebug.h \
+ ../../include/l4/ia32/kdebug.h ../../include/l4/kip.h \
+ ../../include/l4/ia32/syscalls.h ../../include/l4/ia32/vregs.h \
+ ../../include/l4/message.h
+ia32-syscall-stubs.o: ia32-syscall-stubs.S
