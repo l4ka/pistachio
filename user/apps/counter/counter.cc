@@ -71,6 +71,17 @@ unsigned strlen( const char *src )
 
 //https://github.com/toddfries/OpenBSD-lib-patches/edit/master/libc/stdio/fgets.c#
 
+///////////////////
+//#include <stdarg.h>
+//#include <utf.h>
+//#include <fmt.h>
+
+//void p9fmt_test2()
+//{
+//	print("%020.10d\n", 100);
+//}
+//////////////////
+
 //http://www.codingunit.com/c-tutorial-the-functions-malloc-and-free
 int MallocTestOne() {
 	int *ptr_one;
@@ -222,6 +233,8 @@ return 0;
 int main (void) {
 
 char *iEnvStatus[255];
+
+
 
 struct utsname blah;
 InitHwDev();
