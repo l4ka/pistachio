@@ -11,6 +11,7 @@ SysLaunch::SysLaunch():
 
     /* Set the POSIX UID to root (0) */
     setenv("UID", "0", 1);
+    setenv("USER", "syslaunch",1);
 }
 
 void SysLaunch::VerBanner() {
