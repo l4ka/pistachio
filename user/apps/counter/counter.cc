@@ -41,35 +41,19 @@
 #include <stdlib.h>
 #include <string.h>
  
-//#include <cstring> 
 #define KB(x) (x*1024)
 #define MB(x) (x*1024*1024)
 #define GB(x) (x*1024*1024*1024)
 
 #define stdin GetPolledKbdLine()
 
-//extern char** environ;
 
 //http://www.a1k0n.net/2011/06/26/obfuscated-c-yahoo-logo.html
 //http://forge.voodooprojects.org/p/chameleon/source/tree/2261/branches/prasys/i386/libsaio/cddrvr.c
-//http://mirror.fsf.org/pmon2000/2.x/src/include/ctype.h
 //http://stackoverflow.com/questions/8156603/is-usleep-in-c-implemented-as-busy-wait
 //http://www.dreamincode.net/forums/topic/192079-command-line-interpreter/
 
-#define	toascii(c)	((c) & 0177)
-
 //https://github.com/toddfries/OpenBSD-lib-patches/edit/master/libc/stdio/fgets.c#
-
-///////////////////
-//#include <stdarg.h>
-//#include <utf.h>
-//#include <fmt.h>
-
-//void p9fmt_test2()
-//{
-//	print("%020.10d\n", 100);
-//}
-//////////////////
 
 //http://www.codingunit.com/c-tutorial-the-functions-malloc-and-free
 int MallocTestOne() {
@@ -91,9 +75,6 @@ int MallocTestOne() {
 		return FINISHED;
 }
 
-//Hack to import the test function.....
-//#include "p9fmt_test2.c"
-
 /*
 
 //http://www.club.cc.cmu.edu/~cmccabe/blog_strerror.html
@@ -109,11 +90,7 @@ void strerror_r_improved(int err, char *str, size_t str_len)
 */
 
 void InitHwDev() {
-//Hello at 0x8c0000?
-//volatile char *myPointer = (volatile char *)0x8c0000;
 
-//TetrisTheme();
-	//printf("[root-task] : Found %d PATA devices", reg_config());
 /* static int exec_pio_data_in_cmd(
  unsigned char dev,
 unsigned char * bufAddr,
@@ -141,22 +118,11 @@ int reg_pio_data_in_lba28( unsigned char dev,         // device (0 or 1)
 
 */
 
-	//printf("[root-task] : PATA device 0 reset status: %d ", reg_reset(0));
 FATFS* fileSys;
-//int result = exec_pio_data_in_cmd(0,
+
 disk_initialize (0);
 
 printf("\n\n[root-task] : f_mount(default drive, %d)\n\n",f_mount(fileSys, "drive0:/", 1));
-//char[] firstSector;
-//disk_read (0, firstSector, 0, 1);
-
-
-
-//DRESULT disk_read (
-//	BYTE pdrv,		/* Physical drive nmuber (0..) */
-//	BYTE *buff,		/* Data buffer to store read data */
-//	DWORD sector,	/* Sector address (LBA) */
-//	UINT count
 
 BYTE iData;
 
@@ -166,7 +132,6 @@ int readRes = disk_read(0, &iData, pos, 250);
 printf("\n[counter] : Result of reading sector is %d\n", readRes);
 printf("%x",iData);
 }
-
 
 }
 
@@ -258,12 +223,7 @@ auto sum = [](int x, int y) -> int { return x + y; };
 
 printf("\n\n%d\n\n",sum(1,2));
 
-//char *myPointer = (char *)0x8c0000;
-//printf(myPointer);
-
     InternalShell ish;
-
-//	p9fmt_test2();
 
 while(WAITING) {
 
@@ -348,8 +308,6 @@ printf("Entered shiritori\n");
  else {
 
     EDebugPrintf("root-task", "Unsupported command, please type \"help\", or wait...");
-
-
     ish.ShellHelp();
 
 	iEnvStatus[CMD_RESULT] = (char*)WAITING;
