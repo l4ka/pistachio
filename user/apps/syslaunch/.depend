@@ -14,4 +14,5 @@ syslaunch.o: syslaunch.cc syslaunch.h ../../include/liballoc.h \
  ../../include/l4/message.h ../../include/l4/ipc.h \
  ../../include/l4/thread.h ../../include/l4/kdebug.h \
  ../../include/l4/ia32/kdebug.h ../../include/l4e/misc.h \
- ../../include/sys/utsname.h
+ ../../include/sys/utsname.h ../../include/binary_tree/binary_tree.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h
