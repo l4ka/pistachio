@@ -1,3 +1,5 @@
+///http://www.tmk.com/ftp/vms-freeware/gcc-for-alpha/include/vms/descrip.h
+
 /* http://h71000.www7.hp.com/commercial/c/docs/5492p012.html */
 struct  dsc$descriptor
    {
