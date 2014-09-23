@@ -64,7 +64,8 @@ xdr_vwarnx (const char *format, va_list ap)
     fprintf (stderr, "%s: ", get_progname ());
   if (format)
     vfprintf (stderr, format, ap);
-  putc ('\n', stderr);
+//  putc ('\n', stderr);
+putc('n');
 }
 
 void
