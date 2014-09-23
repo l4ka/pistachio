@@ -3,9 +3,24 @@
 #include <stdio.h>
 #include <drivermgr.h>
 
-RamFs::RamFs()
+RamFs::RamFs():
+    iDrvName("RamFs"),
+    iDrvSynopsis("A RAM disk driver"),
+    iType(EGenericBlock),
+    iDrvVersion("0.0.0")
 {
     EDebugPrintf("RamFs", "Initialised RamFs...");
+
+    DriverMgr::RegName(iDrvName, iType,
+                       /*RamFs::Start(0),*/ iDrvSynopsis, iDrvVersion);
+
+}
+
+int RamFs::Start(int aStatus) {
+
+    RamFs *fs = new RamFs();
+
+    return aStatus;
 }
 
 bool RamFs::ReadFile(char *aPath) {

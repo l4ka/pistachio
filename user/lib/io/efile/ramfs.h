@@ -9,8 +9,10 @@ public:
     RamFs();
     bool ReadFile(char *aPath);
     bool WriteFile(char *aPath);
+    int Start(int aStatus);
 
 private:
+    char *iDrvName;
     char *iDrvVersion;
     char *iDrvSynopsis;
     int iType;

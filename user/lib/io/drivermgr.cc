@@ -36,6 +36,18 @@ char* DriverMgr::GetFriendlyType(int aType) {
 
 bool DriverMgr::RegName(char *aName,
                         int aType,
+                        char *aSynopsis,
+                        char *aVersion) {
+
+    printf("\n\n[DrvrMgr] : Registering device of type %s \n\n", GetFriendlyType(aType));
+
+    return 0;
+
+}
+
+
+bool DriverMgr::RegName(char *aName,
+                        int aType,
                         bool (*aHook)(int),
                         char *aSynopsis,
                         char *aVersion) {

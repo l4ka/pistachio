@@ -30,6 +30,9 @@ public:
     bool RegName(char *aName, int aType,
         bool (*aHook)(int), char *aSynopsis, char *aVersion);
 
+  static bool RegName(char *aName, int aType,
+        char *aSynopsis, char *aVersion);
+
     /* Unregister a driver by name */
     
     /* Unregister a driver by ordinal */
@@ -42,7 +45,7 @@ public:
     /* Return the total number of allocated pages, globally */
     int GetPageCount();
 
-    char *GetFriendlyType(int aType);
+    static char *GetFriendlyType(int aType);
 
 private:
     int iDriverCount; //Number of registered drivers
