@@ -31,10 +31,12 @@
 #ifndef __USER__LIB__IO__LIB_H__
 #define __USER__LIB__IO__LIB_H__
 
+#include <stdlib.h>
+
 /* OpenBSD Definition, depends upon machine architecture */
 //typedef unsigned long size_t;
 //http://fxr.watson.org/fxr/source/lib/libkern/bzero.c?v=OPENBSD;im=10
-
+/*
 static unsigned strlen( const char *src )
 {
     unsigned cnt = 0;
@@ -42,7 +44,7 @@ static unsigned strlen( const char *src )
     while( src && src[cnt] )
 	cnt++;
     return cnt;
-}
+}*/
 
 static void strcpy( char *dst, const char *src )
 {

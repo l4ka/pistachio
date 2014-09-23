@@ -34,6 +34,7 @@
 #include <l4io.h>
 #include "lib.h"
 #include "bsd/stdio/local.h"
+#include <stdlib.h>
 
 #ifndef NULL
 #define NULL ((void *) 0)
@@ -655,8 +656,12 @@ while(c != 0x0d && strlen(pass) != (60 - 1)) {
         }//if (c = 0x03 /* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");pass = 0x03; }
     } else {
         //passed a character
-        pass[i] = (char)c; i++;
-        printf("*");
+        pass[i] = (char)c;
+
+char cx =  (char)pass[i];
+
+//int s = strtol(c, NULL, 16);
+        printf("%x",cx);i++;
     }
 }
 

@@ -115,6 +115,10 @@ sradixsort(const u_char **a, int n, const u_char *tab, u_int endch);
 //Really?
 size_t strlen(const char *str);
 
+long
+strtol(const char *nptr, char **endptr, int base);
+
+
 void * calloc(size_t num, size_t size);
 void * memset(void *s1, int c, size_t n);
 void * memcpy(void *s1, const void *s2, size_t n);
