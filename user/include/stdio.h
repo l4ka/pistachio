@@ -14,7 +14,11 @@ extern "C" {
 //https://github.com/haiku/haiku/blob/449f7f5a7b9d381c1eeab3ddfbdba0db0ce05c22/headers/posix/stdio.h
 //ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/include/stdio.h defines FILE as a structure
 
-
+/* stdio buffers */
+struct __sbuf {
+	unsigned char *_base;
+	int	_size;
+};
 
 //Do like OpenBSD for now...
 typedef	struct __sFILE {
@@ -22,6 +26,7 @@ typedef	struct __sFILE {
 	int	_r;		/* read space left for getc() */
 	int	_w;		/* write space left for putc() */
 	short	_flags;		/* flags, below; this FILE is free if 0 */
+	struct	__sbuf _bf;	/* the buffer (at least 1 byte, if !NULL) */
 } FILE;
 
 extern FILE __sF[];
