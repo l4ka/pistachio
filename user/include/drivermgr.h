@@ -6,9 +6,7 @@ enum {
     EFileSys,
     EGenericBlock,
     EHardDisk,
-    EUnknown,
-
-    NULL
+    EUnknown = 0
 
 } TDriver;
 
