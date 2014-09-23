@@ -3,9 +3,9 @@
 
 enum {
 
-    EFileSys,
-    EGenericBlock,
-    EHardDisk,
+    EFileSys = 1,
+    EGenericBlock = 2,
+    EHardDisk = 3,
     EUnknown = 0
 
 } TDriver;
