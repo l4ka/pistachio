@@ -9,6 +9,8 @@ RamFs::RamFs():
     iType(EGenericBlock),
     iDrvVersion("0.0.0")
 {
+    iDrvName = iDrvName;
+
     EDebugPrintf("RamFs", "Initialised RamFs...");
 
     DriverMgr::RegName(iDrvName, iType,

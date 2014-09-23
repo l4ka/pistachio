@@ -39,7 +39,8 @@ bool DriverMgr::RegName(char *aName,
                         char *aSynopsis,
                         char *aVersion) {
 
-    printf("\n\n[DrvrMgr] : Registering device of type %s \n\n", GetFriendlyType(aType));
+    printf("\n\n[DriverMgr] : Registering device of type %s \n\n", GetFriendlyType(aType));
+    printf("\n\n[DriverMgr] : This driver is %s, %s (%s)\n\n", aName, aSynopsis, aVersion);
 
     return 0;
 

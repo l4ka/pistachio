@@ -1064,7 +1064,7 @@ debug.o: debug.cc ../../include/stdio.h ../../include/l4io.h \
  ../../include/openbsd/libkern.h ../../include/sys/types.h \
  ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
  ../../include/utf.h ../../include/utfdef.h
-ramfs.o: efile/ramfs.cc efile/ramfs.h ../../include/stdio.h \
+ramfs.o: efile/ramfs.cc ../../include/ramfs.h ../../include/stdio.h \
  ../../include/l4io.h ../../include/l4/types.h \
  ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
