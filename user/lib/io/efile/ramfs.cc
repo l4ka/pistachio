@@ -4,6 +4,7 @@
 
 RamFs::RamFs()
 {
+    EDebugPrintf("RamFs", "Initialised RamFs...");
 }
 
 bool RamFs::ReadFile(char *aPath) {
