@@ -49,6 +49,8 @@ typedef long long int64_t;
 typedef unsigned short uint16_t;
 typedef short int16_t;
 
+typedef long              ssize_t;
+#define LONG_MAX	9223372036854775807L
 //#if defined(__MINGW32__)
 /* mingw does not define these types anywhere */
 typedef uint8_t   u_int8_t;
