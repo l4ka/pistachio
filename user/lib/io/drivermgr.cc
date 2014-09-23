@@ -20,7 +20,7 @@ int DriverMgr::GetPageCount() {
 
 
 char* DriverMgr::GetFriendlyType(int aType) {
-    switch (aType)
+    switch (aType) {
     EFileSys:
         return "File System Driver";
     EGenericBlock:
@@ -31,6 +31,7 @@ char* DriverMgr::GetFriendlyType(int aType) {
     EUnknown:
      default:
         return "Unknown";
+    }
 }
 
 bool DriverMgr::RegName(char *aName,
@@ -40,5 +41,7 @@ bool DriverMgr::RegName(char *aName,
                         char *aVersion) {
 
     printf("\n\n[DrvrMgr] : Registering device of type %s \n\n", GetFriendlyType(aType));
+
+    return 0;
 
 }

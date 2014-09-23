@@ -1073,6 +1073,13 @@ ramfs.o: efile/ramfs.cc efile/ramfs.h ../../include/stdio.h \
  ../../include/utf.h ../../include/utfdef.h
 cpp_new.o: cpp_new.cc /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
  ../../include/liballoc.h
+drivermgr.o: drivermgr.cc drivermgr.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/sys/types.h \
+ ../../include/sys/_types.h ../../include/lib9.h ../../include/string.h \
+ ../../include/utf.h ../../include/utfdef.h
 charstod.o: p9fmt/charstod.c \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h ../../include/string.h \
  ../../include/sys/types.h ../../include/l4/types.h \
