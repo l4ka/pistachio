@@ -26,14 +26,18 @@ char* DriverMgr::GetFriendlyType(int aType) {
     switch (aType) {
     EFileSys:
         return "File System Driver";
+        break;
     EGenericBlock:
         return "Generic Block Device Driver";
+        break;
     EHardDisk:
         return "Hard Disk Driver";
+        break;
 
     EUnknown:
      default:
         return "Unknown";
+        break;
     }
 
 }
