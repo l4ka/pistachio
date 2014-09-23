@@ -1,6 +1,17 @@
 #ifndef DRIVERMGR_H
 #define DRIVERMGR_H
 
+enum {
+
+    EFileSys,
+    EGenericBlock,
+    EHardDisk,
+    EUnknown,
+
+    NULL
+
+} TDriver;
+
 class DriverMgr
 {
 public:
@@ -16,10 +27,10 @@ public:
       aSynopsis
       aVersion
 
-bool DriverMgr::RegName(char[20] *aName, int aType, 
- bool (*aHook)(int), char[30] *aSynopsis, char[5] *aVersion
-
      */
+
+    bool RegName(char *aName, int aType,
+        bool (*aHook)(int), char *aSynopsis, char *aVersion);
 
     /* Unregister a driver by name */
     
@@ -29,15 +40,17 @@ bool DriverMgr::RegName(char[20] *aName, int aType,
     /* Return a list of drivers, types, synopses, versions, and PID/thread IDs */
 
     /* Return the number of registered drivers, globally */
-    L4_Word_t GetDriverCount();
+    int GetDriverCount();
 
     /* Return the total number of allocated pages, globally */
-    L4_Word_t GetPageCount();
+    int GetPageCount();
+
+    char *GetFriendlyType(int aType);
 
 private:
-    L4_Word_t iDriverCount; //Number of registered drivers
+    int iDriverCount; //Number of registered drivers
     //The list of drivers (linked list/hash map/table?)
-    L4_Word_t iPageCount; //Number of allocated pages?
+    int iPageCount; //Number of allocated pages?
 
 };
 
