@@ -657,11 +657,11 @@ while(c != 0x0d && strlen(pass) != (60 - 1)) {
     } else {
         //passed a character
         pass[i] = (char)c;
-
-char cx =  (char)pass[i];
+//http://stackoverflow.com/questions/6660145/convert-ascii-number-to-ascii-character-in-c
+char cx =  (int)pass[i];
 
 //int s = strtol(c, NULL, 16);
-        printf("%s",cx);i++;
+        printf("%c",cx);i++;
     }
 }
 
