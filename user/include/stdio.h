@@ -47,6 +47,16 @@ extern FILE __sF[];
 #define	stderr	(&__sF[2])
 //End
 
+//SysV yuckiness
+#define	BUFSIZ	1024		/* size of buffer used by setbuf */
+
+//Various magic values...
+#define	__SLBF	0x0001		/* line buffered */
+#define	__SNBF	0x0002		/* unbuffered */
+#define	__SERR	0x0040		/* found error */
+#define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
+#define	__SALC	0x4000		/* allocate string space dynamically */
+
 //Haiku suggests doing the following...
 //This is a hack, we should replace it with something nicer, ASAP
 //extern FILE *stdin; //FILE is abstract, but what should it be?
