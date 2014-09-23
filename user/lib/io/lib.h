@@ -31,7 +31,7 @@
 #ifndef __USER__LIB__IO__LIB_H__
 #define __USER__LIB__IO__LIB_H__
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
 /* OpenBSD Definition, depends upon machine architecture */
 //typedef unsigned long size_t;
