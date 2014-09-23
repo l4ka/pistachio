@@ -5,8 +5,8 @@ class RamFs
 {
 public:
     RamFs();
-    RamFs::ReadFile(char *aPath);
-    RamFs::WriteFile(char *aPath);
+    bool ReadFile(char *aPath);
+    bool WriteFile(char *aPath);
 };
 
 #endif // RAMFS_H

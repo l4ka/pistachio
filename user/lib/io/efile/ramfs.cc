@@ -14,4 +14,6 @@ bool RamFs::ReadFile(char *aPath) {
 
 bool RamFs::WriteFile(char *aPath) {
     EDebugPrintf("RamFs", "Writing files is unsupported");
+
+    return -1;
 }
