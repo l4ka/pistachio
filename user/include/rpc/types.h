@@ -44,15 +44,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+//typedef	unsigned long long	uint64_t;
+typedef long long int64_t;
+typedef unsigned short uint16_t;
+typedef short int16_t;
 
-#if defined(__MINGW32__)
+//#if defined(__MINGW32__)
 /* mingw does not define these types anywhere */
 typedef uint8_t   u_int8_t;
 typedef uint16_t  u_int16_t;
 typedef uint32_t  u_int32_t;
 typedef uint64_t  u_int64_t;
 typedef char     *caddr_t;
-#endif /* __MINGW32__ */
+//#endif /* __MINGW32__ */
 
 #ifdef _MSC_VER
 /* MSVC does not define these types anywhere */
