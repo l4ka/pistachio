@@ -42,6 +42,7 @@
 #define _RPC_XDR_H
 #include <stdio.h>
 #include <rpc/types.h>
+#include <limits.h>
 
 #ifdef __cplusplus
 extern "C" {
