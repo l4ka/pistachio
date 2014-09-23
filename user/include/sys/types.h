@@ -34,6 +34,10 @@ typedef	signed char	int8_t;
 #define CHAR_BIT 8
 #define	RAND_MAX	2147483647 // Like Linux
 
+//typedef	unsigned long		__size_t;
+//ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/sys/arch/i386/include/_types.h
+//typedef	unsigned long		size_t;
+
 typedef unsigned long long u_quad_t;
 typedef long long quad_t;
 typedef L4_Word_t u_long;
