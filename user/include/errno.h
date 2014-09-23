@@ -6,6 +6,8 @@
 //This probably won't work
 extern int errno;
 
+#define EBADF           9               /* Bad file descriptor */
+
 #define EINVAL 22
 #define ERANGE 34
 #endif
