@@ -75,6 +75,7 @@ int __l4_putchar (int c)
     return c;
 }
 
+int __sdidinit = 1;
 
 /*
  * Function print_string (s)
@@ -680,7 +681,7 @@ void append_str(char* s, char c)
 //__sinit()
 void __sinit(void) {
 //this is a hack, since this stuff isn't really set up :(
-int __sdidinit = 1;
+ __sdidinit = 1;
 }
 
 //NetWare thing, move this later
