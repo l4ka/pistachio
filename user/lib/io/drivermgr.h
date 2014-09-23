@@ -34,8 +34,7 @@ public:
 
     /* Unregister a driver by name */
     
-//bool Validate(int nX, int nY, bool (*pfcn)(int, int));
-/* Unregister a driver by ordinal */
+    /* Unregister a driver by ordinal */
 
     /* Return a list of drivers, types, synopses, versions, and PID/thread IDs */
 
