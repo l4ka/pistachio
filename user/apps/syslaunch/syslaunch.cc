@@ -1,7 +1,7 @@
 #include "syslaunch.h"
 
 #include <drivermgr.h>
-//#include 
+#include <ramfs.h>
 
 
 SysLaunch::SysLaunch():
@@ -18,6 +18,7 @@ SysLaunch::SysLaunch():
     setenv("USER", "syslaunch",1);
 
     DriverMgr();
+    RamFs();
 
 
 }
