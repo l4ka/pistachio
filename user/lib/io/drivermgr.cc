@@ -20,6 +20,9 @@ int DriverMgr::GetPageCount() {
 
 
 char* DriverMgr::GetFriendlyType(int aType) {
+
+        printf("\n\n[DriverMgr] : Called GetFriendlyType(%d)\n\n", aType);
+
     switch (aType) {
     EFileSys:
         return "File System Driver";
@@ -32,6 +35,7 @@ char* DriverMgr::GetFriendlyType(int aType) {
      default:
         return "Unknown";
     }
+
 }
 
 bool DriverMgr::RegName(char *aName,
