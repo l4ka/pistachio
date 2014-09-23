@@ -18,7 +18,9 @@ SysLaunch::SysLaunch():
     setenv("USER", "syslaunch",1);
 
     DriverMgr();
-    RamFs();
+
+    RamFs rfs;
+    rfs.Start(1);
 
 
 }
