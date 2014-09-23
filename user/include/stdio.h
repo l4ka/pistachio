@@ -27,6 +27,14 @@ typedef	struct __sFILE {
 	int	_w;		/* write space left for putc() */
 	short	_flags;		/* flags, below; this FILE is free if 0 */
 	struct	__sbuf _bf;	/* the buffer (at least 1 byte, if !NULL) */
+	int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
+
+	void	*_cookie;	/* cookie passed to io functions */
+	int	(*_read)(void *, char *, int);
+
+	/* data for long sequences of ungetc() */
+	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
+	int	_ur;		/* saved _r when _r is counting ungetc data */
 } FILE;
 
 extern FILE __sF[];
@@ -60,6 +68,8 @@ extern FILE __sF[];
 #define	__SERR	0x0040		/* found error */
 #define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
 #define	__SALC	0x4000		/* allocate string space dynamically */
+#define	__SMOD	0x2000		/* true => fgetln modified _p text */
+#define __SIGN	0x8000		/* ignore this file in _fwalk */
 
 //Haiku suggests doing the following...
 //This is a hack, we should replace it with something nicer, ASAP
