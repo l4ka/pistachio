@@ -16,10 +16,15 @@ public:
       aSynopsis
       aVersion
 
+bool DriverMgr::RegName(char[20] *aName, int aType, 
+ bool (*aHook)(int), char[30] *aSynopsis, char[5] *aVersion
+
      */
 
     /* Unregister a driver by name */
-    /* Unregister a driver by ordinal */
+    
+//bool Validate(int nX, int nY, bool (*pfcn)(int, int));
+/* Unregister a driver by ordinal */
 
     /* Return a list of drivers, types, synopses, versions, and PID/thread IDs */
 
