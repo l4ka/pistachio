@@ -678,9 +678,9 @@ void append_str(char* s, char c)
 
 //ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/lib/libc/stdio/findfp.c
 //__sinit()
-extern "C" void __sinit(void) {
+void __sinit(void) {
 //this is a hack, since this stuff isn't really set up :(
-__sdidinit = 1;
+int __sdidinit = 1;
 }
 
 //NetWare thing, move this later
