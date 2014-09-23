@@ -21,24 +21,28 @@ int DriverMgr::GetPageCount() {
 
 char* DriverMgr::GetFriendlyType(int aType) {
 
+    char *value;
+
         printf("\n\n[DriverMgr] : Called GetFriendlyType(%d)\n\n", aType);
 
     switch (aType) {
-    EFileSys:
-        return "File System Driver";
+    case EFileSys:
+        value = "File System Driver";
         break;
-    EGenericBlock:
-        return "Generic Block Device Driver";
+    case EGenericBlock:
+        value = "Generic Block Device Driver";
         break;
-    EHardDisk:
-        return "Hard Disk Driver";
+    case EHardDisk:
+        value = "Hard Disk Driver";
         break;
 
-    EUnknown:
-     default:
-        return "Unknown";
+    case EUnknown:
+    default:
+        value = "Unknown";
         break;
     }
+
+    return value;
 
 }
 
