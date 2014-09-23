@@ -1,6 +1,7 @@
 #include "ramfs.h"
 
 #include <stdio.h>
+#include <drivermgr.h>
 
 RamFs::RamFs()
 {
