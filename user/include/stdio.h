@@ -53,6 +53,8 @@ extern FILE __sF[];
 //Various magic values...
 #define	__SLBF	0x0001		/* line buffered */
 #define	__SNBF	0x0002		/* unbuffered */
+#define	__SWR	0x0008		/* OK to write */
+#define	__SEOF	0x0020		/* found EOF */
 #define	__SERR	0x0040		/* found error */
 #define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
 #define	__SALC	0x4000		/* allocate string space dynamically */
