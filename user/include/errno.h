@@ -6,8 +6,9 @@
 //This probably won't work
 extern int errno;
 
+#define ENOENT          2               /* No such file or directory */
 #define EBADF           9               /* Bad file descriptor */
-
+#define EEXIST          17              /* File exists */
 #define EINVAL 22
 #define ERANGE 34
 #endif
