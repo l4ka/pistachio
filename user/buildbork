@@ -1,0 +1,905 @@
+make[1]: Entering directory `/home/tyson/pistachio/user/lib'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/l4'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/l4'
+===> debug.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c debug.cc -o debug.o
+===> ia32.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32.cc -o ia32.o
+===> ia32-syscall-stubs.S
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c ia32-syscall-stubs.S -o ia32-syscall-stubs.o
+ia32-syscall-stubs.S: Assembler messages:
+ia32-syscall-stubs.S:52: Warning: setting incorrect section attributes for .data.syscalls
+ia32-syscall-stubs.S:58: Warning: setting incorrect section attributes for .data.syscalls_copy
+===> Linking ./libl4.a
+ar cru libl4.a  debug.o ia32.o ia32-syscall-stubs.o  
+ranlib libl4.a
+cp libl4.a ../../lib/libl4.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/io'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/io'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/io'
+===> get_hex.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c get_hex.cc -o get_hex.o
+===> print.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c print.cc -o print.o
+print.cc: In function ‘int __l4_vsnprintf(char*, L4_Size_t, const char*, va_list)’:
+print.cc:113:25: warning: variable ‘uval2’ set but not used [-Wunused-but-set-variable]
+     unsigned long uval, uval2;
+                         ^
+print.cc: In function ‘char* GetPolledKbdLine()’:
+print.cc:641:6: warning: address of local variable ‘pass’ returned [-Wreturn-local-addr]
+ char pass[60] = "";
+      ^
+print.cc:636:6: warning: unused variable ‘data’ [-Wunused-variable]
+ char data;
+      ^
+===> ia32.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32.cc -o ia32.o
+===> liballoc_hooks.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c liballoc_hooks.cc -o liballoc_hooks.o
+liballoc_hooks.cc: In function ‘void* liballoc_alloc(int)’:
+liballoc_hooks.cc:82:34: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+    for (int j=0; j<NWGetPageSize(); j++)
+                                  ^
+===> debug.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c debug.cc -o debug.o
+In file included from ../../include/l4/ia32/syscalls.h:37:0,
+                 from ../../include/l4/thread.h:36,
+                 from ../../include/mutex/mutex.h:86,
+                 from ../../include/stdio.h:75,
+                 from debug.cc:1:
+../../include/l4/message.h: In function ‘L4_Bool_t L4_MapItem(L4_MapItem_t)’:
+../../include/l4/message.h:212:47: error: declaration of C function ‘L4_Bool_t L4_MapItem(L4_MapItem_t)’ conflicts with
+ L4_INLINE L4_Bool_t L4_MapItem (L4_MapItem_t m)
+                                               ^
+../../include/l4/message.h:186:24: error: previous declaration ‘L4_MapItem_t L4_MapItem(L4_Fpage_t, L4_Word_t)’ here
+ L4_INLINE L4_MapItem_t L4_MapItem (L4_Fpage_t f, L4_Word_t SndBase)
+                        ^
+../../include/l4/message.h: In function ‘L4_Bool_t L4_GrantItem(L4_GrantItem_t)’:
+../../include/l4/message.h:280:51: error: declaration of C function ‘L4_Bool_t L4_GrantItem(L4_GrantItem_t)’ conflicts with
+ L4_INLINE L4_Bool_t L4_GrantItem (L4_GrantItem_t g)
+                                                   ^
+../../include/l4/message.h:259:26: error: previous declaration ‘L4_GrantItem_t L4_GrantItem(L4_Fpage_t, L4_Word_t)’ here
+ L4_INLINE L4_GrantItem_t L4_GrantItem (L4_Fpage_t f, L4_Word_t SndBase)
+                          ^
+../../include/l4/message.h: In function ‘L4_Fpage_t L4_SndFpage(L4_GrantItem_t)’:
+../../include/l4/message.h:285:51: error: declaration of C function ‘L4_Fpage_t L4_SndFpage(L4_GrantItem_t)’ conflicts with
+ L4_INLINE L4_Fpage_t L4_SndFpage (L4_GrantItem_t m)
+                                                   ^
+../../include/l4/message.h:217:22: error: previous declaration ‘L4_Fpage_t L4_SndFpage(L4_MapItem_t)’ here
+ L4_INLINE L4_Fpage_t L4_SndFpage (L4_MapItem_t m)
+                      ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_SndBase(L4_GrantItem_t)’:
+../../include/l4/message.h:290:49: error: declaration of C function ‘L4_Word_t L4_SndBase(L4_GrantItem_t)’ conflicts with
+ L4_INLINE L4_Word_t L4_SndBase (L4_GrantItem_t m)
+                                                 ^
+../../include/l4/message.h:222:21: error: previous declaration ‘L4_Word_t L4_SndBase(L4_MapItem_t)’ here
+ L4_INLINE L4_Word_t L4_SndBase (L4_MapItem_t m)
+                     ^
+../../include/l4/message.h: In function ‘L4_Bool_t L4_StringItem(L4_StringItem_t*)’:
+../../include/l4/message.h:346:55: error: declaration of C function ‘L4_Bool_t L4_StringItem(L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Bool_t L4_StringItem (L4_StringItem_t * s)
+                                                       ^
+../../include/l4/message.h:328:27: error: previous declaration ‘L4_StringItem_t L4_StringItem(int, void*)’ here
+ L4_INLINE L4_StringItem_t L4_StringItem (int size, void * address)
+                           ^
+../../include/l4/message.h: In function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’:
+../../include/l4/message.h:426:36: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’ conflicts with
+           L4_StringItem_t substring)
+                                    ^
+../../include/l4/message.h:121:27: error: previous declaration ‘L4_MsgTag_t operator+=(L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator += (L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’:
+../../include/l4/message.h:434:38: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’ conflicts with
+           L4_StringItem_t & substring)
+                                      ^
+../../include/l4/message.h:425:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:434:38: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’ conflicts with
+           L4_StringItem_t & substring)
+                                      ^
+../../include/l4/message.h:121:27: error: previous declaration ‘L4_MsgTag_t operator+=(L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator += (L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’:
+../../include/l4/message.h:441:32: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’ conflicts with
+           void * substring_addr)
+                                ^
+../../include/l4/message.h:433:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:441:32: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’ conflicts with
+           void * substring_addr)
+                                ^
+../../include/l4/message.h:425:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:441:32: error: declaration of C function ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’ conflicts with
+           void * substring_addr)
+                                ^
+../../include/l4/message.h:121:27: error: previous declaration ‘L4_MsgTag_t operator+=(L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator += (L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘void L4_Init(L4_CtrlXferItem_t*, L4_Word_t, L4_Word_t)’:
+../../include/l4/message.h:510:87: error: declaration of C function ‘void L4_Init(L4_CtrlXferItem_t*, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t fault_id, L4_Word_t fault_mask)
+                                                                                       ^
+../../include/l4/message.h:504:16: error: previous declaration ‘void L4_Init(L4_CtrlXferItem_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Init (L4_CtrlXferItem_t *c, L4_Word_t id)
+                ^
+../../include/l4/message.h: In function ‘L4_CacheAllocationHint_t L4_CacheAlloctionHint(const L4_StringItem_t&)’:
+../../include/l4/message.h:563:30: error: declaration of C function ‘L4_CacheAllocationHint_t L4_CacheAlloctionHint(const L4_StringItem_t&)’ conflicts with
+     const L4_StringItem_t & s)
+                              ^
+../../include/l4/message.h:526:36: error: previous declaration ‘L4_CacheAllocationHint_t L4_CacheAlloctionHint(L4_StringItem_t)’ here
+ L4_INLINE L4_CacheAllocationHint_t L4_CacheAlloctionHint (
+                                    ^
+../../include/l4/message.h: In function ‘L4_Bool_t operator==(const L4_CacheAllocationHint_t&, const L4_CacheAllocationHint_t&)’:
+../../include/l4/message.h:571:44: error: declaration of C function ‘L4_Bool_t operator==(const L4_CacheAllocationHint_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+          const L4_CacheAllocationHint_t & r)
+                                            ^
+../../include/l4/message.h:89:25: error: previous declaration ‘L4_Bool_t operator==(const L4_MsgTag_t&, const L4_MsgTag_t&)’ here
+ static inline L4_Bool_t operator == (const L4_MsgTag_t & l,
+                         ^
+../../include/l4/message.h: In function ‘L4_Bool_t operator!=(const L4_CacheAllocationHint_t&, const L4_CacheAllocationHint_t&)’:
+../../include/l4/message.h:577:44: error: declaration of C function ‘L4_Bool_t operator!=(const L4_CacheAllocationHint_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+          const L4_CacheAllocationHint_t & r)
+                                            ^
+../../include/l4/message.h:95:25: error: previous declaration ‘L4_Bool_t operator!=(const L4_MsgTag_t&, const L4_MsgTag_t&)’ here
+ static inline L4_Bool_t operator != (const L4_MsgTag_t & l,
+                         ^
+../../include/l4/message.h: In function ‘L4_StringItem_t operator+(const L4_StringItem_t&, const L4_CacheAllocationHint_t&)’:
+../../include/l4/message.h:583:42: error: declaration of C function ‘L4_StringItem_t operator+(const L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+        const L4_CacheAllocationHint_t & h)
+                                          ^
+../../include/l4/message.h:116:27: error: previous declaration ‘L4_MsgTag_t operator+(const L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator + (const L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’:
+../../include/l4/message.h:589:43: error: declaration of C function ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+         const L4_CacheAllocationHint_t & h)
+                                           ^
+../../include/l4/message.h:440:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:589:43: error: declaration of C function ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+         const L4_CacheAllocationHint_t & h)
+                                           ^
+../../include/l4/message.h:433:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:589:43: error: declaration of C function ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+         const L4_CacheAllocationHint_t & h)
+                                           ^
+../../include/l4/message.h:425:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:589:43: error: declaration of C function ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ conflicts with
+         const L4_CacheAllocationHint_t & h)
+                                           ^
+../../include/l4/message.h:121:27: error: previous declaration ‘L4_MsgTag_t operator+=(L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator += (L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_MsgTag_t L4_MsgTag(const L4_Msg_t*)’:
+../../include/l4/message.h:881:54: error: declaration of C function ‘L4_MsgTag_t L4_MsgTag(const L4_Msg_t*)’ conflicts with
+ L4_INLINE L4_MsgTag_t L4_MsgTag (const L4_Msg_t * msg)
+                                                      ^
+../../include/l4/message.h:147:23: error: previous declaration ‘L4_MsgTag_t L4_MsgTag()’ here
+ L4_INLINE L4_MsgTag_t L4_MsgTag (void)
+                       ^
+../../include/l4/message.h: In function ‘void L4_Set_MsgTag(L4_Msg_t*, L4_MsgTag_t)’:
+../../include/l4/message.h:886:60: error: declaration of C function ‘void L4_Set_MsgTag(L4_Msg_t*, L4_MsgTag_t)’ conflicts with
+ L4_INLINE void L4_Set_MsgTag (L4_Msg_t * msg, L4_MsgTag_t t)
+                                                            ^
+../../include/l4/message.h:154:16: error: previous declaration ‘void L4_Set_MsgTag(L4_MsgTag_t)’ here
+ L4_INLINE void L4_Set_MsgTag (L4_MsgTag_t t)
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Label(const L4_Msg_t*)’:
+../../include/l4/message.h:891:51: error: declaration of C function ‘L4_Word_t L4_Label(const L4_Msg_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Label (const L4_Msg_t * msg)
+                                                   ^
+../../include/l4/message.h:127:21: error: previous declaration ‘L4_Word_t L4_Label(L4_MsgTag_t)’ here
+ L4_INLINE L4_Word_t L4_Label (L4_MsgTag_t t)
+                     ^
+../../include/l4/message.h: In function ‘void L4_Set_Label(L4_Msg_t*, L4_Word_t)’:
+../../include/l4/message.h:896:61: error: declaration of C function ‘void L4_Set_Label(L4_Msg_t*, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Set_Label (L4_Msg_t * msg, L4_Word_t label)
+                                                             ^
+../../include/l4/message.h:142:16: error: previous declaration ‘void L4_Set_Label(L4_MsgTag_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Set_Label (L4_MsgTag_t * t, L4_Word_t label)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, int)’:
+../../include/l4/message.h:921:48: error: declaration of C function ‘void L4_Append(L4_Msg_t*, int)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                                                ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’:
+../../include/l4/message.h:926:57: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                                                         ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:926:57: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                                                         ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’:
+../../include/l4/message.h:931:59: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                                                           ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:931:59: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                                                           ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:931:59: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                                                           ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’:
+../../include/l4/message.h:936:60: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                                                            ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:936:60: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                                                            ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:936:60: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                                                            ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:936:60: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                                                            ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’:
+../../include/l4/message.h:941:62: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                                                              ^
+../../include/l4/message.h:936:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:941:62: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                                                              ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:941:62: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                                                              ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:941:62: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                                                              ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:941:62: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                                                              ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’:
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:941:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                ^
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:936:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:946:63: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                                                               ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’:
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:946:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:941:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:936:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:951:102: error: declaration of C function ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                                                                                                      ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’:
+../../include/l4/message.h:956:64: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                                                                ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’:
+../../include/l4/message.h:961:67: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                                                                   ^
+../../include/l4/message.h:956:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                ^
+../../include/l4/message.h:961:67: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                                                                   ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’:
+../../include/l4/message.h:966:69: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                                                                     ^
+../../include/l4/message.h:961:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:966:69: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                                                                     ^
+../../include/l4/message.h:956:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                ^
+../../include/l4/message.h:966:69: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                                                                     ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’:
+../../include/l4/message.h:971:70: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                                                                      ^
+../../include/l4/message.h:966:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:971:70: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                                                                      ^
+../../include/l4/message.h:961:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:971:70: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                                                                      ^
+../../include/l4/message.h:956:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                ^
+../../include/l4/message.h:971:70: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                                                                      ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’:
+../../include/l4/message.h:976:72: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                        ^
+../../include/l4/message.h:971:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:976:72: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                        ^
+../../include/l4/message.h:966:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:976:72: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                        ^
+../../include/l4/message.h:961:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:976:72: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                        ^
+../../include/l4/message.h:956:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                ^
+../../include/l4/message.h:976:72: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                        ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’:
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:976:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                ^
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:971:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_StringItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:966:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:961:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_MapItem_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:956:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t u, L4_Word_t w)
+                ^
+../../include/l4/message.h:981:73: error: declaration of C function ‘void L4_Put(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t t, L4_CtrlXferItem_t *c)
+                                                                         ^
+../../include/l4/message.h:869:16: error: previous declaration ‘void L4_Put(L4_Msg_t*, L4_Word_t, int, L4_Word_t*, int, void*)’ here
+ L4_INLINE void L4_Put (L4_Msg_t * msg, L4_Word_t label,
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’:
+../../include/l4/message.h:986:56: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                                                        ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’:
+../../include/l4/message.h:991:66: error: declaration of C function ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ conflicts with
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                                                                  ^
+../../include/l4/message.h:986:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                     ^
+../../include/l4/message.h:991:66: error: declaration of C function ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ conflicts with
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                                                                  ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’:
+../../include/l4/message.h:996:74: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                                                                          ^
+../../include/l4/message.h:991:16: error: previous declaration ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ here
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                ^
+../../include/l4/message.h:996:74: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                                                                          ^
+../../include/l4/message.h:986:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                     ^
+../../include/l4/message.h:996:74: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                                                                          ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’:
+../../include/l4/message.h:1001:76: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                                                                            ^
+../../include/l4/message.h:996:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                     ^
+../../include/l4/message.h:1001:76: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                                                                            ^
+../../include/l4/message.h:991:16: error: previous declaration ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ here
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                ^
+../../include/l4/message.h:1001:76: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                                                                            ^
+../../include/l4/message.h:986:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                     ^
+../../include/l4/message.h:1001:76: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                                                                            ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’:
+../../include/l4/message.h:1006:77: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                             ^
+../../include/l4/message.h:1001:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                     ^
+../../include/l4/message.h:1006:77: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                             ^
+../../include/l4/message.h:996:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                     ^
+../../include/l4/message.h:1006:77: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                             ^
+../../include/l4/message.h:991:16: error: previous declaration ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ here
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                ^
+../../include/l4/message.h:1006:77: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                             ^
+../../include/l4/message.h:986:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                     ^
+../../include/l4/message.h:1006:77: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                                                                             ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’:
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:1006:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_StringItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_StringItem_t * s)
+                     ^
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:1001:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_GrantItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_GrantItem_t * g)
+                     ^
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:996:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_MapItem_t*)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t t, L4_MapItem_t * m)
+                     ^
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:991:16: error: previous declaration ‘void L4_Get(L4_Msg_t*, L4_Word_t, L4_Word_t*)’ here
+ L4_INLINE void L4_Get (L4_Msg_t * msg, L4_Word_t u, L4_Word_t * w)
+                ^
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:986:21: error: previous declaration ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t u)
+                     ^
+../../include/l4/message.h:1011:79: error: declaration of C function ‘L4_Word_t L4_Get(L4_Msg_t*, L4_Word_t, L4_CtrlXferItem_t*)’ conflicts with
+ L4_INLINE L4_Word_t L4_Get (L4_Msg_t * msg, L4_Word_t mr, L4_CtrlXferItem_t *c)
+                                                                               ^
+../../include/l4/message.h:876:16: error: previous declaration ‘void L4_Get(const L4_Msg_t*, L4_Word_t*, void*)’ here
+ L4_INLINE void L4_Get (const L4_Msg_t * msg, L4_Word_t * Untyped, void * Items)
+                ^
+../../include/l4/message.h: In function ‘L4_Acceptor_t operator+(const L4_Acceptor_t&, const L4_Acceptor_t&)’:
+../../include/l4/message.h:1101:29: error: declaration of C function ‘L4_Acceptor_t operator+(const L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+      const L4_Acceptor_t & r)
+                             ^
+../../include/l4/message.h:582:31: error: previous declaration ‘L4_StringItem_t operator+(const L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ here
+ static inline L4_StringItem_t operator + (const L4_StringItem_t & dest,
+                               ^
+../../include/l4/message.h:1101:29: error: declaration of C function ‘L4_Acceptor_t operator+(const L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+      const L4_Acceptor_t & r)
+                             ^
+../../include/l4/message.h:116:27: error: previous declaration ‘L4_MsgTag_t operator+(const L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator + (const L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’:
+../../include/l4/message.h:1107:30: error: declaration of C function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+       const L4_Acceptor_t & r)
+                              ^
+../../include/l4/message.h:588:31: error: previous declaration ‘L4_StringItem_t operator+=(L4_StringItem_t&, const L4_CacheAllocationHint_t&)’ here
+ static inline L4_StringItem_t operator += (L4_StringItem_t & dest,
+                               ^
+../../include/l4/message.h:1107:30: error: declaration of C function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+       const L4_Acceptor_t & r)
+                              ^
+../../include/l4/message.h:440:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, void*)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:1107:30: error: declaration of C function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+       const L4_Acceptor_t & r)
+                              ^
+../../include/l4/message.h:433:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t&)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:1107:30: error: declaration of C function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+       const L4_Acceptor_t & r)
+                              ^
+../../include/l4/message.h:425:33: error: previous declaration ‘L4_StringItem_t* operator+=(L4_StringItem_t&, L4_StringItem_t)’ here
+ static inline L4_StringItem_t * operator += (L4_StringItem_t & dest,
+                                 ^
+../../include/l4/message.h:1107:30: error: declaration of C function ‘L4_Acceptor_t operator+=(L4_Acceptor_t&, const L4_Acceptor_t&)’ conflicts with
+       const L4_Acceptor_t & r)
+                              ^
+../../include/l4/message.h:121:27: error: previous declaration ‘L4_MsgTag_t operator+=(L4_MsgTag_t&, int)’ here
+ static inline L4_MsgTag_t operator += (L4_MsgTag_t & t, int label)
+                           ^
+../../include/l4/message.h: In function ‘L4_Bool_t L4_MapGrantItems(L4_Acceptor_t)’:
+../../include/l4/message.h:1141:60: error: declaration of C function ‘L4_Bool_t L4_MapGrantItems(L4_Acceptor_t)’ conflicts with
+ L4_INLINE L4_Bool_t L4_MapGrantItems (const L4_Acceptor_t a)
+                                                            ^
+../../include/l4/message.h:1050:25: error: previous declaration ‘L4_Acceptor_t L4_MapGrantItems(L4_Fpage_t)’ here
+ L4_INLINE L4_Acceptor_t L4_MapGrantItems (L4_Fpage_t RcvWindow)
+                         ^
+../../include/l4/message.h: In function ‘void L4_Accept(L4_Acceptor_t, L4_MsgBuffer_t*)’:
+../../include/l4/message.h:1178:68: error: declaration of C function ‘void L4_Accept(L4_Acceptor_t, L4_MsgBuffer_t*)’ conflicts with
+ L4_INLINE void L4_Accept (const L4_Acceptor_t a, L4_MsgBuffer_t * b)
+                                                                    ^
+../../include/l4/message.h:1155:16: error: previous declaration ‘void L4_Accept(L4_Acceptor_t)’ here
+ L4_INLINE void L4_Accept (const L4_Acceptor_t a)
+                ^
+../../include/l4/message.h: In function ‘void L4_Clear(L4_MsgBuffer_t*)’:
+../../include/l4/message.h:1197:44: error: declaration of C function ‘void L4_Clear(L4_MsgBuffer_t*)’ conflicts with
+ L4_INLINE void L4_Clear (L4_MsgBuffer_t * b)
+                                            ^
+../../include/l4/message.h:911:16: error: previous declaration ‘void L4_Clear(L4_Msg_t*)’ here
+ L4_INLINE void L4_Clear (L4_Msg_t * msg)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’:
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:951:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:946:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:941:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:936:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:1238:64: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                                                                ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+../../include/l4/message.h: In function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’:
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:1238:16: error: previous declaration ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:951:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word64_t, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t *msg, L4_Word64_t fault_id_mask, L4_Word_t fault_mask, L4_Word_t C)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:946:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_CtrlXferItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_CtrlXferItem_t *c)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:941:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t*)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t * s)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:936:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_StringItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_StringItem_t s)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:931:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_GrantItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_GrantItem_t g)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:926:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_MapItem_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_MapItem_t m)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:921:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, int)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, int w)
+                ^
+../../include/l4/message.h:1243:66: error: declaration of C function ‘void L4_Append(L4_MsgBuffer_t*, L4_StringItem_t*)’ conflicts with
+ L4_INLINE void L4_Append (L4_MsgBuffer_t * b, L4_StringItem_t * s)
+                                                                  ^
+../../include/l4/message.h:916:16: error: previous declaration ‘void L4_Append(L4_Msg_t*, L4_Word_t)’ here
+ L4_INLINE void L4_Append (L4_Msg_t * msg, L4_Word_t w)
+                ^
+In file included from ../../include/mutex/mutex.h:86:0,
+                 from ../../include/stdio.h:75,
+                 from debug.cc:1:
+../../include/l4/thread.h: In function ‘L4_Word_t L4_UserDefinedHandle(L4_ThreadId_t)’:
+../../include/l4/thread.h:322:58: error: declaration of C function ‘L4_Word_t L4_UserDefinedHandle(L4_ThreadId_t)’ conflicts with
+ L4_INLINE L4_Word_t L4_UserDefinedHandle (L4_ThreadId_t t)
+                                                          ^
+../../include/l4/thread.h:107:21: error: previous declaration ‘L4_Word_t L4_UserDefinedHandle()’ here
+ L4_INLINE L4_Word_t L4_UserDefinedHandle (void)
+                     ^
+../../include/l4/thread.h: In function ‘void L4_Set_UserDefinedHandle(L4_ThreadId_t, L4_Word_t)’:
+../../include/l4/thread.h:327:75: error: declaration of C function ‘void L4_Set_UserDefinedHandle(L4_ThreadId_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Set_UserDefinedHandle (L4_ThreadId_t t, L4_Word_t handle)
+                                                                           ^
+../../include/l4/thread.h:112:16: error: previous declaration ‘void L4_Set_UserDefinedHandle(L4_Word_t)’ here
+ L4_INLINE void L4_Set_UserDefinedHandle (L4_Word_t NewValue)
+                ^
+../../include/l4/thread.h: In function ‘L4_ThreadId_t L4_Pager(L4_ThreadId_t)’:
+../../include/l4/thread.h:356:50: error: declaration of C function ‘L4_ThreadId_t L4_Pager(L4_ThreadId_t)’ conflicts with
+ L4_INLINE L4_ThreadId_t L4_Pager (L4_ThreadId_t t)
+                                                  ^
+../../include/l4/thread.h:117:25: error: previous declaration ‘L4_ThreadId_t L4_Pager()’ here
+ L4_INLINE L4_ThreadId_t L4_Pager (void)
+                         ^
+../../include/l4/thread.h: In function ‘void L4_Set_Pager(L4_ThreadId_t, L4_ThreadId_t)’:
+../../include/l4/thread.h:361:62: error: declaration of C function ‘void L4_Set_Pager(L4_ThreadId_t, L4_ThreadId_t)’ conflicts with
+ L4_INLINE void L4_Set_Pager (L4_ThreadId_t t, L4_ThreadId_t p)
+                                                              ^
+../../include/l4/thread.h:124:16: error: previous declaration ‘void L4_Set_Pager(L4_ThreadId_t)’ here
+ L4_INLINE void L4_Set_Pager (L4_ThreadId_t NewPager)
+                ^
+../../include/l4/thread.h: In function ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t)’:
+../../include/l4/thread.h:402:69: error: declaration of C function ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t)’ conflicts with
+ L4_INLINE void L4_Start (L4_ThreadId_t t, L4_Word_t sp, L4_Word_t ip)
+                                                                     ^
+../../include/l4/thread.h:367:16: error: previous declaration ‘void L4_Start(L4_ThreadId_t)’ here
+ L4_INLINE void L4_Start (L4_ThreadId_t t)
+                ^
+../../include/l4/thread.h: In function ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t, L4_Word_t)’:
+../../include/l4/thread.h:409:34: error: declaration of C function ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t, L4_Word_t)’ conflicts with
+     L4_Word_t ip, L4_Word_t flags)
+                                  ^
+../../include/l4/thread.h:402:16: error: previous declaration ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t)’ here
+ L4_INLINE void L4_Start (L4_ThreadId_t t, L4_Word_t sp, L4_Word_t ip)
+                ^
+../../include/l4/thread.h:409:34: error: declaration of C function ‘void L4_Start(L4_ThreadId_t, L4_Word_t, L4_Word_t, L4_Word_t)’ conflicts with
+     L4_Word_t ip, L4_Word_t flags)
+                                  ^
+../../include/l4/thread.h:367:16: error: previous declaration ‘void L4_Start(L4_ThreadId_t)’ here
+ L4_INLINE void L4_Start (L4_ThreadId_t t)
+                ^
+../../include/l4/thread.h: In function ‘L4_ThreadState_t L4_Stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’:
+../../include/l4/thread.h:446:40: error: declaration of C function ‘L4_ThreadState_t L4_Stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’ conflicts with
+         L4_Word_t *ip, L4_Word_t *flags)
+                                        ^
+../../include/l4/thread.h:415:28: error: previous declaration ‘L4_ThreadState_t L4_Stop(L4_ThreadId_t)’ here
+ L4_INLINE L4_ThreadState_t L4_Stop (L4_ThreadId_t t)
+                            ^
+../../include/l4/thread.h: In function ‘L4_ThreadState_t L4_AbortReceive_and_stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’:
+../../include/l4/thread.h:486:28: error: declaration of C function ‘L4_ThreadState_t L4_AbortReceive_and_stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’ conflicts with
+            L4_Word_t *flags)
+                            ^
+../../include/l4/thread.h:452:28: error: previous declaration ‘L4_ThreadState_t L4_AbortReceive_and_stop(L4_ThreadId_t)’ here
+ L4_INLINE L4_ThreadState_t L4_AbortReceive_and_stop (L4_ThreadId_t t)
+                            ^
+../../include/l4/thread.h: In function ‘L4_ThreadState_t L4_AbortIpc_and_stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’:
+../../include/l4/thread.h:566:24: error: declaration of C function ‘L4_ThreadState_t L4_AbortIpc_and_stop(L4_ThreadId_t, L4_Word_t*, L4_Word_t*, L4_Word_t*)’ conflicts with
+        L4_Word_t *flags)
+                        ^
+../../include/l4/thread.h:533:28: error: previous declaration ‘L4_ThreadState_t L4_AbortIpc_and_stop(L4_ThreadId_t)’ here
+ L4_INLINE L4_ThreadState_t L4_AbortIpc_and_stop (L4_ThreadId_t t)
+                            ^
+In file included from debug.cc:1:0:
+../../include/stdio.h: At global scope:
+../../include/stdio.h:122:1: error: expected initializer before ‘int’
+ int
+ ^
+make[2]: *** [debug.o] Error 1
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/io'
+make[1]: *** [subdirs-all] Error 2
+make[1]: Leaving directory `/home/tyson/pistachio/user/lib'
+make: *** [subdirs-all] Error 2
