@@ -53,6 +53,8 @@ typedef	struct __sFILE {
 	int eof;
 	unsigned char unget_pos;
 	long int current_pos;
+
+	struct kenge_mutex mutex;
 } FILE;
 
 extern FILE __sF[];
