@@ -117,7 +117,7 @@ void rewind(FILE *); //When the crowd say "Bo Selecta"
 char *
 fgets(char *buf, register int n, register FILE *fp);
 void flockfile(FILE *fp);
-void funlockfile(FILE *fp) //FunLock(TM) Files : The best kind of file
+void funlockfile(FILE *fp); //FunLock(TM) Files : The best kind of file
 
 int
 __sfvwrite(FILE *fp, struct __suio *uio);
