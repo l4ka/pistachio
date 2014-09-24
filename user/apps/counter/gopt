@@ -1,0 +1,33 @@
+===> xdr_test/test_common.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow -DLUA_COMPAT_ALL -std=c++11 -DINT_MAX -DUCHAR_MAX -Wno-conversion -std=c99 -c xdr_test/test_common.c -o xdr_test/test_common.o
+cc1: warning: command line option ‘-std=c++11’ is valid for C++/ObjC++ but not for C [enabled by default]
+In file included from ../../include/stdio.h:3:0,
+                 from xdr_test/test_common.c:26:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+In file included from xdr_test/test_common.c:30:0:
+../../include/limits.h:16:0: warning: "INT_MAX" redefined [enabled by default]
+ #define INT_MAX         0x7fffffff      /* max value for an int */
+ ^
+<command-line>:0:0: note: this is the location of the previous definition
+xdr_test/test_common.c: In function ‘mkdir_p’:
+xdr_test/test_common.c:88:3: warning: implicit declaration of function ‘mkdir’ [-Wimplicit-function-declaration]
+   while (!mkdir (new_path, mode))
+   ^
+xdr_test/test_common.c:93:25: error: ‘EEXIST’ undeclared (first use in this function)
+       if (last_error == EEXIST)
+                         ^
+xdr_test/test_common.c:93:25: note: each undeclared identifier is reported only once for each function it appears in
+xdr_test/test_common.c:95:25: error: ‘ENOENT’ undeclared (first use in this function)
+       if (last_error != ENOENT)
+                         ^
+xdr_test/test_common.c: In function ‘dumpmem’:
+xdr_test/test_common.c:145:3: warning: implicit declaration of function ‘fputs’ [-Wimplicit-function-declaration]
+   fputs("  Addr     0 1  2 3  4 5  6 7  8 9  A B  C D  E F 0 2 4 6 8 A C E \n",f);
+   ^
+xdr_test/test_common.c: In function ‘log_msg’:
+xdr_test/test_common.c:193:7: warning: implicit declaration of function ‘vfprintf’ [-Wimplicit-function-declaration]
+       vfprintf (o->f, fmt, ap);
+       ^
+make: *** [xdr_test/test_common.o] Error 1
