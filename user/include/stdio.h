@@ -35,6 +35,9 @@ typedef	struct __sFILE {
 	/* data for long sequences of ungetc() */
 	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
 	int	_ur;		/* saved _r when _r is counting ungetc data */
+
+//NICTA extension
+	int eof;
 } FILE;
 
 extern FILE __sF[];
