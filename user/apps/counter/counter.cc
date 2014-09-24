@@ -84,7 +84,7 @@ while(1) {
 int counter = 0;
 //counter++;
 
-printf("%d iterations \n", counter++); 
+printf("."); 
 
     }
 }
