@@ -93,6 +93,8 @@ struct mutex {
 
 typedef struct mutex * mutex_t;
 
+#ifdef __cplusplus
+extern "C" {
 void mutex_init(mutex_t);
 void mutex_lock(mutex_t);
 
@@ -108,5 +110,6 @@ mutex_unlock(mutex_t mutex)
 		L4_ThreadSwitch(L4_nilthread);
 	}
 }
-
+}
+#endif
 #endif /* __MUTEX_H__ */
