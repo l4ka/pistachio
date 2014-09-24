@@ -54,7 +54,7 @@ typedef	struct __sFILE {
 	unsigned char unget_pos;
 	long int current_pos;
 
-	struct kenge_mutex mutex;
+	struct mutex mutex;
 } FILE;
 
 extern FILE __sF[];
