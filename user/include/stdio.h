@@ -122,8 +122,10 @@ fgets(char *buf, register int n, register FILE *fp);
 void flockfile(FILE *fp);
 void funlockfile(FILE *fp); //FunLock(TM) Files : The best kind of file
 
-int
-__sfvwrite(FILE *fp, struct __suio *uio);
+
+//Should be namespaced
+//int
+//__sfvwrite(FILE *fp, struct __suio *uio);
 
 #ifdef __cplusplus
 }
