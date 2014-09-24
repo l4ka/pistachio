@@ -37,8 +37,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+//We use the system calloc, instead, but leave this as an alternative
+
 void *
-calloc(size_t num, size_t size)
+dfbsd_calloc(size_t num, size_t size)
 {
 	void *p;
 
