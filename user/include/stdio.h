@@ -114,7 +114,8 @@ void EDebugPrintf(const char *aTag, const char *aText);
 
 int fseek(FILE *, long int, int);
 void rewind(FILE *); //When the crowd say "Bo Selecta"
-char * fgets(buf, n, fp);
+char *
+fgets(char *buf, register int n, register FILE *fp);
 void flockfile(FILE *fp);
 void funlockfile(FILE *fp) //FunLock(TM) Files : The best kind of file
 

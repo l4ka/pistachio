@@ -48,10 +48,10 @@ static char rcsid[] = "$OpenBSD: fgets.c,v 1.3 2001/07/09 06:57:44 deraadt Exp $
  * Return first argument, or NULL if no characters were read.
  */
 char *
-fgets(buf, n, fp)
-	char *buf;
-	register int n;
-	register FILE *fp;
+fgets(char *buf, register int n, register FILE *fp)
+	
+	
+	
 {
 	register size_t len;
 	register char *s;
