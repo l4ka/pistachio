@@ -43,7 +43,9 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/libl4e/libl4e.a\
 		$(top_builddir)/lib/libelf/libelf.a
 
-SRCS=		crt0-$(ARCH).S counter.cc newtest.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc $(wildcard xdr_test/*.c)
+SRCS=		crt0-$(ARCH).S counter.cc newtest.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc
+
+# $(wildcard xdr_test/*.c)
 
 # libxml2-2.9.1/SAX.c #sha256.cc #um_rand.cc 
 #SRCS=           crt0-$(ARCH).S   $(wildcard pforth_v27/csrc/*.c) $(wildcard pforth_v27/csrc/posix/*.c)
