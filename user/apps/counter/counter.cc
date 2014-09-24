@@ -74,6 +74,21 @@ int MallocTestOne() {
 		return FINISHED;
 }
 
+int CrushTest() {
+int *p;
+while(1) {
+    int inc=1024*1024*sizeof(char);
+    p=(int*) calloc(1,inc);
+    if(!p) break;
+
+int counter = 0;
+counter++;
+
+printf("%d iterations \n", counter); 
+
+    }
+}
+
 /*
 
 //http://www.club.cc.cmu.edu/~cmccabe/blog_strerror.html
@@ -202,6 +217,20 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "strtod") == 0) {
         printf(iEnvStatus[ACTIVE_CMD]);
 
         iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+}
+
+
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "memcrush") == 0) {
+	
+	iEnvStatus[CMD_RESULT] = (char*)CrushTest();
+
+       //Return to prompt
+        iEnvStatus[CMD_RESULT] = (char*)WAITING;
+        printf(iEnvStatus[ACTIVE_CMD]);
+
+        iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+
+
 }
 
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "tettheme") == 0) {
