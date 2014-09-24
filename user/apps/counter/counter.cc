@@ -82,11 +82,18 @@ while(1) {
     if(!p) break;
 
 int counter = 0;
-counter++;
+//counter++;
 
-printf("%d iterations \n", counter); 
+printf("%d iterations \n", counter++); 
 
     }
+}
+
+int CrushTest2() {
+  int Mb = 0;
+  while ( malloc(1<<20)) ++Mb;
+  printf("Allocated %d Mb total\n", Mb);
+return RUNNING;
 }
 
 /*
@@ -229,8 +236,17 @@ if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "memcrush") == 0) {
         printf(iEnvStatus[ACTIVE_CMD]);
 
         iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+}
 
+if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "memcrush2") == 0) {
+	
+	iEnvStatus[CMD_RESULT] = (char*)CrushTest2();
 
+       //Return to prompt
+        iEnvStatus[CMD_RESULT] = (char*)WAITING;
+        printf(iEnvStatus[ACTIVE_CMD]);
+
+        iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 }
 
 if (obsd_strcmp(iEnvStatus[ACTIVE_CMD], "tettheme") == 0) {
