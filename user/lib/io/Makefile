@@ -53,7 +53,7 @@ $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c)  \
  libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
- debug.cc $(wildcard efile/*.cc) cpp_new.cc drivermgr.cc feof.c fseek.c $(wildcard p9fmt/*.c)\
+ debug.cc $(wildcard efile/*.cc) cpp_new.cc drivermgr.cc feof.c fseek.c rewind.c $(wildcard p9fmt/*.c)\
 
 
 #btree_core.c bt_modify.c

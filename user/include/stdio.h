@@ -112,6 +112,9 @@ int is_computer_on();
 //Print debugging text with a file name/class tag
 void EDebugPrintf(const char *aTag, const char *aText);
 
+int fseek(FILE *, long int, int);
+void rewind(FILE *); //When the crowd say "Bo Selecta"
+
 #ifdef __cplusplus
 }
 #endif
