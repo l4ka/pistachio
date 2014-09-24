@@ -2,6 +2,9 @@
 #define __STDIO_H__
 #include <l4io.h>
 
+
+
+#include <mutex/mutex.h>
 #define EOF (-1)
 #include <sys/types.h>
 
