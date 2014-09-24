@@ -37,7 +37,19 @@ typedef	struct __sFILE {
 	int	_ur;		/* saved _r when _r is counting ungetc data */
 
 //NICTA extension
+	void *handle;
+	size_t (*read_fn)(void *, long int, size_t, void *);
+	size_t (*write_fn)(void *, long int, size_t, void *);
+
+	int (*close_fn)(void *);
+	long int (*eof_fn)(void *);
+
+	unsigned char buffering_mode;
+	char *buffer;
+
 	int eof;
+	unsigned char unget_pos;
+	long int current_pos;
 } FILE;
 
 extern FILE __sF[];
@@ -60,6 +72,10 @@ extern FILE __sF[];
 
 //SysV yuckiness
 #define	BUFSIZ	1024		/* size of buffer used by setbuf */
+
+#define _IOFBF 0
+#define _IOLBF 1
+#define _IONBF 2
 
 //Various magic values...
 #define	__SLBF	0x0001		/* line buffered */
