@@ -36,7 +36,7 @@ top_builddir=	../..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-LIBRARY=	elf
+LIBRARY=	mach-o
 SRCS=		$(wildcard src/*.c) 
 
 include $(top_srcdir)/Mk/l4.lib.mk
