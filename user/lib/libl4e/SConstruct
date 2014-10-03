@@ -1,3 +1,0 @@
-Import("env")
-lib = env.MyLibrary("l4e", LIBS=['c', 'l4', 'elf'])
-Return("lib")
