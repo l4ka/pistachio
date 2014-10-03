@@ -5,4 +5,4 @@ cp -v apps/syslaunch/syslaunch /media/tyson/71864a82-d274-4e22-9767-9884defb3dcd
 cp -v  apps/bench/pingpong/pingpong  /media/tyson/71864a82-d274-4e22-9767-9884defb3dcd/
 
 umount /media/tyson/71864a82-d274-4e22-9767-9884defb3dcd
-qemu -hda  /dev/sda -boot d -cdrom ../grub.iso -soundhw pcspk
+qemu -m 512 -hda  /dev/sda -boot d -cdrom ../grub.iso -soundhw pcspk
