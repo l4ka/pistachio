@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Fri, 03 Oct 2014 15:04:27 +0000 */
+/* At: Fri, 03 Oct 2014 22:17:45 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -8,13 +8,13 @@
 /* Hardware */
 
 /* Basic Architecture */
-#undef  CONFIG_ARCH_X86
-#define CONFIG_ARCH_POWERPC 1
+#define CONFIG_ARCH_X86 1
+#undef  CONFIG_ARCH_POWERPC
 #undef  CONFIG_ARCH_POWERPC64
 
 
 /* X86 Processor Architecture */
-#undef  CONFIG_SUBARCH_X32
+#define CONFIG_SUBARCH_X32 1
 #undef  CONFIG_SUBARCH_X64
 
 
@@ -22,7 +22,7 @@
 #undef  CONFIG_CPU_X86_I486
 #undef  CONFIG_CPU_X86_I586
 #undef  CONFIG_CPU_X86_I686
-#undef  CONFIG_CPU_X86_P4
+#define CONFIG_CPU_X86_P4 1
 #undef  CONFIG_CPU_X86_K8
 #undef  CONFIG_CPU_X86_C3
 #undef  CONFIG_CPU_X86_SIMICS
@@ -30,16 +30,17 @@
 
 /* Platform */
 #undef  CONFIG_PLAT_PC99
+#define CONFIG_PLAT_EFI 1
 
 
 /* Processor Type */
 #undef  CONFIG_CPU_POWERPC_PPC440
 #undef  CONFIG_CPU_POWERPC_IBM750
-#define CONFIG_CPU_POWERPC_PPC604 1
+#undef  CONFIG_CPU_POWERPC_PPC604
 
 
 /* Platform */
-#define CONFIG_PLAT_OFPPC 1
+#undef  CONFIG_PLAT_OFPPC
 #undef  CONFIG_PLAT_PPC44X
 
 
@@ -87,7 +88,7 @@
 #define CONFIG_KDB_CONS_COM 1
 #define CONFIG_KDB_COMPORT 0x0
 #define CONFIG_KDB_COMSPEED 115200
-#undef  CONFIG_KDB_CONS_KBD
+#define CONFIG_KDB_CONS_KBD 1
 #undef  CONFIG_KDB_CONS_OF1275
 #undef  CONFIG_KDB_CONS_PSIM_COM
 #define CONFIG_KDB_BOOT_CONS 0
@@ -95,7 +96,7 @@
 #undef  CONFIG_KDB_DISAS
 #undef  CONFIG_KDB_ON_STARTUP
 #undef  CONFIG_KDB_BREAKIN
-#undef  CONFIG_KDB_BREAKIN_BREAK
+#define CONFIG_KDB_BREAKIN_BREAK 1
 #undef  CONFIG_KDB_INPUT_HLT
 #undef  CONFIG_KDB_NO_ASSERTS
 
@@ -116,15 +117,15 @@
 
 /* Derived symbols */
 #undef  CONFIG_HAVE_MEMORY_CONTROL
-#undef  CONFIG_X86_PSE
-#define CONFIG_BIGENDIAN 1
+#define CONFIG_X86_PSE 1
+#undef  CONFIG_BIGENDIAN
 #undef  CONFIG_PPC_MMU_TLB
-#undef  CONFIG_X86_SYSENTER
-#undef  CONFIG_X86_PGE
-#undef  CONFIG_X86_FXSR
+#define CONFIG_X86_SYSENTER 1
+#define CONFIG_X86_PGE 1
+#define CONFIG_X86_FXSR 1
 #define CONFIG_IS_32BIT 1
-#undef  CONFIG_X86_HTT
-#undef  CONFIG_X86_PAT
+#define CONFIG_X86_HTT 1
+#define CONFIG_X86_PAT 1
 #undef  CONFIG_PPC_BOOKE
 #undef  CONFIG_IS_64BIT
 #undef  CONFIG_MULTI_ARCHITECTURE
@@ -133,8 +134,8 @@
 #undef  CONFIG_PPC_TLB_INV_LOCAL
 #undef  CONFIG_PPC_CACHE_ICBI_LOCAL
 #undef  CONFIG_X86_SMALL_SPACES_GLOBAL
-#undef  CONFIG_X86_HVM
-#define CONFIG_PPC_MMU_SEGMENTS 1
-#undef  CONFIG_X86_TSC
+#define CONFIG_X86_HVM 1
+#undef  CONFIG_PPC_MMU_SEGMENTS
+#define CONFIG_X86_TSC 1
 /* That's all, folks! */
 #define AUTOCONF_INCLUDED

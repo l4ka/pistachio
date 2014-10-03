@@ -52,6 +52,8 @@ CPU_X86_SIMICS_SPEED		'Speed of SIMICS CPU (Mhz)'
 
 
 PLAT_PC99			'PC99 Compatible Machines (Standard PC)'
+PLAT_EFI			'Extensible Firmware Interface'
+
 
 #
 # X86 specific kernel configurations
@@ -159,6 +161,7 @@ choices x86_arch
 
 choices x86_platform
 	PLAT_PC99
+	PLAT_EFI
 	default PLAT_PC99
 
 unless ARCH_X86 suppress dependent x86_platform 

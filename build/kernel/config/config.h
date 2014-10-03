@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Fri, 03 Oct 2014 15:11:06 +0000 */
+/* At: Fri, 03 Oct 2014 22:18:45 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -30,6 +30,7 @@
 
 /* Platform */
 #define CONFIG_PLAT_PC99 1
+#undef  CONFIG_PLAT_EFI
 
 
 /* Processor Type */
