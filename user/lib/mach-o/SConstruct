@@ -1,0 +1,9 @@
+Import("env")
+lib = env.MyLibrary("mach-o", CCFLAGS=[
+	"-D__BIG_ENDIAN__=0", 
+	"-D__LITTLE_ENDIAN__=1",
+	"-static",
+	"-fno-strict-aliasing"],
+	CPPPATH=["#libs/xnuglue/xnu_include/include/EXTERNAL_HEADERS"],
+	LIBS=["c"])
+Return("lib")
