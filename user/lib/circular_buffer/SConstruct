@@ -1,0 +1,8 @@
+# Stuff for testing
+Import('tests_env')
+tests_env.TestLibrary('test_libs_circular_buffer', 'libs/circular_buffer/', ['src/*.c', 'test/*.c'])
+
+# Stuff for regular Iguana build.
+Import("env")
+lib = env.MyLibrary("circular_buffer", LIBS=["c"])
+Return("lib")
