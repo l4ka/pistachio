@@ -78,8 +78,8 @@ extern FILE __sF[];
 //NICTA
 
 #include <mutex/mutex.h>
-#define lock_stream(s) kenge_mutex_count_lock(&(s)->mutex)
-#define unlock_stream(s) kenge_mutex_count_unlock(&(s)->mutex)
+#define lock_stream(s) mutex_count_lock(&(s)->mutex)
+#define unlock_stream(s) mutex_count_unlock(&(s)->mutex)
 
 #define SEEK_CUR 0
 #define SEEK_END 1
