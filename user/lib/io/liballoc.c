@@ -132,7 +132,7 @@ static void dump_array()
 		}
 
 	printf("'*' denotes a split to the left/right of a tag\n");
-	fflush( stdout );
+	//fflush( stdout );
 }
 #endif
 

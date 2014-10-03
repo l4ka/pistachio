@@ -73,6 +73,22 @@ extern FILE __sF[];
 #define	stdin	(&__sF[0])
 #define	stdout	(&__sF[1])
 #define	stderr	(&__sF[2])
+
+/*
+
+struct __file __stdout = {
+	NULL,
+	NULL,
+	l4kdb_write,
+	NULL,
+	NULL,
+	_IONBF,
+	NULL,
+	0,
+	0
+};
+*/
+
 //End
 
 //NICTA
