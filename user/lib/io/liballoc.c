@@ -13,6 +13,7 @@
 #define MODE_INSTANT		1
 
 #define MODE	MODE_BEST
+#define DEBUG
 
 #ifdef DEBUG
 #include <stdio.h>
