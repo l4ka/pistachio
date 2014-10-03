@@ -2,7 +2,7 @@
 # Automatically generated, don't edit
 #
 # Generated on: tyson-VirtualBox
-# At: Fri, 16 May 2014 22:56:27 +0000
+# At: Fri, 03 Oct 2014 15:04:27 +0000
 # Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013
 
 #
@@ -16,15 +16,15 @@
 #
 # Basic Architecture
 #
-CONFIG_ARCH_X86=y
-# CONFIG_ARCH_POWERPC is not set
+# CONFIG_ARCH_X86 is not set
+CONFIG_ARCH_POWERPC=y
 # CONFIG_ARCH_POWERPC64 is not set
 
 
 #
 # X86 Processor Architecture
 #
-CONFIG_SUBARCH_X32=y
+# CONFIG_SUBARCH_X32 is not set
 # CONFIG_SUBARCH_X64 is not set
 
 
@@ -33,7 +33,7 @@ CONFIG_SUBARCH_X32=y
 #
 # CONFIG_CPU_X86_I486 is not set
 # CONFIG_CPU_X86_I586 is not set
-CONFIG_CPU_X86_I686=y
+# CONFIG_CPU_X86_I686 is not set
 # CONFIG_CPU_X86_P4 is not set
 # CONFIG_CPU_X86_K8 is not set
 # CONFIG_CPU_X86_C3 is not set
@@ -43,7 +43,29 @@ CONFIG_CPU_X86_I686=y
 #
 # Platform
 #
-CONFIG_PLAT_PC99=y
+# CONFIG_PLAT_PC99 is not set
+
+
+#
+# Processor Type
+#
+# CONFIG_CPU_POWERPC_PPC440 is not set
+# CONFIG_CPU_POWERPC_IBM750 is not set
+CONFIG_CPU_POWERPC_PPC604=y
+
+
+#
+# Platform
+#
+CONFIG_PLAT_OFPPC=y
+# CONFIG_PLAT_PPC44X is not set
+
+
+#
+# Sub-Platform
+#
+# CONFIG_SUBPLAT_440_BGP is not set
+# CONFIG_SUBPLAT_440_EBONY is not set
 
 
 #
@@ -52,6 +74,7 @@ CONFIG_PLAT_PC99=y
 CONFIG_IOAPIC=y
 CONFIG_MAX_IOAPICS=2
 CONFIG_APIC_TIMER_TICK=1000
+# CONFIG_PPC_EXPOSE_OPIC is not set
 
 # CONFIG_SMP is not set
 
@@ -82,6 +105,7 @@ CONFIG_DEBUG=y
 CONFIG_SPIN_WHEELS=y
 # CONFIG_NEW_MDB is not set
 # CONFIG_STATIC_TCBS is not set
+CONFIG_PPC_BAT_SYSCALLS=y
 # CONFIG_X86_SMALL_SPACES is not set
 
 
@@ -92,15 +116,18 @@ CONFIG_SPIN_WHEELS=y
 #
 # Kernel Debugger Console
 #
-# CONFIG_KDB_CONS_COM is not set
+CONFIG_KDB_CONS_COM=y
 CONFIG_KDB_COMPORT=0x0
 CONFIG_KDB_COMSPEED=115200
 # CONFIG_KDB_CONS_KBD is not set
+# CONFIG_KDB_CONS_OF1275 is not set
+# CONFIG_KDB_CONS_PSIM_COM is not set
 CONFIG_KDB_BOOT_CONS=0
 
 # CONFIG_KDB_DISAS is not set
 # CONFIG_KDB_ON_STARTUP is not set
 # CONFIG_KDB_BREAKIN is not set
+# CONFIG_KDB_BREAKIN_BREAK is not set
 # CONFIG_KDB_INPUT_HLT is not set
 # CONFIG_KDB_NO_ASSERTS is not set
 
@@ -118,21 +145,24 @@ CONFIG_VERBOSE_INIT=y
 #
 # Code Generator Options
 #
+CONFIG_SYSV_ABI=y
+# CONFIG_PPC_SEGMENT_LOOP is not set
+CONFIG_PPC_MULTIWORD_INSTR=y
 
 
 #
 # Derived symbols
 #
 # CONFIG_HAVE_MEMORY_CONTROL is not set
-CONFIG_X86_PSE=y
-# CONFIG_BIGENDIAN is not set
+# CONFIG_X86_PSE is not set
+CONFIG_BIGENDIAN=y
 # CONFIG_PPC_MMU_TLB is not set
-CONFIG_X86_SYSENTER=y
-CONFIG_X86_PGE=y
-CONFIG_X86_FXSR=y
+# CONFIG_X86_SYSENTER is not set
+# CONFIG_X86_PGE is not set
+# CONFIG_X86_FXSR is not set
 CONFIG_IS_32BIT=y
 # CONFIG_X86_HTT is not set
-CONFIG_X86_PAT=y
+# CONFIG_X86_PAT is not set
 # CONFIG_PPC_BOOKE is not set
 # CONFIG_IS_64BIT is not set
 # CONFIG_MULTI_ARCHITECTURE is not set
@@ -142,7 +172,7 @@ CONFIG_X86_PAT=y
 # CONFIG_PPC_CACHE_ICBI_LOCAL is not set
 # CONFIG_X86_SMALL_SPACES_GLOBAL is not set
 # CONFIG_X86_HVM is not set
-# CONFIG_PPC_MMU_SEGMENTS is not set
-CONFIG_X86_TSC=y
+CONFIG_PPC_MMU_SEGMENTS=y
+# CONFIG_X86_TSC is not set
 #
 # That's all, folks!
