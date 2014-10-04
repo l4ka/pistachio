@@ -4,6 +4,7 @@ static cmd_ret_t cmd_idt(cmd_group_t*);
 static cmd_ret_t cmd_gdt(cmd_group_t*);
 static cmd_ret_t cmd_cpu(cmd_group_t*);
 static cmd_ret_t cmd_amdhwcr(cmd_group_t*);
+static cmd_ret_t cmd_pgtcalc(cmd_group_t*);
 static cmd_ret_t cmd_dump_ptab(cmd_group_t*);
 static cmd_ret_t cmd_dump_mdb(cmd_group_t*);
 static cmd_ret_t cmd_dump_bootinfo(cmd_group_t*);
