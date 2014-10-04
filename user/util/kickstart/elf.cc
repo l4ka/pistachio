@@ -388,6 +388,8 @@ bool elf_find_sections (L4_Word_t addr,
           (eh->ident[3] == 'F')))
     {
 	// Not an ELF file.
+
+printf("This is not an ELF executable!\n");
         return false;
     }
 
