@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Fri, 03 Oct 2014 22:18:45 +0000 */
+/* At: Sat, 04 Oct 2014 16:51:04 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -14,8 +14,8 @@
 
 
 /* X86 Processor Architecture */
-#define CONFIG_SUBARCH_X32 1
-#undef  CONFIG_SUBARCH_X64
+#undef  CONFIG_SUBARCH_X32
+#define CONFIG_SUBARCH_X64 1
 
 
 /* Processor Type */
@@ -80,6 +80,7 @@
 #undef  CONFIG_STATIC_TCBS
 #define CONFIG_PPC_BAT_SYSCALLS 1
 #undef  CONFIG_X86_SMALL_SPACES
+#undef  CONFIG_X86_COMPATIBILITY_MODE
 
 
 /* Debugger */
@@ -123,13 +124,13 @@
 #define CONFIG_X86_SYSENTER 1
 #define CONFIG_X86_PGE 1
 #define CONFIG_X86_FXSR 1
-#define CONFIG_IS_32BIT 1
+#undef  CONFIG_IS_32BIT
 #define CONFIG_X86_HTT 1
 #define CONFIG_X86_PAT 1
 #undef  CONFIG_PPC_BOOKE
-#undef  CONFIG_IS_64BIT
+#define CONFIG_IS_64BIT 1
 #undef  CONFIG_MULTI_ARCHITECTURE
-#undef  CONFIG_X86_EM64T
+#define CONFIG_X86_EM64T 1
 #undef  CONFIG_PPC_CACHE_L1_WRITETHROUGH
 #undef  CONFIG_PPC_TLB_INV_LOCAL
 #undef  CONFIG_PPC_CACHE_ICBI_LOCAL

@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-VirtualBox */
-/* At: Sat, 04 Oct 2014 16:51:04 +0000 */
+/* At: Sat, 04 Oct 2014 17:06:27 +0000 */
 /* Linux version 3.11.0-12-generic (buildd@komainu) (gcc version 4.8.1 (Ubuntu/Linaro 4.8.1-10ubuntu7) ) #19-Ubuntu SMP Wed Oct 9 16:12:00 UTC 2013 */
 
 /* Pistachio Kernel Configuration System */
@@ -14,8 +14,8 @@
 
 
 /* X86 Processor Architecture */
-#undef  CONFIG_SUBARCH_X32
-#define CONFIG_SUBARCH_X64 1
+#define CONFIG_SUBARCH_X32 1
+#undef  CONFIG_SUBARCH_X64
 
 
 /* Processor Type */
@@ -124,13 +124,13 @@
 #define CONFIG_X86_SYSENTER 1
 #define CONFIG_X86_PGE 1
 #define CONFIG_X86_FXSR 1
-#undef  CONFIG_IS_32BIT
+#define CONFIG_IS_32BIT 1
 #define CONFIG_X86_HTT 1
 #define CONFIG_X86_PAT 1
 #undef  CONFIG_PPC_BOOKE
-#define CONFIG_IS_64BIT 1
+#undef  CONFIG_IS_64BIT
 #undef  CONFIG_MULTI_ARCHITECTURE
-#define CONFIG_X86_EM64T 1
+#undef  CONFIG_X86_EM64T
 #undef  CONFIG_PPC_CACHE_L1_WRITETHROUGH
 #undef  CONFIG_PPC_TLB_INV_LOCAL
 #undef  CONFIG_PPC_CACHE_ICBI_LOCAL
