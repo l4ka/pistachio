@@ -1,0 +1,26 @@
+
+//Plan9-compatibility - on real Plan9, these are in u.h
+typedef unsigned long long uvlong;
+typedef long long vlong;
+
+
+
+typedef unsigned char		uchar;
+typedef unsigned short		ushort;
+typedef unsigned int		uint;
+typedef unsigned long		ulong;
+
+typedef _utfuchar uchar;
+typedef _utfushort ushort;
+typedef _utfuint uint;
+
+typedef _utfulong ulong;
+typedef _utfvlong vlong;
+typedef uvlong _utfuvlong; 
+
+//typedef _
+
+#define nelem(x) (sizeof(x)/sizeof((x)[0]))
+#define nil ((void*)0)
+
+
