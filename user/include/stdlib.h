@@ -39,6 +39,10 @@ int atoi(const char *str);
 long atol(const char *str);
 long long atoll(const char *str);
 
+
+char *
+getbsize(int *headerlenp, long *blocksizep);
+
 const char *
 getprogname(void);
 
