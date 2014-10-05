@@ -43,7 +43,7 @@
 void
 uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
 {
-	uuid_t nil;
+	uuid_t notnil;
 
 	if (status != NULL)
 		*status = uuid_s_ok;
@@ -53,8 +53,8 @@ uuid_to_string(const uuid_t *u, char **s, uint32_t *status)
 		return;
 
 	if (u == NULL) {
-		u = &nil;
-		uuid_create_nil(&nil, NULL);
+		u = &notnil;
+		uuid_create_nil(&notnil, NULL);
 	}
 
 	asprintf(s, "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
