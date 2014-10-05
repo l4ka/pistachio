@@ -60,10 +60,13 @@ void SysLaunch::WaitForCmd() {
 
     while(1) {
 
-	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
+	char *cmd;
+	strcpy(cmd, GetPolledKbdLine());
+
+	setenv("ACTIVE_CMD", cmd, 1);
 	this->EscalateCmd(getenv("ACTIVE_CMD"));
 	printf("%s\n", getenv("ACTIVE_CMD"));
-	printf("%s\n", getenv("UID"));
+	//printf("%s\n", getenv("UID"));
     }
 }
 
