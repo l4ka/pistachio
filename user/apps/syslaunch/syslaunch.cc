@@ -38,6 +38,9 @@ void SysLaunch::WaitForCmd() {
 
     while(1) {
         //EDebugPrintf("SysLaunch","Still waiting...\n");
+//iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
+//setenv("ACTIVE_CMD", iEnvStatus[ACTIVE_CMD], 1);
+//printf(getenv("ACTIVE_CMD"));
     }
 }
 
