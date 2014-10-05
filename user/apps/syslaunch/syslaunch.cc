@@ -35,7 +35,7 @@ void SysLaunch::VerBanner() {
 }
 
 /* This function will eventually call system(), or an equivalent */ 
-void SysLaunch::EscalateCmd(char* aCmd) {
+void SysLaunch::EscalateCmd(char *aCmd) {
 
 printf("Entered %s\n", aCmd);
 
@@ -57,8 +57,12 @@ void SysLaunch::WaitForCmd() {
     while(1) {
         //EDebugPrintf("SysLaunch","Still waiting...\n");
 
+	char* cmd = NULL;
+
+	cmd = getenv("ACTIVE_CMD");
+
 	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
-	this->EscalateCmd(getenv("ACTIVE_CMD"));
+	this->EscalateCmd(cmd);
 	printf(getenv("ACTIVE_CMD"));
     }
 }
