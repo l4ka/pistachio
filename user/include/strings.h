@@ -34,15 +34,9 @@
 
 #include <liballoc.h>
 
-//#ifndef _SIZE_T_DECLARED
-//typedef	__size_t	size_t;
-//#define	_SIZE_T_DECLARED
-//#endif
-
 #define __pure2
 #define __pure
 
-//__BEGIN_DECLS
 #if __BSD_VISIBLE || __POSIX_VISIBLE <= 200112
 int	 bcmp(const void *, const void *, size_t) __pure;	/* LEGACY */
 void	 bcopy(const void *, void *, size_t);			/* LEGACY */
@@ -68,6 +62,5 @@ int	 strncasecmp(const char *, const char *, size_t) __pure;
 #if __POSIX_VISIBLE >= 200809 || defined(_XLOCALE_H_)
 #include <xlocale/_strings.h>
 #endif
-//__END_DECLS
 
 #endif /* _STRINGS_H_ */
