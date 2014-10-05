@@ -44,6 +44,8 @@ getbsize(int *headerlenp, long *blocksizep)
 	char *ep, *p;
 	const char *form;
 
+#define warnx printf
+
 #define	KB	(1024L)
 #define	MB	(1024L * 1024L)
 #define	GB	(1024L * 1024L * 1024L)
