@@ -33,6 +33,7 @@
 #include <sys/_types.h>
 #include <machine/endian.h>
 
+#include <sys/types.h>
 #include <l4/ia32/types.h>
 /*
 ../../include/l4/ia32/types.h:59:28: error: conflicting types for ‘uint32_t’
