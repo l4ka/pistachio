@@ -37,6 +37,8 @@ void SysLaunch::VerBanner() {
 /* This function will eventually call system(), or an equivalent */ 
 void SysLaunch::EscalateCmd(char* aCmd) {
 
+printf("Entered %s\n", aCmd);
+
 	if (strcmp(aCmd, "uname") == 0) {
 		struct utsname utsName;
     		uname(&utsName);
