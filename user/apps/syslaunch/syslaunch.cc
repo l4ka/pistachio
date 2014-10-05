@@ -17,6 +17,10 @@ SysLaunch::SysLaunch():
     setenv("UID", "0", 1);
     setenv("USER", "syslaunch",1);
 
+    printf("Defaulting to user \"%s\" (%s)\n", 
+	getenv("USER"), 
+	getenv("UID"));
+
     DriverMgr();
 
     RamFs rfs;
