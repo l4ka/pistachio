@@ -56,13 +56,16 @@ void SysLaunch::EscalateCmd(char *aCmd) {
 
 void SysLaunch::WaitForCmd() {
 
+    struct utsname utsName;
+    uname(&utsName);
+
     while(1) {
 
 	char *cmd;
 	strcpy(cmd, GetPolledKbdLine());
 
 	setenv("ACTIVE_CMD", cmd, 1);
-	printf("%s\n", cmd);
+	printf("%s@%s:/$ %s\n", getenv("USER"), utsName.nodename, cmd);
 	this->EscalateCmd(cmd);
 
     }
