@@ -19,6 +19,14 @@
 extern "C" {
 #endif
 
+//FreeBSD extensions (NEW!)
+char *
+stpncpy(char * __restrict dst, const char * __restrict src, size_t n);
+
+char *
+stpcpy(char * __restrict to, const char * __restrict from);
+
+
 char *
 strncat(char *dst, const char *src, size_t n);
 
