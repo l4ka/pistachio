@@ -34,8 +34,19 @@ void SysLaunch::VerBanner() {
            utsName.release, utsName.version, utsName.nodename);
 }
 
+/* This function will eventually call system(), or an equivalent */ 
 void SysLaunch::EscalateCmd(char* aCmd) {
-	EDebugPrintf("SysLaunch", "No processor is available for this command. Sorry.");
+
+	if (strcmp(aCmd, "uname") == 0) {
+		struct utsname utsName;
+    		uname(&utsName);
+
+		printf("%s\n", utsName.sysname);
+	}
+
+	else {
+		EDebugPrintf("SysLaunch", "No processor is available for this command. Sorry.");
+	}
 
 }
 
