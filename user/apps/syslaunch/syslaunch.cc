@@ -50,7 +50,7 @@ printf("Entered %s\n", getenv("ACTIVE_CMD")); //temporary workaround
 		EDebugPrintf("SysLaunch", "No processor is available for this command. Sorry.");
 	}
 
-}
+}				
 
 void SysLaunch::WaitForCmd() {
 
@@ -58,7 +58,8 @@ void SysLaunch::WaitForCmd() {
 
 	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
 	this->EscalateCmd(getenv("ACTIVE_CMD"));
-	printf(getenv("ACTIVE_CMD"));
+	printf("%s\n", getenv("ACTIVE_CMD"));
+	printf("%s\n", getenv("UID"));
     }
 }
 
