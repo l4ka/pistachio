@@ -18,12 +18,13 @@
 class SysLaunch
 {
 public:
-    SysLaunch();
-    void WaitForCmd();
-    void VerBanner();
+	SysLaunch();
+	void WaitForCmd();
+	void VerBanner();
+	void EscalateCmd(char* aCmd);
 
 private:
-    int iScreenNbr;
+	int iScreenNbr;
 };
 
 #endif // SYSLAUNCH_H

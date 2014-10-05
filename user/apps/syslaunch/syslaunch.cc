@@ -34,12 +34,18 @@ void SysLaunch::VerBanner() {
            utsName.release, utsName.version, utsName.nodename);
 }
 
+void SysLaunch::EscalateCmd(char* aCmd) {
+	EDebugPrintf("SysLaunch", "No processor is available for this command. Sorry.");
+
+}
+
 void SysLaunch::WaitForCmd() {
 
     while(1) {
         //EDebugPrintf("SysLaunch","Still waiting...\n");
 
 	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
+	this->EscalateCmd(getenv("ACTIVE_CMD"));
 	printf(getenv("ACTIVE_CMD"));
     }
 }
