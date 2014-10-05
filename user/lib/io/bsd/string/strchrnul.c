@@ -26,15 +26,13 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+
 
 #include <stddef.h>
 #include <string.h>
 
-__weak_reference(__strchrnul, strchrnul);
-
 char *
-__strchrnul(const char *p, int ch)
+strchrnul(const char *p, int ch)
 {
 	char c;
 

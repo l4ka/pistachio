@@ -19,6 +19,10 @@
 extern "C" {
 #endif
 
+//GNU stuff
+char *
+strchrnul(const char *p, int ch);
+
 //FreeBSD extensions (NEW!)
 char *
 stpncpy(char * __restrict dst, const char * __restrict src, size_t n);
