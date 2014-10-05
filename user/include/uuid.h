@@ -45,7 +45,7 @@
 #define	uuid_s_invalid_string_uuid	2
 #define	uuid_s_no_memory		3
 
-__BEGIN_DECLS
+//__BEGIN_DECLS
 int32_t	uuid_compare(const uuid_t *, const uuid_t *, uint32_t *);
 void	uuid_create(uuid_t *, uint32_t *);
 void	uuid_create_nil(uuid_t *, uint32_t *);
@@ -58,6 +58,6 @@ void	uuid_enc_le(void *, const uuid_t *);
 void	uuid_dec_le(const void *, uuid_t *);
 void	uuid_enc_be(void *, const uuid_t *);
 void	uuid_dec_be(const void *, uuid_t *);
-__END_DECLS
+//__END_DECLS
 
 #endif	/* _UUID_H_ */
