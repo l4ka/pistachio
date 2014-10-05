@@ -62,8 +62,9 @@ void SysLaunch::WaitForCmd() {
 	strcpy(cmd, GetPolledKbdLine());
 
 	setenv("ACTIVE_CMD", cmd, 1);
-	this->EscalateCmd(cmd);
 	printf("%s\n", cmd);
+	this->EscalateCmd(cmd);
+
     }
 }
 
