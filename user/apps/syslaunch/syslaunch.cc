@@ -41,8 +41,6 @@ void SysLaunch::VerBanner() {
 /* This function will eventually call system(), or an equivalent */ 
 void SysLaunch::EscalateCmd(char *aCmd) {
 
-printf("Entered %s\n", getenv("ACTIVE_CMD")); //temporary workaround
-
 	if (strcmp(getenv("ACTIVE_CMD"), "uname") == 0) {
 		struct utsname utsName;
     		uname(&utsName);
@@ -64,9 +62,8 @@ void SysLaunch::WaitForCmd() {
 	strcpy(cmd, GetPolledKbdLine());
 
 	setenv("ACTIVE_CMD", cmd, 1);
-	this->EscalateCmd(getenv("ACTIVE_CMD"));
-	printf("%s\n", getenv("ACTIVE_CMD"));
-	//printf("%s\n", getenv("UID"));
+	this->EscalateCmd(cmd);
+	printf("%s\n", cmd);
     }
 }
 
