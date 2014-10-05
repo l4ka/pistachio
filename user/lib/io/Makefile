@@ -51,7 +51,7 @@ sputl.c sgetl.c liballoc.c liballoc_hooks.cc\
  becompat.c \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wildcard bsd/uuid/*.c)\
- libhash/src/hash_free.c  libhash/src/hash.c binary_tree.c \
+ libhash/src/hash_free.c  libhash/src/hash.c $(wildcard bsd/libutil/*.c) binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
  debug.cc $(wildcard efile/*.cc) cpp_new.cc drivermgr.cc feof.c fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
 
