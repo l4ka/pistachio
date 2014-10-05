@@ -33,6 +33,15 @@
 #include <sys/_types.h>
 #include <machine/endian.h>
 
+#include <l4/ia32/types.h>
+/*
+../../include/l4/ia32/types.h:59:28: error: conflicting types for ‘uint32_t’
+ typedef unsigned long int  uint32_t;
+
+
+*/
+
+/*
 #ifndef _UINT8_T_DECLARED
 typedef	__uint8_t	uint8_t;
 #define	_UINT8_T_DECLARED
@@ -52,7 +61,8 @@ typedef	__uint32_t	uint32_t;
 typedef	__uint64_t	uint64_t;
 #define	_UINT64_T_DECLARED
 #endif
- 
+ */
+
 /*
  * General byte order swapping functions.
  */
