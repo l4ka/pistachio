@@ -39,6 +39,12 @@ int atoi(const char *str);
 long atol(const char *str);
 long long atoll(const char *str);
 
+const char *
+getprogname(void);
+
+void
+setprogname(const char *programName);
+
 
 //POSIX style environment variables
 int putenv(char *str);
