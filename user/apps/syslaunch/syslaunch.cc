@@ -57,12 +57,13 @@ void SysLaunch::WaitForCmd() {
     while(1) {
         //EDebugPrintf("SysLaunch","Still waiting...\n");
 
-	char* cmd = NULL;
-
-	cmd = getenv("ACTIVE_CMD");
+	char* cmd[0];
 
 	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
-	this->EscalateCmd(cmd);
+
+	cmd[0] = getenv("ACTIVE_CMD");
+
+	this->EscalateCmd((char*)cmd[0]);
 	printf(getenv("ACTIVE_CMD"));
     }
 }
