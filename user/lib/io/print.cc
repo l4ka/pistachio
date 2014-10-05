@@ -640,7 +640,7 @@ int c;
 int i = 0;
 char pass[60] = "";
 
-printf("Enter password: ");
+printf("> ");
 while(c != 0x0d && strlen(pass) != (60 - 1)) {
     c = getc();
 
@@ -667,7 +667,7 @@ char cx =  (int)pass[i];
 
 
 pass[i] = '\0';
-printf("\nPass: %s\n", pass);
+printf("\n%s\n", pass);
 
 
 return pass ;//getc();
