@@ -40,7 +40,9 @@ void SysLaunch::WaitForCmd() {
         //EDebugPrintf("SysLaunch","Still waiting...\n");
 //iEnvStatus[ACTIVE_CMD] = GetPolledKbdLine();
 //setenv("ACTIVE_CMD", iEnvStatus[ACTIVE_CMD], 1);
-//printf(getenv("ACTIVE_CMD"));
+
+	setenv("ACTIVE_CMD", GetPolledKbdLine(), 1);
+	printf(getenv("ACTIVE_CMD"));
     }
 }
 
