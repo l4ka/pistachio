@@ -10,6 +10,9 @@ int InternalShell::ShellHelp() {
     printf("\n\t * beep          : Beep the PC speaker.\n");
     printf("\n\t * help, h, Help : Print this shell help notice.\n");
     printf("\n\t * malloc_test_1 : Test the liballoc port (should return 25).\n");
+    printf("\n\t * memcrush      : Try to allocate as much physical/userspace RAM as possible.\n");
+    printf("\n\t * memcrush2     : Try to allocate as much physical/userspace RAM as possible. (Alternative algorithm).\n"); 
+
     printf("\n\t * shiritori     : Start the Shiritori game \(buggy!\).\n");
     printf("\n\t * tettheme      : Play part of the Tetris theme. \n");
     printf("\n\t * strtod        : Test the strtod() function. \n");
