@@ -65,7 +65,7 @@ void SysLaunch::WaitForCmd() {
 	strcpy(cmd, GetPolledKbdLine());
 
 	setenv("ACTIVE_CMD", cmd, 1);
-	printf("%s@%s:/$ %s\n", getenv("USER"), utsName.nodename, cmd);
+	printf("%s@%s:/$ %s\n", getenv("USER"), utsName.nodename, getenv("ACTIVE_CMD"));
 	this->EscalateCmd(cmd);
 
     }
