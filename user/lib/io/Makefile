@@ -46,7 +46,7 @@ SRCS=		get_hex.cc  print.cc \
 $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
  $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)\
   $(wildcard android/*.c)  $(wildcard bsd/net/*.c) \
-$(wildcard bsd/string/*.c) \
+$(wildcard bsd/string/*.c) $(wildcard bsd/libm/*.c)\
 sputl.c sgetl.c liballoc.c liballoc_hooks.cc\
  becompat.c \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
