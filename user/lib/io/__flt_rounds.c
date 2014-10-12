@@ -24,7 +24,7 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+//#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
  * These functions return the prevailing rounding mode per ANSI C spec:
@@ -35,10 +35,22 @@
  *	-1:	indeterminable			<<< never returned
  */
 
-#include "lint.h"
+//#include "lint.h"
 #include <sys/types.h>
-#include <floatingpoint.h>
-#include "libc.h"
+//#include <floatingpoint.h>
+//#include "libc.h"
+
+//https://www.cs.cmu.edu/afs/cs.cmu.edu/project/amulet-4/jh6p/classes/studio/gcc-2.5.8/include/sys/ieeefp.h
+#ifdef __i386__
+enum fp_direction_type 		/* rounding direction */
+	{
+	fp_nearest	= 0,
+	fp_negative	= 1,
+	fp_positive	= 2,
+	fp_tozero	= 3
+	} ;
+#endif
+
 
 #if defined(__sparc)
 

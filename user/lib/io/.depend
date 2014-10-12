@@ -1578,6 +1578,9 @@ ramfs.o: efile/ramfs.cc ../../include/ramfs.h ../../include/stdio.h \
  ../../include/sys/types.h ../../include/sys/_types.h \
  ../../include/lib9.h ../../include/string.h ../../include/utf.h \
  ../../include/utfdef.h ../../include/drivermgr.h
+__flt_rounds.o: __flt_rounds.c ../../include/sys/types.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/sys/_types.h
 cpp_new.o: cpp_new.cc /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
  ../../include/liballoc.h
 drivermgr.o: drivermgr.cc ../../include/drivermgr.h ../../include/stdio.h \
