@@ -38,7 +38,7 @@ include $(top_srcdir)/Mk/l4.base.mk
 #$(wildcard openbsd/locale/*.c)
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
-#ia32_OBJS=      libhash/src/arch-ia32/try_lock.S
+#ia32_OBJS=      __xgetRD.s
 
 
 LIBRARY=	io
@@ -48,7 +48,7 @@ $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
   $(wildcard android/*.c)  $(wildcard bsd/net/*.c) \
 $(wildcard bsd/string/*.c) $(wildcard bsd/libm/*.c)\
 sputl.c sgetl.c liballoc.c liballoc_hooks.cc\
- becompat.c \
+ becompat.c __xgetRD.s \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wildcard bsd/uuid/*.c)\
  libhash/src/hash_free.c  libhash/src/hash.c $(wildcard bsd/libutil/*.c) binary_tree.c \
