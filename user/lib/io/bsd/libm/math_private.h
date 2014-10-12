@@ -38,6 +38,9 @@
  * big endian.
  */
 
+//#define BYTE_ORDER LITTLE_ENDIAN
+
+/*
 #if (BYTE_ORDER == BIG_ENDIAN) || defined(arm32)
 
 typedef union 
@@ -72,6 +75,7 @@ typedef union
 } ieee_quad_shape_type;
 
 #endif
+*/
 
 #if (BYTE_ORDER == LITTLE_ENDIAN) && !defined(arm32)
 
