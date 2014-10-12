@@ -70,6 +70,8 @@ __flt_rounds(void)
 	return (1);
 }
 
+
+//ftp://ftp.stu.edu.tw/BSD/OpenBSD/src/lib/libc/arch/arm/gen/flt_rounds.c
 #elif defined(__i386) || defined(__amd64)
 
 int
