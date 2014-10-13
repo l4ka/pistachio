@@ -2,6 +2,10 @@
 
 //http://sourceforge.jp/projects/openbsd-octeon/scm/git/openbsd-octeon/blobs/master/src/sys/arch/i386/include/float.h
 
+int
+__flt_rounds(void);
+
+
 #define FLT_ROUNDS      __flt_rounds()
 #define FLT_RADIX       2               /* b */
 
