@@ -34,6 +34,7 @@ THIS SOFTWARE.
 #ifdef USE_LOCALE
 #include "locale.h"
 #endif
+#include <float.h>
 
  static CONST int
 fivesbits[] = {	 0,  3,  5,  7, 10, 12, 14, 17, 19, 21,
