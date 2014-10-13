@@ -37,7 +37,7 @@
 
 //#include "lint.h"
 #include <sys/types.h>
-//#include <floatingpoint.h>
+#include <floatingpoint.h>
 //#include "libc.h"
 
 //https://www.cs.cmu.edu/afs/cs.cmu.edu/project/amulet-4/jh6p/classes/studio/gcc-2.5.8/include/sys/ieeefp.h
