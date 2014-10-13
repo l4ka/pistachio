@@ -2,11 +2,17 @@
 
 //http://sourceforge.jp/projects/openbsd-octeon/scm/git/openbsd-octeon/blobs/master/src/sys/arch/i386/include/float.h
 
+#ifdef BROKEN_FLOUNDS
 int
 __flt_rounds(void);
 
 
 #define FLT_ROUNDS      __flt_rounds()
+#endif
+
+#define FLT_ROUNDS 1
+
+
 #define FLT_RADIX       2               /* b */
 
 #define DBL_DIG         15

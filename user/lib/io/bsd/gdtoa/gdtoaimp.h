@@ -176,6 +176,7 @@ THIS SOFTWARE.
  * #define USE_LOCALE to use the current locale's decimal_point value.
  */
 
+//#undef FLT_ROUNDS
 #ifndef GDTOAIMP_H_INCLUDED
 #define GDTOAIMP_H_INCLUDED
 #include "gdtoa.h"
