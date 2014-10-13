@@ -38,6 +38,8 @@ THIS SOFTWARE.
 #include "locale.h"
 #endif
 
+#include <float.h>
+
 #ifdef IEEE_Arith
 #ifndef NO_IEEE_Scale
 #define Avoid_Underflow
