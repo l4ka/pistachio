@@ -35,7 +35,6 @@ top_builddir=	../..
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-#$(wildcard openbsd/locale/*.c)
 powerpc_SRCS=	1275tree.cc fdt.cc 
 
 #ia32_OBJS=      __xgetRD.s
@@ -46,7 +45,7 @@ $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
  $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)\
   $(wildcard android/*.c)  $(wildcard bsd/net/*.c) \
 $(wildcard bsd/string/*.c) $(wildcard bsd/libm/*.c)\
-sputl.c sgetl.c liballoc.c liballoc_hooks.cc\
+sputl.c sgetl.c $(wildcard memory/*.c*)\
  becompat.c __xgetRD.S \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wildcard bsd/uuid/*.c)\
