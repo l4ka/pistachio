@@ -35,12 +35,7 @@ top_builddir=	../..
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-
-#ia32_OBJS=	
-
 LIBRARY=	mutex
 SRCS=		src/mutex.c src/arch-$(ARCH)/mutex.c src/arch-ia32/try_lock.S
-#debug.cc $(ARCH).cc $($(ARCH)_OBJS) 
-
 
 include $(top_srcdir)/Mk/l4.lib.mk
