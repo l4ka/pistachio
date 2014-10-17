@@ -40,7 +40,6 @@ powerpc_SRCS=	1275tree.cc fdt.cc
 
 #ia32_OBJS=      __xgetRD.s
 
-
 LIBRARY=	io
 SRCS=		get_hex.cc  print.cc \
 $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
@@ -54,6 +53,7 @@ $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wil
  libhash/src/hash_free.c  libhash/src/hash.c $(wildcard bsd/libutil/*.c) binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
  debug.cc $(wildcard efile/*.cc) __flt_rounds.c cpp_new.cc drivermgr.cc feof.c fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
+mutex/src/mutex.c mutex/src/arch-$(ARCH)/mutex.c mutex/src/arch-ia32/try_lock.S
 
 
 #btree_core.c bt_modify.c
