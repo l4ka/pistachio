@@ -52,10 +52,7 @@ $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wil
  hashtable/src/hash_free.c  hashtable/src/hash.c $(wildcard bsd/libutil/*.c) structures/binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
  debug.cc $(wildcard efile/*.cc) __flt_rounds.c cpp_new.cc drivermgr.cc feof.c efile/fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
-mutex/src/mutex.c mutex/src/arch-$(ARCH)/mutex.c mutex/src/arch-ia32/try_lock.S
-
-
-#btree_core.c bt_modify.c
+mutex/src/mutex.c mutex/src/arch-$(ARCH)/mutex.c mutex/src/arch-ia32/try_lock.S #structures/btree_core.c structures/bt_modify.c
 
 #Need to move DragonFlyBSD stuff to own directory - l64a/calloc
 include $(top_srcdir)/Mk/l4.lib.mk
