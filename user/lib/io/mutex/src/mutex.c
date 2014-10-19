@@ -79,8 +79,8 @@
 /*
   Author: Ben Leslie
 */
-#include <mutex/mutex.h>
-#include <sys/types.h>
+
+#include <pthread.h>
 
 void
 mutex_init(mutex_t mutex)
