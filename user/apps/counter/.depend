@@ -1,11 +1,1 @@
 crt0-ia32.o: crt0-ia32.S ../../config.h
-wump.o: wump.c ../../include/stdio.h ../../include/l4io.h \
- ../../include/l4/types.h ../../include/l4/ia32/types.h \
- ../../include/l4/ia32/specials.h \
- /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
- ../../include/openbsd/libkern.h ../../include/mutex/mutex.h \
- ../../include/l4/thread.h ../../include/l4/ia32/syscalls.h \
- ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
- ../../include/sys/types.h ../../include/sys/_types.h \
- ../../include/lib9.h ../../include/string.h ../../include/utf.h \
- ../../include/utfdef.h sgtty.h
