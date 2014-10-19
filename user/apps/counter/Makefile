@@ -48,7 +48,7 @@ SRCS=		crt0-$(ARCH).S counter.cc newtest.cc libhashtest.c mindrvr.c elmfat/src/f
 
 # libxml2-2.9.1/SAX.c #sha256.cc #um_rand.cc 
 #SRCS=           crt0-$(ARCH).S   $(wildcard pforth_v27/csrc/*.c) $(wildcard pforth_v27/csrc/posix/*.c)
-LIBS+=		-ll4 -lio -lmutex -ll4e -lelf 
+LIBS+=		-ll4 -lio -ll4e -lelf 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
