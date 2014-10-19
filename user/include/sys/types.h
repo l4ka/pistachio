@@ -9,6 +9,10 @@ extern "C" {
 
 #include <l4/types.h>
 #include <sys/_types.h>
+#include <mutex/mutex.h>
+
+//http://pubs.opengroup.org/onlinepubs/9699919799/
+typedef mutex_t pthread_mutex_t; //Does this have a special feature?
 
 /* L4 defines these:
 
