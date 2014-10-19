@@ -11,6 +11,11 @@ enum {
     EGenericUsb = 6,
     EGeneric1394 = 7,
     ESerialUart = 8,
+    EAirGuitar = 9, /* Hear no evil (loopback audio accessory) */
+    EAnalogueMic = 10,
+    EKeyboard = 11,
+    EMouse = 12,
+    ESpeakers = 13,
     EUnknown = 0
 
 } TDriver;
