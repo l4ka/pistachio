@@ -6,6 +6,7 @@ enum {
     EFileSys = 1,
     EGenericBlock = 2,
     EHardDisk = 3,
+    ESmBiosZone = 4,
     EUnknown = 0
 
 } TDriver;
