@@ -80,6 +80,7 @@
   Author: Ben Leslie
 */
 #include <mutex/mutex.h>
+#include <sys/types.h>
 
 void
 mutex_init(mutex_t mutex)
@@ -118,4 +119,21 @@ int pthread_mutex_destroy(pthread_mutex_t *mutex) {
 	return 0;
 }
 
+//http://pubs.opengroup.org/onlinepubs/007908775/xsh/pthread_mutex_unlock.html
 
+int pthread_mutex_lock(pthread_mutex_t *mutex) {
+	mutex_count_lock(mutex);
+	return 0;
+
+}
+
+//This is a hack
+int pthread_mutex_trylock(pthread_mutex_t *mutex) {
+	pthread_mutex_lock(mutex);
+	return 0;
+}
+
+int pthread_mutex_unlock(pthread_mutex_t *mutex) {
+	pthread_mutex_unlock(mutex);
+	return 0;
+}
