@@ -103,3 +103,19 @@ mutex_count_unlock(mutex_t mutex)
 	if (mutex->count == 0)
 		mutex_unlock(mutex);
 }
+
+/* Stuff for POSIX compatibility */
+
+/*
+int pthread_mutex_init(pthread_mutex_t *mutex, 
+    const pthread_mutexattr_t *attr);
+int pthread_mutex_destroy(pthread_mutex_t *mutex);
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+*/
+
+int pthread_mutex_destroy(pthread_mutex_t *mutex) {
+	mutex_count_unlock(mutex);
+	return 0;
+}
+
+
