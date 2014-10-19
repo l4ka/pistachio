@@ -7,6 +7,10 @@ enum {
     EGenericBlock = 2,
     EHardDisk = 3,
     ESmBiosZone = 4,
+    EGenericPci = 5,
+    EGenericUsb = 6,
+    EGeneric1394 = 7,
+    ESerialUart = 8,
     EUnknown = 0
 
 } TDriver;
