@@ -1,2 +1,2 @@
 crt0-ia32.o: crt0-ia32.S ../../config.h
-quiz.o: quiz.c
+yes.o: yes.c
