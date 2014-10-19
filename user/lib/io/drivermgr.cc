@@ -35,8 +35,38 @@ char* DriverMgr::GetFriendlyType(int aType) {
     case EHardDisk:
         value = "Hard Disk Driver";
         break;
+    case ESmBiosZone:
+        value = "System Management BIOS Zone Driver";
+	break;
+    case EGenericPci:
+	value = "Generic PCI Driver";
+	break;
+    case EGenericUsb:
+	value = "Generic USB Driver";
+	break; 
+    case EGeneric1394:
+	value = "Generic IEEE 1394 Driver";
+	break;
+    case ESerialUart:
+	value = "Serial Port/UART Device Driver";
+	break;
+    case EAirGuitar:
+	value = "Loopback Audio Source (Line In) Driver";
+	break;
+    case EAnalogueMic:
+	value = "Analogue Microphone Driver";
+	break;
+    case EKeyboard:
+	value = "Keyboard Driver";
+	break;
+   case EMouse: 
+	value = "Mouse Driver";
+	break;
+   case ESpeakers: 
+	value = "Speaker Driver";
+ 	break;
 
-    case EUnknown:
+   case EUnknown:
     default:
         value = "Unknown";
         break;
