@@ -46,7 +46,7 @@ $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
   $(wildcard android/*.c)  $(wildcard bsd/net/*.c) \
 $(wildcard bsd/string/*.c) $(wildcard bsd/libm/*.c)\
 sputl.c sgetl.c $(wildcard memory/*.c*)\
- becompat.c __xgetRD.S \
+ becompat.c __xgetRD.S  ftell.c \
 $(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
 $(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c) $(wildcard bsd/uuid/*.c)\
  hashtable/src/hash_free.c  hashtable/src/hash.c $(wildcard bsd/libutil/*.c) structures/binary_tree.c \
