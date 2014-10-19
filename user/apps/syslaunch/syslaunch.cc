@@ -48,6 +48,10 @@ void SysLaunch::EscalateCmd(char *aCmd) {
 		printf("%s\n", utsName.sysname);
 	}
 
+	if (strcmp(getenv("ACTIVE_CMD"), "whoami") == 0 ) {
+		printf("%s\n", getenv("USER"));
+	}
+
 	else {
 		EDebugPrintf("SysLaunch", "No processor is available for this command. Sorry.");
 	}
