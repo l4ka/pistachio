@@ -38,7 +38,6 @@ include $(top_srcdir)/Mk/l4.base.mk
 PROGRAM=	syslaunch
 PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/io/libio.a \
-		$(top_builddir)/lib/libmutex/libmutex.a \
 		$(top_builddir)/lib/libl4e/libl4e.a\
 		$(top_builddir)/lib/libelf/libelf.a
 
