@@ -65,6 +65,9 @@ char* DriverMgr::GetFriendlyType(int aType) {
    case ESpeakers: 
 	value = "Speaker Driver";
  	break;
+    case EMarshmallowAmp:
+        value = "Loopback Audio Sink (Line Out) Driver";
+        break;
 
    case EUnknown:
     default:

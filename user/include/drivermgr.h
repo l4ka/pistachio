@@ -16,6 +16,7 @@ enum {
     EKeyboard = 11,
     EMouse = 12,
     ESpeakers = 13,
+    EMarshmallowAmp = 14, /* Loopback audio accessory - sink */
     EUnknown = 0
 
 } TDriver;
