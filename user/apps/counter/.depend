@@ -1,5 +1,5 @@
 crt0-ia32.o: crt0-ia32.S ../../config.h
-hostname.o: hostname.c ../../include/stdio.h ../../include/l4io.h \
+wump.o: wump.c ../../include/stdio.h ../../include/l4io.h \
  ../../include/l4/types.h ../../include/l4/ia32/types.h \
  ../../include/l4/ia32/specials.h \
  /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
@@ -8,4 +8,4 @@ hostname.o: hostname.c ../../include/stdio.h ../../include/l4io.h \
  ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
  ../../include/sys/types.h ../../include/sys/_types.h \
  ../../include/lib9.h ../../include/string.h ../../include/utf.h \
- ../../include/utfdef.h
+ ../../include/utfdef.h sgtty.h
