@@ -42,7 +42,7 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/libelf/libelf.a
 
 SRCS=		crt0-$(ARCH).S syslaunch.cc 
-LIBS+=		-ll4 -lio -lmutex -ll4e -lelf 
+LIBS+=		-ll4 -lio -ll4e -lelf 
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float
