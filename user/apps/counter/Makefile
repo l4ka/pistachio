@@ -42,7 +42,7 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/libl4e/libl4e.a\
 		$(top_builddir)/lib/libelf/libelf.a
 
-SRCS=		crt0-$(ARCH).S  counter.cc newtest.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc
+SRCS=		crt0-$(ARCH).S counter.cc newtest.cc libhashtest.c mindrvr.c elmfat/src/ff.c elmfat/src/diskio.c mt19937ar.c internalshell.cc
 
 
 
