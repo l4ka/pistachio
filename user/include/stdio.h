@@ -34,6 +34,7 @@ typedef	struct __sFILE {
 
 	void	*_cookie;	/* cookie passed to io functions */
 	int	(*_read)(void *, char *, int);
+	int	(*_write)(void *, const char *, int);
 
 	/* data for long sequences of ungetc() */
 	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
