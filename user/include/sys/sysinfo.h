@@ -29,6 +29,9 @@ extern "C" {
 //Populate the members of the struct
 int sysinfo(struct sysinfo *aSysInfo);
 
+//Return the number of installed CPUs
+int get_nprocs();
+
 #ifdef __cplusplus
 
 }

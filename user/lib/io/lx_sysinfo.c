@@ -23,8 +23,12 @@ extern "C" {
 //               char _f[20-2*sizeof(long)-sizeof(int)]; /* Padding to 64 bytes */
 //           };
 
+//Return the number of available CPUs, according to the KIP/SMBIOS
+int get_nprocs() {
+	return -1;
+}
 
-
+//Initialise the sysinfo structure...
 //https://github.com/klange/toaruos/blob/94c976a903181df453f39d2a264f85c9a7c90246/kernel/sys/syscall.c
 int	sysinfo(struct sysinfo *aSysInfo) {
 
