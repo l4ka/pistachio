@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-
-//#include <stdio.h>
 //ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/lib/libc/stdio/local.h
 //https://platform--bionic.android-source-browsing.googlecode.com/git/libc/stdio/local.h
 
@@ -23,6 +21,19 @@ void    __sinit(void);
  * Test whether the given stdio file has an active ungetc buffer;
  * release such a buffer, without restoring ordinary unread data.
  */
+
+//http://code.metager.de/source/xref/OpenBSD/src/lib/libc/stdio/fileext.h is what defines _UB
+
+//EVIL HAX
+struct __sfileext {
+	struct	__sbuf _ub; /* ungetc buffer */
+//	struct wchar_io_data _wcio;	/* wide char io status */
+};
+
+#define _EXT(fp) ((struct __sfileext *)((fp)->_ext._base))
+#define _UB(fp) _EXT(fp)->_ub
+//That's what makes McDonald's(TM)
+
 #define  HASUB(fp) (_UB(fp)._base != NULL)
 #define  FREEUB(fp) { \
   if (_UB(fp)._base != (fp)->_ubuf) \
