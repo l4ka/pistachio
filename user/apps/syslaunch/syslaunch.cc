@@ -48,7 +48,7 @@ void SysLaunch::EscalateCmd(char *aCmd) {
 		printf("%s\n", utsName.sysname);
 	}
 
-	if (strcmp(getenv("ACTIVE_CMD"), "pwd") == 0 {
+	if (strcmp(getenv("ACTIVE_CMD"), "pwd") == 0) {
 		printf("%s\n", getenv("PWD"));
 	}
 
