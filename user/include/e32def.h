@@ -4,7 +4,7 @@
 #pragma once
 
 #ifdef __cplusplus
-export "C" {
+extern "C" {
 #endif
 
 //Equivalent to standard void, and preferred to void* when pointerised...
