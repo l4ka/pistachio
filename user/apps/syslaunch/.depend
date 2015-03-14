@@ -8,8 +8,8 @@ syslaunch.o: syslaunch.cc syslaunch.h ../../include/liballoc.h \
  ../../include/l4/ia32/vregs.h ../../include/l4/message.h \
  ../../include/sys/types.h ../../include/sys/_types.h \
  ../../include/lib9.h ../../include/string.h ../../include/utf.h \
- ../../include/utfdef.h ../../include/stdlib.h ../../include/sys/cdefs.h \
- ../../include/stdint.h ../../include/unistd.h ../../include/gdtoa.h \
+ ../../include/utfdef.h ../../include/stdint.h ../../include/sys/cdefs.h \
+ ../../include/stdlib.h ../../include/unistd.h ../../include/gdtoa.h \
  ../../include/arith.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
  ../../include/l4/sigma0.h ../../include/l4/kip.h ../../include/l4/ipc.h \
  ../../include/l4/kdebug.h ../../include/l4/ia32/kdebug.h \
