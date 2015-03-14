@@ -46,6 +46,7 @@ typedef unsigned long long Uint64;
 //64-bit signed integer
 typedef long long Int64;
 
+//This is a synonym for Int64
 typedef	Int64	TInt64;
 
 #ifdef __cplusplus
