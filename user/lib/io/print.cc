@@ -33,7 +33,7 @@
 #include <stdarg.h>
 #include <l4io.h>
 #include "lib.h"
-#include "bsd/stdio/local.h"
+#include "stdio/local.h"
 //#include <stdlib.h>
 
 #ifndef NULL
