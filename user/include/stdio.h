@@ -43,6 +43,9 @@ typedef	struct __sFILE {
 	int	(*_read)(void *, char *, int);
 	int	(*_write)(void *, const char *, int);
 
+	/* extension data, to avoid further ABI breakage */
+	struct	__sbuf _ext;
+
 	/* data for long sequences of ungetc() */
 	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
 	int	_ur;		/* saved _r when _r is counting ungetc data */
