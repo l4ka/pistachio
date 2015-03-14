@@ -1,6 +1,8 @@
 #pragma once
 #include <string.h>
 
+#include <e32def.h>
+
 //http://developer.nokia.com/community/wiki/Fundamental_Types_in_symbian
 
 //We don't have DLLs
@@ -10,22 +12,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-//These are supposed to be defined in e32def.h, in Symbian OS
-typedef unsigned int TUint;
-typedef unsigned char TUint8;
-typedef long int TInt32;
-
-//Symbian ints are always signed, unless marked as unsigned explicitly
-typedef signed int TInt;
-
-//Compatibility value...
-typedef long long Int64;
-typedef	Int64	TInt64;
-
-//Real number types
-typedef double TReal;
-typedef double TReal64;
 
 
 #ifdef __cplusplus

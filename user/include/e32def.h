@@ -19,6 +19,12 @@ typedef unsigned char TUint8;
 //Always an unsigned integer, likely to be 8-bit, but not guaranteed...
 typedef unsigned int TUint;
 
+//Always a 32-bit(?), signed long integer...
+typedef long int TInt32;
+
+//Always a 32-bit, signed integer
+typedef signed int TInt;
+
 //64-bit, floating-point number, but not guaranteed
 typedef double TReal64;
 
@@ -36,6 +42,11 @@ typedef int TBool;
 
 //Unsigned, long long integer (64-bit)
 typedef unsigned long long Uint64;
+
+//64-bit signed integer
+typedef long long Int64;
+
+typedef	Int64	TInt64;
 
 #ifdef __cplusplus
 }
