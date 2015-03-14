@@ -17,6 +17,12 @@ extern "C" {
 //https://github.com/haiku/haiku/blob/449f7f5a7b9d381c1eeab3ddfbdba0db0ce05c22/headers/posix/stdio.h
 //ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/include/stdio.h defines FILE as a structure
 
+
+#include <stdint.h> //Is another hack
+//http://code.metager.de/source/xref/OpenBSD/src/include/stdio.h
+typedef	__off_t	off_t;
+typedef off_t fpos_t;		/* stdio file position type */
+
 /* stdio buffers */
 struct __sbuf {
 	unsigned char *_base;
@@ -29,6 +35,7 @@ typedef	struct __sFILE {
 	int	_r;		/* read space left for getc() */
 	int	_w;		/* write space left for putc() */
 	short	_flags;		/* flags, below; this FILE is free if 0 */
+	short	_file;		/* fileno, if Unix descriptor, else -1 */
 	struct	__sbuf _bf;	/* the buffer (at least 1 byte, if !NULL) */
 	int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
 
@@ -56,6 +63,10 @@ typedef	struct __sFILE {
 	long int current_pos;
 
 	struct mutex mutex;
+
+	/* Unix stdio files get aligned to block boundaries on fseek() */
+	int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
+	fpos_t	_offset;	/* current lseek offset */
 } FILE;
 
 extern FILE __sF[];
@@ -118,6 +129,7 @@ struct __file __stdout = {
 #define	__SEOF	0x0020		/* found EOF */
 #define	__SERR	0x0040		/* found error */
 #define	__SMBF	0x0080		/* _buf is from malloc */
+#define	__SAPP	0x0100		/* fdopen()ed in append mode */
 #define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
 #define	__SALC	0x4000		/* allocate string space dynamically */
 #define	__SOFF	0x1000		/* set iff _offset is in fact correct */
