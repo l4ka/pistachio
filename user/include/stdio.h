@@ -132,15 +132,18 @@ struct __file __stdout = {
 #define	__SNBF	0x0002		/* unbuffered */
 #define	__SRD	0x0004		/* OK to read */
 #define	__SWR	0x0008		/* OK to write */
+	/* RD and WR are never simultaneously asserted */
 #define	__SRW	0x0010		/* open for reading & writing */
 #define	__SEOF	0x0020		/* found EOF */
 #define	__SERR	0x0040		/* found error */
 #define	__SMBF	0x0080		/* _buf is from malloc */
 #define	__SAPP	0x0100		/* fdopen()ed in append mode */
 #define	__SSTR	0x0200		/* this is an sprintf/snprintf string */
-#define	__SALC	0x4000		/* allocate string space dynamically */
+#define	__SOPT	0x0400		/* do fseek() optimisation */
+#define	__SNPT	0x0800		/* do not do fseek() optimisation */
 #define	__SOFF	0x1000		/* set iff _offset is in fact correct */
 #define	__SMOD	0x2000		/* true => fgetln modified _p text */
+#define	__SALC	0x4000		/* allocate string space dynamically */
 #define __SIGN	0x8000		/* ignore this file in _fwalk */
 
 //Haiku suggests doing the following...

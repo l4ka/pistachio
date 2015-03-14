@@ -30,11 +30,11 @@
  * SUCH DAMAGE.
  */
 
-#if defined(LIBC_SCCS) && !defined(lint)
+//#if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)makebuf.c	8.1 (Berkeley) 6/4/93";
-#endif /* LIBC_SCCS and not lint */
+//#endif /* LIBC_SCCS and not lint */
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
+//__FBSDID("$FreeBSD$");
 
 #include "namespace.h"
 #include <sys/types.h>
@@ -44,7 +44,7 @@ __FBSDID("$FreeBSD$");
 #include <stdlib.h>
 #include "un-namespace.h"
 
-#include "libc_private.h"
+//#include "libc_private.h"
 #include "local.h"
 
 /*
