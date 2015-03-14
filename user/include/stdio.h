@@ -46,6 +46,10 @@ typedef	struct __sFILE {
 	/* data for long sequences of ungetc() */
 	unsigned char *_up;	/* saved _p when _p is doing ungetc data */
 	int	_ur;		/* saved _r when _r is counting ungetc data */
+	
+	/* tricks to meet minimum requirements even when malloc() fails */
+	unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
+	unsigned char _nbuf[1];	/* guarantee a getc() buffer */
 
 //NICTA extension
 	void *handle;

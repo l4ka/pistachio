@@ -18,7 +18,7 @@ extern int __sdidinit;
 int	__sflush(FILE *);
 int	__sflush_locked(FILE *);
 int	_fwalk(int (*)(FILE *));
-
+void    __sinit(void);
 /*
  * Test whether the given stdio file has an active ungetc buffer;
  * release such a buffer, without restoring ordinary unread data.
