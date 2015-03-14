@@ -46,12 +46,12 @@ $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
   $(wildcard android/*.c)  $(wildcard net/*.c) \
 $(wildcard string/*.c) $(wildcard libm/*.c)\
 sputl.c sgetl.c $(wildcard memory/*.c*)\
- becompat.c __xgetRD.S  ftell.c  fread.c \
+ becompat.c __xgetRD.S  stdio/ftell.c  stdio/fread.c \
 $(wildcard quad/*.c) $(wildcard gen/*.c) \
 $(wildcard hash/*.c) $(wildcard xdr/*.c) $(wildcard gdtoa/*.c) $(wildcard uuid/*.c)\
  hashtable/src/hash_free.c  hashtable/src/hash.c $(wildcard libutil/*.c) structures/binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
- debug.cc $(wildcard efile/*.cc) __flt_rounds.c fwrite.c cpp_new.cc  fclose.c drivermgr.cc feof.c fputc.c efile/fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
+ debug.cc $(wildcard efile/*.cc) __flt_rounds.c stdio/fwrite.c cpp_new.cc  stdio/fclose.c drivermgr.cc stdio/feof.c stdio/fputc.c efile/fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
 mutex/src/mutex.c mutex/src/arch-$(ARCH)/mutex.c mutex/src/arch-ia32/try_lock.S #structures/btree_core.c structures/bt_modify.c
 
 #Need to move DragonFlyBSD stuff to own directory - l64a/calloc
