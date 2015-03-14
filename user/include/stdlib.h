@@ -32,6 +32,9 @@ typedef struct {
 	long long rem;  /* Remainder. */
 } lldiv_t;
 
+//Placeholder for a proper implementation (POSIX)
+int system(const char *command);
+
 //Wrapper of free()
 void cfree(void *p);
 
