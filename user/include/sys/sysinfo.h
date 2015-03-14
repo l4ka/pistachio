@@ -26,6 +26,8 @@ extern "C" {
 
 //Sadly, for compatibility purposes, a clean-room implementation would have to share the same variable names
 
+//Populate the members of the struct
+int sysinfo(struct sysinfo *aSysInfo);
 
 #ifdef __cplusplus
 
