@@ -2,6 +2,7 @@
       e32def.h.... */
 
 #pragma once
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
