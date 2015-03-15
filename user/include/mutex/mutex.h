@@ -82,8 +82,16 @@
 
 #ifndef __MUTEX_H__
 #define __MUTEX_H__
+
+//Seems to be a hotspot for breakage?
+//#ifdef __cplusplus
+//extern "C"{
+//#endif
  
 #include <l4/thread.h>
+//#ifdef __cplusplus
+//}
+//#endif
 
 struct mutex {
 	L4_Word_t holder;

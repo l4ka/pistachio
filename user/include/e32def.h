@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include <string.h>
+//#include <string.h>
 
 //Equivalent to standard void, and preferred to void* when pointerised...
 typedef void TAny;
@@ -51,6 +51,12 @@ typedef long long Int64;
 
 //This is a synonym for Int64
 typedef	Int64	TInt64;
+
+typedef unsigned long int TUint32;
+
+//Reformat these, later
+#define ETrue 1
+#define EFalse 0
 
 #ifdef __cplusplus
 }
