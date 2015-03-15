@@ -27,19 +27,19 @@ extern "C" {
 //Return the number of available CPUs, according to the KIP/SMBIOS
 int get_nprocs() {
 
-/*
+
         void *kip;
         L4_KernelInterfacePage_t *skip;
         L4_Word_t apiv, apif, kid;
 
         kip = L4_KernelInterface( &apiv, &apif, &kid );
 
-*/
+
 //L4_Word_t L4_NumProcessors (void * KernelInterface)
-//int num = kip->ProcessorInfo.X.processors + 1;
+int num = kip->ProcessorInfo.X.processors + 1;
 //    printf("Processors: %d\n", num);
 
-	return -1;
+	return num;
 }
 
 //Initialise the sysinfo structure...
