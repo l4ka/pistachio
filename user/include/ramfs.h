@@ -11,6 +11,10 @@ public:
     bool WriteFile(char *aPath);
     int Start(int aStatus);
 
+/* Mount callback? */
+/* Format callback */
+/* Directories? */
+
 private:
     char *iDrvName;
     char *iDrvVersion;
