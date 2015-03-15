@@ -21,6 +21,22 @@ enum {
 
 } TDriver;
 
+/* Potential errors (File System) */
+static const int KErrNone = 0; //Operation successful
+static const int KErrAccessDenied = 1; //Access denied, or impossible action
+static const int KErrNotSupported = 2; //Action not supported
+static const int KErrVolumeFull = 3; //The disk is full
+static const int KErrCompletion = 4; //Task completed
+static const int KErrEof = 5; //End of file
+static const int KErrVolumeDirty = 6; //Disk wasn't unmounted cleanly
+static const int KErrExtAttrTooLarge = 7; //The extended attribute's payload exceeds the supported size
+static const int KErrDisconnected = 8; //The network server went away
+static const int KErrGeneral = 9; //General error...
+static const int KErrArgument = 10; //Argument error
+static const int KErrTooBig = 11; //Specified file/sector/cluster size exceeds the volume size
+static const int KErrCorrupt = 12; //File/boot sector is damaged; not necessarily same as 6
+static const int KErrNotFound = 13; //The requested file/cluster/sector could not be located for some reason
+
 class DriverMgr
 {
 public:
