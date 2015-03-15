@@ -3,6 +3,7 @@
 #include <drivermgr.h>
 #include <ramfs.h>
 
+#include <sys/sysinfo.h>
 
 SysLaunch::SysLaunch():
     iScreenNbr(0)
@@ -56,6 +57,10 @@ void SysLaunch::EscalateCmd(char *aCmd) {
 
 	if (strcmp(getenv("ACTIVE_CMD"), "whoami") == 0 ) {
 		printf("%s\n", getenv("USER"));
+	}
+
+	if (strcmp(getenv("ACTIVE_CMD"), "cpucount") == 0 ) {
+		printf("%d CPUs are installed in this system.\n", get_nprocs());
 	}
 
 	if (strcmp(getenv("ACTIVE_CMD"), "yes") == 0 ) {
