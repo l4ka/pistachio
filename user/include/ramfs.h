@@ -2,7 +2,7 @@
 #define RAMFS_H
 
 
-
+//https://code.google.com/p/ostutorial/wiki/8VFSAndInitrd
 class RamFs
 {
 public:
