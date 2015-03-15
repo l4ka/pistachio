@@ -2,11 +2,13 @@
       e32def.h.... */
 
 #pragma once
-#include <string.h>
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <string.h>
 
 //Equivalent to standard void, and preferred to void* when pointerised...
 typedef void TAny;
