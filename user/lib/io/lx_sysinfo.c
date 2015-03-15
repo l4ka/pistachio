@@ -26,18 +26,11 @@ extern "C" {
 
 //Return the number of available CPUs, according to the KIP/SMBIOS
 int get_nprocs() {
-
-
-       // TAny *kip;
         L4_KernelInterfacePage_t *skip;
         L4_Word_t apiv, apif, kid;
 
         skip = L4_KernelInterface( &apiv, &apif, &kid );
-
-
-//L4_Word_t L4_NumProcessors (void * KernelInterface)
-int num = skip->ProcessorInfo.X.processors + 1;
-//    printf("Processors: %d\n", num);
+	int num = skip->ProcessorInfo.X.processors + 1;
 
 	return num;
 }
