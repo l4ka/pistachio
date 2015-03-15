@@ -26,18 +26,20 @@ extern "C" {
 
 //Return the number of available CPUs, according to the KIP/SMBIOS
 int get_nprocs() {
-        L4_KernelInterfacePage_t *skip;
         L4_Word_t apiv, apif, kid;
-
-        skip = L4_KernelInterface( &apiv, &apif, &kid );
-	int num = skip->ProcessorInfo.X.processors + 1;
-
-	return num;
+	L4_KernelInterfacePage_t * kip;
+	kip = (L4_KernelInterfacePage_t *) L4_KernelInterface( &apiv, &apif, &kid );
+	
+	return L4_NumProcessors(kip);
 }
 
 //Initialise the sysinfo structure...
 //https://github.com/klange/toaruos/blob/94c976a903181df453f39d2a264f85c9a7c90246/kernel/sys/syscall.c
 int	sysinfo(struct sysinfo *aSysInfo) {
+
+        L4_Word_t apiv, apif, kid;
+	L4_KernelInterfacePage_t * kip;
+	kip = (L4_KernelInterfacePage_t *) L4_KernelInterface( &apiv, &apif, &kid );
 
 //        strcpy(aUtsName->sysname, "Enryo");
 //        strcpy(aUtsName->nodename,"noname");
