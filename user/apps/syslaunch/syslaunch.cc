@@ -26,6 +26,8 @@ SysLaunch::SysLaunch():
     RamFs rfs;
     rfs.Start(1);
 
+	rfs.ReadFile("/sys/kip/raw");
+
 
 }
 
