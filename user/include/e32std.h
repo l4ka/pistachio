@@ -1,7 +1,5 @@
 #pragma once
-#include <string.h>
 
-#include <e32def.h>
 
 //http://developer.nokia.com/community/wiki/Fundamental_Types_in_symbian
 
@@ -12,7 +10,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include <e32def.h>
 
 #ifdef __cplusplus
 }
