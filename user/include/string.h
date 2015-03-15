@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 #include <sys/types.h>
-
+#include <memory.h>
 #ifdef __cplusplus
 }
 #endif
@@ -57,8 +57,8 @@ strncpy(char *dst, const char *src, size_t n);
 
 
 //The triad...
-void *
-memcpy(void *dst0, const void *src0, size_t length);
+//void *
+//memcpy(void *dst0, const void *src0, size_t length);
 
 void *
 memmove(void *dst0, const void *src0, size_t length);
@@ -69,8 +69,8 @@ bcopy(const void *src0, void *dst0, size_t length);
 
 
 //Try exporting this for cstring...
-void *
-memcpy(void *s1, const void *s2, size_t n);
+//void *
+//memcpy(void *s1, const void *s2, size_t n);
 
 char *
 strerror(int num);
