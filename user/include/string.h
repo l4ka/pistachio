@@ -4,7 +4,16 @@
 #ifndef __STRING_H__
 #define __STRING_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
+
+#ifdef __cplusplus
+}
+#endif
+
 
 // BAD IDEA #include <lib/io/lib.h>
 
