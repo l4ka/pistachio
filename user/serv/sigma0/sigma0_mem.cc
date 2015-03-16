@@ -292,7 +292,7 @@ void dump_mempools (void)
  *
  * @return true upon success, false otherwise
  */
-bool allocate_page (L4_ThreadId_t tid, L4_Word_t addr, L4_Word_t log2size,
+bool allocate_page (L4_ThreadId_t tid, L4_Paddr_t addr, L4_Word_t log2size,
 		    L4_MapItem_t & map, bool only_conventional)
 {
     region_t * r;
@@ -307,8 +307,24 @@ bool allocate_page (L4_ThreadId_t tid, L4_Word_t addr, L4_Word_t log2size,
 	return false;
 
     // Make sure that addr is properly aligned.
-    addr &= ~((1UL << log2size) - 1);
-    L4_Word_t addr_high = addr + (1UL << log2size) - 1;
+    addr &= ~(((L4_Paddr_t)1UL << log2size) - 1);
+    L4_Paddr_t addr_high = addr + (1UL << log2size) - 1;
+
+    L4_Fpage_t kip_area, utcb_area;
+    L4_Word_t control;
+    L4_ThreadId_t redirector;
+    L4_Word_t shortaddr = (L4_Word_t)addr;
+
+    if (addr != (L4_Word_t)addr) { //extended mapping
+    	kip_area.X.s = log2size;
+        kip_area.X.b = shortaddr >> 10;
+        redirector.raw = addr >> 32;
+        utcb_area.raw = shortaddr;
+
+        L4_SpaceControl(sigma0_id,1 << 29, kip_area, utcb_area, redirector,
+        		&control);
+
+    }
 
     region_pool_t * pools[] = { &conv_memory_pool, &memory_pool,
 				(region_pool_t *) NULL };
@@ -364,9 +380,9 @@ bool allocate_page (L4_ThreadId_t tid, L4_Word_t addr, L4_Word_t log2size,
     {
 
 	// Use smallest page size as stepping
-	for (L4_Word_t a = addr; a < addr_high; a += (1UL << min_pgsize))
+	for (L4_Paddr_t a = addr; a < addr_high; a += (1UL << min_pgsize))
 	{
-	    L4_Word_t a_end = a + (1UL << min_pgsize);
+	    L4_Paddr_t a_end = a + (1UL << min_pgsize);
 	    bool failed = true;
 
 	    // Try the different pools
@@ -398,8 +414,8 @@ bool allocate_page (L4_ThreadId_t tid, L4_Word_t addr, L4_Word_t log2size,
 	}
     }
 
-    map = L4_MapItem (L4_FpageLog2 (addr, log2size) + L4_FullyAccessible,
-		      addr);
+    map = L4_MapItem (L4_FpageLog2 ((L4_Word_t)addr, log2size) + L4_FullyAccessible,
+		      (L4_Word_t)addr);
 
     return true;
 }
