@@ -1,0 +1,492 @@
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:3:
+In file included from ../../include/l4io.h:35:
+../../include/l4/types.h:376:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw + r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:381:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw + r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:386:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw + r.raw };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:391:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw - r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:396:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw - r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:401:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : l.raw - r.raw };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:407:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : c.raw + r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:412:27: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return (L4_Clock_t) { raw : c.raw - r };
+                          ^~~~~
+                          .raw = 
+../../include/l4/types.h:518:13: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+            return L4_Never;
+                   ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+../../include/l4/types.h:529:13: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+            return L4_Never;
+                   ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+In file included from ../../include/l4/thread.h:36:
+../../include/l4/ia32/syscalls.h:198:7: error: unsupported inline asm: input with type 'L4_ThreadId_t' matching output with type 'L4_Word_t' (aka 'unsigned long')
+        "0" (dest),
+             ^~~~
+../../include/l4/ia32/syscalls.h:275:7: error: unsupported inline asm: input with type 'L4_ThreadId_t' matching output with type 'L4_Word_t' (aka 'unsigned long')
+        "0" (dest),
+             ^~~~
+../../include/l4/ia32/syscalls.h:488:7: error: unsupported inline asm: input with type 'L4_ThreadId_t' matching output with type 'L4_Word_t' (aka 'unsigned long')
+        "0" (SpaceSpecifier),
+             ^~~~~~~~~~~~~~
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:260:49: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+        return L4_ExchangeRegisters (t, 0, 0, 0, 0, 0, L4_nilthread,
+                                                       ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:285:49: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+        return L4_ExchangeRegisters (t, 0, 0, 0, 0, 0, L4_nilthread,
+                                                       ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:304:59: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    (void) L4_ExchangeRegisters (t, (1 << 9), 0, 0, 0, 0, L4_nilthread,
+                                                          ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:316:64: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    (void) L4_ExchangeRegisters (t, (1 << 6), 0, 0, 0, handle, L4_nilthread,
+                                                               ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:338:59: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    (void) L4_ExchangeRegisters (t, (1 << 9), 0, 0, 0, 0, L4_nilthread,
+                                                          ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:372:63: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    (void) L4_ExchangeRegisters (t, (1 << 8) + 6, 0, 0, 0, 0, L4_nilthread,
+                                                              ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:383:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:396:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:422:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, &dummy, &dummy,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:438:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, sp, ip, flags,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:459:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, &dummy, &dummy,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:476:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, sp, ip, flags,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:499:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, &dummy, &dummy,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:517:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, sp, ip, flags,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:540:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, &dummy, &dummy,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:556:6: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                                 L4_nilthread, &state.raw, sp, ip, flags,
+                                 ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:582:9: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                             L4_nilthread, HandlerThread, (void *) -1);
+                             ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:588:9: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                             L4_nilthread, InterruptThread, (void *) -1);
+                             ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:595:76: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_CONF_FLAG, 0, 0 , 0, 0, L4_nilthread,
+                                                                           ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:604:76: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_READ_FLAG, 0, 0 , 0, 0, L4_nilthread,
+                                                                           ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+In file included from ../../include/mutex/mutex.h:91:
+../../include/l4/thread.h:613:77: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    L4_ExchangeRegisters (dest, L4_EXREGS_CTRLXFER_WRITE_FLAG, 0, 0 , 0, 0, L4_nilthread,
+                                                                            ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:5:
+In file included from ../../include/stdio.h:7:
+../../include/mutex/mutex.h:120:19: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                L4_ThreadSwitch(L4_nilthread);
+                                ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:36:
+../../include/l4/kip.h:561:54: error: comparison between pointer and integer ('char *' and 'int')
+    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != '\0'; i++ )
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~ ^  ~~~~
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:129:34: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Call_Timeouts (to, L4_Never, L4_Never);
+                                 ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:129:44: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Call_Timeouts (to, L4_Never, L4_Never);
+                                           ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:134:24: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (to, L4_nilthread, (L4_Word_t)SndTimeout.raw << 16, (L4_ThreadId_t *) 0);
+                       ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:146:33: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Send_Timeout (to, L4_Never);
+                                ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:151:33: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Send_Timeout (to, L4_ZeroTime);
+                                ^
+../../include/l4/types.h:491:36: note: expanded from macro 'L4_ZeroTime'
+#define L4_ZeroTime     ((L4_Time_t) { period : { L4_SHUFFLE3(0, 1, 0) }})
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:158:20: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (L4_nilthread, from, (L4_Word_t)RcvTimeout.raw, &dummy);
+                   ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:170:38: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Receive_Timeout (from, L4_Never);
+                                     ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:176:20: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (L4_nilthread, L4_anythread, (L4_Word_t)RcvTimeout.raw, from);
+                   ^
+../../include/l4/types.h:296:46: note: expanded from macro 'L4_nilthread'
+#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:176:34: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (L4_nilthread, L4_anythread, (L4_Word_t)RcvTimeout.raw, from);
+                                 ^
+../../include/l4/types.h:297:46: note: expanded from macro 'L4_anythread'
+#define L4_anythread      ((L4_ThreadId_t) { raw : ~0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:188:29: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Wait_Timeout (L4_Never, from);
+                            ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:195:24: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (to, L4_anythread, L4_Timeouts (L4_ZeroTime, RcvTimeout),
+                       ^
+../../include/l4/types.h:297:46: note: expanded from macro 'L4_anythread'
+#define L4_anythread      ((L4_ThreadId_t) { raw : ~0UL})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:195:51: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Ipc (to, L4_anythread, L4_Timeouts (L4_ZeroTime, RcvTimeout),
+                                                  ^
+../../include/l4/types.h:491:36: note: expanded from macro 'L4_ZeroTime'
+#define L4_ZeroTime     ((L4_Time_t) { period : { L4_SHUFFLE3(0, 1, 0) }})
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:211:38: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_ReplyWait_Timeout (to, L4_Never, from);
+                                     ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:222:42: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Lipc (to, to, L4_Timeouts (L4_Never, L4_Never), &dummy);
+                                         ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:222:52: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Lipc (to, to, L4_Timeouts (L4_Never, L4_Never), &dummy);
+                                                   ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:227:25: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Lipc (to, L4_anylocalthread,
+                        ^
+../../include/l4/types.h:298:46: note: expanded from macro 'L4_anylocalthread'
+#define L4_anylocalthread ((L4_ThreadId_t) { local : { X : {L4_SHUFFLE2(0, ((1UL<<(8*sizeof(L4_Word_t)-6))-1))}}})
+                                             ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:227:25: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+../../include/l4/types.h:298:56: note: expanded from macro 'L4_anylocalthread'
+#define L4_anylocalthread ((L4_ThreadId_t) { local : { X : {L4_SHUFFLE2(0, ((1UL<<(8*sizeof(L4_Word_t)-6))-1))}}})
+                                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:228:20: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                    L4_Timeouts (L4_ZeroTime, L4_Never), from);
+                                 ^
+../../include/l4/types.h:491:36: note: expanded from macro 'L4_ZeroTime'
+#define L4_ZeroTime     ((L4_Time_t) { period : { L4_SHUFFLE3(0, 1, 0) }})
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+In file included from ../../include/l4/sigma0.h:38:
+../../include/l4/ipc.h:228:33: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+                    L4_Timeouts (L4_ZeroTime, L4_Never), from);
+                                              ^
+../../include/l4/types.h:490:33: note: expanded from macro 'L4_Never'
+#define L4_Never        ((L4_Time_t) { raw : 0UL })
+                                       ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+../../include/l4/sigma0.h:67:9: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+        return L4_Nilpage;
+               ^
+../../include/l4/types.h:166:37: note: expanded from macro 'L4_Nilpage'
+#define L4_Nilpage              ((L4_Fpage_t) { raw : 0UL })
+                                                ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+../../include/l4/sigma0.h:82:48: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+    return L4_Sigma0_GetPage_RcvWindow (s0, f, L4_CompleteAddressSpace);
+                                               ^
+../../include/l4/types.h:167:49: note: expanded from macro 'L4_CompleteAddressSpace'
+#define L4_CompleteAddressSpace ((L4_Fpage_t) { X : { L4_SHUFFLE4(0, 0, 1, 0) }})
+                                                ^
+In file included from syslaunch.cc:1:
+In file included from ./syslaunch.h:8:
+../../include/l4/sigma0.h:91:50: warning: use of GNU old-style field designator extension [-Wgnu-designator]
+        return L4_Sigma0_GetPage_RcvWindow_High (s0, f, L4_CompleteAddressSpace, high);
+                                                        ^
+../../include/l4/types.h:167:49: note: expanded from macro 'L4_CompleteAddressSpace'
+#define L4_CompleteAddressSpace ((L4_Fpage_t) { X : { L4_SHUFFLE4(0, 0, 1, 0) }})
+                                                ^
+syslaunch.cc:30:15: warning: conversion from string literal to 'char *' is deprecated [-Wc++11-compat-deprecated-writable-strings]
+        rfs.ReadFile("/sys/kip/raw");
+                     ^
+syslaunch.cc:98:36: warning: format specifies type 'int' but the argument has type 'L4_Word64_t' (aka 'unsigned long long') [-Wformat]
+    printf("The clock says: %d\n", L4_SystemClock().raw);
+                            ~~     ^~~~~~~~~~~~~~~~~~~~
+                            %llu
+syslaunch.cc:100:10: warning: unused variable 'test' [-Wunused-variable]
+    int *test = new int(1);
+         ^
+57 warnings and 4 errors generated.
+ld: cannot find syslaunch.o: No such file or directory
