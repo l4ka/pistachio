@@ -36,9 +36,10 @@ top_builddir=	..
 include $(top_srcdir)/Mk/l4.base.mk
 
 
-SUBDIRS=	l4 io libl4e libelf mach-o circular_buffer
+SUBDIRS=	l4 io libmutex libl4e libelf mach-o circular_buffer
 
 post-clean:
 	rm -f *.a
+
 
 include $(top_srcdir)/Mk/l4.subdir.mk

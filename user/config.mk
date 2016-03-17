@@ -32,7 +32,7 @@
 
 # config.mk.  Generated from config.mk.in by configure.
 
-ARCH=		ia32
+ARCH=		amd64
 PLAT=           amd64-pc99
 KERNEL=		x86-kernel
 
@@ -48,10 +48,10 @@ SHELL=		/bin/bash
 CC=		gcc
 CXX=		$(CC) -x c++
 AS=		$(CC)
-CFLAGS=		-fno-stack-protector -nostdinc -g -O2 -m32
+CFLAGS=		-fno-stack-protector -nostdinc -g -O2 -m64 -mno-red-zone
 CXXFLAGS=	$(CFLAGS) -fno-exceptions
-LDFLAGS=	-N -L$(top_builddir)/lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386
-CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir) -I/usr/lib/gcc/i686-linux-gnu/4.8/include 
+LDFLAGS=	-N -L$(top_builddir)/lib -L/usr/lib/gcc/x86_64-linux-gnu/4.8 -nostdlib  -melf_x86_64
+CPPFLAGS=	-I$(top_srcdir)/include -I$(top_builddir) -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include 
 LGCC=		-lgcc
 
 TOOLPREFIX=	
@@ -70,6 +70,6 @@ INSTALL_PROGRAM=${INSTALL}
 INSTALL_DATA=	${INSTALL} -m 644
 INSTALL_SCRIPT=	${INSTALL}
 
-KICKSTART_LINKBASE=	00800000
-SIGMA0_LINKBASE=	00020000
-ROOTTASK_LINKBASE=	00400000
+KICKSTART_LINKBASE=	00100000
+SIGMA0_LINKBASE=	00f00000
+ROOTTASK_LINKBASE=	01000000
