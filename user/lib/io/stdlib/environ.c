@@ -18,8 +18,8 @@ extern char **environ;
 extern char *strchr();
 extern char *strcpy();
 extern char *strncpy();
-extern char *malloc();
-extern char *realloc();
+//extern char *malloc();
+//extern char *realloc();
 extern int strncmp();
 extern void free();
 

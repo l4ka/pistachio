@@ -11,6 +11,9 @@
 
 #define intmax_t long long int
 #define uintmax_t unsigned long int
+typedef unsigned int u_int32_t;
+typedef unsigned int            uint32_t;
+
 
 //#define intmax_t long long int
 

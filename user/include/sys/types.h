@@ -10,7 +10,7 @@ extern "C" {
 #include <l4/types.h>
 #include <sys/_types.h>
 #include <mutex/mutex.h>
-
+#include <stddef.h>
 //http://pubs.opengroup.org/onlinepubs/9699919799/
 typedef mutex_t pthread_mutex_t; //Does this have a special feature?
 
@@ -52,6 +52,8 @@ void * memset(void *s1, int c, size_t n);
 
 size_t strlen(const char *str);
 
+typedef unsigned int u_int32_t;
+typedef unsigned int            uint32_t;
 
 //For compatibility with OpenBSD
 typedef unsigned char u_char;

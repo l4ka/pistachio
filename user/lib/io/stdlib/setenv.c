@@ -23,7 +23,7 @@ char   *name;
 char   *value;
 int     clobber;
 {
-    char   *malloc();
+//    char   *malloc();
     char   *getenv();
     char   *cp;
 
