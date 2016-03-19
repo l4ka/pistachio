@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-Lenovo-G505 */
-/* At: Thu, 17 Mar 2016 22:54:47 +0000 */
+/* At: Sat, 19 Mar 2016 21:10:41 +0000 */
 /* Linux version 3.13.0-79-generic (buildd@lcy01-24) (gcc version 4.8.2 (Ubuntu 4.8.2-19ubuntu1) ) #123-Ubuntu SMP Fri Feb 19 14:27:58 UTC 2016 */
 
 /* Pistachio Kernel Configuration System */
@@ -21,8 +21,8 @@
 /* Processor Type */
 #undef  CONFIG_CPU_X86_I486
 #undef  CONFIG_CPU_X86_I586
-#undef  CONFIG_CPU_X86_I686
-#define CONFIG_CPU_X86_P4 1
+#define CONFIG_CPU_X86_I686 1
+#undef  CONFIG_CPU_X86_P4
 #undef  CONFIG_CPU_X86_K8
 #undef  CONFIG_CPU_X86_C3
 #undef  CONFIG_CPU_X86_SIMICS
@@ -55,7 +55,9 @@
 #define CONFIG_APIC_TIMER_TICK 1000
 #undef  CONFIG_PPC_EXPOSE_OPIC
 
-#undef  CONFIG_SMP
+#define CONFIG_SMP 1
+#define CONFIG_SMP_MAX_PROCS 4
+#undef  CONFIG_SMP_IDLE_POLL
 
 
 /* Kernel */
@@ -72,24 +74,25 @@
 
 
 #undef  CONFIG_IPC_FASTPATH
-#define CONFIG_DEBUG 1
+#undef  CONFIG_DEBUG
 #undef  CONFIG_DEBUG_SYMBOLS
-#undef  CONFIG_PERFMON
+#define CONFIG_PERFMON 1
 #define CONFIG_SPIN_WHEELS 1
-#undef  CONFIG_NEW_MDB
+#define CONFIG_NEW_MDB 1
 #undef  CONFIG_STATIC_TCBS
 #define CONFIG_PPC_BAT_SYSCALLS 1
 #undef  CONFIG_X86_SMALL_SPACES
 #undef  CONFIG_X86_COMPATIBILITY_MODE
+#define CONFIG_X86_IO_FLEXPAGES 1
 
 
 /* Debugger */
 
 /* Kernel Debugger Console */
-#define CONFIG_KDB_CONS_COM 1
+#undef  CONFIG_KDB_CONS_COM
 #define CONFIG_KDB_COMPORT 0x0
 #define CONFIG_KDB_COMSPEED 115200
-#define CONFIG_KDB_CONS_KBD 1
+#undef  CONFIG_KDB_CONS_KBD
 #undef  CONFIG_KDB_CONS_OF1275
 #undef  CONFIG_KDB_CONS_PSIM_COM
 #define CONFIG_KDB_BOOT_CONS 0
@@ -97,15 +100,17 @@
 #undef  CONFIG_KDB_DISAS
 #undef  CONFIG_KDB_ON_STARTUP
 #undef  CONFIG_KDB_BREAKIN
-#define CONFIG_KDB_BREAKIN_BREAK 1
+#undef  CONFIG_KDB_BREAKIN_BREAK
+#undef  CONFIG_KDB_BREAKIN_ESCAPE
 #undef  CONFIG_KDB_INPUT_HLT
 #undef  CONFIG_KDB_NO_ASSERTS
 
 /* Trace Settings */
-#define CONFIG_VERBOSE_INIT 1
+#undef  CONFIG_VERBOSE_INIT
 #undef  CONFIG_TRACEPOINTS
 #undef  CONFIG_KMEM_TRACE
 #undef  CONFIG_TRACEBUFFER
+#undef  CONFIG_TBUF_PERFMON
 #undef  CONFIG_X86_KEEP_LAST_BRANCHES
 
 
@@ -125,7 +130,7 @@
 #define CONFIG_X86_PGE 1
 #define CONFIG_X86_FXSR 1
 #define CONFIG_IS_32BIT 1
-#define CONFIG_X86_HTT 1
+#undef  CONFIG_X86_HTT
 #define CONFIG_X86_PAT 1
 #undef  CONFIG_PPC_BOOKE
 #undef  CONFIG_IS_64BIT
@@ -135,7 +140,7 @@
 #undef  CONFIG_PPC_TLB_INV_LOCAL
 #undef  CONFIG_PPC_CACHE_ICBI_LOCAL
 #undef  CONFIG_X86_SMALL_SPACES_GLOBAL
-#define CONFIG_X86_HVM 1
+#undef  CONFIG_X86_HVM
 #undef  CONFIG_PPC_MMU_SEGMENTS
 #define CONFIG_X86_TSC 1
 /* That's all, folks! */
