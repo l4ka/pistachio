@@ -347,10 +347,7 @@ lib/io/Makefile
 serv/Makefile
 serv/sigma0/Makefile
 apps/Makefile
-apps/bench/Makefile
-apps/bench/pingpong/Makefile
-apps/grabmem/Makefile
-apps/l4test/Makefile
+apps/syslaunch/Makefile
 util/Makefile
 util/kickstart/Makefile
 util/grubdisk/Makefile

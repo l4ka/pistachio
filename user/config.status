@@ -393,7 +393,7 @@ on `(hostname || uname -n) 2>/dev/null | sed 1q`
 "
 
 # Files that config.status was made for.
-config_files=" config.mk Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile serv/Makefile serv/sigma0/Makefile apps/Makefile apps/bench/Makefile apps/bench/pingpong/Makefile apps/grabmem/Makefile apps/l4test/Makefile util/Makefile util/kickstart/Makefile util/grubdisk/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile contrib/Makefile contrib/elf-loader/Makefile"
+config_files=" config.mk Makefile lib/Makefile lib/l4/Makefile lib/io/Makefile serv/Makefile serv/sigma0/Makefile apps/Makefile apps/syslaunch/Makefile util/Makefile util/kickstart/Makefile util/grubdisk/Makefile util/piggybacker/Makefile util/piggybacker/ofppc/Makefile util/piggybacker/ofppc64/Makefile contrib/Makefile contrib/elf-loader/Makefile"
 config_headers=" config.h"
 
 ac_cs_usage="\
@@ -545,10 +545,7 @@ do
     "serv/Makefile") CONFIG_FILES="$CONFIG_FILES serv/Makefile" ;;
     "serv/sigma0/Makefile") CONFIG_FILES="$CONFIG_FILES serv/sigma0/Makefile" ;;
     "apps/Makefile") CONFIG_FILES="$CONFIG_FILES apps/Makefile" ;;
-    "apps/bench/Makefile") CONFIG_FILES="$CONFIG_FILES apps/bench/Makefile" ;;
-    "apps/bench/pingpong/Makefile") CONFIG_FILES="$CONFIG_FILES apps/bench/pingpong/Makefile" ;;
-    "apps/grabmem/Makefile") CONFIG_FILES="$CONFIG_FILES apps/grabmem/Makefile" ;;
-    "apps/l4test/Makefile") CONFIG_FILES="$CONFIG_FILES apps/l4test/Makefile" ;;
+    "apps/syslaunch/Makefile") CONFIG_FILES="$CONFIG_FILES apps/syslaunch/Makefile" ;;
     "util/Makefile") CONFIG_FILES="$CONFIG_FILES util/Makefile" ;;
     "util/kickstart/Makefile") CONFIG_FILES="$CONFIG_FILES util/kickstart/Makefile" ;;
     "util/grubdisk/Makefile") CONFIG_FILES="$CONFIG_FILES util/grubdisk/Makefile" ;;

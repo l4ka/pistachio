@@ -59,9 +59,9 @@ void SysLaunch::EscalateCmd(char *aCmd) {
 		printf("%s\n", getenv("USER"));
 	}
 
-	if (strcmp(getenv("ACTIVE_CMD"), "cpucount") == 0 ) {
-		printf("%d CPUs are installed in this system.\n", get_nprocs());
-	}
+//	if (strcmp(getenv("ACTIVE_CMD"), "cpucount") == 0 ) {
+//		printf("%d CPUs are installed in this system.\n", get_nprocs());
+//	}
 
 	if (strcmp(getenv("ACTIVE_CMD"), "yes") == 0 ) {
 		while(1) {
