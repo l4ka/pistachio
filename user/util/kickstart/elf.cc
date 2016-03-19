@@ -42,6 +42,36 @@
 #define BI_NS BI64
 #endif
 
+// void * InternalMemSet(void *s1, int c, size_t n);
+//#include <liballoc.h>
+//#define InternalMemSet liballoc_InternalMemSet
+
+//#include <sys/types.h>
+
+//This is a hack
+
+extern "C" void InternalMemSet(L4_Word_t dst, L4_Word8_t val, L4_Word_t len)
+{
+    L4_Word8_t* d = (L4_Word8_t*) dst;
+
+    while (len--)
+        *d++ = val;
+}
+
+extern "C" void InternalStrCpy( char *dst, const char *src )
+{
+    unsigned cnt = 0;
+
+    if( !dst || !src )
+        return;
+
+    do {
+        dst[cnt] = src[cnt];
+    } while( src[cnt++] );
+
+}
+
+
 bool elf_load32 (L4_Word_t file_start,
 		 L4_Word_t file_end,
 		 L4_Word_t *memory_start,
@@ -131,7 +161,7 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
             // Copy bytes from "file" to memory - load address
             memcopy(dst_start, src_start, ph->fsize);
             // Zero "non-file" bytes
-            memset(dst_start + ph->fsize, 0, ph->msize - ph->fsize);
+            InternalMemSet(dst_start + ph->fsize, 0, ph->msize - ph->fsize);
             // Update min and max
             min_addr = min(min_addr, dst_start);
             max_addr = max(max_addr, dst_end);
@@ -162,7 +192,7 @@ bool __elf_func(elf_find_sections) (L4_Word_t addr,
         return false;
 
     // Initialize a local bootinfo record
-    memset ((L4_Word_t) exec, 0, sizeof (*exec));
+    InternalMemSet ((L4_Word_t) exec, 0, sizeof (*exec));
     exec->type = L4_BootInfo_SimpleExec;
     exec->version = 1;
     exec->initial_ip = eh->entry;

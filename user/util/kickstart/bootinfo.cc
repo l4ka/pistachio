@@ -118,7 +118,7 @@ L4_BootRec_t * record_bootinfo_modules (L4_BootInfo_t * bi,
 		// bootinfo.
 		sz = sizeof (*exec);
 		exec->cmdline_offset = sz;
-		strcpy ((char *) exec + sz, mbi->mods[i].cmdline);
+		InternalStrCpy ((char *) exec + sz, mbi->mods[i].cmdline);
 		sz += strlen (mbi->mods[i].cmdline) + 1;
 		sz = align_up (sz, sizeof (L4_Word_t));
 		exec->offset_next = sz;
@@ -137,7 +137,7 @@ L4_BootRec_t * record_bootinfo_modules (L4_BootInfo_t * bi,
 
 		// Copy command line to bootinfo.
 		mod->cmdline_offset = sz;
-		strcpy ((char *) exec + sz, mbi->mods[i].cmdline);
+		InternalStrCpy ((char *) exec + sz, mbi->mods[i].cmdline);
 		sz += strlen (mbi->mods[i].cmdline) + 1;
 		sz = align_up (sz, sizeof (L4_Word_t));
 		mod->offset_next = sz;

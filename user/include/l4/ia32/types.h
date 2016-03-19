@@ -56,8 +56,8 @@ typedef unsigned int		L4_Size_t;
 typedef unsigned int		size_t; //Alias for BSD compatibility
 
 //Defined for BSD compatibility
-typedef unsigned long int 	uint32_t;
-typedef unsigned long int 	u_int32_t; //for htonl
+//typedef unsigned long int 	uint32_t;
+//typedef unsigned long int 	u_int32_t; //for htonl
 
 typedef L4_Word64_t		L4_Paddr_t;
 
