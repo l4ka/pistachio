@@ -41,16 +41,16 @@ powerpc_SRCS=	1275tree.cc fdt.cc
 LIBRARY=	io
 SRCS=		get_hex.cc  print.cc \
 $(ARCH).cc $($(ARCH)_SRCS)  getpagesize.c pcspkr.c  \
- $(wildcard bsd/stdio/*.c) $(wildcard bsd/stdlib/*.c)\
-  $(wildcard android/*.c)  $(wildcard bsd/net/*.c) \
-$(wildcard bsd/string/*.c) \
+ $(wildcard stdio/*.c) $(wildcard stdlib/*.c)\
+  $(wildcard android/*.c)  $(wildcard net/*.c) \
+$(wildcard string/*.c) \
 sputl.c sgetl.c memory/liballoc.c memory/liballoc_hooks.cc\
  becompat.c \
-$(wildcard bsd/quad/*.c) $(wildcard bsd/gen/*.c) \
-$(wildcard bsd/hash/*.c) $(wildcard bsd/xdr/*.c) $(wildcard bsd/gdtoa/*.c)  \
- libhash/src/hash_free.c  libhash/src/hash.c structures/binary_tree.c \
+$(wildcard quad/*.c) $(wildcard gen/*.c) \
+$(wildcard hash/*.c) $(wildcard xdr/*.c) $(wildcard gdtoa/*.c)  \
+ $(wildcard hashtable/src/*.c) structures/binary_tree.c \
  netware/apicore.c uname.c nap.c $(wildcard p9rune/*.c) $(wildcard fs-bootinfo/*.c)\
- debug.cc $(wildcard efile/*.cc) cpp_new.cc drivermgr.cc feof.c fseek.c rewind.c fflush.c $(wildcard p9fmt/*.c)\
+ debug.cc $(wildcard efile/*.cc) cpp_new.cc drivermgr.cc $(wildcard p9fmt/*.c)\
 
 include $(top_srcdir)/Mk/l4.lib.mk
 
