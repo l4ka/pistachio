@@ -1,6 +1,6 @@
 /* Automatically generated, don't edit */
 /* Generated on: tyson-Lenovo-G505 */
-/* At: Sat, 19 Mar 2016 21:10:41 +0000 */
+/* At: Sat, 19 Mar 2016 22:22:02 +0000 */
 /* Linux version 3.13.0-79-generic (buildd@lcy01-24) (gcc version 4.8.2 (Ubuntu 4.8.2-19ubuntu1) ) #123-Ubuntu SMP Fri Feb 19 14:27:58 UTC 2016 */
 
 /* Pistachio Kernel Configuration System */
@@ -14,8 +14,8 @@
 
 
 /* X86 Processor Architecture */
-#define CONFIG_SUBARCH_X32 1
-#undef  CONFIG_SUBARCH_X64
+#undef  CONFIG_SUBARCH_X32
+#define CONFIG_SUBARCH_X64 1
 
 
 /* Processor Type */
@@ -55,7 +55,7 @@
 #define CONFIG_APIC_TIMER_TICK 1000
 #undef  CONFIG_PPC_EXPOSE_OPIC
 
-#define CONFIG_SMP 1
+#undef  CONFIG_SMP
 #define CONFIG_SMP_MAX_PROCS 4
 #undef  CONFIG_SMP_IDLE_POLL
 
@@ -76,14 +76,14 @@
 #undef  CONFIG_IPC_FASTPATH
 #undef  CONFIG_DEBUG
 #undef  CONFIG_DEBUG_SYMBOLS
-#define CONFIG_PERFMON 1
+#undef  CONFIG_PERFMON
 #define CONFIG_SPIN_WHEELS 1
-#define CONFIG_NEW_MDB 1
+#undef  CONFIG_NEW_MDB
 #undef  CONFIG_STATIC_TCBS
 #define CONFIG_PPC_BAT_SYSCALLS 1
 #undef  CONFIG_X86_SMALL_SPACES
-#undef  CONFIG_X86_COMPATIBILITY_MODE
-#define CONFIG_X86_IO_FLEXPAGES 1
+#define CONFIG_X86_COMPATIBILITY_MODE 1
+#undef  CONFIG_X86_IO_FLEXPAGES
 
 
 /* Debugger */
@@ -129,12 +129,12 @@
 #define CONFIG_X86_SYSENTER 1
 #define CONFIG_X86_PGE 1
 #define CONFIG_X86_FXSR 1
-#define CONFIG_IS_32BIT 1
+#undef  CONFIG_IS_32BIT
 #undef  CONFIG_X86_HTT
 #define CONFIG_X86_PAT 1
 #undef  CONFIG_PPC_BOOKE
-#undef  CONFIG_IS_64BIT
-#undef  CONFIG_MULTI_ARCHITECTURE
+#define CONFIG_IS_64BIT 1
+#define CONFIG_MULTI_ARCHITECTURE 1
 #undef  CONFIG_X86_EM64T
 #undef  CONFIG_PPC_CACHE_L1_WRITETHROUGH
 #undef  CONFIG_PPC_TLB_INV_LOCAL

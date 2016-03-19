@@ -1,4 +1,4 @@
-#####################################################################
+######################################################################
 ##                
 ## Copyright (C) 2003-2004, 2007,  Karlsruhe University
 ##                
@@ -28,6 +28,7 @@
 ## $Id: Makefile.in,v 1.2 2004/04/22 15:08:18 skoglund Exp $
 ##                
 ######################################################################
+
 srcdir=		.
 top_srcdir=	../..
 top_builddir=	../..
@@ -42,7 +43,8 @@ PROGRAM_DEPS=	$(top_builddir)/lib/l4/libl4.a \
 		$(top_builddir)/lib/libelf/libelf.a
 
 SRCS=		crt0-$(ARCH).S syslaunch.cc # $(wildcard libdex/*.cc)  
-LIBS+=		-ll4 -lio -ll4e -lelf 
+
+LIBS+=		-ll4 -lio -ll4e -lelf
 LDFLAGS+=	-Ttext=$(ROOTTASK_LINKBASE)
 
 CFLAGS_powerpc+=	-fno-builtin -msoft-float

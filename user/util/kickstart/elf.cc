@@ -129,7 +129,7 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
     {
         // No. Bail out
         printf("  Wrong PHDR table offset\n");
-        return true; //false;
+        return false;//true; //false;
     }
 
     printf("   => %p\n", (void *)(L4_Word_t)eh->entry);
