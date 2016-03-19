@@ -3,6 +3,8 @@
 
 #include <l4/types.h>
 
+#include <stddef.h>
+
 /* Export bzero() */
 void	 bzero(void *, size_t);
 

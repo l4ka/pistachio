@@ -1,17 +1,29 @@
 #ifndef _LIBALLOC_H
 #define _LIBALLOC_H
 
-
+//#include <stddef.h>
 
 // If we are told to not define our own size_t, then we
 // skip the define.
 #ifndef _ALLOC_SKIP_DEFINE
 
+/*
+cpp_new.cc:10:44: error: ‘operator new’ takes type ‘size_t’ (‘long unsigned int’) as first parameter [-fpermissive]
+ extern "C" void *operator new[](size_t size)
+
+*/
+
 #ifndef _HAVE_SIZE_T
 #define _HAVE_SIZE_T
+
+#if __x86_64__
+/* 64-bit */
+	typedef unsigned long int size_t;
+#else
+/* 32-bit */
 typedef	unsigned int	size_t;
 #endif
-
+#endif
 
 #ifndef	NULL
 #define NULL		0
