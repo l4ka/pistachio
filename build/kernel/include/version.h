@@ -18,5 +18,5 @@
 \
 #define __USER__               "tyson@tyson-Lenovo-G505"				
 \
-#define __KERNELBUILDNO__      25				
+#define __KERNELBUILDNO__      26				
 

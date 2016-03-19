@@ -63,7 +63,7 @@ RMDIR=		rmdir
 LN_S=		ln -s
 AUTOCONF=	autoconf
 MKDIRHIER=	$(top_srcdir)/../tools/mkdirhier
-AWK=		mawk
+AWK=		gawk
 
 INSTALL=	/usr/bin/install -c
 INSTALL_PROGRAM=${INSTALL}

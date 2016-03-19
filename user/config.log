@@ -110,10 +110,8 @@ configure:2818: result: yes
 configure:2827: checking whether ln -s works
 configure:2831: result: yes
 configure:2842: checking for gawk
-configure:2872: result: no
-configure:2842: checking for mawk
-configure:2858: found /usr/bin/mawk
-configure:2869: result: mawk
+configure:2858: found /usr/bin/gawk
+configure:2869: result: gawk
 configure:2953: checking location of libgcc.a
 configure:2957: result: /usr/lib/gcc/x86_64-linux-gnu/4.8
 configure:2960: checking location of stdarg.h
@@ -170,7 +168,7 @@ ac_cv_env_target_alias_set=
 ac_cv_env_target_alias_value=
 ac_cv_objext=o
 ac_cv_path_install='/usr/bin/install -c'
-ac_cv_prog_AWK=mawk
+ac_cv_prog_AWK=gawk
 ac_cv_prog_ac_ct_CC=gcc
 ac_cv_prog_cc_c89=
 ac_cv_prog_cc_g=yes
@@ -181,7 +179,7 @@ ac_cv_prog_make_make_set=yes
 ## ----------------- ##
 
 ARCH='amd64'
-AWK='mawk'
+AWK='gawk'
 CC='gcc'
 CFLAGS='-fno-stack-protector -nostdinc -g -O2 -m64 -mno-red-zone'
 CPPFLAGS='-I$(top_srcdir)/include -I$(top_builddir) -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include '

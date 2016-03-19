@@ -436,7 +436,7 @@ gives unlimited permission to copy, distribute and modify it."
 ac_pwd='/home/tyson/pistachio/user'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
-AWK='mawk'
+AWK='gawk'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
 ac_need_defaults=:
@@ -632,7 +632,7 @@ S["ARCH"]="amd64"
 S["CXXFLAGS"]="-fno-exceptions "
 S["PLAT"]="amd64-pc99"
 S["TOOLPREFIX"]=""
-S["AWK"]="mawk"
+S["AWK"]="gawk"
 S["LN_S"]="ln -s"
 S["SET_MAKE"]=""
 S["INSTALL_DATA"]="${INSTALL} -m 644"
