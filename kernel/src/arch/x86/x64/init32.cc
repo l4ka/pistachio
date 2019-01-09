@@ -179,9 +179,11 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
     if (!x86_mmu_t::has_long_mode())
 	init32_spin(1);
 
-
+    u64_t *p_init_pml4 = init_pml4;
+    u64_t *p_init_pdp = init_pdp;
+    u64_t *p_init_pdir = init_pdir;
     for (int i=0; i<512; i++){
-	init_pml4[i] = init_pdp[i] = init_pdir[i] = 0;
+	p_init_pml4[i] = p_init_pdp[i] = p_init_pdir[i] = 0;
     }
 
     

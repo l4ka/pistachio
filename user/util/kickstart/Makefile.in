@@ -37,7 +37,7 @@ top_builddir=	@top_builddir@
 
 include $(top_srcdir)/Mk/l4.base.mk
 
-CFLAGS+=	-fno-builtin
+CFLAGS+=	-fno-builtin -fno-stack-protector
 KICKSTART_LINKBASE?=	00800000
 
 PROGRAM=	kickstart
