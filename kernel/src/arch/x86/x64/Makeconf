@@ -34,8 +34,7 @@ SOURCES += $(addprefix src/arch/x86/x64/, init32.cc cpu.cc)
 CCFLAGS_src/arch/x86/x64/init32 = -DX64_32BIT_CODE\
 				  $(patsubst -m64, -m32,\
 				  $(patsubst -mcmodel=kernel, ,\
-				  $(patsubst -fno-pie -no-pie, ,\
-				  $(CCFLAGS))))
+				  $(CCFLAGS)))
 
 src/arch/x86/x64/init32.o: src/arch/x86/x64/init32.cc
 	@$(ECHO_MSG) $(subst $(SRCDIR)/,,$<)

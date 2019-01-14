@@ -73,6 +73,7 @@ extern "C" void loader (void)
     flush_cache();
 
     printf("Launching kernel ...\n");
+    printf("entry: 0x%lx \n", entry);
 
     // Start the kernel at its entry point
     launch_kernel (entry);

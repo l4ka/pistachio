@@ -558,7 +558,7 @@ L4_INLINE L4_Bool_t L4_HasFeature (const char *feature_name)
     void *kip = L4_GetKernelInterface();
     char *name;
 
-    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != nullptr; i++ )
+    for( L4_Word_t i = 0; (name = L4_Feature(kip,i)) != 0; i++ )
     {
         const char *n = name;
         const char *fn = feature_name;

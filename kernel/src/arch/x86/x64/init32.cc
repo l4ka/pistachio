@@ -127,7 +127,7 @@ static void SECTION(".init.init32")  init32_spin (int pos = 0)
     }
 }
 
-static void SECTION(".init.init32") init32_cons (void)
+static inline void SECTION(".init.init32") init32_cons (void)
 {
 #define IER	(INIT32_COMPORT+1)
 #define EIR	(INIT32_COMPORT+2)
@@ -179,9 +179,15 @@ extern "C" void SECTION(".init.init32") init_paging( u32_t is_ap )
     if (!x86_mmu_t::has_long_mode())
 	init32_spin(1);
 
-    u64_t *p_init_pml4 = init_pml4;
-    u64_t *p_init_pdp = init_pdp;
-    u64_t *p_init_pdir = init_pdir;
+    u64_t _64_init_pml4 = (u64_t) init_pml4;
+    u64_t _64_init_pdp = (u64_t) init_pdp;
+    u64_t _64_init_pdir = (u64_t) init_pdir;
+    u32_t _32_init_pml4 = (u32_t) _64_init_pml4;
+    u32_t _32_init_pdp = (u32_t) _64_init_pdp;
+    u32_t _32_init_pdir = (u32_t) _64_init_pdir;
+    u64_t *p_init_pml4 = (u64_t *) _32_init_pml4;
+    u64_t *p_init_pdp = (u64_t *) _32_init_pdp;
+    u64_t *p_init_pdir = (u64_t *) _32_init_pdir;
     for (int i=0; i<512; i++){
 	p_init_pml4[i] = p_init_pdp[i] = p_init_pdir[i] = 0;
     }

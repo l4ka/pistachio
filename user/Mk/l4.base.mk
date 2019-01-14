@@ -49,6 +49,7 @@ CFLAGS += -Wno-conversion
 else
 CFLAGS += -Wconversion
 endif
+CCFLAGS += -fno-stack-protector
 
 
 # Create early targets so that a make without args (implicit all) does
