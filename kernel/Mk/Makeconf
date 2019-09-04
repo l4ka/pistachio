@@ -71,7 +71,7 @@ else
 TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
 			$(ARCH)-gcc $(ARCH)-linux-gcc $(ARCH)-unknown-elf-gcc \
 			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc \
-			$(ARCH)-linux-gnu-gcc $(ARCH)-pc-linux-gnu-gcc)))
+			$(ARCH)-linux-gnu-gcc $(ARCH)-pc-linux-gnu-gcc $(ARCH)-redhat-linux-gcc)))
 
 endif
 
