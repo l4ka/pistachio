@@ -119,6 +119,12 @@ bool check_memory (L4_Word_t start, L4_Word_t end)
     {
 	L4_Word_t mod_start = mbi->mods[i].start;
 	L4_Word_t mod_end = mbi->mods[i].end;
+        printf("     mbi->mods[%d].start : %p,\n"
+               "     mbi->mods[%d].end : %p,\n",
+               i,
+               (void *) mod_start,
+               i,
+               (void *) mod_end);
 
 	if (mod_start < end && start < mod_end)
 	{
