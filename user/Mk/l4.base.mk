@@ -40,7 +40,7 @@ ECHO_MSG=	$(ECHO) ===\>
 MKDIRHIER=	$(top_srcdir)/../tools/mkdirhier
 
 CPPFLAGS+=	$(CPPFLAGS_$(ARCH))
-CFLAGS+=	-O2 -g -Wall -Wshadow \
+CFLAGS+=	-O2 -g -Wall -Wshadow -fno-stack-protector \
 		$(CFLAGS_$(ARCH))
 LDFLAGS+=	$(LDFLAGS_$(ARCH))
 
@@ -49,6 +49,7 @@ CFLAGS += -Wno-conversion
 else
 CFLAGS += -Wconversion
 endif
+CCFLAGS += -fno-stack-protector
 
 
 # Create early targets so that a make without args (implicit all) does

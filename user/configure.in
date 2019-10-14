@@ -255,8 +255,8 @@ case $LDFLAGS in
 	;;
 esac
 LDFLAGS="-N -L\$(top_builddir)/lib -L$LIBGCCDIR $LDFLAGS"
-CFLAGS="-nostdinc $CFLAGS"
-CXXFLAGS="-fno-exceptions $CXXFLAGS"
+CFLAGS="-nostdinc -fno-stack-protector $CFLAGS"
+CXXFLAGS="-fno-exceptions -fno-stack-protector $CXXFLAGS"
 
 CC_VERSION=`echo __GNUC__ | $CC -E  - | grep -v "\#"`
 CC_SUBVERSION=`echo __GNUC_MINOR__ | $CC -E  - | grep -v "\#"`
