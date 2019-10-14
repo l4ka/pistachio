@@ -1,0 +1,3 @@
+env = Environment(CCFLAGS = '-g -I../include')
+
+env.Program('elf-test', ['main.c', 'aistructs.c', 'endian.c', '../src/elf32.c'])

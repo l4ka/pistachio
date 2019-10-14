@@ -49,7 +49,7 @@ loader_format_t loader_formats[] = {
 
 void fail(int ec)
 {
-    printf("PANIC: FAIL in line %d\n", ec);
+    printf("[ia32.cc] : PANIC: FAIL in line %d\n", ec); //This gets called somewhere, when we fail
     while(1);
 }
 
@@ -66,6 +66,8 @@ void flush_cache()
  */
 void launch_kernel(L4_Word_t entry)
 {
+    printf("[ia32.cc] : Inside launch_kernel(), trying to squeeze into 0x%X\n", entry);
+
     __asm__ __volatile__ ("jmp *%0" : : "r"(entry));
 }
 

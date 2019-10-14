@@ -75,7 +75,7 @@ void mbi_t::copy( mbi_t *target )
     if( this->cmdline )
     {
 	target->cmdline = strings;
-	strcpy( target->cmdline, this->cmdline );
+	InternalStrCpy( target->cmdline, this->cmdline );
 	strings = strings + 1 + strlen(this->cmdline);
 	// TODO: align the strings pointer.
     }
@@ -92,7 +92,7 @@ void mbi_t::copy( mbi_t *target )
 	if( this->mods[i].cmdline )
 	{
 	    target->mods[i].cmdline = strings;
-	    strcpy( target->mods[i].cmdline, this->mods[i].cmdline );
+	    InternalStrCpy( target->mods[i].cmdline, this->mods[i].cmdline );
 	    strings = strings + 1 + strlen(this->mods[i].cmdline);
 	    // TODO: align the strings pointer.
 	}

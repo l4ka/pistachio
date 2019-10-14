@@ -1,0 +1,7 @@
+Testing string reads
+A string printed to stdout
+4 numbers: 12345678, 4321, 0x78675645, 1.234567890123456
+A ustl::string object printed 3 times
+A ustl::string object printed 3 times
+A ustl::string object printed 3 times
+All done.

@@ -31,7 +31,12 @@
 #ifndef __USER__LIB__IO__LIB_H__
 #define __USER__LIB__IO__LIB_H__
 
+//#include <stdlib.h>
 
+/* OpenBSD Definition, depends upon machine architecture */
+//typedef unsigned long size_t;
+//http://fxr.watson.org/fxr/source/lib/libkern/bzero.c?v=OPENBSD;im=10
+/*
 static unsigned strlen( const char *src )
 {
     unsigned cnt = 0;
@@ -40,7 +45,8 @@ static unsigned strlen( const char *src )
 	cnt++;
     return cnt;
 }
-
+*/
+/*
 static void strcpy( char *dst, const char *src )
 {
     unsigned cnt = 0;
@@ -53,6 +59,8 @@ static void strcpy( char *dst, const char *src )
     } while( src[cnt++] );
     
 }
+*/
+
 /*
  * For the remainder of this file:
  *
@@ -63,6 +71,8 @@ static void strcpy( char *dst, const char *src )
 /*
  * Compare strings.
  */
+
+/*
 static int
 strcmp(const char *s1, const char *s2)
 {
@@ -71,7 +81,9 @@ strcmp(const char *s1, const char *s2)
 			return (0);
 	return (*(unsigned char *)s1 - *(unsigned char *)--s2);
 }
-
+*/
+//Probably from OpenBSD (http://fxr.watson.org/fxr/source/lib/libkern/strncmp.c?v=OPENBSD;im=10)
+/*
 static int
 strncmp(const char *s1, const char *s2, unsigned int n)
 {
@@ -85,10 +97,11 @@ strncmp(const char *s1, const char *s2, unsigned int n)
 	} while (--n != 0);
 	return (0);
 }
-
+*/
 /*
  * Find the first occurrence of find in s.
  */
+/*
 static char *
 strstr(const char *s, const char *find)
 {
@@ -108,18 +121,36 @@ strstr(const char *s, const char *find)
 	return ((char *)s);
 }
 
-static char *
-strchr(const char *p, int ch)
-{
-    for (;; ++p) {
-	if (*p == ch) {
+*/
+//static char *
+//strchr(const char *p, int ch)
+//{
+//    for (;; ++p) {
+//	if (*p == ch) {
 	    /* LINTED const cast-away */
-	    return((char *)p);
-	}
-	if (!*p)
-	    return((char *)0);
-    }
+//	    return((char *)p);
+//	}
+//	if (!*p)
+//	    return((char *)0);
+//    }
     /* NOTREACHED */
-}
+//}
+
+//Begin NetWare-compatible functions
+//http://www.novell.com/documentation/developer/clib/ndev_enu/data/sdk1274.html
+//http://www.linuxdoc.org/HOWTO/NLM-HOWTO-3.html
+
+
+/* Hive these off into <nwconio.h>, when we've got the dev environment configured... */  
+   
+   //Beep the PC speaker
+  //void RingTheBell  (void); 
+
+void append_str(char* s, char c);
+
+
+  
+//OpenVMS-compatible functions
+//http://h71000.www7.hp.com/doc/83final/5763/5763pro_029.html
 
 #endif /* !__USER__LIB__IO__LIB_H__ */

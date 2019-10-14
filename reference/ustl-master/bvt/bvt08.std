@@ -1,0 +1,30 @@
+Hello world!
+Hello again!
+element3
+element4
+element5_long_element5
+element3 found at position 2
+After erase (end,end):
+Hello world!
+Hello again!
+element3
+element4
+element5_long_element5
+After erase (2,2):
+Hello world!
+Hello again!
+element5_long_element5
+After pop_back():
+Hello world!
+Hello again!
+element3
+element4
+After insert(1,1,3):
+Hello world!
+Hello again!
+element3
+element4
+Hello again!
+element3
+element4
+element5_long_element5

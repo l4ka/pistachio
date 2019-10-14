@@ -1,0 +1,27 @@
+body {
+    font-family: sans-serif;
+    color: black;
+    background-color: #59C;
+    margin: 5mm
+}
+div.banner {
+    color: black;
+    background-color: #48B;
+    text-align: center;
+    font-size: 1cm;
+    padding: 1mm;
+    margin-top: -5mm;
+    margin-left: -5mm;
+    margin-right: -5mm;
+    margin-bottom: 5mm
+}
+div.motto {
+    color: #159;
+    font-style: italic;
+    font-size: 2mm;
+    margin-top: -5mm
+}
+div.sffooter	{ text-align: right }
+a:link		{ color: #238 }
+a:visited	{ color: #632 }
+hr.banner	{ display: none }

@@ -1,0 +1,11 @@
+Generating Unicode characters 0 - 65534
+Encoding to utf8.
+Decoding back.
+Comparing.
+src = 65535 chars, encoded = 194429 chars, decoded = 65535
+0 differences between src and decoded.
+Testing wide character string::insert
+Values[17]: 1234 49 50 3456 4567 3456 4567 2345 51 52 53 54 55 56 57 48 5678
+Character offsets: 0 2 3 4 7 10 13 16 19 20 21 22 23 24 25 26 27
+Erasing character 16:  1234 49 50 3456 4567 3456 4567 2345 51 52 53 54 55 56 57 48
+Erasing 2 characters after '2':  1234 49 50 3456 4567 2345 51 52 53 54 55 56 57 48

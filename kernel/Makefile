@@ -104,7 +104,7 @@ endif
 else
 
 
-all:	$(ARCH)-kernel
+all:	$(ARCH)-kernel 
 	@echo Done.
 
 # load all the compiler settings

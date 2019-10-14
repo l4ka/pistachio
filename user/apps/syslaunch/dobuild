@@ -1,0 +1,6 @@
+
+clang++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow -std=c++11  -DINT_MAX -DUCHAR_MAX -Wno-conversion -c crt0-ia32.S -o crt0-ia32.o
+
+clang++ -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow -std=c++11  -DINT_MAX -DUCHAR_MAX -Wno-conversion -fno-exceptions -c syslaunch.cc -o syslaunch.o
+
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o syslaunch.o    -ll4 -lio -ll4e -lelf  -lgcc -o syslaunch

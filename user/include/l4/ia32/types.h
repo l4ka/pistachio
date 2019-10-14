@@ -39,6 +39,7 @@
 
 typedef unsigned int __attribute__((__mode__(__DI__))) L4_Word64_t;
 typedef unsigned int		L4_Word32_t;
+
 typedef unsigned short		L4_Word16_t;
 typedef unsigned char		L4_Word8_t;
 
@@ -52,6 +53,12 @@ typedef signed char		L4_SignedWord8_t;
 typedef signed long		L4_SignedWord_t;
 
 typedef unsigned int		L4_Size_t;
+typedef unsigned int		size_t; //Alias for BSD compatibility
+
+//Defined for BSD compatibility
+//typedef unsigned long int 	uint32_t;
+//typedef unsigned long int 	u_int32_t; //for htonl
+
 typedef L4_Word64_t		L4_Paddr_t;
 
 #endif /* !__L4__X86__TYPES_H__ */

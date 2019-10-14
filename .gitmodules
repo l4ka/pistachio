@@ -1,0 +1,3 @@
+[submodule "libcxxrt"]
+	path = libcxxrt
+	url = https://github.com/pathscale/libcxxrt.git

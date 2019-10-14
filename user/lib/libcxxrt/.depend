@@ -1,0 +1,42 @@
+auxhelper.o: src/auxhelper.cc ../../include/stdlib.h src/stdexcept.h
+cxa_atexit.o: src/cxa_atexit.c
+cxa_finalize.o: src/cxa_finalize.c
+dynamic_cast.o: src/dynamic_cast.cc src/typeinfo.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h src/abi_namespace.h \
+ ../../include/stdio.h ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h
+exception.o: src/exception.cc ../../include/stdlib.h dlfcn.h \
+ ../../include/stdio.h ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/string.h \
+ ../../include/stdint.h pthread.h src/typeinfo.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h src/abi_namespace.h \
+ src/dwarf_eh.h assert.h src/unwind.h src/unwind-itanium.h src/atomic.h \
+ src/cxxabi.h
+guard.o: src/guard.cc ../../include/stdint.h ../../include/stdlib.h \
+ ../../include/stdio.h ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h pthread.h assert.h src/atomic.h
+libelftc_dem_gnu3.o: src/libelftc_dem_gnu3.c ../../include/sys/types.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h assert.h ctype.h ../../include/errno.h \
+ limits.h /usr/lib/gcc/i686-linux-gnu/4.8/include/stdbool.h \
+ ../../include/stdio.h ../../include/l4io.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/stdlib.h \
+ ../../include/string.h
+memory.o: src/memory.cc /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
+ ../../include/stdlib.h src/stdexcept.h src/atomic.h
+stdexcept.o: src/stdexcept.cc src/stdexcept.h
+terminate.o: src/terminate.cc ../../include/stdlib.h
+typeinfo.o: src/typeinfo.cc src/typeinfo.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h src/abi_namespace.h \
+ ../../include/string.h ../../include/stdlib.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h

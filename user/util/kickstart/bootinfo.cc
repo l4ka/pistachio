@@ -69,6 +69,12 @@ L4_BootRec_t * init_bootinfo (L4_BootInfo_t * bi)
     bi->first_entry	= sizeof (*bi);
     bi->num_entries	= 0;
 
+    //Debug init_bootinfo()
+
+    printf("[bootinfo.cc] : init_bootinfo(), boot info record size & first entry: %d...\n\n", sizeof (*bi));
+    printf("[bootinfo.cc] : init_bootinfo(), boot info record version: %d...\n\n", L4_BOOTINFO_VERSION);
+    printf("[bootinfo.cc] : init_bootinfo(), have %d entries in the table...\n\n", bi->num_entries);
+
     return L4_BootInfo_FirstEntry (bi);
 }
 
@@ -112,7 +118,7 @@ L4_BootRec_t * record_bootinfo_modules (L4_BootInfo_t * bi,
 		// bootinfo.
 		sz = sizeof (*exec);
 		exec->cmdline_offset = sz;
-		strcpy ((char *) exec + sz, mbi->mods[i].cmdline);
+		InternalStrCpy ((char *) exec + sz, mbi->mods[i].cmdline);
 		sz += strlen (mbi->mods[i].cmdline) + 1;
 		sz = align_up (sz, sizeof (L4_Word_t));
 		exec->offset_next = sz;
@@ -131,7 +137,7 @@ L4_BootRec_t * record_bootinfo_modules (L4_BootInfo_t * bi,
 
 		// Copy command line to bootinfo.
 		mod->cmdline_offset = sz;
-		strcpy ((char *) exec + sz, mbi->mods[i].cmdline);
+		InternalStrCpy ((char *) exec + sz, mbi->mods[i].cmdline);
 		sz += strlen (mbi->mods[i].cmdline) + 1;
 		sz = align_up (sz, sizeof (L4_Word_t));
 		mod->offset_next = sz;

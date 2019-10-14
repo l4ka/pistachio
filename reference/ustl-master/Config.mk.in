@@ -1,0 +1,59 @@
+################ Build options #######################################
+
+NAME		:= @PKG_NAME@
+MAJOR		:= @PKG_MAJOR@
+MINOR		:= @PKG_MINOR@
+
+#DEBUG		:= 1
+BUILD_SHARED	:= 1
+#BUILD_STATIC	:= 1
+NOLIBSTDCPP	:= 1
+
+################ Programs ############################################
+
+CXX		:= @CXX@
+LD		:= @CXX@
+AR		:= @AR@
+RANLIB		:= @RANLIB@
+DOXYGEN		:= @DOXYGEN@
+INSTALL		:= @INSTALL@
+
+INSTALLDATA	:= ${INSTALL} -D -p -m 644
+INSTALLLIB	:= ${INSTALLDATA}
+
+################ Destination #########################################
+
+prefix		:= @prefix@
+exec_prefix	:= @exec_prefix@
+BINDIR		:= @bindir@
+INCDIR		:= @includedir@
+LIBDIR		:= @libdir@
+
+################ Compiler options ####################################
+
+WARNOPTS	:= -Wall -Wextra -Woverloaded-virtual -Wpointer-arith\
+		-Wshadow -Wredundant-decls -Wcast-qual @SYSWARNS@
+TGTOPTS		:= @PROCESSOR_OPTS@
+INLINEOPTS	:= @INLINE_OPTS@
+
+CXXFLAGS	:= ${WARNOPTS} ${TGTOPTS} -fPIC
+LDFLAGS		:=
+LIBS		:=
+ifdef DEBUG
+    CXXFLAGS	+= -O0 -g
+    LDFLAGS	+= -rdynamic
+else
+    CXXFLAGS	+= -Os -g0 -DNDEBUG=1 -fomit-frame-pointer ${INLINEOPTS}
+    LDFLAGS	+= -s -Wl,-gc-sections
+endif
+ifdef NOLIBSTDCPP
+    LD		:= @CC@
+    STAL_LIBS	:= @libsupc++@ @libgcc_eh@ @libSystemStubs@
+    LIBS	:= ${STAL_LIBS}
+endif
+O		:= .o/
+
+slib_lnk	= lib$1.so
+slib_son	= lib$1.so.${MAJOR}
+slib_tgt	= lib$1.so.${MAJOR}.${MINOR}
+slib_flags	= @SHBLDFL@

@@ -33,6 +33,8 @@
 #include <stdarg.h>
 #include <l4io.h>
 #include "lib.h"
+#include "stdio/local.h"
+//#include <stdlib.h>
 
 #ifndef NULL
 #define NULL ((void *) 0)
@@ -74,7 +76,7 @@ int __l4_putchar (int c)
     return c;
 }
 
-
+int __sdidinit = 1;
 
 /*
  * Function print_string (s)
@@ -626,4 +628,68 @@ int __l4_printf(const char *fmt, ...)
 	print_string(outbuf);
 
     return r;
+}
+
+//Hack to get strings from the keyboard
+char *GetPolledKbdLine() {
+
+char data;
+
+//http://stackoverflow.com/questions/4093847/strcat-throws-segmentation-fault-on-simple-getch-like-password-input
+int c;
+int i = 0;
+char pass[60] = "";
+
+printf("> ");
+while(c != 0x0d && strlen(pass) != (60 - 1)) {
+    c = getc();
+
+
+
+    if (c == 0x0d) {
+        //ensure cannot backspace past prompt
+        if(i != 0) {
+            //simulate backspace by replacing with space
+            printf("\b \b");
+            //get rid of last character
+            //pass[i-1] = 0; i--;
+        }//if (c = 0x03 /* Ctrl + C, maybe? */) {printf("[kbd] : Ctrl+C pressed");pass = 0x03; }
+    } else {
+        //passed a character
+        pass[i] = (char)c;
+//http://stackoverflow.com/questions/6660145/convert-ascii-number-to-ascii-character-in-c
+char cx =  (int)pass[i];
+
+//int s = strtol(c, NULL, 16);
+        printf("%c",cx);i++;
+    }
+}
+
+
+pass[i] = '\0';
+printf("\n%s\n", pass);
+
+
+return pass ;//getc();
+
+}
+
+//http://ubuntuforums.org/showthread.php?t=1016188
+void append_str(char* s, char c)
+{
+	int len = strlen(s);
+	s[len] = c;
+	s[len + 1] = '\0';
+}
+
+//ftp://ftp.fr.openbsd.org/pub/OpenBSD/src/lib/libc/stdio/findfp.c
+//__sinit()
+void __sinit(void) {
+//this is a hack, since this stuff isn't really set up :(
+ __sdidinit = 1;
+}
+
+//NetWare thing, move this later
+void RingTheBell() {
+printf("YOU RANG THE BELL!");
 }

@@ -32,15 +32,18 @@
 #include <config.h>
 #include <l4/types.h>
 #include "ia32.h"
+//#include "lib.h" //HAX
 
-extern "C" void __l4_putc (int c);
+
 extern "C" void putc (int c) __attribute__ ((weak, alias ("__l4_putc")));
 extern "C" int __l4_getc (void);
 extern "C" int getc (void) __attribute__ ((weak, alias ("__l4_getc")));
-
+extern "C" void __l4_putc (int c);
 
 #if defined(CONFIG_COMPORT)
 
+//RS-232/Serial port interfaces
+//http://wiki.osdev.org/Serial_Ports
 #if CONFIG_COMPORT == 0
 # define COMPORT 0x3f8
 #elif CONFIG_COMPORT == 1
@@ -90,6 +93,8 @@ static void io_init( void )
 
 }
 
+
+
 void __l4_putc(int c)
 {
     io_init();
@@ -115,6 +120,8 @@ int __l4_getc (void)
 #define COLOR 7
 #define NUM_LINES 25
 
+//Correspond with PS/2 keyboard interface
+//http://wiki.osdev.org/%228042%22_PS/2_Controller
 #define KBD_STATUS_REG		0x64	
 #define KBD_CNTL_REG		0x64	
 #define KBD_DATA_REG		0x60	
@@ -132,6 +139,7 @@ static unsigned char keyb_layout[128] =
 	"\206\207\210\211\212\000\000789-456+1"		/* 0x40 - 0x4f */
 	"230\177\000\000\213\214\000\000\000\000\000\000\000\000\000\000" /* 0x50 - 0x5f */
 	"\r\000/";					/* 0x60 - 0x6f */
+
 
 void __l4_putc(int c)
 {
@@ -182,6 +190,8 @@ void __l4_putc(int c)
     __l4_putc_cursor = __cursor;
 }
 
+
+
 /* No SHIFT key support!!! */
 
 int __l4_getc()
@@ -193,11 +203,17 @@ int __l4_getc()
 	while (status & KBD_STAT_OBF) {
 	    unsigned char scancode;
 	    scancode = kbd_read_input();
+
+	//if (scancode = 0x1d || scancode = \03/* Ctrl + C, maybe? */) printf("[kbd] : Ctrl+C pressed");
+
 	    if (scancode & 0x80)
 		last_key = 0;
 	    else if (last_key != scancode)
 	    {
-		//printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);
+//Why doesn't this printf() work, if the serial port's disabled?
+#ifdef 	CONFIG_COMPORT
+	printf("kbd: %d, %d, %c\n", scancode, last_key, keyb_layout[scancode]);//was disabled
+#endif
 		last_key = scancode;
 		c = keyb_layout[scancode];
 		if (c > 0) return c;

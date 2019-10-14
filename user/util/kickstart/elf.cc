@@ -1,4 +1,4 @@
-/*********************************************************************
+  /*********************************************************************
  *                
  * Copyright (C) 2004, 2006,  Karlsruhe University
  *                
@@ -42,6 +42,36 @@
 #define BI_NS BI64
 #endif
 
+// void * InternalMemSet(void *s1, int c, size_t n);
+//#include <liballoc.h>
+//#define InternalMemSet liballoc_InternalMemSet
+
+//#include <sys/types.h>
+
+//This is a hack
+
+extern "C" void InternalMemSet(L4_Word_t dst, L4_Word8_t val, L4_Word_t len)
+{
+    L4_Word8_t* d = (L4_Word8_t*) dst;
+
+    while (len--)
+        *d++ = val;
+}
+
+extern "C" void InternalStrCpy( char *dst, const char *src )
+{
+    unsigned cnt = 0;
+
+    if( !dst || !src )
+        return;
+
+    do {
+        dst[cnt] = src[cnt];
+    } while( src[cnt++] );
+
+}
+
+
 bool elf_load32 (L4_Word_t file_start,
 		 L4_Word_t file_end,
 		 L4_Word_t *memory_start,
@@ -74,9 +104,17 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
     // Pointer to ELF file header
     ehdr_t* eh = (ehdr_t*) file_start;
 
+//Print the start/end ranges
     printf("  (%p-%p)",
            (void *) file_start,
            (void *) file_end);
+    
+    printf("\r\nType: %x, \r\n \
+	  Machine:  \r\n%x,\
+	   Version: %x, \r\n \
+	   Entry: %x, \r\n \
+	   Program Header Offset: %x, \
+	   \r\n", eh->type, eh->machine, eh->entry, eh->phoff);
 
     // Is it an executable?
     if (eh->type != 2)
@@ -91,7 +129,7 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
     {
         // No. Bail out
         printf("  Wrong PHDR table offset\n");
-        return false;
+        return false;//true; //false;
     }
 
     printf("   => %p\n", (void *)(L4_Word_t)eh->entry);
@@ -130,7 +168,7 @@ bool __elf_func(elf_load) (L4_Word_t file_start,
             // Copy bytes from "file" to memory - load address
             memcopy(dst_start, src_start, ph->fsize);
             // Zero "non-file" bytes
-            memset(dst_start + ph->fsize, 0, ph->msize - ph->fsize);
+            InternalMemSet(dst_start + ph->fsize, 0, ph->msize - ph->fsize);
             // Update min and max
             min_addr = min(min_addr, dst_start);
             max_addr = max(max_addr, dst_end);
@@ -161,7 +199,7 @@ bool __elf_func(elf_find_sections) (L4_Word_t addr,
         return false;
 
     // Initialize a local bootinfo record
-    memset ((L4_Word_t) exec, 0, sizeof (*exec));
+    InternalMemSet ((L4_Word_t) exec, 0, sizeof (*exec));
     exec->type = L4_BootInfo_SimpleExec;
     exec->version = 1;
     exec->initial_ip = eh->entry;
@@ -316,6 +354,8 @@ bool elf_load (L4_Word_t file_start,
 	       L4_Word_t *type,
 	       L4_MemCheck_Func_t check)
 {
+
+
     // Pointer to ELF file header
     ehdr_t* eh = (ehdr_t*) file_start;
 
@@ -331,19 +371,29 @@ bool elf_load (L4_Word_t file_start,
     if (type)
 	*type = eh->ident[4];
 
-#if defined(L4_32BIT) || defined(ALSO_ELF32)
+//#if defined(L4_32BIT) || defined(ALSO_ELF32)
     if (eh->is_32bit ())
+    //Debugging ELF loader
+    //printf("\n\n[elf.cc] : elf_load() was traversed!\n\n"); 
+
+        printf("<32> | \n"); //32-bitness
+
 	return elf_load32 (file_start, file_end,
 			   memory_start, memory_end, entry,
 			   check);
-#endif
+//#endif
 
-#if defined(L4_64BIT) || defined(ALSO_ELF64)
+//#if defined(L4_64BIT) || defined(ALSO_ELF64)
     if (eh->is_64bit ())
+
+        printf("<64> | \n"); //64-bitness
+
 	return elf_load64 (file_start, file_end,
 			   memory_start, memory_end, entry,
 			   check);
-#endif
+//#endif
+
+
 
     return false;
 }
@@ -375,6 +425,8 @@ bool elf_find_sections (L4_Word_t addr,
           (eh->ident[3] == 'F')))
     {
 	// Not an ELF file.
+
+printf("This is not an ELF executable!\n");
         return false;
     }
 

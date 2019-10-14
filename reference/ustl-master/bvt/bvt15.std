@@ -1,0 +1,30 @@
+As-inserted listing:
+Dumb	- $15000
+Dave	- $27000
+Jim	- $27000
+Gail	- $47000
+Barbara	- $47000
+Mary	- $47000
+BigBoss	- $99000
+Alphabetical listing:
+Dumb	- $15000
+Dave	- $27000
+Jim	- $27000
+Barbara	- $47000
+Gail	- $47000
+Mary	- $47000
+BigBoss	- $99000
+Employees making $47000: Barbara Gail Mary
+Dave makes $27000
+There are 2 low-paid employees
+Firing all low-paid employees:
+Dumb	- $15000
+Barbara	- $47000
+Gail	- $47000
+Mary	- $47000
+BigBoss	- $99000
+Firing dumb employees:
+Barbara	- $47000
+Gail	- $47000
+Mary	- $47000
+BigBoss	- $99000

@@ -75,6 +75,19 @@ bool decode_all_executables = false;
 L4_Word_t sigma0_type = 0;
 L4_Word_t root_task_type = 0;
 
+extern "C" void InternalStrCpy( char *dst, const char *src )
+{
+    unsigned cnt = 0;
+
+    if( !dst || !src )
+        return;
+
+    do {
+        dst[cnt] = src[cnt];
+    } while( src[cnt++] );
+
+}
+
 
 /**
  * Function used by load_modules to check for memory conflicts
@@ -106,6 +119,12 @@ bool check_memory (L4_Word_t start, L4_Word_t end)
     {
 	L4_Word_t mod_start = mbi->mods[i].start;
 	L4_Word_t mod_end = mbi->mods[i].end;
+        printf("     mbi->mods[%d].start : %p,\n"
+               "     mbi->mods[%d].end : %p,\n",
+               i,
+               (void *) mod_start,
+               i,
+               (void *) mod_end);
 
 	if (mod_start < end && start < mod_end)
 	{
@@ -343,7 +362,7 @@ L4_Word_t mbi_init (void)
 	    printf ("String buffer overrun\n");	\
 	    FAIL ();				\
 	}					\
-	strcpy (sptr, str);			\
+	InternalStrCpy (sptr, str);			\
 	str = sptr;				\
 	nfree -= len;				\
 	sptr += len;				\

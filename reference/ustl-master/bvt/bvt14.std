@@ -1,0 +1,23 @@
+There are 31 days in january.
+There are 30 days in september.
+There are 31 days in december.
+may found at index 8
+Alphabetical listing:
+april has 30 days.
+august has 31 days.
+december has 31 days.
+february has 28 days.
+january has 31 days.
+july has 31 days.
+june has 30 days.
+march has 31 days.
+may has 31 days.
+november has 30 days.
+october has 31 days.
+september has 30 days.
+After erasing may:
+april august december february january july june march november october september 
+After erasing months 2, 3, 4, and the last one:
+april january july june march may november october 
+After inserting frobuary,42:
+april august december february frobuary january july june march may november october september 

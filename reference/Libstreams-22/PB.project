@@ -1,0 +1,51 @@
+{
+    CURRENTLY_ACTIVE_VERSION = YES; 
+    DEPLOY_WITH_VERSION_NAME = A; 
+    DYNAMIC_CODE_GEN = YES; 
+    FILESTABLE = {
+        HEADERSEARCH = (
+            "$(HDRROOT)$(PUBLIC_HEADER_DIR)", 
+            "$(HDRROOT)$(PUBLIC_HEADER_DIR)/bsd", 
+            "$(HDRROOT)$(PUBLIC_HEADER_DIR)/bsd/sys", 
+            "$(HDRROOT)$(PUBLIC_HEADER_DIR)/bsd/sys/machine", 
+            "$(SYMROOT)/PrivateHeaders", 
+            "$(SYMROOT)/Headers"
+        ); 
+        H_FILES = (defs.h, streams.h, streamsextra.h, streamsimpl.h); 
+        OTHER_LINKED = (
+            except.c, 
+            file_funcs.c, 
+            globals.c, 
+            indir_ops.c, 
+            ipc_funcs.c, 
+            memory_funcs.c, 
+            NXLogError.c, 
+            streams.c, 
+            streams_doprnt.c, 
+            streams_doscan.c, 
+            streams_internal.c
+        ); 
+        OTHER_SOURCES = (Makefile.preamble, Makefile, Makefile.postamble); 
+        PROJECT_HEADERS = (streams.h); 
+    }; 
+    LANGUAGE = English; 
+    MAKEFILEDIR = "$(MAKEFILEPATH)/pb_makefiles"; 
+    NEXTSTEP_BUILDTOOL = /bin/gnumake; 
+    NEXTSTEP_INSTALLDIR = /usr/local/lib/system; 
+    NEXTSTEP_JAVA_COMPILER = /usr/bin/javac; 
+    NEXTSTEP_OBJCPLUS_COMPILER = /usr/bin/cc; 
+    NEXTSTEP_PUBLICHEADERSDIR = "$(LOCAL_DEVELOPER_DIR)/Headers/$(NAME)"; 
+    PDO_UNIX_BUILDTOOL = $NEXT_ROOT/Developer/bin/make; 
+    PDO_UNIX_INSTALLDIR = /Local/Developer/Libraries; 
+    PDO_UNIX_JAVA_COMPILER = "$(JDKBINDIR)/javac"; 
+    PDO_UNIX_OBJCPLUS_COMPILER = "$(NEXTDEV_BIN)/gcc"; 
+    PDO_UNIX_PUBLICHEADERSDIR = "$(LOCAL_DEVELOPER_DIR)/Headers/$(NAME)"; 
+    PROJECTNAME = streams; 
+    PROJECTTYPE = Library; 
+    PROJECTVERSION = 2.8; 
+    WINDOWS_BUILDTOOL = $NEXT_ROOT/Developer/Executables/make; 
+    WINDOWS_INSTALLDIR = /Developer/Libraries; 
+    WINDOWS_JAVA_COMPILER = "$(JDKBINDIR)/javac.exe"; 
+    WINDOWS_OBJCPLUS_COMPILER = "$(DEVDIR)/gcc"; 
+    WINDOWS_PUBLICHEADERSDIR = "$(HOMEDRIVE)$(LOCAL_DEVELOPER_DIR)/Headers/$(NAME)"; 
+}

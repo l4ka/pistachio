@@ -1,0 +1,54 @@
+make[1]: Entering directory `/home/tyson/pistachio/user/lib'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/io'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/io'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libmutex'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libmutex'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libl4e'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libl4e'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libelf'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libelf'
+make[1]: Leaving directory `/home/tyson/pistachio/user/lib'
+make[1]: Entering directory `/home/tyson/pistachio/user/serv'
+make[2]: Entering directory `/home/tyson/pistachio/user/serv/sigma0'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/serv/sigma0'
+make[1]: Leaving directory `/home/tyson/pistachio/user/serv'
+make[1]: Entering directory `/home/tyson/pistachio/user/apps'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/bench'
+make[3]: Entering directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+make[3]: Nothing to be done for `all'.
+make[3]: Leaving directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/bench'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/grabmem'
+make[2]: Nothing to be done for `all'.
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/grabmem'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/l4test'
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/l4test'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/counter'
+===> Linking ./counter
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o shiri.o    -ll4 -lio -lmutex -ll4e -lelf  -lgcc -o counter
+shiri.o: In function `main':
+/home/tyson/pistachio/user/apps/counter/shiri.c:12: undefined reference to `__sF'
+../../lib/libio.a(refill.o): In function `__srefill':
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:56: undefined reference to `__sdidinit'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:57: undefined reference to `__sinit'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:88: undefined reference to `HASUB'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:89: undefined reference to `FREEUB'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:113: undefined reference to `__sflush'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:74: undefined reference to `__sflush'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:98: undefined reference to `__smakebuf'
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:68: undefined reference to `errno'
+../../lib/libio.a(refill.o): In function `lflush':
+/home/tyson/pistachio/user/lib/io/bsd/stdio/refill.c:43: undefined reference to `__sflush_locked'
+make[2]: *** [counter] Error 1
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/counter'
+make[1]: *** [subdirs-all] Error 2
+make[1]: Leaving directory `/home/tyson/pistachio/user/apps'
+make: *** [subdirs-all] Error 2

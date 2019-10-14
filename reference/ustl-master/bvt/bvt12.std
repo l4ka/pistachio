@@ -1,0 +1,12 @@
+Write const void*, pos is right
+Write void*, pos is right
+Write string, pos is right
+Write const string*, pos is right
+Write string*, pos is right
+Write vector<uint16_t>(7), pos is right
+Read const void*, pos is right, value is right
+Read void*, pos is right, value is right
+Read string, pos is right, value is TestString
+Read const string*, pos is right, value is right
+Read string*, pos is right, value is right
+Read vector<uint16_t>(7), pos is right, value is right

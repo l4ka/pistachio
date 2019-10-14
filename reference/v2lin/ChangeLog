@@ -1,0 +1,16 @@
+2004-09-17 13:28  skibochka
+
+	* Makefile: don't optimize by default
+
+2004-09-13 13:57  skibochka
+
+	* ltaskLib.c, v2pthread.h: local volatile for pthrid
+
+2004-09-10 17:49  skibochka
+
+	* v2pthread.h: make pthrid volatile
+
+2004-09-10 11:05  skibochka
+
+	* lkernelLib.c, ltaskLib.c: external fixes merged in
+

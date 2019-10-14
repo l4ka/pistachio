@@ -31,7 +31,7 @@
  ********************************************************************/
 #ifndef __KICKSTART__ELF_H__
 #define __KICKSTART__ELF_H__
-
+//#include <string.h>
 /**
    \file        elf.h
    \brief       Rudimentary ELF file format structures
@@ -67,7 +67,7 @@
 # define __elf_func(x)	x##64
 #endif
 
-
+//#include <string.h>
 /*
  * ELF header
  */

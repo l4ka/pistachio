@@ -34,17 +34,35 @@
 
 #include <l4/types.h>
 
+// BAD IDEA #include <lib/io/lib.h>
+
 #include "stdarg.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+char *GetPolledKbdLine();
+
 int vsnprintf(char *str, L4_Size_t size, const char *fmt, va_list ap);
 int snprintf(char *str, L4_Size_t size, const char *fmt, ...);
 int printf(const char *fmt, ...);
 void putc(int c);
 int getc(void);
+
+//
+//extern "C" char *GetPolledKbdLine();
+/* OpenBSD libkern convenience functions */
+#include <openbsd/libkern.h>
+char *
+strcat(char *s, const char *append);
+
+int
+obsd_strcmp(const char *s1, const char *s2);
+
+
+//NetWare thing, move later
+void RingTheBell();
 
 
 #ifdef __cplusplus

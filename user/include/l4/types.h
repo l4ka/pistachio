@@ -163,7 +163,7 @@ typedef union {
 #define L4_ReadeXecOnly		(0x05)
 #define L4_NoAccess		(0x00)
 
-#define L4_Nilpage		((L4_Fpage_t) { raw : 0UL })
+#define L4_Nilpage		((L4_Fpage_t) { .raw = 0UL })
 #define L4_CompleteAddressSpace	((L4_Fpage_t) { X : { L4_SHUFFLE4(0, 0, 1, 0) }})
 
 #include __L4_INC_ARCH(specials.h)
@@ -293,8 +293,8 @@ typedef union {
     L4_LthreadId_t	local;
 } L4_ThreadId_t;
 
-#define L4_nilthread      ((L4_ThreadId_t) { raw : 0UL})
-#define L4_anythread      ((L4_ThreadId_t) { raw : ~0UL})
+#define L4_nilthread      ((L4_ThreadId_t) { .raw = 0UL})
+#define L4_anythread      ((L4_ThreadId_t) { .raw = ~0UL})
 #define L4_anylocalthread ((L4_ThreadId_t) { local : { X : {L4_SHUFFLE2(0, ((1UL<<(8*sizeof(L4_Word_t)-6))-1))}}})
 
 L4_INLINE L4_ThreadId_t L4_GlobalId (L4_Word_t threadno, L4_Word_t version)
@@ -373,43 +373,43 @@ typedef union {
 #if defined(__cplusplus)
 static inline L4_Clock_t operator + (const L4_Clock_t & l, const int r)
 {
-    return (L4_Clock_t) { raw : l.raw + r };
+    return (L4_Clock_t) { .raw = l.raw + r };
 }
 
 static inline L4_Clock_t operator + (const L4_Clock_t & l, const L4_Word64_t r)
 {
-    return (L4_Clock_t) { raw : l.raw + r };
+    return (L4_Clock_t) { .raw = l.raw + r };
 }
 
 static inline L4_Clock_t operator + (const L4_Clock_t & l, const L4_Clock_t r)
 {
-    return (L4_Clock_t) { raw : l.raw + r.raw };
+    return (L4_Clock_t) { .raw = l.raw + r.raw };
 }
 
 static inline L4_Clock_t operator - (const L4_Clock_t & l, const int r)
 {
-    return (L4_Clock_t) { raw : l.raw - r };
+    return (L4_Clock_t) { .raw = l.raw - r };
 }
 
 static inline L4_Clock_t operator - (const L4_Clock_t & l, const L4_Word64_t r)
 {
-    return (L4_Clock_t) { raw : l.raw - r };
+    return (L4_Clock_t) { .raw = l.raw - r };
 }
 
 static inline L4_Clock_t operator - (const L4_Clock_t & l, const L4_Clock_t r)
 {
-    return (L4_Clock_t) { raw : l.raw - r.raw };
+    return (L4_Clock_t) { .raw = l.raw - r.raw };
 }
 #endif /* __cplusplus */
 
 L4_INLINE L4_Clock_t L4_ClockAddUsec (const L4_Clock_t c, const L4_Word64_t r)
 {
-    return (L4_Clock_t) { raw : c.raw + r };
+    return (L4_Clock_t) { .raw = c.raw + r };
 }
 
 L4_INLINE L4_Clock_t L4_ClockSubUsec (const L4_Clock_t c, const L4_Word64_t r)
 {
-    return (L4_Clock_t) { raw : c.raw - r };
+    return (L4_Clock_t) { .raw = c.raw - r };
 }
 
 #if defined(__cplusplus)
@@ -487,7 +487,7 @@ typedef union {
     } point;
 } L4_Time_t;
 
-#define L4_Never	((L4_Time_t) { raw : 0UL })
+#define L4_Never	((L4_Time_t) { .raw = 0UL })
 #define L4_ZeroTime	((L4_Time_t) { period : { L4_SHUFFLE3(0, 1, 0) }})
 
 L4_INLINE L4_Time_t L4_TimePeriod (L4_Word64_t microseconds)

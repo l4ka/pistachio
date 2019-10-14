@@ -1,0 +1,68 @@
+DivRU(13,5) = 3
+DivRU(15,5) = 3
+DivRU(-12,5) = -3
+
+Align(5) = 8
+Align(5,2) = 6
+Align(17,7) = 21
+Align(14,7) = 14
+
+NextPow2(0) = 1
+NextPow2(1) = 2
+NextPow2(4) = 4
+NextPow2(3827) = 4096
+NextPow2(0xFFFFFFF0) = 1
+
+advance(42,0) = 42
+advance(42,3) = 45
+cvp = 1234
+vp = 4321
+advance(cvp,5) = 1239
+advance(vp,4) = 4325
+distance(cvp,vp) = 30ED
+abs_distance(vp,cvp) = 30ED
+
+size_of_elements(3, c_Numbers) = 12
+VectorSize(c_Numbers[5]) = 5
+VectorSize(c_Numbers[0]) = 0
+
+BitsInType(uint32_t) = 32
+BitsInType(int16_t) = 16
+BitsInType(char) = 8
+
+BitMask(uint32_t,12) = FFF
+BitMask(uint16_t,1) = 1
+BitMask(uint8_t,8) = FF
+BitMask(uint16_t,0) = 0
+
+pack_type(uint8_t, uint16_t) = 4242
+pack_type(uint8_t, uint32_t) = 42424242
+pack_type(uint16_t, uint32_t) = 42434243
+pack_type(uint8_t, uint64_t) = 4242424242424242
+pack_type(uint32_t, uint64_t) = 4243444542434445
+
+bswap(1234) = 3412
+le_to_native(1234) = ok
+native_to_le(1234) = ok
+be_to_native(1234) = ok
+native_to_be(1234) = ok
+bswap(12345678) = 78563412
+le_to_native(12345678) = ok
+native_to_le(12345678) = ok
+be_to_native(12345678) = ok
+native_to_be(12345678) = ok
+bswap(123456789ABCDEF0) = F0DEBC9A78563412
+le_to_native(123456789ABCDEF0) = ok
+native_to_le(123456789ABCDEF0) = ok
+be_to_native(123456789ABCDEF0) = ok
+native_to_be(123456789ABCDEF0) = ok
+
+absv(12) = 12
+absv(-12) = 12
+sign(12) = 1
+sign(-12) = -1
+sign(0) = 0
+min(3,4) = 3
+min(6U,1U) = 1
+max(-3,-6) = -3
+max(-3L,6L) = 6

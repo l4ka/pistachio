@@ -48,7 +48,10 @@ extern "C" void loader (void)
 {
     loader_format_t * fmt = NULL;
 
-    printf("KickStart 0."_MKSTR(REVISION)"\n");
+    printf("[kickstart.cc] : KickStart 0."_MKSTR(REVISION)"\n");
+    
+   //Say where we are...
+    printf("[kickstart.cc] : inside loader()\n\n");
 
     // Try to find a valid loader format.
     for (L4_Word_t n = 0; loader_formats[n].probe; n++)
@@ -62,17 +65,19 @@ extern "C" void loader (void)
 
     if (fmt == NULL)
     {
-	printf ("No valid loader format found.");
+	printf ("[kickstart.cc] : No valid loader format found.");
 	return;
     }
 
-    printf ("Detected %s\n", fmt->name);
+    printf ("[kickstart.cc] : Detected %s\n", fmt->name);
     L4_Word_t entry = fmt->init ();
 
     // Flush caches (some archs don't like code in their D-cache)
     flush_cache();
 
-    printf("Launching kernel ...\n");
+    printf("[kickstart.cc] : Launching kernel ...\n");
+    printf("entry: 0x%lx \n", entry);
+
 
     // Start the kernel at its entry point
     launch_kernel (entry);

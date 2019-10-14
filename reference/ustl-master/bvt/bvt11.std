@@ -1,0 +1,7 @@
+set:		{ 1 2 3 4 6 8 9 }
+erase(3):	{ 1 2 4 6 8 9 }
+multiset:	{ 1 1 1 1 2 3 3 4 4 6 8 9 }
+count(1) = 4
+find(4) = 7
+find(5) = false
+erase(3):	{ 1 1 1 1 2 4 4 6 8 9 }

@@ -71,7 +71,7 @@ else
 TOOLPREFIX?=	$(patsubst %gcc,%,$(firstword $(shell type -p \
 			$(ARCH)-gcc $(ARCH)-linux-gcc $(ARCH)-unknown-elf-gcc \
 			$(ARCH)-elf-gcc $(ARCH)-unknown-linux-gnu-gcc \
-			$(ARCH)-linux-gnu-gcc $(ARCH)-pc-linux-gnu-gcc)))
+			$(ARCH)-linux-gnu-gcc $(ARCH)-pc-linux-gnu-gcc $(ARCH)-redhat-linux-gcc)))
 
 endif
 
@@ -250,7 +250,7 @@ OBJS	=$(patsubst %.cc, %.o, \
 
 #.INTERMEDIATE: lds.tmp
 lds.tmp:	 $(LDSCRIPT) $(SRCDIR)/Mk/Makeconf $(SRCDIR)/src/generic/macros.h $(BUILDDIR)/config/config.h
-	@$(CPP) -DASSEMBLY $(PPFLAGS) -P -C $< -o $@
+	$(CPP) -DASSEMBLY $(PPFLAGS) -P -C $< -o $@
 
 # link the final binary
 $(ARCH)-kernel:	$(BUILDDIR)/Makeconf.local $(OBJS) lds.tmp

@@ -1,0 +1,71 @@
+except.o: except.c ../../include/stdlib.h ../../include/liballoc.h \
+ ../../include/sys/cdefs.h ../../include/stdio.h ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/unistd.h mach/cthreads.h \
+ objc/objc.h objc/error.h
+file_funcs.o: file_funcs.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h \
+ ../../include/sys/types.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ sys/stat.h sys/file.h ../../include/stdio.h ../../include/l4io.h \
+ ../../include/openbsd/libkern.h ../../include/unistd.h \
+ ../../include/stdlib.h ../../include/liballoc.h \
+ ../../include/sys/cdefs.h mach/mach_init.h ../../include/errno.h
+globals.o: globals.c /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h
+indir_ops.o: indir_ops.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h
+ipc_funcs.o: ipc_funcs.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h mach/mach.h \
+ mach/message.h
+memory_funcs.o: memory_funcs.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h streamsextra.h \
+ mach/mach.h mach/mach_types.h mach/machine/vm_param.h libc.h \
+ ../../include/stdlib.h ../../include/liballoc.h \
+ ../../include/sys/cdefs.h ../../include/string.h ../../include/unistd.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/openbsd/libkern.h sys/file.h \
+ ../../include/sys/types.h sys/stat.h mach-o/loader.h mach-o/fat.h \
+ mach-o/swap.h
+NXLogError.o: NXLogError.c ../../include/stdio.h ../../include/l4io.h \
+ ../../include/l4/types.h ../../include/l4/ia32/types.h \
+ ../../include/l4/ia32/specials.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h \
+ ../../include/openbsd/libkern.h ../../include/unistd.h syslog.h
+streams.o: streams.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/openbsd/libkern.h
+streams_doprnt.o: streams_doprnt.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/ctype.h
+streams_doscan.o: streams_doscan.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/stdio.h \
+ ../../include/l4io.h ../../include/l4/types.h \
+ ../../include/l4/ia32/types.h ../../include/l4/ia32/specials.h \
+ ../../include/openbsd/libkern.h ../../include/ctype.h \
+ ../../include/stdlib.h ../../include/liballoc.h \
+ ../../include/sys/cdefs.h ../../include/string.h
+streams_internal.o: streams_internal.c defs.h streams.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stdarg.h mach/port.h \
+ streamsimpl.h objc/zone.h objc/error.h \
+ /usr/lib/gcc/i686-linux-gnu/4.8/include/stddef.h ../../include/stdlib.h \
+ ../../include/liballoc.h ../../include/sys/cdefs.h \
+ ../../include/string.h

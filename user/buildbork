@@ -1,0 +1,1434 @@
+make[1]: Entering directory `/home/tyson/pistachio/user/lib'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/l4'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/l4'
+===> debug.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c debug.cc -o debug.o
+===> ia32.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32.cc -o ia32.o
+===> ia32-syscall-stubs.S
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c ia32-syscall-stubs.S -o ia32-syscall-stubs.o
+ia32-syscall-stubs.S: Assembler messages:
+ia32-syscall-stubs.S:52: Warning: setting incorrect section attributes for .data.syscalls
+ia32-syscall-stubs.S:58: Warning: setting incorrect section attributes for .data.syscalls_copy
+===> Linking ./libl4.a
+ar cru libl4.a  debug.o ia32.o ia32-syscall-stubs.o  
+ranlib libl4.a
+cp libl4.a ../../lib/libl4.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/l4'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/io'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/io'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/io'
+===> get_hex.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c get_hex.cc -o get_hex.o
+===> print.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c print.cc -o print.o
+print.cc: In function ‘int __l4_vsnprintf(char*, L4_Size_t, const char*, va_list)’:
+print.cc:113:25: warning: variable ‘uval2’ set but not used [-Wunused-but-set-variable]
+     unsigned long uval, uval2;
+                         ^
+print.cc: In function ‘char* GetPolledKbdLine()’:
+print.cc:641:6: warning: address of local variable ‘pass’ returned [-Wreturn-local-addr]
+ char pass[60] = "";
+      ^
+print.cc:636:6: warning: unused variable ‘data’ [-Wunused-variable]
+ char data;
+      ^
+===> ia32.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32.cc -o ia32.o
+===> liballoc_hooks.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c liballoc_hooks.cc -o liballoc_hooks.o
+liballoc_hooks.cc: In function ‘void* liballoc_alloc(int)’:
+liballoc_hooks.cc:82:34: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+    for (int j=0; j<NWGetPageSize(); j++)
+                                  ^
+===> debug.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c debug.cc -o debug.o
+===> efile/ramfs.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c efile/ramfs.cc -o efile/ramfs.o
+In file included from efile/ramfs.cc:4:0:
+../../include/drivermgr.h:11:3: warning: anonymous type with no linkage used to declare variable ‘<anonymous enum> TDriver’ with linkage [enabled by default]
+ } TDriver;
+   ^
+In file included from efile/ramfs.cc:1:0:
+../../include/ramfs.h: In constructor ‘RamFs::RamFs()’:
+../../include/ramfs.h:18:9: warning: ‘RamFs::iType’ will be initialized after [-Wreorder]
+     int iType;
+         ^
+../../include/ramfs.h:16:11: warning:   ‘char* RamFs::iDrvVersion’ [-Wreorder]
+     char *iDrvVersion;
+           ^
+efile/ramfs.cc:6:1: warning:   when initialized here [-Wreorder]
+ RamFs::RamFs():
+ ^
+efile/ramfs.cc:10:24: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+     iDrvVersion("0.0.0")
+                        ^
+efile/ramfs.cc:10:24: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+efile/ramfs.cc:10:24: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+efile/ramfs.cc: In member function ‘int RamFs::Start(int)’:
+efile/ramfs.cc:23:12: warning: unused variable ‘fs’ [-Wunused-variable]
+     RamFs *fs = new RamFs();
+            ^
+efile/ramfs.cc: In member function ‘bool RamFs::ReadFile(char*)’:
+efile/ramfs.cc:32:42: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘char*’ [-Wformat=]
+     printf("RamFs::ReadFile(%d)\n", aPath);
+                                          ^
+efile/ramfs.cc: In member function ‘bool RamFs::WriteFile(char*)’:
+efile/ramfs.cc:40:43: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘char*’ [-Wformat=]
+     printf("RamFs::WriteFile(%d)\n", aPath);
+                                           ^
+In file included from efile/ramfs.cc:4:0:
+../../include/drivermgr.h: At global scope:
+../../include/drivermgr.h:11:3: warning: ‘TDriver’ defined but not used [-Wunused-variable]
+ } TDriver;
+   ^
+===> cpp_new.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c cpp_new.cc -o cpp_new.o
+===> drivermgr.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c drivermgr.cc -o drivermgr.o
+In file included from drivermgr.cc:1:0:
+../../include/drivermgr.h:11:3: warning: anonymous type with no linkage used to declare variable ‘<anonymous enum> TDriver’ with linkage [enabled by default]
+ } TDriver;
+   ^
+drivermgr.cc: In static member function ‘static char* DriverMgr::GetFriendlyType(int)’:
+drivermgr.cc:30:15: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+         value = "File System Driver";
+               ^
+drivermgr.cc:33:15: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+         value = "Generic Block Device Driver";
+               ^
+drivermgr.cc:36:15: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+         value = "Hard Disk Driver";
+               ^
+drivermgr.cc:41:15: warning: deprecated conversion from string constant to ‘char*’ [-Wwrite-strings]
+         value = "Unknown";
+               ^
+In file included from drivermgr.cc:1:0:
+../../include/drivermgr.h: At global scope:
+../../include/drivermgr.h:11:3: warning: ‘TDriver’ defined but not used [-Wunused-variable]
+ } TDriver;
+   ^
+===> getpagesize.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c getpagesize.c -o getpagesize.o
+===> pcspkr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c pcspkr.c -o pcspkr.o
+In file included from ../../include/stdio.h:3:0,
+                 from pcspkr.c:37:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+pcspkr.c: In function ‘note’:
+pcspkr.c:64:19: warning: unused variable ‘ss’ [-Wunused-variable]
+  unsigned long s, ss;
+                   ^
+pcspkr.c:64:16: warning: unused variable ‘s’ [-Wunused-variable]
+  unsigned long s, ss;
+                ^
+===> bsd/stdio/fgets.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/fgets.c -o bsd/stdio/fgets.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/fgets.c:41:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/stdio/fgets.c: In function ‘fgets’:
+bsd/stdio/fgets.c:70:4: warning: implicit declaration of function ‘__srefill’ [-Wimplicit-function-declaration]
+    if (__srefill(fp)) {
+    ^
+===> bsd/stdio/flockfile.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/flockfile.c -o bsd/stdio/flockfile.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/flockfile.c:3:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/stdio/fvwrite.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/fvwrite.c -o bsd/stdio/fvwrite.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/fvwrite.c:39:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/stdio/fvwrite.c: In function ‘__sfvwrite’:
+bsd/stdio/fvwrite.c:64:2: warning: implicit declaration of function ‘prepwrite’ [-Wimplicit-function-declaration]
+  if (prepwrite(fp) != 0)
+  ^
+bsd/stdio/fvwrite.c:87:4: warning: implicit declaration of function ‘_swrite’ [-Wimplicit-function-declaration]
+    w = _swrite(fp, p, MIN(len, BUFSIZ));
+    ^
+bsd/stdio/fvwrite.c:118:9: warning: implicit declaration of function ‘reallocf’ [-Wimplicit-function-declaration]
+         reallocf(fp->_bf._base, fp->_bf._size + 1);
+         ^
+bsd/stdio/fvwrite.c:117:19: warning: assignment makes pointer from integer without a cast [enabled by default]
+     fp->_bf._base =
+                   ^
+bsd/stdio/fvwrite.c:138:5: warning: implicit declaration of function ‘__fflush’ [-Wimplicit-function-declaration]
+     if (__fflush(fp))
+     ^
+bsd/stdio/fvwrite.c: At top level:
+bsd/stdio/fvwrite.c:34:13: warning: ‘sccsid’ defined but not used [-Wunused-variable]
+ static char sccsid[] = "@(#)fvwrite.c 8.1 (Berkeley) 6/4/93";
+             ^
+===> bsd/stdio/fwalk.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/fwalk.c -o bsd/stdio/fwalk.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/fwalk.c:42:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/stdio/refill.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/refill.c -o bsd/stdio/refill.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/refill.c:35:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/stdio/refill.c: In function ‘lflush’:
+bsd/stdio/refill.c:43:3: warning: implicit declaration of function ‘__sflush_locked’ [-Wimplicit-function-declaration]
+   return (__sflush_locked(fp)); /* ignored... */
+   ^
+bsd/stdio/refill.c: In function ‘__srefill’:
+bsd/stdio/refill.c:57:3: warning: implicit declaration of function ‘__sinit’ [-Wimplicit-function-declaration]
+   __sinit();
+   ^
+bsd/stdio/refill.c:74:4: warning: implicit declaration of function ‘__sflush’ [-Wimplicit-function-declaration]
+    if (__sflush(fp))
+    ^
+bsd/stdio/refill.c:88:3: warning: implicit declaration of function ‘HASUB’ [-Wimplicit-function-declaration]
+   if (HASUB(fp)) {
+   ^
+bsd/stdio/refill.c:89:4: warning: implicit declaration of function ‘FREEUB’ [-Wimplicit-function-declaration]
+    FREEUB(fp);
+    ^
+bsd/stdio/refill.c:98:3: warning: implicit declaration of function ‘__smakebuf’ [-Wimplicit-function-declaration]
+   __smakebuf(fp);
+   ^
+bsd/stdio/refill.c:108:3: warning: implicit declaration of function ‘_fwalk’ [-Wimplicit-function-declaration]
+   (void) _fwalk(lflush);
+   ^
+===> bsd/stdio/scanf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdio/scanf.c -o bsd/stdio/scanf.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdio/scanf.c:34:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/stdio/scanf.c: In function ‘scanf’:
+bsd/stdio/scanf.c:46:2: warning: implicit declaration of function ‘vfscanf’ [-Wimplicit-function-declaration]
+  ret = vfscanf(stdin, fmt, ap);
+  ^
+===> bsd/stdlib/a64l.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/a64l.c -o bsd/stdlib/a64l.o
+===> bsd/stdlib/abs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/abs.c -o bsd/stdlib/abs.o
+===> bsd/stdlib/atof.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/atof.c -o bsd/stdlib/atof.o
+===> bsd/stdlib/atoi.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/atoi.c -o bsd/stdlib/atoi.o
+===> bsd/stdlib/atol.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/atol.c -o bsd/stdlib/atol.o
+===> bsd/stdlib/atoll.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/atoll.c -o bsd/stdlib/atoll.o
+bsd/stdlib/atoll.c: In function ‘atoll’:
+bsd/stdlib/atoll.c:36:2: warning: implicit declaration of function ‘strtoll’ [-Wimplicit-function-declaration]
+  return(strtoll(str, (char **)NULL, 10));
+  ^
+===> bsd/stdlib/bsearch.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/bsearch.c -o bsd/stdlib/bsearch.o
+===> bsd/stdlib/calloc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/calloc.c -o bsd/stdlib/calloc.o
+bsd/stdlib/calloc.c: In function ‘calloc’:
+bsd/stdlib/calloc.c:47:3: warning: implicit declaration of function ‘bzero’ [-Wimplicit-function-declaration]
+   bzero(p, size);
+   ^
+===> bsd/stdlib/cfree.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/cfree.c -o bsd/stdlib/cfree.o
+===> bsd/stdlib/div.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/div.c -o bsd/stdlib/div.o
+===> bsd/stdlib/drand48.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/drand48.c -o bsd/stdlib/drand48.o
+bsd/stdlib/drand48.c: In function ‘drand48’:
+bsd/stdlib/drand48.c:22:2: warning: implicit declaration of function ‘erand48’ [-Wimplicit-function-declaration]
+  return erand48(__rand48_seed);
+  ^
+===> bsd/stdlib/ecvt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/ecvt.c -o bsd/stdlib/ecvt.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/stdlib/ecvt.c:23:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/stdlib/ecvt.c: In function ‘__cvt’:
+bsd/stdlib/ecvt.c:80:3: warning: implicit declaration of function ‘strlcpy’ [-Wimplicit-function-declaration]
+   (void) strlcpy(s, p, siz);
+   ^
+===> bsd/stdlib/environ.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/environ.c -o bsd/stdlib/environ.o
+bsd/stdlib/environ.c:21:14: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+ extern char *malloc();
+              ^
+bsd/stdlib/environ.c:22:14: warning: conflicting types for built-in function ‘realloc’ [enabled by default]
+ extern char *realloc();
+              ^
+bsd/stdlib/environ.c:29:14: warning: conflicting types for built-in function ‘memcpy’ [enabled by default]
+ extern char *memcpy();
+              ^
+bsd/stdlib/environ.c: In function ‘namelength’:
+bsd/stdlib/environ.c:48:5: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
+     return ((equal == 0) ? strlen(name) : (equal - name));
+     ^
+bsd/stdlib/environ.c:48:28: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     return ((equal == 0) ? strlen(name) : (equal - name));
+                            ^
+bsd/stdlib/environ.c: In function ‘putenv’:
+bsd/stdlib/environ.c:84:5: warning: implicit declaration of function ‘setenv’ [-Wimplicit-function-declaration]
+     return (setenv(nameval, value, DO_CLOBBER));
+     ^
+bsd/stdlib/environ.c: In function ‘unsetenv’:
+bsd/stdlib/environ.c:95:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while (envp[0] = envp[1])
+  ^
+bsd/stdlib/environ.c: In function ‘setenv’:
+bsd/stdlib/environ.c:119:26: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     l_nameval = l_name + strlen(value) + 1;
+                          ^
+bsd/stdlib/environ.c: In function ‘cmalloc’:
+bsd/stdlib/environ.c:138:14: warning: type of ‘new_len’ defaults to ‘int’ [enabled by default]
+ static char *cmalloc(new_len, old, old_len)
+              ^
+bsd/stdlib/environ.c: At top level:
+bsd/stdlib/environ.c:10:13: warning: ‘sccsid’ defined but not used [-Wunused-variable]
+ static char sccsid[] = "@(#) environ.c 1.2 94/03/23 16:09:46";
+             ^
+===> bsd/stdlib/erand48.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/erand48.c -o bsd/stdlib/erand48.o
+===> bsd/stdlib/heapsort.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/heapsort.c -o bsd/stdlib/heapsort.o
+===> bsd/stdlib/imaxabs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/imaxabs.c -o bsd/stdlib/imaxabs.o
+===> bsd/stdlib/insque.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/insque.c -o bsd/stdlib/insque.o
+===> bsd/stdlib/jrand48.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/jrand48.c -o bsd/stdlib/jrand48.o
+===> bsd/stdlib/l64a.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/l64a.c -o bsd/stdlib/l64a.o
+===> bsd/stdlib/labs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/labs.c -o bsd/stdlib/labs.o
+===> bsd/stdlib/lcong48.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/lcong48.c -o bsd/stdlib/lcong48.o
+===> bsd/stdlib/ldiv.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/ldiv.c -o bsd/stdlib/ldiv.o
+===> bsd/stdlib/llabs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/llabs.c -o bsd/stdlib/llabs.o
+===> bsd/stdlib/lldiv.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/lldiv.c -o bsd/stdlib/lldiv.o
+===> bsd/stdlib/merge.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/merge.c -o bsd/stdlib/merge.o
+===> bsd/stdlib/qabs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/qabs.c -o bsd/stdlib/qabs.o
+===> bsd/stdlib/qsort.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/qsort.c -o bsd/stdlib/qsort.o
+===> bsd/stdlib/radixsort.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/radixsort.c -o bsd/stdlib/radixsort.o
+===> bsd/stdlib/rand.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/rand.c -o bsd/stdlib/rand.o
+===> bsd/stdlib/reallocarray.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/reallocarray.c -o bsd/stdlib/reallocarray.o
+===> bsd/stdlib/remque.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/remque.c -o bsd/stdlib/remque.o
+===> bsd/stdlib/seed48.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/seed48.c -o bsd/stdlib/seed48.o
+===> bsd/stdlib/setenv.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/setenv.c -o bsd/stdlib/setenv.o
+bsd/stdlib/setenv.c: In function ‘setenv’:
+bsd/stdlib/setenv.c:26:13: warning: conflicting types for built-in function ‘malloc’ [enabled by default]
+     char   *malloc();
+             ^
+bsd/stdlib/setenv.c:32:5: warning: implicit declaration of function ‘strlen’ [-Wimplicit-function-declaration]
+     if ((cp = malloc(strlen(name) + strlen(value) + 2)) == 0)
+     ^
+bsd/stdlib/setenv.c:32:22: warning: incompatible implicit declaration of built-in function ‘strlen’ [enabled by default]
+     if ((cp = malloc(strlen(name) + strlen(value) + 2)) == 0)
+                      ^
+bsd/stdlib/setenv.c:34:5: warning: implicit declaration of function ‘sprintf’ [-Wimplicit-function-declaration]
+     sprintf(cp, "%s=%s", name, value);
+     ^
+bsd/stdlib/setenv.c:34:5: warning: incompatible implicit declaration of built-in function ‘sprintf’ [enabled by default]
+bsd/stdlib/setenv.c:35:5: warning: implicit declaration of function ‘putenv’ [-Wimplicit-function-declaration]
+     return (putenv(cp));
+     ^
+bsd/stdlib/setenv.c: At top level:
+bsd/stdlib/setenv.c:16:13: warning: ‘sccsid’ defined but not used [-Wunused-variable]
+ static char sccsid[] = "@(#) setenv.c 1.1 93/03/07 22:47:58";
+             ^
+===> bsd/stdlib/strtoimax.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/strtoimax.c -o bsd/stdlib/strtoimax.o
+===> bsd/stdlib/strtol.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/strtol.c -o bsd/stdlib/strtol.o
+bsd/stdlib/strtol.c: In function ‘strtol’:
+bsd/stdlib/strtol.c:128:5: warning: overflow in implicit constant conversion [-Woverflow]
+     acc = LONG_MIN;
+     ^
+bsd/stdlib/strtol.c:138:5: warning: overflow in implicit constant conversion [-Woverflow]
+     acc = LONG_MAX;
+     ^
+===> bsd/stdlib/strtonum.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/strtonum.c -o bsd/stdlib/strtonum.o
+bsd/stdlib/strtonum.c: In function ‘strtonum’:
+bsd/stdlib/strtonum.c:50:3: warning: implicit declaration of function ‘strtoll’ [-Wimplicit-function-declaration]
+   ll = strtoll(numstr, &ep, 10);
+   ^
+===> bsd/stdlib/strtoul.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/strtoul.c -o bsd/stdlib/strtoul.o
+===> bsd/stdlib/strtoull.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/strtoull.c -o bsd/stdlib/strtoull.o
+bsd/stdlib/strtoull.c:113:1: warning: data definition has no type or storage class [enabled by default]
+ __strong_alias(strtouq, strtoull);
+ ^
+bsd/stdlib/strtoull.c:113:1: warning: type defaults to ‘int’ in declaration of ‘__strong_alias’ [enabled by default]
+bsd/stdlib/strtoull.c:113:1: warning: parameter names (without types) in function declaration [enabled by default]
+===> bsd/stdlib/tsearch.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/stdlib/tsearch.c -o bsd/stdlib/tsearch.o
+===> android/strxfrm.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c android/strxfrm.c -o android/strxfrm.o
+===> bsd/net/htonl.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/net/htonl.c -o bsd/net/htonl.o
+===> bsd/net/htons.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/net/htons.c -o bsd/net/htons.o
+===> bsd/net/ntohl.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/net/ntohl.c -o bsd/net/ntohl.o
+===> bsd/net/ntohs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/net/ntohs.c -o bsd/net/ntohs.o
+===> bsd/string/bcopy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/bcopy.c -o bsd/string/bcopy.o
+===> bsd/string/bzero.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/bzero.c -o bsd/string/bzero.o
+bsd/string/bzero.c:35:14: warning: ‘rcsid’ defined but not used [-Wunused-variable]
+ static char *rcsid = "$OpenBSD: bzero.c,v 1.7 2004/11/28 07:23:41 mickey Exp $";
+              ^
+===> bsd/string/explicit_bzero.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/explicit_bzero.c -o bsd/string/explicit_bzero.o
+bsd/string/explicit_bzero.c: In function ‘explicit_bzero’:
+bsd/string/explicit_bzero.c:19:2: warning: implicit declaration of function ‘bzero’ [-Wimplicit-function-declaration]
+  bzero(p, n);
+  ^
+===> bsd/string/ffs.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/ffs.c -o bsd/string/ffs.o
+===> bsd/string/ffsl.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/ffsl.c -o bsd/string/ffsl.o
+===> bsd/string/fls.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/fls.c -o bsd/string/fls.o
+===> bsd/string/index.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/index.c -o bsd/string/index.o
+===> bsd/string/memccpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memccpy.c -o bsd/string/memccpy.o
+===> bsd/string/memchr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memchr.c -o bsd/string/memchr.o
+===> bsd/string/memcmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memcmp.c -o bsd/string/memcmp.o
+===> bsd/string/memcpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memcpy.c -o bsd/string/memcpy.o
+===> bsd/string/memmem.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memmem.c -o bsd/string/memmem.o
+===> bsd/string/memmove.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memmove.c -o bsd/string/memmove.o
+===> bsd/string/memrchr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memrchr.c -o bsd/string/memrchr.o
+===> bsd/string/memset.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/memset.c -o bsd/string/memset.o
+===> bsd/string/rindex.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/rindex.c -o bsd/string/rindex.o
+===> bsd/string/strcasecmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcasecmp.c -o bsd/string/strcasecmp.o
+===> bsd/string/strcat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcat.c -o bsd/string/strcat.o
+===> bsd/string/strchr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strchr.c -o bsd/string/strchr.o
+===> bsd/string/strcmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcmp.c -o bsd/string/strcmp.o
+===> bsd/string/strcoll.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcoll.c -o bsd/string/strcoll.o
+===> bsd/string/strcpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcpy.c -o bsd/string/strcpy.o
+===> bsd/string/strcspn.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strcspn.c -o bsd/string/strcspn.o
+===> bsd/string/strdup.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strdup.c -o bsd/string/strdup.o
+===> bsd/string/strerror.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strerror.c -o bsd/string/strerror.o
+bsd/string/strerror.c: In function ‘strerror’:
+bsd/string/strerror.c:39:2: warning: implicit declaration of function ‘strerror_r’ [-Wimplicit-function-declaration]
+  (void)strerror_r(num, buf, sizeof(buf));
+  ^
+===> bsd/string/strlcat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strlcat.c -o bsd/string/strlcat.o
+===> bsd/string/strlen.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strlen.c -o bsd/string/strlen.o
+===> bsd/string/strncat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strncat.c -o bsd/string/strncat.o
+===> bsd/string/strncmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strncmp.c -o bsd/string/strncmp.o
+===> bsd/string/strncpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strncpy.c -o bsd/string/strncpy.o
+===> bsd/string/strpbrk.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strpbrk.c -o bsd/string/strpbrk.o
+===> bsd/string/strsep.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strsep.c -o bsd/string/strsep.o
+===> bsd/string/strsignal.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strsignal.c -o bsd/string/strsignal.o
+===> bsd/string/strspn.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strspn.c -o bsd/string/strspn.o
+===> bsd/string/strstr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strstr.c -o bsd/string/strstr.o
+===> bsd/string/strtok.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strtok.c -o bsd/string/strtok.o
+===> bsd/string/strxfrm.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/strxfrm.c -o bsd/string/strxfrm.o
+bsd/string/strxfrm.c: In function ‘strxfrm’:
+bsd/string/strxfrm.c:50:2: warning: implicit declaration of function ‘strlcpy’ [-Wimplicit-function-declaration]
+  return (strlcpy(dst, src, n));
+  ^
+===> bsd/string/swab.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/swab.c -o bsd/string/swab.o
+===> bsd/string/timingsafe_bcmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/string/timingsafe_bcmp.c -o bsd/string/timingsafe_bcmp.o
+===> sputl.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c sputl.c -o sputl.o
+sputl.c:25:0: warning: ignoring #pragma ident  [-Wunknown-pragmas]
+ #pragma ident "%Z%%M% %I% %E% SMI"
+ ^
+===> sgetl.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c sgetl.c -o sgetl.o
+sgetl.c:25:0: warning: ignoring #pragma ident  [-Wunknown-pragmas]
+ #pragma ident "%Z%%M% %I% %E% SMI"
+ ^
+===> liballoc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c liballoc.c -o liballoc.o
+liballoc.c: In function ‘realloc’:
+liballoc.c:519:21: warning: the comparison will always evaluate as ‘true’ for the address of ‘liballoc_lock’ will never be NULL [-Waddress]
+  if ( liballoc_lock != NULL ) liballoc_lock();  // lockit
+                     ^
+liballoc.c:522:23: warning: the comparison will always evaluate as ‘true’ for the address of ‘liballoc_unlock’ will never be NULL [-Waddress]
+  if ( liballoc_unlock != NULL ) liballoc_unlock();
+                       ^
+===> becompat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c becompat.c -o becompat.o
+In file included from ../../include/stdio.h:3:0,
+                 from becompat.c:1:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/quad/adddi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/adddi3.c -o bsd/quad/adddi3.o
+===> bsd/quad/anddi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/anddi3.c -o bsd/quad/anddi3.o
+===> bsd/quad/ashldi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/ashldi3.c -o bsd/quad/ashldi3.o
+===> bsd/quad/ashrdi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/ashrdi3.c -o bsd/quad/ashrdi3.o
+===> bsd/quad/cmpdi2.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/cmpdi2.c -o bsd/quad/cmpdi2.o
+===> bsd/quad/divdi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/divdi3.c -o bsd/quad/divdi3.o
+===> bsd/quad/fixdfdi.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/fixdfdi.c -o bsd/quad/fixdfdi.o
+===> bsd/quad/fixsfdi.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/fixsfdi.c -o bsd/quad/fixsfdi.o
+===> bsd/quad/fixunsdfdi.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/fixunsdfdi.c -o bsd/quad/fixunsdfdi.o
+===> bsd/quad/fixunssfdi.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/fixunssfdi.c -o bsd/quad/fixunssfdi.o
+===> bsd/quad/floatdidf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/floatdidf.c -o bsd/quad/floatdidf.o
+===> bsd/quad/floatdisf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/floatdisf.c -o bsd/quad/floatdisf.o
+===> bsd/quad/floatunsdidf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/floatunsdidf.c -o bsd/quad/floatunsdidf.o
+===> bsd/quad/iordi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/iordi3.c -o bsd/quad/iordi3.o
+===> bsd/quad/lshldi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/lshldi3.c -o bsd/quad/lshldi3.o
+===> bsd/quad/lshrdi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/lshrdi3.c -o bsd/quad/lshrdi3.o
+===> bsd/quad/moddi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/moddi3.c -o bsd/quad/moddi3.o
+===> bsd/quad/muldi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/muldi3.c -o bsd/quad/muldi3.o
+===> bsd/quad/negdi2.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/negdi2.c -o bsd/quad/negdi2.o
+===> bsd/quad/notdi2.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/notdi2.c -o bsd/quad/notdi2.o
+===> bsd/quad/qdivrem.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/qdivrem.c -o bsd/quad/qdivrem.o
+===> bsd/quad/subdi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/subdi3.c -o bsd/quad/subdi3.o
+===> bsd/quad/ucmpdi2.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/ucmpdi2.c -o bsd/quad/ucmpdi2.o
+===> bsd/quad/udivdi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/udivdi3.c -o bsd/quad/udivdi3.o
+===> bsd/quad/umoddi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/umoddi3.c -o bsd/quad/umoddi3.o
+===> bsd/quad/xordi3.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/quad/xordi3.c -o bsd/quad/xordi3.o
+===> bsd/gen/ctype_.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gen/ctype_.c -o bsd/gen/ctype_.o
+===> bsd/gen/tolower_.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gen/tolower_.c -o bsd/gen/tolower_.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/gen/tolower_.c:9:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/gen/toupper_.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gen/toupper_.c -o bsd/gen/toupper_.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/gen/toupper_.c:9:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_array.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_array.c -o bsd/xdr/xdr_array.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_array.c:40:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr.c -o bsd/xdr/xdr.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr.c:39:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_float.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_float.c -o bsd/xdr/xdr_float.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_float.c:41:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_mem.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_mem.c -o bsd/xdr/xdr_mem.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/rpc/xdr.h:43,
+                 from bsd/xdr/xdr_mem.c:45:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_private.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_private.c -o bsd/xdr/xdr_private.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_private.c:24:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/xdr/xdr_private.c: In function ‘xdr_vwarnx’:
+bsd/xdr/xdr_private.c:64:5: warning: implicit declaration of function ‘fprintf’ [-Wimplicit-function-declaration]
+     fprintf (stderr, "%s: ", get_progname ());
+     ^
+bsd/xdr/xdr_private.c:64:5: warning: incompatible implicit declaration of built-in function ‘fprintf’ [enabled by default]
+bsd/xdr/xdr_private.c:66:5: warning: implicit declaration of function ‘vfprintf’ [-Wimplicit-function-declaration]
+     vfprintf (stderr, format, ap);
+     ^
+===> bsd/xdr/xdr_rec.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_rec.c -o bsd/xdr/xdr_rec.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_rec.c:49:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/xdr/xdr_rec.c: In function ‘xdrrec_getpos’:
+bsd/xdr/xdr_rec.c:361:3: warning: implicit declaration of function ‘lseek’ [-Wimplicit-function-declaration]
+   pos = lseek ((int) (u_long) rstrm->tcp_handle, (off_t) 0, 1);
+   ^
+bsd/xdr/xdr_rec.c: In function ‘xdrrec_endofrecord’:
+bsd/xdr/xdr_rec.c:604:3: warning: implicit declaration of function ‘UINT32_C’ [-Wimplicit-function-declaration]
+   *(rstrm->frag_header) = htonl ((u_int32_t) len | LAST_FRAG);
+   ^
+===> bsd/xdr/xdr_reference.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_reference.c -o bsd/xdr/xdr_reference.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_reference.c:38:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_sizeof.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_sizeof.c -o bsd/xdr/xdr_sizeof.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/rpc/xdr.h:43,
+                 from bsd/xdr/xdr_sizeof.c:38:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> bsd/xdr/xdr_stdio.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/xdr/xdr_stdio.c -o bsd/xdr/xdr_stdio.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/xdr/xdr_stdio.c:39:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_destroy’:
+bsd/xdr/xdr_stdio.c:95:3: warning: implicit declaration of function ‘fflush’ [-Wimplicit-function-declaration]
+   (void) fflush ((FILE *) xdrs->x_private);
+   ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_getlong’:
+bsd/xdr/xdr_stdio.c:104:3: warning: implicit declaration of function ‘fread’ [-Wimplicit-function-declaration]
+   if (fread (&temp, sizeof (int32_t), 1, (FILE *) xdrs->x_private) != 1)
+   ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_putlong’:
+bsd/xdr/xdr_stdio.c:115:3: warning: implicit declaration of function ‘fwrite’ [-Wimplicit-function-declaration]
+   if (fwrite (&temp, sizeof (int32_t), 1, (FILE *) xdrs->x_private) != 1)
+   ^
+bsd/xdr/xdr_stdio.c:115:7: warning: incompatible implicit declaration of built-in function ‘fwrite’ [enabled by default]
+   if (fwrite (&temp, sizeof (int32_t), 1, (FILE *) xdrs->x_private) != 1)
+       ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_putbytes’:
+bsd/xdr/xdr_stdio.c:132:22: warning: incompatible implicit declaration of built-in function ‘fwrite’ [enabled by default]
+   if ((len != 0) && (fwrite (addr, (size_t) len, 1,
+                      ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_getpos’:
+bsd/xdr/xdr_stdio.c:141:3: warning: implicit declaration of function ‘ftell’ [-Wimplicit-function-declaration]
+   return ((u_int) ftell ((FILE *) xdrs->x_private));
+   ^
+bsd/xdr/xdr_stdio.c: In function ‘xdrstdio_putint32’:
+bsd/xdr/xdr_stdio.c:190:7: warning: incompatible implicit declaration of built-in function ‘fwrite’ [enabled by default]
+   if (fwrite (&temp, sizeof (int32_t), 1, (FILE *) xdrs->x_private) != 1)
+       ^
+===> bsd/gdtoa/dmisc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/dmisc.c -o bsd/gdtoa/dmisc.o
+===> bsd/gdtoa/dtoa.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/dtoa.c -o bsd/gdtoa/dtoa.o
+===> bsd/gdtoa/gdtoa.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/gdtoa.c -o bsd/gdtoa/gdtoa.o
+===> bsd/gdtoa/gethex.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/gethex.c -o bsd/gdtoa/gethex.o
+===> bsd/gdtoa/gmisc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/gmisc.c -o bsd/gdtoa/gmisc.o
+===> bsd/gdtoa/hd_init.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/hd_init.c -o bsd/gdtoa/hd_init.o
+===> bsd/gdtoa/hdtoa.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/hdtoa.c -o bsd/gdtoa/hdtoa.o
+bsd/gdtoa/hdtoa.c: In function ‘__hdtoa’:
+bsd/gdtoa/hdtoa.c:133:2: warning: implicit declaration of function ‘fpclassify’ [-Wimplicit-function-declaration]
+  switch (fpclassify(d)) {
+  ^
+bsd/gdtoa/hdtoa.c:151:3: warning: implicit declaration of function ‘abort’ [-Wimplicit-function-declaration]
+   abort();
+   ^
+bsd/gdtoa/hdtoa.c:151:3: warning: incompatible implicit declaration of built-in function ‘abort’ [enabled by default]
+bsd/gdtoa/hdtoa.c: In function ‘__hldtoa’:
+bsd/gdtoa/hdtoa.c:248:3: warning: incompatible implicit declaration of built-in function ‘abort’ [enabled by default]
+   abort();
+   ^
+===> bsd/gdtoa/hexnan.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/hexnan.c -o bsd/gdtoa/hexnan.o
+===> bsd/gdtoa/ldtoa.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/ldtoa.c -o bsd/gdtoa/ldtoa.o
+bsd/gdtoa/ldtoa.c: In function ‘__ldtoa’:
+bsd/gdtoa/ldtoa.c:80:2: warning: implicit declaration of function ‘fpclassify’ [-Wimplicit-function-declaration]
+  switch (fpclassify(*ld)) {
+  ^
+bsd/gdtoa/ldtoa.c:101:3: warning: implicit declaration of function ‘abort’ [-Wimplicit-function-declaration]
+   abort();
+   ^
+bsd/gdtoa/ldtoa.c:101:3: warning: incompatible implicit declaration of built-in function ‘abort’ [enabled by default]
+===> bsd/gdtoa/locks.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/locks.c -o bsd/gdtoa/locks.o
+In file included from ../../include/stdio.h:3:0,
+                 from bsd/gdtoa/locks.c:5:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+bsd/gdtoa/locks.c:7:0: warning: "NULL" redefined [enabled by default]
+ #define NULL 0
+ ^
+In file included from ../../include/lib9.h:2:0,
+                 from ../../include/stdio.h:11,
+                 from bsd/gdtoa/locks.c:5:
+../../include/string.h:13:0: note: this is the location of the previous definition
+  #define NULL ((void *)0)
+ ^
+===> bsd/gdtoa/misc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/misc.c -o bsd/gdtoa/misc.o
+===> bsd/gdtoa/smisc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/smisc.c -o bsd/gdtoa/smisc.o
+===> bsd/gdtoa/strtod.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtod.c -o bsd/gdtoa/strtod.o
+===> bsd/gdtoa/strtodg.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtodg.c -o bsd/gdtoa/strtodg.o
+===> bsd/gdtoa/strtof.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtof.c -o bsd/gdtoa/strtof.o
+bsd/gdtoa/strtof.c: In function ‘strtof’:
+bsd/gdtoa/strtof.c:79:10: warning: ‘u.f’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+   u.L[0] |= 0x80000000L;
+          ^
+===> bsd/gdtoa/strtold.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtold.c -o bsd/gdtoa/strtold.o
+===> bsd/gdtoa/strtord.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtord.c -o bsd/gdtoa/strtord.o
+===> bsd/gdtoa/strtorQ.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtorQ.c -o bsd/gdtoa/strtorQ.o
+===> bsd/gdtoa/strtorx.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/strtorx.c -o bsd/gdtoa/strtorx.o
+===> bsd/gdtoa/sum.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/sum.c -o bsd/gdtoa/sum.o
+===> bsd/gdtoa/ulp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c bsd/gdtoa/ulp.c -o bsd/gdtoa/ulp.o
+===> libhash/src/hash_free.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c libhash/src/hash_free.c -o libhash/src/hash_free.o
+===> libhash/src/hash.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c libhash/src/hash.c -o libhash/src/hash.o
+libhash/src/hash.c: In function ‘hash_init’:
+libhash/src/hash.c:93:2: warning: implicit declaration of function ‘printf’ [-Wimplicit-function-declaration]
+  assert ((size & (size -1)) == 0);
+  ^
+In file included from libhash/src/hash.c:82:0:
+../../include/assert.h:15:17: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+                 printf("Assertion failed: %s, file %s, line %d\n"   \
+                 ^
+libhash/src/hash.c:93:2: note: in expansion of macro ‘assert’
+  assert ((size & (size -1)) == 0);
+  ^
+../../include/assert.h:15:17: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+                 printf("Assertion failed: %s, file %s, line %d\n"   \
+                 ^
+libhash/src/hash.c:95:52: note: in expansion of macro ‘assert’
+  tablestruct = malloc (sizeof (struct hashtable)); assert (tablestruct);
+                                                    ^
+../../include/assert.h:15:17: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+                 printf("Assertion failed: %s, file %s, line %d\n"   \
+                 ^
+libhash/src/hash.c:106:2: note: in expansion of macro ‘assert’
+  assert (tablestruct->table);
+  ^
+===> binary_tree.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c binary_tree.c -o binary_tree.o
+===> netware/apicore.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c netware/apicore.c -o netware/apicore.o
+===> uname.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c uname.c -o uname.o
+===> nap.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c nap.c -o nap.o
+===> p9rune/rune.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/rune.c -o p9rune/rune.o
+===> p9rune/runestrcat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrcat.c -o p9rune/runestrcat.o
+===> p9rune/runestrchr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrchr.c -o p9rune/runestrchr.o
+p9rune/runestrchr.c: In function ‘runestrchr’:
+p9rune/runestrchr.c:32:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while(c1 = *s++)
+  ^
+===> p9rune/runestrcmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrcmp.c -o p9rune/runestrcmp.o
+===> p9rune/runestrcpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrcpy.c -o p9rune/runestrcpy.o
+p9rune/runestrcpy.c: In function ‘runestrcpy’:
+p9rune/runestrcpy.c:26:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while(*s1++ = *s2++)
+  ^
+===> p9rune/runestrdup.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrdup.c -o p9rune/runestrdup.o
+===> p9rune/runestrecpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrecpy.c -o p9rune/runestrecpy.o
+p9rune/runestrecpy.c: In function ‘runestrecpy’:
+p9rune/runestrecpy.c:26:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while(*s1++ = *s2++){
+  ^
+===> p9rune/runestrlen.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrlen.c -o p9rune/runestrlen.o
+===> p9rune/runestrncat.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrncat.c -o p9rune/runestrncat.o
+p9rune/runestrncat.c: In function ‘runestrncat’:
+p9rune/runestrncat.c:27:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while(*s1++ = *s2++)
+  ^
+===> p9rune/runestrncmp.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrncmp.c -o p9rune/runestrncmp.o
+===> p9rune/runestrncpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrncpy.c -o p9rune/runestrncpy.o
+===> p9rune/runestrrchr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrrchr.c -o p9rune/runestrrchr.o
+p9rune/runestrrchr.c: In function ‘runestrrchr’:
+p9rune/runestrrchr.c:28:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  while(s = runestrchr(s, c))
+  ^
+===> p9rune/runestrstr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runestrstr.c -o p9rune/runestrstr.o
+===> p9rune/runetype.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/runetype.c -o p9rune/runetype.o
+===> p9rune/utfecpy.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utfecpy.c -o p9rune/utfecpy.o
+===> p9rune/utflen.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utflen.c -o p9rune/utflen.o
+===> p9rune/utfnlen.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utfnlen.c -o p9rune/utfnlen.o
+===> p9rune/utfrrune.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utfrrune.c -o p9rune/utfrrune.o
+===> p9rune/utfrune.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utfrune.c -o p9rune/utfrune.o
+===> p9rune/utfutf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9rune/utfutf.c -o p9rune/utfutf.o
+p9rune/utfutf.c: In function ‘utfutf’:
+p9rune/utfutf.c:37:2: warning: suggest parentheses around assignment used as truth value [-Wparentheses]
+  for(p=s1; p=utfrune(p, f); p+=n1)
+  ^
+===> fs-bootinfo/fopen.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c fs-bootinfo/fopen.c -o fs-bootinfo/fopen.o
+In file included from ../../include/stdio.h:3:0,
+                 from fs-bootinfo/fopen.c:80:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+fs-bootinfo/fopen.c: In function ‘find_bootrec’:
+fs-bootinfo/fopen.c:139:21: warning: variable ‘objs’ set but not used [-Wunused-but-set-variable]
+  unsigned num_recs, objs;
+                     ^
+===> feof.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c feof.c -o feof.o
+In file included from ../../include/stdio.h:3:0,
+                 from feof.c:79:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+feof.c: In function ‘feof’:
+feof.c:85:2: warning: implicit declaration of function ‘kenge_mutex_count_lock’ [-Wimplicit-function-declaration]
+  lock_stream(f);
+  ^
+feof.c:87:2: warning: implicit declaration of function ‘kenge_mutex_count_unlock’ [-Wimplicit-function-declaration]
+  unlock_stream(f);
+  ^
+===> fseek.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c fseek.c -o fseek.o
+In file included from ../../include/stdio.h:3:0,
+                 from fseek.c:80:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+fseek.c: In function ‘fseek’:
+fseek.c:87:2: warning: implicit declaration of function ‘kenge_mutex_count_lock’ [-Wimplicit-function-declaration]
+  lock_stream(stream);
+  ^
+fseek.c:101:2: warning: implicit declaration of function ‘kenge_mutex_count_unlock’ [-Wimplicit-function-declaration]
+  unlock_stream(stream);
+  ^
+===> rewind.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c rewind.c -o rewind.o
+In file included from ../../include/stdio.h:3:0,
+                 from rewind.c:80:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> p9fmt/charstod.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/charstod.c -o p9fmt/charstod.o
+===> p9fmt/dofmt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/dofmt.c -o p9fmt/dofmt.o
+===> p9fmt/dorfmt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/dorfmt.c -o p9fmt/dorfmt.o
+===> p9fmt/errfmt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/errfmt.c -o p9fmt/errfmt.o
+===> p9fmt/fltfmt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fltfmt.c -o p9fmt/fltfmt.o
+In file included from ../../include/stdio.h:3:0,
+                 from p9fmt/fltfmt.c:2:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+p9fmt/fltfmt.c: In function ‘xsub1’:
+p9fmt/fltfmt.c:145:2: warning: implicit declaration of function ‘abort’ [-Wimplicit-function-declaration]
+  abort();
+  ^
+p9fmt/fltfmt.c:145:2: warning: incompatible implicit declaration of built-in function ‘abort’ [enabled by default]
+===> p9fmt/fmt.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmt.c -o p9fmt/fmt.o
+p9fmt/fmt.c:28:2: warning: missing braces around initializer [-Wmissing-braces]
+  ' ', __flagfmt,
+  ^
+p9fmt/fmt.c:28:2: warning: (near initialization for ‘knownfmt[0]’) [-Wmissing-braces]
+===> p9fmt/fmtfd.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtfd.c -o p9fmt/fmtfd.o
+===> p9fmt/fmtfdflush.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtfdflush.c -o p9fmt/fmtfdflush.o
+p9fmt/fmtfdflush.c: In function ‘__fmtFdFlush’:
+p9fmt/fmtfdflush.c:21:2: warning: implicit declaration of function ‘write’ [-Wimplicit-function-declaration]
+  if(n && write((uintptr)f->farg, f->start, n) != n)
+  ^
+===> p9fmt/fmtlocale.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtlocale.c -o p9fmt/fmtlocale.o
+===> p9fmt/fmtlock.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtlock.c -o p9fmt/fmtlock.o
+===> p9fmt/fmtnull.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtnull.c -o p9fmt/fmtnull.o
+===> p9fmt/fmtprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtprint.c -o p9fmt/fmtprint.o
+===> p9fmt/fmtquote.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtquote.c -o p9fmt/fmtquote.o
+===> p9fmt/fmtrune.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtrune.c -o p9fmt/fmtrune.o
+===> p9fmt/fmtstr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtstr.c -o p9fmt/fmtstr.o
+===> p9fmt/fmtvprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fmtvprint.c -o p9fmt/fmtvprint.o
+===> p9fmt/fprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/fprint.c -o p9fmt/fprint.o
+===> p9fmt/nan64.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/nan64.c -o p9fmt/nan64.o
+p9fmt/nan64.c: In function ‘d2u’:
+p9fmt/nan64.c:27:2: warning: implicit declaration of function ‘printf’ [-Wimplicit-function-declaration]
+  assert(sizeof(u.d) == sizeof(u.v));
+  ^
+In file included from p9fmt/nan64.c:11:0:
+../../include/assert.h:15:17: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+                 printf("Assertion failed: %s, file %s, line %d\n"   \
+                 ^
+p9fmt/nan64.c:27:2: note: in expansion of macro ‘assert’
+  assert(sizeof(u.d) == sizeof(u.v));
+  ^
+p9fmt/nan64.c: In function ‘u2d’:
+../../include/assert.h:15:17: warning: incompatible implicit declaration of built-in function ‘printf’ [enabled by default]
+                 printf("Assertion failed: %s, file %s, line %d\n"   \
+                 ^
+p9fmt/nan64.c:39:2: note: in expansion of macro ‘assert’
+  assert(sizeof(u.d) == sizeof(u.v));
+  ^
+===> p9fmt/pow10.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/pow10.c -o p9fmt/pow10.o
+===> p9fmt/print.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/print.c -o p9fmt/print.o
+===> p9fmt/runefmtstr.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runefmtstr.c -o p9fmt/runefmtstr.o
+===> p9fmt/runeseprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runeseprint.c -o p9fmt/runeseprint.o
+===> p9fmt/runesmprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runesmprint.c -o p9fmt/runesmprint.o
+===> p9fmt/runesnprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runesnprint.c -o p9fmt/runesnprint.o
+===> p9fmt/runesprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runesprint.c -o p9fmt/runesprint.o
+===> p9fmt/runevseprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runevseprint.c -o p9fmt/runevseprint.o
+===> p9fmt/runevsmprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runevsmprint.c -o p9fmt/runevsmprint.o
+===> p9fmt/runevsnprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/runevsnprint.c -o p9fmt/runevsnprint.o
+===> p9fmt/seprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/seprint.c -o p9fmt/seprint.o
+===> p9fmt/smprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/smprint.c -o p9fmt/smprint.o
+===> p9fmt/snprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/snprint.c -o p9fmt/snprint.o
+===> p9fmt/sprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/sprint.c -o p9fmt/sprint.o
+===> p9fmt/strtod.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/strtod.c -o p9fmt/strtod.o
+p9fmt/strtod.c:415:3: warning: missing braces around initializer [-Wmissing-braces]
+   1,  0, "",
+   ^
+p9fmt/strtod.c:415:3: warning: (near initialization for ‘tab1[0]’) [-Wmissing-braces]
+p9fmt/strtod.c:474:3: warning: missing braces around initializer [-Wmissing-braces]
+   1,  1, "",    /* dp = 0-0 */
+   ^
+p9fmt/strtod.c:474:3: warning: (near initialization for ‘tab2[0]’) [-Wmissing-braces]
+===> p9fmt/vfprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/vfprint.c -o p9fmt/vfprint.o
+===> p9fmt/vseprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/vseprint.c -o p9fmt/vseprint.o
+===> p9fmt/vsmprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/vsmprint.c -o p9fmt/vsmprint.o
+===> p9fmt/vsnprint.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c p9fmt/vsnprint.c -o p9fmt/vsnprint.o
+===> Linking ./libio.a
+ar cru libio.a  get_hex.o print.o ia32.o liballoc_hooks.o debug.o efile/ramfs.o cpp_new.o drivermgr.o getpagesize.o pcspkr.o bsd/stdio/fgets.o bsd/stdio/flockfile.o bsd/stdio/fvwrite.o bsd/stdio/fwalk.o bsd/stdio/refill.o bsd/stdio/scanf.o bsd/stdlib/a64l.o bsd/stdlib/abs.o bsd/stdlib/atof.o bsd/stdlib/atoi.o bsd/stdlib/atol.o bsd/stdlib/atoll.o bsd/stdlib/bsearch.o bsd/stdlib/calloc.o bsd/stdlib/cfree.o bsd/stdlib/div.o bsd/stdlib/drand48.o bsd/stdlib/ecvt.o bsd/stdlib/environ.o bsd/stdlib/erand48.o bsd/stdlib/heapsort.o bsd/stdlib/imaxabs.o bsd/stdlib/insque.o bsd/stdlib/jrand48.o bsd/stdlib/l64a.o bsd/stdlib/labs.o bsd/stdlib/lcong48.o bsd/stdlib/ldiv.o bsd/stdlib/llabs.o bsd/stdlib/lldiv.o bsd/stdlib/merge.o bsd/stdlib/qabs.o bsd/stdlib/qsort.o bsd/stdlib/radixsort.o bsd/stdlib/rand.o bsd/stdlib/reallocarray.o bsd/stdlib/remque.o bsd/stdlib/seed48.o bsd/stdlib/setenv.o bsd/stdlib/strtoimax.o bsd/stdlib/strtol.o bsd/stdlib/strtonum.o bsd/stdlib/strtoul.o bsd/stdlib/strtoull.o bsd/stdlib/tsearch.o android/strxfrm.o bsd/net/htonl.o bsd/net/htons.o bsd/net/ntohl.o bsd/net/ntohs.o bsd/string/bcopy.o bsd/string/bzero.o bsd/string/explicit_bzero.o bsd/string/ffs.o bsd/string/ffsl.o bsd/string/fls.o bsd/string/index.o bsd/string/memccpy.o bsd/string/memchr.o bsd/string/memcmp.o bsd/string/memcpy.o bsd/string/memmem.o bsd/string/memmove.o bsd/string/memrchr.o bsd/string/memset.o bsd/string/rindex.o bsd/string/strcasecmp.o bsd/string/strcat.o bsd/string/strchr.o bsd/string/strcmp.o bsd/string/strcoll.o bsd/string/strcpy.o bsd/string/strcspn.o bsd/string/strdup.o bsd/string/strerror.o bsd/string/strlcat.o bsd/string/strlen.o bsd/string/strncat.o bsd/string/strncmp.o bsd/string/strncpy.o bsd/string/strpbrk.o bsd/string/strsep.o bsd/string/strsignal.o bsd/string/strspn.o bsd/string/strstr.o bsd/string/strtok.o bsd/string/strxfrm.o bsd/string/swab.o bsd/string/timingsafe_bcmp.o sputl.o sgetl.o liballoc.o becompat.o bsd/quad/adddi3.o bsd/quad/anddi3.o bsd/quad/ashldi3.o bsd/quad/ashrdi3.o bsd/quad/cmpdi2.o bsd/quad/divdi3.o bsd/quad/fixdfdi.o bsd/quad/fixsfdi.o bsd/quad/fixunsdfdi.o bsd/quad/fixunssfdi.o bsd/quad/floatdidf.o bsd/quad/floatdisf.o bsd/quad/floatunsdidf.o bsd/quad/iordi3.o bsd/quad/lshldi3.o bsd/quad/lshrdi3.o bsd/quad/moddi3.o bsd/quad/muldi3.o bsd/quad/negdi2.o bsd/quad/notdi2.o bsd/quad/qdivrem.o bsd/quad/subdi3.o bsd/quad/ucmpdi2.o bsd/quad/udivdi3.o bsd/quad/umoddi3.o bsd/quad/xordi3.o bsd/gen/ctype_.o bsd/gen/tolower_.o bsd/gen/toupper_.o bsd/xdr/xdr_array.o bsd/xdr/xdr.o bsd/xdr/xdr_float.o bsd/xdr/xdr_mem.o bsd/xdr/xdr_private.o bsd/xdr/xdr_rec.o bsd/xdr/xdr_reference.o bsd/xdr/xdr_sizeof.o bsd/xdr/xdr_stdio.o bsd/gdtoa/dmisc.o bsd/gdtoa/dtoa.o bsd/gdtoa/gdtoa.o bsd/gdtoa/gethex.o bsd/gdtoa/gmisc.o bsd/gdtoa/hd_init.o bsd/gdtoa/hdtoa.o bsd/gdtoa/hexnan.o bsd/gdtoa/ldtoa.o bsd/gdtoa/locks.o bsd/gdtoa/misc.o bsd/gdtoa/smisc.o bsd/gdtoa/strtod.o bsd/gdtoa/strtodg.o bsd/gdtoa/strtof.o bsd/gdtoa/strtold.o bsd/gdtoa/strtord.o bsd/gdtoa/strtorQ.o bsd/gdtoa/strtorx.o bsd/gdtoa/sum.o bsd/gdtoa/ulp.o libhash/src/hash_free.o libhash/src/hash.o binary_tree.o netware/apicore.o uname.o nap.o p9rune/rune.o p9rune/runestrcat.o p9rune/runestrchr.o p9rune/runestrcmp.o p9rune/runestrcpy.o p9rune/runestrdup.o p9rune/runestrecpy.o p9rune/runestrlen.o p9rune/runestrncat.o p9rune/runestrncmp.o p9rune/runestrncpy.o p9rune/runestrrchr.o p9rune/runestrstr.o p9rune/runetype.o p9rune/utfecpy.o p9rune/utflen.o p9rune/utfnlen.o p9rune/utfrrune.o p9rune/utfrune.o p9rune/utfutf.o fs-bootinfo/fopen.o feof.o fseek.o rewind.o p9fmt/charstod.o p9fmt/dofmt.o p9fmt/dorfmt.o p9fmt/errfmt.o p9fmt/fltfmt.o p9fmt/fmt.o p9fmt/fmtfd.o p9fmt/fmtfdflush.o p9fmt/fmtlocale.o p9fmt/fmtlock.o p9fmt/fmtnull.o p9fmt/fmtprint.o p9fmt/fmtquote.o p9fmt/fmtrune.o p9fmt/fmtstr.o p9fmt/fmtvprint.o p9fmt/fprint.o p9fmt/nan64.o p9fmt/pow10.o p9fmt/print.o p9fmt/runefmtstr.o p9fmt/runeseprint.o p9fmt/runesmprint.o p9fmt/runesnprint.o p9fmt/runesprint.o p9fmt/runevseprint.o p9fmt/runevsmprint.o p9fmt/runevsnprint.o p9fmt/seprint.o p9fmt/smprint.o p9fmt/snprint.o p9fmt/sprint.o p9fmt/strtod.o p9fmt/vfprint.o p9fmt/vseprint.o p9fmt/vsmprint.o p9fmt/vsnprint.o  
+ranlib libio.a
+cp libio.a ../../lib/libio.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/io'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libmutex'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libmutex'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libmutex'
+===> src/mutex.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/mutex.c -o src/mutex.o
+===> src/arch-ia32/mutex.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/arch-ia32/mutex.c -o src/arch-ia32/mutex.o
+===> Linking ./libmutex.a
+ar cru libmutex.a  src/mutex.o src/arch-ia32/mutex.o  
+ranlib libmutex.a
+cp libmutex.a ../../lib/libmutex.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libmutex'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libl4e'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libl4e'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libl4e'
+===> src/bootinfo.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/bootinfo.c -o src/bootinfo.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/l4e/regions.h:88,
+                 from ../../include/l4e/bootinfo.h:82,
+                 from src/bootinfo.c:81:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/l4e_find_mem_in_region.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/l4e_find_mem_in_region.c -o src/l4e_find_mem_in_region.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/l4e/regions.h:88,
+                 from src/l4e_find_mem_in_region.c:83:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/l4e_find_physmem.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/l4e_find_physmem.c -o src/l4e_find_physmem.o
+In file included from ../../include/stdio.h:3:0,
+                 from src/l4e_find_physmem.c:83:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/l4e_find_virtmem.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/l4e_find_virtmem.c -o src/l4e_find_virtmem.o
+In file included from ../../include/stdio.h:3:0,
+                 from src/l4e_find_virtmem.c:83:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/l4e_remove_chunk.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/l4e_remove_chunk.c -o src/l4e_remove_chunk.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/l4e/regions.h:88,
+                 from src/l4e_remove_chunk.c:83:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/misc.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/misc.c -o src/misc.o
+===> src/regions.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/regions.c -o src/regions.o
+In file included from ../../include/stdio.h:3:0,
+                 from src/regions.c:86:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/sigma0.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/sigma0.c -o src/sigma0.o
+In file included from ../../include/stdio.h:3:0,
+                 from src/sigma0.c:84:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/thread.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/thread.c -o src/thread.o
+===> Linking ./libl4e.a
+ar cru libl4e.a  src/bootinfo.o src/l4e_find_mem_in_region.o src/l4e_find_physmem.o src/l4e_find_virtmem.o src/l4e_remove_chunk.o src/misc.o src/regions.o src/sigma0.o src/thread.o  
+ranlib libl4e.a
+cp libl4e.a ../../lib/libl4e.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libl4e'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libelf'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libelf'
+make[2]: Entering directory `/home/tyson/pistachio/user/lib/libelf'
+===> src/elf32.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/elf32.c -o src/elf32.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/elf/elf.h:106,
+                 from src/elf32.c:79:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+src/elf32.c: In function ‘elf32_fprintf’:
+src/elf32.c:254:2: warning: implicit declaration of function ‘fprintf’ [-Wimplicit-function-declaration]
+  fprintf(f, "Found an elf32 file called \"%s\" located "
+  ^
+src/elf32.c:254:2: warning: incompatible implicit declaration of built-in function ‘fprintf’ [enabled by default]
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 3 has type ‘uint32_t’ [-Wformat=]
+      segments[i].p_align);
+      ^
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 4 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 5 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 6 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 7 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:306:6: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 11 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:321:5: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 5 has type ‘uint32_t’ [-Wformat=]
+     sections[i].sh_addr, sections[i].sh_offset);
+     ^
+src/elf32.c:321:5: warning: format ‘%x’ expects argument of type ‘unsigned int’, but argument 6 has type ‘uint32_t’ [-Wformat=]
+src/elf32.c:252:8: warning: variable ‘str_table’ set but not used [-Wunused-but-set-variable]
+  char *str_table;
+        ^
+===> src/elf64.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/elf64.c -o src/elf64.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/elf/elf.h:106,
+                 from src/elf64.c:79:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> src/elf.c
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -std=c99 -c src/elf.c -o src/elf.o
+In file included from ../../include/stdio.h:3:0,
+                 from ../../include/elf/elf.h:106,
+                 from src/elf.c:79:
+../../include/l4io.h:50:6: warning: conflicting types for built-in function ‘putc’ [enabled by default]
+ void putc(int c);
+      ^
+===> Linking ./libelf.a
+ar cru libelf.a  src/elf32.o src/elf64.o src/elf.o  
+ranlib libelf.a
+cp libelf.a ../../lib/libelf.a
+make[2]: Leaving directory `/home/tyson/pistachio/user/lib/libelf'
+make[1]: Leaving directory `/home/tyson/pistachio/user/lib'
+make[1]: Entering directory `/home/tyson/pistachio/user/serv'
+make[2]: Entering directory `/home/tyson/pistachio/user/serv/sigma0'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/serv/sigma0'
+make[2]: Entering directory `/home/tyson/pistachio/user/serv/sigma0'
+===> crt0-ia32.S
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c crt0-ia32.S -o crt0-ia32.o
+===> sigma0_io.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c sigma0_io.cc -o sigma0_io.o
+===> sigma0.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c sigma0.cc -o sigma0.o
+===> sigma0_mem.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c sigma0_mem.cc -o sigma0_mem.o
+===> region.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c region.cc -o region.o
+===> Linking ./sigma0
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00020000 crt0-ia32.o sigma0_io.o sigma0.o sigma0_mem.o region.o    -ll4 -lio -lgcc -o sigma0
+make[2]: Leaving directory `/home/tyson/pistachio/user/serv/sigma0'
+make[1]: Leaving directory `/home/tyson/pistachio/user/serv'
+make[1]: Entering directory `/home/tyson/pistachio/user/apps'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/bench'
+make[3]: Entering directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+===> Making dependencies in .
+make[3]: Leaving directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+make[3]: Entering directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+===> crt0-ia32.S
+gcc -I../../../include -I../../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c crt0-ia32.S -o crt0-ia32.o
+===> pingpong.cc
+gcc -x c++ -I../../../include -I../../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c pingpong.cc -o pingpong.o
+pingpong.cc: In function ‘void ping_thread()’:
+pingpong.cc:218:19: warning: variable ‘pong_ltid’ set but not used [-Wunused-but-set-variable]
+     L4_ThreadId_t pong_ltid = L4_LocalId (pong_tid);
+                   ^
+pingpong.cc: In function ‘int main()’:
+pingpong.cc:416:21: warning: variable ‘q’ set but not used [-Wunused-but-set-variable]
+  volatile L4_Word_t q;
+                     ^
+pingpong.cc:452:54: warning: variable ‘result’ set but not used [-Wunused-but-set-variable]
+  L4_Word_t sched_control = 0, old_sched_control = 0, result = 0;
+                                                      ^
+===> Linking ./pingpong
+ld -e_start -N -L../../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o pingpong.o    -ll4 -lio -lgcc -o pingpong
+make[3]: Leaving directory `/home/tyson/pistachio/user/apps/bench/pingpong'
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/bench'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/grabmem'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/grabmem'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/grabmem'
+===> crt0-ia32.S
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c crt0-ia32.S -o crt0-ia32.o
+===> grabmem.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c grabmem.cc -o grabmem.o
+===> Linking ./grabmem
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o grabmem.o    -ll4 -lio -lgcc -o grabmem
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/grabmem'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/l4test'
+===> Making dependencies in .
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/l4test'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/l4test'
+===> ia32/crt0.S
+gcc -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -c ia32/crt0.S -o ia32/crt0.o
+===> main.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c main.cc -o main.o
+===> assert.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c assert.cc -o assert.o
+===> menu.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c menu.cc -o menu.o
+===> threads.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c threads.cc -o threads.o
+threads.cc: In function ‘L4_ThreadId_t create_thread(bool, int, L4_Word_t)’:
+threads.cc:93:80: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘L4_Word_t {aka long unsigned int}’ [-Wformat=]
+      printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
+                                                                                ^
+threads.cc:99:79: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘L4_Word_t {aka long unsigned int}’ [-Wformat=]
+      printf ("ERROR: SpaceControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
+                                                                               ^
+threads.cc:104:80: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘L4_Word_t {aka long unsigned int}’ [-Wformat=]
+      printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
+                                                                                ^
+threads.cc:111:80: warning: format ‘%d’ expects argument of type ‘int’, but argument 3 has type ‘L4_Word_t {aka long unsigned int}’ [-Wformat=]
+      printf ("ERROR: ThreadControl returned %d (ERR=%d)\n", res, L4_ErrorCode());
+                                                                                ^
+===> string.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c string.cc -o string.o
+===> ipc.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ipc.cc -o ipc.o
+===> ipc-string.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ipc-string.cc -o ipc-string.o
+In file included from ../../include/l4/ia32/syscalls.h:37:0,
+                 from ../../include/l4/ipc.h:36,
+                 from ipc-string.cc:32:
+../../include/l4/message.h: In function ‘void string_ipc_t1()’:
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+===> ipc-pf.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ipc-pf.cc -o ipc-pf.o
+In file included from ../../include/l4/ia32/syscalls.h:37:0,
+                 from ../../include/l4/space.h:36,
+                 from ipc-pf.cc:32:
+../../include/l4/message.h: In function ‘void string_ipc_pf_t1_2()’:
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h: In function ‘void string_ipc_pf_t1_1()’:
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+../../include/l4/message.h:1218:13: warning: array subscript is above array bounds [-Warray-bounds]
+  b->string[0].X.C = 0;
+             ^
+===> ipc-smp.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ipc-smp.cc -o ipc-smp.o
+===> kip.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c kip.cc -o kip.o
+kip.cc:55:103: warning: ‘typedef’ was ignored in this declaration [enabled by default]
+ typedef struct kid_list_t { L4_Word_t id; L4_Word_t subid; const char *kernel; const char * supplier; };
+                                                                                                       ^
+kip.cc:72:87: warning: ‘typedef’ was ignored in this declaration [enabled by default]
+ typedef struct api_list_t { L4_Word_t version; L4_Word_t subversion; const char *api; };
+                                                                                       ^
+kip.cc: In function ‘void call_kip(int)’:
+kip.cc:232:8: warning: variable ‘kip’ set but not used [-Wunused-but-set-variable]
+  void *kip;
+        ^
+===> mem.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c mem.cc -o mem.o
+===> sig0.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c sig0.cc -o sig0.o
+sig0.cc: In function ‘void bad_send()’:
+sig0.cc:136:57: warning: suggest parentheses around comparison in operand of ‘&’ [-Wparentheses]
+         bool ok = (L4_IpcFailed(tag) && (L4_ErrorCode() & 0x1 == 1));
+                                                         ^
+===> exreg.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c exreg.cc -o exreg.o
+===> tcontrol.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c tcontrol.cc -o tcontrol.o
+===> schedule.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c schedule.cc -o schedule.o
+===> ia32/help.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32/help.cc -o ia32/help.o
+===> ia32/tests.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -I./ia32 -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow  -Wno-conversion -fno-exceptions -c ia32/tests.cc -o ia32/tests.o
+ia32/tests.cc: In function ‘void exception_test()’:
+ia32/tests.cc:68:21: warning: variable ‘q’ set but not used [-Wunused-but-set-variable]
+  volatile L4_Word_t q;
+                     ^
+ia32/tests.cc: In function ‘void ctrlxfer_test()’:
+ia32/tests.cc:125:21: warning: variable ‘q’ set but not used [-Wunused-but-set-variable]
+  volatile L4_Word_t q;
+                     ^
+In file included from ../../include/l4/ia32/syscalls.h:37:0,
+                 from ../../include/l4/kip.h:36,
+                 from ia32/tests.cc:13:
+../../include/l4/message.h:496:13: warning: array subscript is above array bounds [-Warray-bounds]
+     c->raw[0] = 0;
+             ^
+../../include/l4/message.h:751:35: warning: array subscript is above array bounds [-Warray-bounds]
+  L4_MsgAppendWord(msg, item.raw[0]);
+                                   ^
+../../include/l4/message.h:764:55: warning: array subscript is above array bounds [-Warray-bounds]
+     msg->msg[msg->tag.X.u + msg->tag.X.t] = item.raw[0];
+                                                       ^
+../../include/l4/message.h:487:13: warning: array subscript is above array bounds [-Warray-bounds]
+     c->raw[0] = 0;
+             ^
+../../include/l4/message.h:728:64: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
+                                                                ^
+../../include/l4/message.h:733:54: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
+                                                      ^
+../../include/l4/message.h:487:13: warning: array subscript is above array bounds [-Warray-bounds]
+     c->raw[0] = 0;
+             ^
+../../include/l4/message.h:728:64: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
+                                                                ^
+../../include/l4/message.h:733:54: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
+                                                      ^
+../../include/l4/message.h:487:13: warning: array subscript is above array bounds [-Warray-bounds]
+     c->raw[0] = 0;
+             ^
+../../include/l4/message.h:728:64: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 2 + num] = c->raw[reg+1];
+                                                                ^
+../../include/l4/message.h:733:54: warning: array subscript is above array bounds [-Warray-bounds]
+  msg->msg[msg->tag.X.u + msg->tag.X.t + 1] = c->raw[0];
+                                                      ^
+===> Linking ./l4test
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 ia32/crt0.o main.o assert.o menu.o threads.o string.o ipc.o ipc-string.o ipc-pf.o ipc-smp.o kip.o mem.o sig0.o exreg.o tcontrol.o schedule.o ia32/help.o ia32/tests.o    -ll4 -lio -lgcc -o l4test
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/l4test'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/counter'
+===> Linking ./counter
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o counter.o newtest.o internalshell.o libhashtest.o mindrvr.o elmfat/src/ff.o elmfat/src/diskio.o mt19937ar.o    -ll4 -lio -lmutex -ll4e -lelf  -lgcc -o counter
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/counter'
+make[2]: Entering directory `/home/tyson/pistachio/user/apps/syslaunch'
+===> syslaunch.cc
+gcc -x c++ -I../../include -I../.. -I/usr/lib/gcc/i686-linux-gnu/4.8/include   -fno-stack-protector -nostdinc -g -O2 -m32 -O2 -g -Wall -Wshadow -std=c++11  -DINT_MAX -DUCHAR_MAX -Wno-conversion -fno-exceptions -c syslaunch.cc -o syslaunch.o
+syslaunch.cc: In function ‘int main()’:
+syslaunch.cc:47:56: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘L4_Word64_t {aka long long unsigned int}’ [-Wformat=]
+     printf("The clock says: %d\n", L4_SystemClock().raw);
+                                                        ^
+syslaunch.cc:49:10: warning: unused variable ‘test’ [-Wunused-variable]
+     int *test = new int(1);
+          ^
+In file included from syslaunch.cc:3:0:
+../../include/drivermgr.h: At global scope:
+../../include/drivermgr.h:11:3: warning: ‘TDriver’ defined but not used [-Wunused-variable]
+ } TDriver;
+   ^
+===> Linking ./syslaunch
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00400000 crt0-ia32.o syslaunch.o    -ll4 -lio -lmutex -ll4e -lelf  -lgcc -o syslaunch
+make[2]: Leaving directory `/home/tyson/pistachio/user/apps/syslaunch'
+make[1]: Leaving directory `/home/tyson/pistachio/user/apps'
+make[1]: Entering directory `/home/tyson/pistachio/user/util'
+make[2]: Entering directory `/home/tyson/pistachio/user/util/kickstart'
+===> Linking ./kickstart
+ld -e_start -N -L../../lib -L/usr/lib/gcc/i686-linux-gnu/4.8 -nostdlib  -melf_i386  -Ttext=00800000 -L. -Tkickstart.ld  crt0-ia32.o kickstart.o kipmgr.o elf.o lib.o bootinfo.o ia32.o mbi.o mbi-ia32.o mbi-loader.o    -lio  -o kickstart
+make[2]: Leaving directory `/home/tyson/pistachio/user/util/kickstart'
+make[1]: Leaving directory `/home/tyson/pistachio/user/util'
+make[1]: Entering directory `/home/tyson/pistachio/user/contrib'
+make[1]: Leaving directory `/home/tyson/pistachio/user/contrib'

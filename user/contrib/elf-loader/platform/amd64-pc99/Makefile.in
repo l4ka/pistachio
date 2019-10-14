@@ -50,11 +50,11 @@ CC=		gcc
 LD=		ld
 
 CPPFLAGS=	-I$(top_srcdir)/include
-CFLAGS=		 -nostdinc -g -O2 \
+CFLAGS=		 -nostdinc -fno-stack-protector -g -O2 \
 		-I$(top_srcdir)/contrib/elf-loader/include \
 		-I$(dir $(shell $(CC) -print-libgcc-file-name))include \
 		-DELF_LOADER_32BIT
-CXXFLAGS=       $(CFLAGS) -fno-exceptions
+CXXFLAGS=       $(CFLAGS) -fno-exceptions -fno-stack-protector
 LDFLAGS=       -N -L@srcdir@ -Tlinker.ld  -L$(dir $(shell $(CC) -print-libgcc-file-name)) \
 		-lgcc 
 
